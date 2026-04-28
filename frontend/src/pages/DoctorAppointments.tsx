@@ -408,7 +408,7 @@ export default function DoctorAppointments() {
                                         const isPending = appt.status === 'PENDING';
                                         const borderClass = isPending ? 'border-slate-300 dark:border-slate-600 opacity-70' : (isOnline ? 'border-primary' : 'border-blue-500');
                                         const timeClass = isPending ? 'text-slate-400' : (isOnline ? 'bg-primary/20 text-slate-900 dark:text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-slate-900 dark:text-white');
-                                        
+
                                         return (
                                             <div key={appt.id} className={`group p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border-l-4 ${borderClass} transition-all hover:shadow-md`}>
                                                 <div className="flex items-start justify-between mb-3">

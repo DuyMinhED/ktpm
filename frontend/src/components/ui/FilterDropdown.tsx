@@ -46,11 +46,11 @@ export default function FilterDropdown({
       {isOpen && (
         <>
           {/* Overlay to close when clicking outside */}
-          <div 
-            className="fixed inset-0 z-[100]" 
+          <div
+            className="fixed inset-0 z-[100]"
             onClick={() => setIsOpen(false)}
           ></div>
-          
+
           {/* Dropdown Menu */}
           <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-xl shadow-2xl py-2 z-[110] animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
             <div className="max-h-60 overflow-y-auto custom-scrollbar">
@@ -61,11 +61,10 @@ export default function FilterDropdown({
                     onChange(option);
                     setIsOpen(false);
                   }}
-                  className={`w-full px-5 py-3 text-left text-sm font-bold transition-all flex items-center justify-between hover:bg-primary/5 ${
-                    value === option 
+                  className={`w-full px-5 py-3 text-left text-sm font-bold transition-all flex items-center justify-between hover:bg-primary/5 ${value === option
                       ? (optionColors?.[option] || 'text-primary bg-primary/5')
                       : (optionColors?.[option] || 'text-slate-600 hover:text-primary')
-                  }`}
+                    }`}
                 >
                   {option}
                   {value === option && (

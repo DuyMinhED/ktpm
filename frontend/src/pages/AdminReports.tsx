@@ -56,8 +56,8 @@ export default function AdminReports() {
               </div>
             ) : (
               <>
-                <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white">Báo cáo hợp nhất</h2>
-                <p className="text-[14px] md:text-[16px] text-slate-500 mt-1 font-medium italic-none">Phân tích dữ liệu vận hành toàn hệ thống</p>
+                <h2 className="text-lg md:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">Báo cáo hợp nhất</h2>
+                <p className="text-[13px] md:text-[16px] text-slate-500 mt-1 font-medium italic-none">Phân tích dữ liệu vận hành toàn hệ thống</p>
               </>
             )}
           </div>
@@ -70,7 +70,7 @@ export default function AdminReports() {
                   <button
                     key={type}
                     onClick={() => setReportType(type)}
-                    className={`px-5 py-2 text-[14px] font-bold rounded-lg transition-all ${reportType === type ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:bg-white dark:hover:bg-slate-700'
+                    className={`px-5 py-2 text-[14px] font-medium rounded-full transition-all ${reportType === type ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:bg-white dark:hover:bg-slate-700'
                       }`}
                   >
                     Theo {type}
@@ -114,8 +114,8 @@ export default function AdminReports() {
                     {stat.trend}
                   </span>
                 </div>
-                <p className="text-slate-500 text-[13px] md:text-[15px] font-medium mt-1 font-display tracking-tight leading-none">{stat.label}</p>
-                <h3 className={`text-lg md:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-2`}>
+                <p className="text-slate-500 text-[12px] md:text-[15px] font-medium mt-1 font-display tracking-tight leading-none">{stat.label}</p>
+                <h3 className={`text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-2 leading-none`}>
                   {stat.value}
                   {stat.unit && <span className="text-[12px] md:text-[14px] font-bold ml-1 opacity-50">{stat.unit}</span>}
                 </h3>
@@ -135,8 +135,8 @@ export default function AdminReports() {
                 </div>
               ) : (
                 <div>
-                  <h4 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Xu hướng tăng trưởng hệ thống</h4>
-                  <p className="text-[15px] font-medium text-slate-500 mt-1">Dữ liệu tổng hợp toàn thời gian</p>
+                  <h4 className="text-[15px] md:text-[19px] font-bold tracking-tight text-slate-900 dark:text-white">Xu hướng tăng trưởng hệ thống</h4>
+                  <p className="text-[12px] md:text-[15px] font-medium text-slate-500 mt-1">Dữ liệu tổng hợp toàn thời gian</p>
                 </div>
               )}
             </div>
@@ -210,8 +210,17 @@ export default function AdminReports() {
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-4 md:p-8 rounded-2xl shadow-sm border border-primary/5 flex flex-col">
-            <h4 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 leading-tight">Phân bổ bệnh nhân</h4>
-            <p className="text-[15px] font-medium text-slate-500 mb-10">Mạng lưới chi nhánh tháng này</p>
+            {isLoading ? (
+              <div className="space-y-2 mb-6 md:mb-10">
+                <div className="h-6 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-48"></div>
+                <div className="h-4 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-64"></div>
+              </div>
+            ) : (
+              <>
+                <h4 className="text-[15px] md:text-[19px] font-bold tracking-tight text-slate-900 dark:text-white mb-2 leading-tight">Phân bổ bệnh nhân</h4>
+                <p className="text-[12px] md:text-[15px] font-medium text-slate-500 mb-6 md:mb-10">Mạng lưới chi nhánh tháng này</p>
+              </>
+            )}
             <div className="space-y-6 flex-1">
               {isLoading ? (
                 [...Array(5)].map((_, i) => (
@@ -250,7 +259,7 @@ export default function AdminReports() {
             ) : (
               <Link
                 to={ROUTES.ADMIN.USERS}
-                className="mt-10 py-3.5 w-full bg-slate-900 text-white text-[13px] font-bold rounded-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-2 group shadow-xl shadow-slate-900/10"
+                className="mt-10 py-3.5 w-full bg-slate-900 text-white text-[13px] font-medium rounded-full hover:bg-slate-800 transition-all flex items-center justify-center gap-2 group shadow-xl shadow-slate-900/10"
               >
                 Xem chi tiết bệnh nhân
                 <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
@@ -269,8 +278,8 @@ export default function AdminReports() {
               </div>
             ) : (
               <div>
-                <h4 className="text-lg md:text-xl font-bold tracking-tight text-slate-900 dark:text-white">Chi tiết hiệu suất phòng khám</h4>
-                <p className="text-[13px] md:text-[15px] font-medium text-slate-500 mt-1">Phân tích tải trọng và trạng thái vận hành</p>
+                <h4 className="text-[15px] md:text-[19px] font-bold tracking-tight text-slate-900 dark:text-white">Chi tiết hiệu suất phòng khám</h4>
+                <p className="text-[12px] md:text-[15px] font-medium text-slate-500 mt-1">Phân tích tải trọng và trạng thái vận hành</p>
               </div>
             )}
             {isLoading ? (

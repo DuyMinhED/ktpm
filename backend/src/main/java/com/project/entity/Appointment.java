@@ -37,8 +37,9 @@ public class Appointment extends BaseEntity {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String status; // SCHEDULED, COMPLETED, CANCELLED
+    private AppointmentStatus status; // SCHEDULED, COMPLETED, CANCELLED
 
     @Column(length = 255)
     private String type; // IN_PERSON, ONLINE

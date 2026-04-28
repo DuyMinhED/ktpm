@@ -6,7 +6,12 @@ import com.project.dto.request.UpdateClinicRequest;
 import com.project.dto.request.UpdateUserRequest;
 import com.project.dto.request.UpdateSystemConfigRequest;
 import com.project.dto.response.*;
-import com.project.service.AdminService;
+import com.project.entity.UserRole;
+import com.project.service.AdminDashboardService;
+import com.project.service.AdminClinicService;
+import com.project.service.AdminUserService;
+import com.project.service.AdminConfigService;
+import com.project.util.RoleUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import com.project.util.RoleUtils;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -27,7 +31,10 @@ import com.project.util.RoleUtils;
 @Tag(name = "Admin", description = "Admin management APIs")
 public class AdminController {
 
-    private final AdminService adminService;
+    private final AdminDashboardService adminDashboardService;
+    private final AdminClinicService adminClinicService;
+    private final AdminUserService adminUserService;
+    private final AdminConfigService adminConfigService;
 
     // === Dashboard ===
 
@@ -37,7 +44,7 @@ public class AdminController {
             @RequestParam(defaultValue = "DAY") String timeRange,
             @RequestParam(defaultValue = "Lượng bệnh nhân") String metric
     ) {
-        return ApiResponse.success("Dashboard data fetched successfully", adminService.getDashboardData(timeRange, metric));
+        return ApiResponse.success("Dashboard data fetched successfully", adminDashboardService.getDashboardData(timeRange, metric));
     }
 
     // === Clinic Management ===
@@ -45,7 +52,7 @@ public class AdminController {
     @GetMapping("/clinics/stats")
     @Operation(summary = "Get clinic management statistics")
     public ApiResponse<AdminClinicStatsResponse> getClinicStats() {
-        return ApiResponse.success("Clinic stats fetched successfully", adminService.getClinicStats());
+        return ApiResponse.success("Clinic stats fetched successfully", adminClinicService.getClinicStats());
     }
 
     @GetMapping("/clinics")
@@ -57,19 +64,19 @@ public class AdminController {
             @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return ApiResponse.success("Clinics fetched successfully", adminService.getClinics(status, keyword, pageable));
+        return ApiResponse.success("Clinics fetched successfully", adminClinicService.getClinics(status, keyword, pageable));
     }
 
     @GetMapping("/clinics/{id}")
     @Operation(summary = "Get clinic details by ID")
     public ApiResponse<AdminClinicResponse> getClinicById(@PathVariable Long id) {
-        return ApiResponse.success("Clinic details fetched successfully", adminService.getClinicById(id));
+        return ApiResponse.success("Clinic details fetched successfully", adminClinicService.getClinicById(id));
     }
 
     @PostMapping("/clinics")
     @Operation(summary = "Create a new clinic")
     public ApiResponse<AdminClinicResponse> createClinic(@RequestBody @Valid CreateClinicRequest request) {
-        return ApiResponse.success("Clinic created successfully", adminService.createClinic(request));
+        return ApiResponse.success("Clinic created successfully", adminClinicService.createClinic(request));
     }
 
     @PutMapping("/clinics/{id}")
@@ -78,13 +85,13 @@ public class AdminController {
             @PathVariable Long id,
             @RequestBody @Valid UpdateClinicRequest request
     ) {
-        return ApiResponse.success("Clinic updated successfully", adminService.updateClinic(id, request));
+        return ApiResponse.success("Clinic updated successfully", adminClinicService.updateClinic(id, request));
     }
 
     @PatchMapping("/clinics/{id}/toggle-status")
     @Operation(summary = "Toggle clinic active/inactive status")
     public ApiResponse<Void> toggleClinicStatus(@PathVariable Long id) {
-        adminService.toggleClinicStatus(id);
+        adminClinicService.toggleClinicStatus(id);
         return ApiResponse.success("Clinic status toggled successfully", null);
     }
 
@@ -93,7 +100,7 @@ public class AdminController {
     @GetMapping("/users/stats")
     @Operation(summary = "Get user management statistics")
     public ApiResponse<AdminUserStatsResponse> getUserStats() {
-        return ApiResponse.success("User stats fetched successfully", adminService.getUserStats());
+        return ApiResponse.success("User stats fetched successfully", adminUserService.getUserStats());
     }
 
     @GetMapping("/users")
@@ -107,19 +114,20 @@ public class AdminController {
             @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return ApiResponse.success("Users fetched successfully", adminService.getUsers(role, status, clinicId, keyword, pageable));
+        UserRole userRole = (role != null && !role.isBlank()) ? UserRole.valueOf(role.toUpperCase()) : null;
+        return ApiResponse.success("Users fetched successfully", adminUserService.getUsers(userRole, status, clinicId, keyword, pageable));
     }
 
     @GetMapping("/users/{id}")
     @Operation(summary = "Get user details by ID")
     public ApiResponse<AdminUserResponse> getUserById(@PathVariable Long id) {
-        return ApiResponse.success("User details fetched successfully", adminService.getUserById(id));
+        return ApiResponse.success("User details fetched successfully", adminUserService.getUserById(id));
     }
 
     @PostMapping("/users")
     @Operation(summary = "Create a new user (Doctor/Manager/Admin)")
     public ApiResponse<AdminUserResponse> createUser(@RequestBody @Valid CreateUserRequest request) {
-        return ApiResponse.success("User created successfully", adminService.createUser(request));
+        return ApiResponse.success("User created successfully", adminUserService.createUser(request));
     }
 
     @PutMapping("/users/{id}")
@@ -128,20 +136,20 @@ public class AdminController {
             @PathVariable Long id,
             @RequestBody @Valid UpdateUserRequest request
     ) {
-        return ApiResponse.success("User updated successfully", adminService.updateUser(id, request));
+        return ApiResponse.success("User updated successfully", adminUserService.updateUser(id, request));
     }
 
     @PatchMapping("/users/{id}/toggle-status")
     @Operation(summary = "Toggle user active/inactive status")
     public ApiResponse<Void> toggleUserStatus(@PathVariable Long id) {
-        adminService.toggleUserStatus(id);
+        adminUserService.toggleUserStatus(id);
         return ApiResponse.success("User status toggled successfully", null);
     }
 
     @DeleteMapping("/users/{id}")
     @Operation(summary = "Permanently delete user record")
     public ApiResponse<Void> deleteUser(@PathVariable Long id) {
-        adminService.deleteUser(id);
+        adminUserService.deleteUser(id);
         return ApiResponse.success("User deleted successfully", null);
     }
 
@@ -153,7 +161,7 @@ public class AdminController {
             @RequestParam(defaultValue = "CLINIC") String reportType,
             @RequestParam(defaultValue = "ALL") String performanceFilter
     ) {
-        return ApiResponse.success("Reports data fetched successfully", adminService.getReportsData(reportType, performanceFilter));
+        return ApiResponse.success("Reports data fetched successfully", adminDashboardService.getReportsData(reportType, performanceFilter));
     }
 
     // === Audit Logs ===
@@ -168,7 +176,7 @@ public class AdminController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return ApiResponse.success("Audit logs fetched successfully", adminService.getAuditLogs(userName, module, keyword, pageable));
+        return ApiResponse.success("Audit logs fetched successfully", adminDashboardService.getAuditLogs(userName, module, keyword, pageable));
     }
 
     // === System Config ===
@@ -176,18 +184,18 @@ public class AdminController {
     @GetMapping("/config")
     @Operation(summary = "Get system configuration")
     public ApiResponse<SystemConfigResponse> getConfig() {
-        return ApiResponse.success("System config fetched successfully", adminService.getConfig());
+        return ApiResponse.success("System config fetched successfully", adminConfigService.getConfig());
     }
 
     @PutMapping("/config")
     @Operation(summary = "Update system configuration")
     public ApiResponse<SystemConfigResponse> updateConfig(@RequestBody @Valid UpdateSystemConfigRequest request) {
-        return ApiResponse.success("System config updated successfully", adminService.updateConfig(request));
+        return ApiResponse.success("System config updated successfully", adminConfigService.updateConfig(request));
     }
 
     @PostMapping("/config/regenerate-key")
     @Operation(summary = "Regenerate system API key")
     public ApiResponse<String> regenerateApiKey() {
-        return ApiResponse.success("API key regenerated successfully", adminService.regenerateApiKey());
+        return ApiResponse.success("API key regenerated successfully", adminConfigService.regenerateApiKey());
     }
 }

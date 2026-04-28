@@ -51,4 +51,10 @@ public class MedicalServiceController {
     public ResponseEntity<ApiResponse<MedicalService>> toggleStatus(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(medicalServiceService.toggleStatus(id)));
     }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<com.project.dto.response.AdminMedicalServiceStatsResponse>> getServiceStats() {
+        return ResponseEntity.ok(ApiResponse.success(medicalServiceService.getServiceStats()));
+    }
 }

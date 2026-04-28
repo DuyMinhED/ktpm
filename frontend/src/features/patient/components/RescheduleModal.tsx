@@ -52,7 +52,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-white/20 dark:bg-slate-900/40 backdrop-blur-[2px]"
         onClick={onClose}
       ></div>
 
@@ -207,7 +207,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
         <div className="px-10 py-6 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 sticky bottom-0 z-10 transition-all">
           <button
             onClick={onClose}
-            className="px-8 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all"
+            className="px-8 py-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all"
           >
             Hủy bỏ
           </button>
@@ -220,7 +220,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
               notes: notes
             })}
             disabled={isSaving || !selectedPatientId}
-            className="px-10 py-3 text-sm font-extrabold text-slate-900 bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-xl shadow-primary/20 flex items-center gap-3 active:scale-95 transform disabled:opacity-50 disabled:cursor-wait"
+            className="px-10 py-3 text-sm font-medium text-slate-900 bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-xl shadow-primary/20 flex items-center gap-3 active:scale-95 transform disabled:opacity-50 disabled:cursor-wait"
           >
             {isSaving ? (
               <>

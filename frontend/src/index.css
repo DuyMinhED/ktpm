@@ -11,7 +11,7 @@ html, body, #root {
 }
 
 body.admin-theme {
-  background: #f6f8f7 !important; /* Màu xám sáng của giao diện Admin */
+  background: #f1f5f9 !important; /* Màu xám Slate-100 đậm hơn để nổi bật các thẻ trắng */
   background-attachment: fixed !important;
 }
 
@@ -453,4 +453,902 @@ input:focus + .custom-input-icon {
 .dark .motion-active-bg {
   background: #1e293b;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE MODAL & FORM SYSTEM
+   Premium mobile-first form experience
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Mobile-first modal adjustments ─── */
+@media (max-width: 767px) {
+  /* Full-screen modal on mobile */
+  .fixed.inset-0.z-\[1000\],
+  .fixed.inset-0.z-\[200\] {
+    padding: 0 !important;
+  }
+
+  .fixed.inset-0.z-\[1000\] > div:last-child,
+  .fixed.inset-0.z-\[200\] > div:last-child:not(.absolute) {
+    max-width: 100% !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    height: 100vh;
+  }
+
+  /* Compact modal header on mobile */
+  .fixed.inset-0 .px-6.py-5.border-b,
+  .fixed.inset-0 .px-6.md\:px-8.py-5.border-b {
+    padding: 14px 16px !important;
+  }
+
+  .fixed.inset-0 .px-6.py-5.border-b h2,
+  .fixed.inset-0 .px-6.md\:px-8.py-5.border-b h2 {
+    font-size: 17px !important;
+  }
+
+  /* Form body mobile padding */
+  .fixed.inset-0 .px-6.md\:px-8.pt-3.pb-6,
+  .fixed.inset-0 .px-6.md\:px-8.pt-6.pb-6 {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    padding-bottom: 20px !important;
+  }
+
+  /* Compact footer on mobile */
+  .fixed.inset-0 .px-6.md\:px-8.py-5.bg-slate-50,
+  .fixed.inset-0 .px-6.md\:px-8.py-5.bg-slate-50.dark\:bg-slate-900 {
+    padding: 12px 14px !important;
+    border-radius: 0 !important;
+  }
+
+  /* Footer buttons stack & full width on mobile */
+  .fixed.inset-0 .px-6.md\:px-8.py-5.bg-slate-50 .flex.items-center.gap-3 {
+    flex-direction: column-reverse !important;
+    width: 100% !important;
+  }
+
+  .fixed.inset-0 .px-6.md\:px-8.py-5.bg-slate-50 .flex.items-center.gap-3 > button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    font-size: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  /* Section cards compact padding */
+  .fixed.inset-0 .p-4.lg\:p-5.rounded-2xl.border,
+  .fixed.inset-0 .p-5.lg\:p-6.rounded-2xl.border {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  /* Section titles smaller on mobile */
+  .fixed.inset-0 .font-medium.text-slate-500.text-\[15px\],
+  .fixed.inset-0 .font-bold.text-slate-500.text-\[15px\] {
+    font-size: 13.5px !important;
+  }
+
+  /* Grid gap tighter on mobile */
+  .fixed.inset-0 .grid.gap-x-5.gap-y-3 {
+    gap: 10px !important;
+  }
+
+  .fixed.inset-0 .grid.gap-5 {
+    gap: 12px !important;
+  }
+
+  .fixed.inset-0 .grid.gap-4 {
+    gap: 10px !important;
+  }
+}
+
+/* ─── Responsive input & label styling ─── */
+@media (max-width: 767px) {
+  /* Input touch-friendly height */
+  .fixed.inset-0 input[type="text"],
+  .fixed.inset-0 input[type="email"],
+  .fixed.inset-0 input[type="password"],
+  .fixed.inset-0 input[type="tel"],
+  .fixed.inset-0 input[type="number"],
+  .fixed.inset-0 input:not([type]) {
+    height: 44px !important;
+    font-size: 14px !important;
+    border-radius: 12px !important;
+  }
+
+  /* Labels compact on mobile */
+  .fixed.inset-0 label.text-\[14px\] {
+    font-size: 12.5px !important;
+    margin-bottom: 2px !important;
+  }
+
+  /* Error messages compact */
+  .fixed.inset-0 .text-\[11px\].font-bold.text-red-500,
+  .fixed.inset-0 .text-\[11px\].font-medium.text-red-500,
+  .fixed.inset-0 .text-\[11px\].md\:text-\[13\.5px\] {
+    font-size: 11px !important;
+    margin-top: 3px !important;
+  }
+
+  /* Textarea mobile */
+  .fixed.inset-0 textarea {
+    font-size: 13.5px !important;
+    border-radius: 12px !important;
+    padding: 10px 12px !important;
+    min-height: 72px !important;
+  }
+
+  /* Dropdown compact */
+  .fixed.inset-0 .relative.z-\[40\],
+  .fixed.inset-0 .relative.z-\[35\] {
+    z-index: unset !important;
+  }
+}
+
+/* ─── Avatar upload mobile layout ─── */
+@media (max-width: 767px) {
+  /* Horizontal compact avatar section */
+  .fixed.inset-0 .flex.items-center.gap-5.pb-2.mb-1.border-b {
+    gap: 12px !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Smaller avatar preview on mobile */
+  .fixed.inset-0 .w-20.h-20.bg-slate-50.rounded-2xl,
+  .fixed.inset-0 .w-20.h-20.bg-slate-50.dark\:bg-slate-800.rounded-2xl {
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 14px !important;
+  }
+
+  .fixed.inset-0 .w-20.h-20 .material-symbols-outlined.text-\[32px\] {
+    font-size: 24px !important;
+  }
+
+  .fixed.inset-0 .w-20.h-20 .text-\[10px\] {
+    display: none !important;
+  }
+
+  /* Avatar upload text smaller */
+  .fixed.inset-0 .flex.items-center.gap-5.pb-2 .text-\[14px\].font-bold {
+    font-size: 13px !important;
+  }
+
+  .fixed.inset-0 .flex.items-center.gap-5.pb-2 .text-\[12px\] {
+    font-size: 11px !important;
+    display: none;
+  }
+
+  .fixed.inset-0 .flex.items-center.gap-5.pb-2 .text-\[13px\].font-medium,
+  .fixed.inset-0 .flex.items-center.gap-5.pb-2 .text-\[13px\].font-black {
+    font-size: 12px !important;
+  }
+}
+
+/* ─── Status toggle buttons mobile ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0 .flex.gap-2 > button,
+  .fixed.inset-0 .flex.gap-3 > button.flex-1 {
+    padding: 10px 8px !important;
+    font-size: 12.5px !important;
+    border-radius: 12px !important;
+  }
+
+  .fixed.inset-0 .flex.gap-2 > button .material-symbols-outlined,
+  .fixed.inset-0 .flex.gap-3 > button.flex-1 .material-symbols-outlined {
+    font-size: 16px !important;
+  }
+}
+
+/* ─── Notice/warning cards mobile ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0 .p-4.bg-amber-50.rounded-2xl,
+  .fixed.inset-0 .p-4.bg-amber-50.dark\:bg-amber-900\/10 {
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .fixed.inset-0 .p-4.bg-amber-50 .text-\[13px\] {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+}
+
+/* ─── Stats cards mobile (ClinicDetailsModal) ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0 .grid.grid-cols-1.md\:grid-cols-3.gap-5 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .fixed.inset-0 .grid.grid-cols-1.md\:grid-cols-3 > div {
+    padding: 10px !important;
+    border-radius: 12px !important;
+    flex-direction: column !important;
+    text-align: center;
+    gap: 6px !important;
+  }
+
+  .fixed.inset-0 .grid.grid-cols-1.md\:grid-cols-3 .w-12.h-12 {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    margin: 0 auto;
+  }
+
+  .fixed.inset-0 .grid.grid-cols-1.md\:grid-cols-3 .w-12.h-12 .material-symbols-outlined {
+    font-size: 18px !important;
+  }
+
+  .fixed.inset-0 .grid.grid-cols-1.md\:grid-cols-3 .text-\[20px\].font-bold {
+    font-size: 16px !important;
+  }
+
+  .fixed.inset-0 .grid.grid-cols-1.md\:grid-cols-3 .text-\[13px\].font-medium {
+    font-size: 10.5px !important;
+  }
+}
+
+/* ─── Overview banner mobile (ClinicDetailsModal) ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0 .flex.flex-col.md\:flex-row.items-center.gap-6 {
+    flex-direction: column !important;
+    gap: 12px !important;
+    text-align: center;
+    padding: 14px !important;
+  }
+
+  .fixed.inset-0 .flex.flex-col.md\:flex-row .w-24.h-24 {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 14px !important;
+  }
+
+  .fixed.inset-0 .flex.flex-col.md\:flex-row .text-2xl.font-bold {
+    font-size: 17px !important;
+  }
+
+  .fixed.inset-0 .flex.flex-col.md\:flex-row .text-\[14px\] {
+    font-size: 12.5px !important;
+  }
+}
+
+/* ─── Feature list mobile (CreateServiceModal) ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0 .flex.gap-2 > .relative.flex-1 input {
+    height: 40px !important;
+    font-size: 13px !important;
+  }
+
+  .fixed.inset-0 .flex.gap-2 > button.w-\[40px\] {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .fixed.inset-0 .flex.items-center.gap-1\.5.px-3.py-1\.5 {
+    font-size: 12px !important;
+  }
+}
+
+/* ─── Smooth focus & interaction micro-animations ─── */
+.fixed.inset-0 input:focus,
+.fixed.inset-0 textarea:focus {
+  transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.15s ease;
+}
+
+/* Subtle scale on focus for premium feel */
+@media (min-width: 768px) {
+  .fixed.inset-0 input:focus,
+  .fixed.inset-0 textarea:focus {
+    transform: translateY(-0.5px);
+  }
+}
+
+/* ─── Premium label animation on focus-within ─── */
+.fixed.inset-0 .space-y-1\.5:focus-within > label {
+  color: #3bb9f3 !important;
+  transition: color 0.2s ease;
+}
+
+/* ─── Tablet breakpoint refinements ─── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .fixed.inset-0 .max-w-3xl {
+    max-width: 680px !important;
+  }
+
+  .fixed.inset-0 .p-4.lg\:p-5 {
+    padding: 14px !important;
+  }
+}
+
+/* ─── LoginModal responsive (z-500) ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0.z-\[500\] {
+    padding: 0 !important;
+  }
+
+  .fixed.inset-0.z-\[500\] .max-w-md {
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .fixed.inset-0.z-\[500\] .p-10 {
+    padding: 24px 20px !important;
+  }
+
+  .fixed.inset-0.z-\[500\] .text-3xl {
+    font-size: 24px !important;
+  }
+
+  .fixed.inset-0.z-\[500\] .mb-10 {
+    margin-bottom: 28px !important;
+  }
+
+  .fixed.inset-0.z-\[500\] .w-16.h-16 {
+    width: 48px !important;
+    height: 48px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .fixed.inset-0.z-\[500\] input {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+    font-size: 15px !important;
+    border-radius: 14px !important;
+  }
+
+  .fixed.inset-0.z-\[500\] button[type="submit"] {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+    font-size: 16px !important;
+    border-radius: 16px !important;
+  }
+}
+
+/* ─── DoctorAssignmentModal (max-w-5xl) responsive ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0 .max-w-5xl {
+    max-width: 100% !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    height: 100vh;
+  }
+
+  /* Compact header */
+  .fixed.inset-0 .max-w-5xl .px-6.md\:px-8.pt-8.pb-3 {
+    padding: 14px 14px 8px !important;
+  }
+
+  .fixed.inset-0 .max-w-5xl .text-\[19px\].font-bold {
+    font-size: 16px !important;
+  }
+
+  /* Metrics section compact */
+  .fixed.inset-0 .max-w-5xl .px-6.md\:px-8.pt-1.pb-2 {
+    padding: 4px 14px 8px !important;
+  }
+
+  .fixed.inset-0 .max-w-5xl .grid.grid-cols-1.md\:grid-cols-2.gap-6 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .fixed.inset-0 .max-w-5xl .grid.grid-cols-1.md\:grid-cols-2 > div {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .fixed.inset-0 .max-w-5xl .text-3xl.font-black {
+    font-size: 22px !important;
+  }
+
+  /* Table section */
+  .fixed.inset-0 .max-w-5xl .px-6.md\:px-8.pt-4.pb-0 {
+    padding: 8px 14px 0 !important;
+  }
+
+  /* Tab buttons compact */
+  .fixed.inset-0 .max-w-5xl .flex.bg-slate-200\/50 {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .fixed.inset-0 .max-w-5xl .flex.bg-slate-200\/50 button {
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+    text-align: center;
+  }
+
+  /* Search input */
+  .fixed.inset-0 .max-w-5xl .relative.w-full.md\:w-80 {
+    width: 100% !important;
+  }
+
+  /* Hide less important table columns on mobile */
+  .fixed.inset-0 .max-w-5xl table th:nth-child(3),
+  .fixed.inset-0 .max-w-5xl table td:nth-child(3),
+  .fixed.inset-0 .max-w-5xl table th:nth-child(5),
+  .fixed.inset-0 .max-w-5xl table td:nth-child(5) {
+    display: none !important;
+  }
+
+  .fixed.inset-0 .max-w-5xl table th,
+  .fixed.inset-0 .max-w-5xl table td {
+    padding: 10px 8px !important;
+    font-size: 13px !important;
+  }
+
+  .fixed.inset-0 .max-w-5xl table .w-11.h-11 {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+/* ─── EditPatientModal footer fix (bg-white variant) ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0 .px-6.md\:px-8.py-5.bg-white.dark\:bg-slate-900.border-t .flex.items-center.gap-3 {
+    flex-direction: column-reverse !important;
+    width: 100% !important;
+  }
+
+  .fixed.inset-0 .px-6.md\:px-8.py-5.bg-white.dark\:bg-slate-900.border-t .flex.items-center.gap-3 > button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .fixed.inset-0 .px-6.md\:px-8.py-5.bg-white.dark\:bg-slate-900.border-t {
+    padding: 12px 14px !important;
+  }
+}
+
+/* ─── Delete/Confirm modals responsive ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0 .max-w-lg,
+  .fixed.inset-0 .max-w-sm {
+    max-width: calc(100% - 32px) !important;
+    border-radius: 20px !important;
+  }
+}
+
+/* ─── Scrollbar touch-friendly on mobile ─── */
+@media (max-width: 767px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 3px !important;
+  }
+
+  /* Ensure no horizontal overflow in modals */
+  .fixed.inset-0 .overflow-y-auto {
+    overflow-x: hidden !important;
+  }
+}
+
+/* ─── Smooth entrance animation for form sections ─── */
+.fixed.inset-0 .space-y-6 > div {
+  animation: formSectionFadeIn 0.4s ease-out both;
+}
+
+.fixed.inset-0 .space-y-6 > div:nth-child(1) { animation-delay: 0.05s; }
+.fixed.inset-0 .space-y-6 > div:nth-child(2) { animation-delay: 0.12s; }
+.fixed.inset-0 .space-y-6 > div:nth-child(3) { animation-delay: 0.18s; }
+
+@keyframes formSectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE PAGE & COMPONENT SYSTEM
+   Covers all pages, nav, dropdowns, cards, tables, charts
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Notification Dropdown mobile ─── */
+@media (max-width: 767px) {
+  .absolute.right-0.mt-3.w-80 {
+    position: fixed !important;
+    top: 64px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-height: calc(100vh - 80px) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
+  }
+}
+
+/* ─── AI Chat Bubble mobile ─── */
+@media (max-width: 767px) {
+  .fixed.bottom-6.right-6 {
+    bottom: 16px !important;
+    right: 12px !important;
+  }
+
+  .fixed.bottom-6.right-6 .absolute.bottom-16.right-0 {
+    position: fixed !important;
+    bottom: 72px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-height: calc(100vh - 100px) !important;
+    border-radius: 20px !important;
+  }
+
+  .fixed.bottom-6.right-6 .w-14.h-14 {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .fixed.bottom-6.right-6 .h-96 {
+    height: 50vh !important;
+  }
+}
+
+/* ─── TopBar mobile ─── */
+@media (max-width: 767px) {
+  header.h-20 {
+    height: 60px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  header .text-\[10px\].font-extrabold {
+    display: none !important;
+  }
+}
+
+/* ─── Dashboard stat cards responsive (Clinic + Patient) ─── */
+@media (max-width: 767px) {
+  /* Clinic stats compact */
+  .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > div,
+  .bg-white.dark\:bg-slate-900.p-6.rounded-3xl {
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .bg-white.dark\:bg-slate-900.p-6.rounded-3xl .text-3xl.font-black {
+    font-size: 22px !important;
+  }
+
+  .bg-white.dark\:bg-slate-900.p-6.rounded-3xl .w-12.h-12 {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 12px !important;
+  }
+
+  .bg-white.dark\:bg-slate-900.p-6.rounded-3xl .text-2xl {
+    font-size: 18px !important;
+  }
+
+  /* Primary accent stat card */
+  .bg-primary.p-6.rounded-3xl {
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .bg-primary.p-6.rounded-3xl .text-3xl.font-black {
+    font-size: 22px !important;
+  }
+}
+
+/* ─── Charts responsive ─── */
+@media (max-width: 767px) {
+  /* Make chart containers shorter on mobile */
+  .h-\[300px\] {
+    height: 200px !important;
+  }
+
+  .h-\[240px\] {
+    height: 180px !important;
+  }
+
+  /* Chart section cards */
+  .bg-white.dark\:bg-slate-900.p-6.md\:p-8.rounded-3xl {
+    padding: 14px !important;
+  }
+
+  .bg-white.dark\:bg-slate-900.p-6.rounded-3xl .text-lg.font-bold {
+    font-size: 15px !important;
+  }
+
+  /* Hide chart legend on very small screens */
+  .bg-white.dark\:bg-slate-900.p-6.rounded-3xl .flex.gap-2 .text-\[12px\].font-medium {
+    font-size: 10px !important;
+  }
+}
+
+/* ─── Patient Profile section mobile ─── */
+@media (max-width: 767px) {
+  section.bg-white.dark\:bg-slate-900.rounded-xl.p-6 {
+    padding: 14px !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    text-align: center;
+  }
+
+  section.bg-white.dark\:bg-slate-900.rounded-xl.p-6 .h-24.w-24 {
+    width: 64px !important;
+    height: 64px !important;
+    margin: 0 auto;
+  }
+
+  section.bg-white.dark\:bg-slate-900.rounded-xl.p-6 .grid.grid-cols-2.lg\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    text-align: left;
+  }
+
+  section.bg-white.dark\:bg-slate-900.rounded-xl.p-6 .text-base.font-bold {
+    font-size: 13px !important;
+  }
+
+  section.bg-white.dark\:bg-slate-900.rounded-xl.p-6 button {
+    width: 100%;
+  }
+}
+
+/* ─── Patient health metric cards ─── */
+@media (max-width: 767px) {
+  .bg-white.dark\:bg-slate-900.p-6.rounded-xl.border .text-3xl.font-bold {
+    font-size: 24px !important;
+  }
+
+  .bg-white.dark\:bg-slate-900.p-6.rounded-xl.border {
+    padding: 14px !important;
+  }
+
+  .h-44 {
+    height: 120px !important;
+  }
+
+  /* Secondary metric mini-cards */
+  .bg-white.dark\:bg-slate-900.p-4.rounded-xl.border.flex.items-center.gap-4 {
+    padding: 10px !important;
+    gap: 10px !important;
+  }
+
+  .bg-white.dark\:bg-slate-900.p-4.rounded-xl.border .p-3 {
+    padding: 8px !important;
+  }
+
+  .bg-white.dark\:bg-slate-900.p-4.rounded-xl.border .text-lg.font-bold {
+    font-size: 15px !important;
+  }
+}
+
+/* ─── Patient sidebar medicine/appointments widgets ─── */
+@media (max-width: 767px) {
+  /* Alert card compact */
+  .bg-red-50.dark\:bg-red-900\/10.border.border-red-100.p-4 {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  /* Medicine schedule card */
+  .bg-white.dark\:bg-slate-900.rounded-xl.border.shadow-sm.overflow-hidden .p-4 {
+    padding: 12px !important;
+  }
+
+  /* Doctor chat widget */
+  .bg-primary\/10.dark\:bg-primary\/5.rounded-xl.border.p-4 {
+    padding: 12px !important;
+  }
+
+  .bg-primary\/10.dark\:bg-primary\/5 .h-12.w-12 {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+/* ─── Right sidebar spacing on mobile (3-col grid) ─── */
+@media (max-width: 767px) {
+  .grid.grid-cols-1.lg\:grid-cols-3.gap-8 {
+    gap: 16px !important;
+  }
+
+  .grid.grid-cols-1.lg\:grid-cols-12.gap-6.md\:gap-8 {
+    gap: 16px !important;
+  }
+}
+
+/* ─── Risk patients cards compact ─── */
+@media (max-width: 767px) {
+  .p-4.rounded-2xl.border.border-slate-50 {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .p-4.rounded-2xl.border.border-slate-50 .w-12.h-12 {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+  }
+}
+
+/* ─── Clinic Doctor performance cards ─── */
+@media (max-width: 767px) {
+  .flex.items-center.gap-4.p-3.bg-slate-50.rounded-2xl {
+    padding: 10px !important;
+    border-radius: 12px !important;
+    gap: 10px !important;
+  }
+
+  .flex.items-center.gap-4.p-3.bg-slate-50.rounded-2xl .w-10.h-10 {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
+/* ─── Data table overflow on all pages ─── */
+@media (max-width: 767px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Compact table cells globally */
+  table th,
+  table td {
+    white-space: nowrap;
+  }
+}
+
+/* ─── Landing page responsive ─── */
+@media (max-width: 767px) {
+  .app-container {
+    padding: 16px !important;
+  }
+
+  .header {
+    margin-bottom: 24px !important;
+    padding-top: 16px !important;
+  }
+
+  .header h1 {
+    font-size: 2rem !important;
+  }
+
+  .header p {
+    font-size: 1rem !important;
+  }
+
+  .roles-grid {
+    gap: 12px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .role-card {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .icon-wrapper {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 12px !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 12px !important;
+  }
+
+  .role-info h2 {
+    font-size: 1.2rem !important;
+  }
+
+  .role-info p {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* ─── Clinic settings / admin settings page ─── */
+@media (max-width: 767px) {
+  /* Settings section cards */
+  .bg-white.dark\:bg-slate-900.rounded-2xl.border.p-6,
+  .bg-white.dark\:bg-slate-900.rounded-2xl.border.p-8 {
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .bg-white.dark\:bg-slate-900.rounded-2xl.border .text-xl.font-bold,
+  .bg-white.dark\:bg-slate-900.rounded-2xl.border .text-lg.font-bold {
+    font-size: 15px !important;
+  }
+}
+
+/* ─── Doctor page cards ─── */
+@media (max-width: 767px) {
+  /* Doctor patient list cards */
+  .bg-white.dark\:bg-slate-900.p-5.rounded-2xl {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  /* Prescription cards */
+  .bg-white.dark\:bg-slate-900.p-6.rounded-2xl {
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* ─── Filter dropdown mobile ─── */
+@media (max-width: 767px) {
+  .absolute.right-0.mt-2.w-48.bg-white.rounded-2xl.shadow-2xl {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    border-radius: 16px !important;
+  }
+}
+
+/* ─── Gradient tip card (Clinic Dashboard) ─── */
+@media (max-width: 767px) {
+  .bg-gradient-to-br.from-primary.to-blue-600.p-6.rounded-3xl {
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .bg-gradient-to-br.from-primary.to-blue-600 .text-sm.mb-4 {
+    font-size: 12.5px !important;
+    margin-bottom: 10px !important;
+  }
+}
+
+/* ─── Overall page content spacing ─── */
+@media (max-width: 767px) {
+  .space-y-8 {
+    --tw-space-y-reverse: 0;
+  }
+}
+
+/* ─── Profile modals (EditProfileModal, EmergencyContactModal) ─── */
+@media (max-width: 767px) {
+  .fixed.inset-0 .max-w-2xl {
+    max-width: 100% !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    height: 100vh;
+  }
+}
+
+/* ─── Safe area bottom padding for iOS notch/gesture bar ─── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (max-width: 767px) {
+    .fixed.inset-0 .sticky.bottom-0 {
+      padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+    }
+  }
+}
+
+/* ─── Smooth page transitions ─── */
+.animate-in {
+  animation-fill-mode: both;
+}
+
+/* ─── Touch-friendly hit areas ─── */
+@media (max-width: 767px) {
+  /* Make all icon buttons at least 40px */
+  button .material-symbols-outlined {
+    min-width: 20px;
+    min-height: 20px;
+  }
+
+  /* Wider touch for action buttons on table rows */
+  .w-8.h-8,
+  .w-9.h-9 {
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
 }

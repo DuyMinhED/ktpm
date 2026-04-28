@@ -2,12 +2,15 @@ import { useState, useRef, useEffect } from 'react';
 import PrescriptionModal from '../features/prescription/components/PrescriptionModal';
 import AdviceModal from '../features/patient/components/AdviceModal';
 import Toast from '../components/ui/Toast';
-import TopBar from '../components/common/TopBar';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import MedicalHistoryModal from '../features/patient/components/MedicalHistoryModal';
 import { doctorApi } from '../api/doctor';
+import TopBar from '../components/common/TopBar';
+import DoctorSidebar from '../components/common/DoctorSidebar';
 
 export default function DoctorMessages() {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [notifications, setNotifications] = useState<any[]>([]);
     const [conversations, setConversations] = useState<any[]>([]);
     const [activeConv, setActiveConv] = useState<any | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -17,17 +20,13 @@ export default function DoctorMessages() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
     const [isAdviceModalOpen, setIsAdviceModalOpen] = useState(false);
     const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isAddingNewMedicine, setIsAddingNewMedicine] = useState(false);
-    const [medications, setMedications] = useState([
-        { id: 1, name: 'Metformin 500mg', intakeType: 'Uống sau khi ăn', dosage: '1 viên', frequency: 'Sáng 1, Tối 1', duration: '30 ngày' },
-        { id: 2, name: 'Paracetamol 500mg', intakeType: 'Khi sốt trên 38.5 độ', dosage: '1 viên', frequency: 'Cách 4-6 giờ', duration: '5 ngày' }
-    ]);
+    const [medications, setMedications] = useState<any[]>([]);
     const [newMedForm, setNewMedForm] = useState({ name: '', dosage: '', frequency: '', duration: '', intakeType: '' });
     const [formErrors, setFormErrors] = useState({
         name: false,
@@ -41,8 +40,6 @@ export default function DoctorMessages() {
     const [showToast, setShowToast] = useState(false);
     const [toastTitle, setToastTitle] = useState('');
     const [isSaving, setIsSaving] = useState(false);
-    const [notifications, setNotifications] = useState<any[]>([]);
-
     useEffect(() => {
         loadConversations();
     }, []);
@@ -154,68 +151,15 @@ export default function DoctorMessages() {
 
     return (
         <div className="flex h-screen overflow-hidden font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
-            {/* Sidebar Navigation */}
-            <aside className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-900 border-r border-primary/10 flex flex-col z-[150] transition-transform duration-300 w-72 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl lg:shadow-none shadow-primary/10`}>
-                <div className="p-6 flex items-center gap-3 border-b border-primary/5">
-                    <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl text-white shadow-lg shadow-primary/20">
-                        <span className="material-symbols-outlined fill-1">health_metrics</span>
-                    </div>
-                    <div>
-                        <h1 className="text-xl font-extrabold text-slate-900 dark:text-white leading-none">DamDiep</h1>
-                    </div>
-                </div>
-                <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
-                    <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-xl font-medium transition-all" href="/doctor">
-                        <span className="material-symbols-outlined">dashboard</span>
-                        <span>Bảng điều khiển</span>
-                    </a>
-                    {[
-                        { name: 'Danh sách bệnh nhân', icon: 'groups', href: '/doctor/patients' },
-                        { name: 'Phân tích nguy cơ', icon: 'analytics', href: '/doctor/analytics' },
-                        { name: 'Đơn thuốc điện tử', icon: 'prescriptions', href: '/doctor/prescriptions' },
-                        { name: 'Lịch hẹn khám', icon: 'calendar_today', href: '/doctor/appointments' },
-                    ].map((item, idx) => (
-                        <a key={idx} className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-xl font-medium transition-all" href={item.href}>
-                            <span className="material-symbols-outlined">{item.icon}</span>
-                            <span>{item.name}</span>
-                        </a>
-                    ))}
-                    <a className="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl font-medium shadow-lg shadow-primary/10 transition-all" href="/doctor/messages">
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
-                        <span>Tin nhắn</span>
-                        <span className="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">5</span>
-                    </a>
-                </nav>
-                <div className="p-4 mt-auto">
-                    <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div
-                                className="w-10 h-10 rounded-full bg-slate-200"
-                                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDvD1gNLm_sBMkVyq8FuYHA20LjP97yY90_RzaDO9mjZaL9ubIXYPTKQeV1FDlhsH3p7qndF3QILzvglilx1ly9Sb7AtePxkBlVz8-5HPGNI5wMlA1c27CCvjNz865bvs_Y9uYkK2245BaMa66pFJCTPXK2wTV6-A4oQjShYdPHNg1nx01j-yW7I48c8aShwiEDSx2B_FE04UGkIxELFaJ-Ho65BrMgC_LF9Yk0dKK7BGEGWjFX4zFwmnNWi44sq8khTm_Q-D-Iig4')", backgroundSize: 'cover' }}>
-                            </div>
-                            <div className="overflow-hidden">
-                                <p className="text-sm font-bold truncate">BS. Lê Minh Tâm</p>
-                                <p className="text-xs text-slate-500">Chuyên khoa Nội</p>
-                            </div>
-                        </div>
-                        <button className="w-full flex items-center justify-center gap-2 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                            <span className="material-symbols-outlined text-sm">logout</span>
-                            Đăng xuất
-                        </button>
-                    </div>
-                </div>
-            </aside>
+            <DoctorSidebar isSidebarOpen={isSidebarOpen} />
 
-            {/* Main Content Area */}
             <main className="flex-1 lg:ml-72 flex flex-col h-screen overflow-hidden transition-all duration-300">
-                {/* Mobile Sidebar Overlay */}
                 {isSidebarOpen && (
                     <div
                         className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[140] lg:hidden animate-in fade-in duration-300"
                         onClick={() => setIsSidebarOpen(false)}
                     ></div>
                 )}
-                {/* Top Bar */}
                 <TopBar
                     setIsSidebarOpen={setIsSidebarOpen}
                     notifications={notifications}
@@ -464,7 +408,7 @@ export default function DoctorMessages() {
                     )}
                 </section>
             </div>
-        </main>
+            </main>
 
             <AdviceModal
                 isOpen={isAdviceModalOpen}

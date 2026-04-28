@@ -85,13 +85,13 @@ export default function DoctorAnalytics() {
 
         // Header Row
         const headerRow = worksheet.addRow([
-            'Họ và Tên', 
-            'Mã Bệnh Nhân', 
-            'Chỉ Số Gần Nhất', 
-            'Phân Tích AI', 
+            'Họ và Tên',
+            'Mã Bệnh Nhân',
+            'Chỉ Số Gần Nhất',
+            'Phân Tích AI',
             'Bệnh Lý Ghi Nhận'
         ]);
-        
+
         headerRow.font = { bold: true, color: { argb: 'FF1E293B' } }; // slate-800
         headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }; // slate-100
         headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -116,10 +116,10 @@ export default function DoctorAnalytics() {
                 p.chronicCondition || 'Chưa xác định'
             ]);
             row.alignment = { vertical: 'middle', wrapText: true };
-            
+
             const indexCell = row.getCell(3);
             indexCell.font = { color: { argb: 'FFEF4444' }, bold: true }; // Analytics mostly shows high risk
-            
+
             const aiCell = row.getCell(4);
             aiCell.font = { color: { argb: 'FFEF4444' }, bold: true };
         });
@@ -129,10 +129,10 @@ export default function DoctorAnalytics() {
             if (rowNumber > 1) {
                 row.eachCell({ includeEmpty: true }, (cell) => {
                     cell.border = {
-                        top: {style:'thin', color: {argb:'FFCBD5E1'}},
-                        left: {style:'thin', color: {argb:'FFCBD5E1'}},
-                        bottom: {style:'thin', color: {argb:'FFCBD5E1'}},
-                        right: {style:'thin', color: {argb:'FFCBD5E1'}}
+                        top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                        left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                        bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                        right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
                     };
                 });
             }

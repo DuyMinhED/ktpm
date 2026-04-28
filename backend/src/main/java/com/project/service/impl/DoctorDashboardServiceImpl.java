@@ -9,6 +9,7 @@ import com.project.repository.MessageRepository;
 import com.project.service.ClinicalAnalyticsService;
 import com.project.service.DoctorDashboardService;
 import com.project.service.DoctorPatientService;
+import com.project.entity.AppointmentStatus;
 import com.project.util.AppConstants;
 import com.project.util.DateTimeUtils;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,7 @@ public class DoctorDashboardServiceImpl implements DoctorDashboardService {
                 java.util.concurrent.CompletableFuture<Long> pendingAppointmentsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> 
                         appointmentRepository.countByDoctorIdAndStatusInAndAppointmentTimeAfter(
                                 doctorId,
-                                java.util.List.of(AppConstants.APPT_STATUS_PENDING, AppConstants.APPT_STATUS_SCHEDULED),
+                                java.util.List.of(AppointmentStatus.PENDING, AppointmentStatus.SCHEDULED),
                                 now));
 
                 java.util.concurrent.CompletableFuture<Long> unreadMessagesFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> 

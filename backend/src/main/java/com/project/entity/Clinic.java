@@ -12,6 +12,12 @@ import lombok.*;
 @Builder
 public class Clinic extends BaseEntity {
 
+    @Column(name = "email", length = 100)
+    private String email;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

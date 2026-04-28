@@ -20,5 +20,6 @@ public class AdminClinicResponse {
     private int patientCount;
     private int highRiskPatientCount;
     private String status;
+    private String growth;
     private LocalDateTime createdAt;
 }

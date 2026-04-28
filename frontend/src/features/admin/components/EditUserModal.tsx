@@ -145,8 +145,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                       {/* Name */}
                       <div className="space-y-1.5 flex-1">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Họ và tên</label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">person</span>
+                        <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">person</span>
                           <input
                             name="name"
                             value={formData.name}
@@ -161,8 +161,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                       {/* Email */}
                       <div className="space-y-1.5 flex-1">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Email <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">mail</span>
+                        <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">mail</span>
                           <input
                             name="email"
                             value={formData.email}
@@ -177,8 +177,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                       {/* Phone */}
                       <div className="space-y-1.5 flex-1 md:col-span-2">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Số điện thoại</label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">call</span>
+                        <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">call</span>
                           <input
                             name="phone"
                             value={formData.phone}
@@ -236,7 +236,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, status: 'ACTIVE' }))}
-                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 transition-all font-bold text-sm ${formData.status === 'ACTIVE'
+                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 transition-all font-medium text-sm ${formData.status === 'ACTIVE'
                             ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
                             : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 opacity-60'
                             }`}
@@ -247,7 +247,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, status: 'INACTIVE' }))}
-                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 transition-all font-bold text-sm ${formData.status === 'INACTIVE'
+                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 transition-all font-medium text-sm ${formData.status === 'INACTIVE'
                             ? 'border-red-500 bg-red-500 text-white shadow-lg shadow-red-500/20'
                             : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 opacity-60'
                             }`}

@@ -13,6 +13,8 @@ import com.project.dto.response.ClinicReportResponse;
 import com.project.repository.AppointmentRepository;
 import com.project.repository.PatientRepository;
 import com.project.service.ClinicReportService;
+import com.project.entity.AppointmentStatus;
+import com.project.util.AppConstants;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,13 +34,13 @@ public class ClinicReportServiceImpl implements ClinicReportService {
 
         // 1. Fetch Basic Metrics
         long totalPatients = patientRepository.countByClinicIdAndIsDeletedFalse(clinicId);
-        long highRiskPatients = patientRepository.countByClinicIdAndRiskLevelAndIsDeletedFalse(clinicId, "HIGH");
+        long highRiskPatients = patientRepository.countByClinicIdAndRiskLevelAndIsDeletedFalse(clinicId, AppConstants.RISK_HIGH);
 
         // 2. Real Adherence Rate Calculation
         // Adherence = (Completed Appointments / Total Appointments) in recent times
         LocalDateTime since = LocalDateTime.now().minusMonths(1);
         long totalAppts = appointmentRepository.countByClinicIdAndCreatedAtAfter(clinicId, since); // Need to add this to repo
-        long completedAppts = appointmentRepository.countByClinicIdAndStatusAndCreatedAtAfter(clinicId, "COMPLETED", since);
+        long completedAppts = appointmentRepository.countByClinicIdAndStatusAndCreatedAtAfter(clinicId, AppointmentStatus.COMPLETED, since);
         double adherenceRate = totalAppts > 0 ? (double) completedAppts * 100 / totalAppts : 85.0;
 
         // 3. Improvement Rate (Mocked for now, but infrastructure is ready for real metrics trend analysis)
@@ -120,7 +122,7 @@ public class ClinicReportServiceImpl implements ClinicReportService {
         
         // Fetch top 5 high-risk patients for this specific condition
         List<com.project.entity.Patient> topPatients = patientRepository.findByClinicIdAndFilters(
-            clinicId, null, condition, "HIGH", null, null, org.springframework.data.domain.PageRequest.of(0, 5)
+            clinicId, null, condition, AppConstants.RISK_HIGH, null, null, org.springframework.data.domain.PageRequest.of(0, 5)
         ).getContent();
         
         result.put("condition", condition);

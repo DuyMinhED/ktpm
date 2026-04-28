@@ -12,6 +12,7 @@ import Dropdown from '../components/ui/Dropdown';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import { doctorApi } from '../api/doctor';
+import DoctorSidebar from '../components/common/DoctorSidebar';
 
 export default function DoctorDashboard() {
   const [isLoading, setIsLoading] = useState(true);
@@ -90,10 +91,7 @@ export default function DoctorDashboard() {
       setIsAdviceSaving(false);
     }
   };
-  const [medications, setMedications] = useState([
-    { id: 1, name: 'Metformin 500mg', intakeType: 'Uống sau khi ăn', dosage: '1 viên', frequency: 'Sáng 1, Tối 1', duration: '30 ngày' },
-    { id: 2, name: 'Paracetamol 500mg', intakeType: 'Khi sốt trên 38.5 độ', dosage: '1 viên', frequency: 'Cách 4-6 giờ', duration: '5 ngày' }
-  ]);
+  const [medications, setMedications] = useState<any[]>([]);
 
   const [newMedForm, setNewMedForm] = useState({
     name: '',
@@ -249,63 +247,7 @@ export default function DoctorDashboard() {
   return (
     <>
       <div className="flex min-h-screen font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
-        {/* Sidebar Navigation - Responsive Collapsible */}
-        <aside className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-900 border-r border-primary/10 flex flex-col z-[150] transition-transform duration-300 w-72 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl lg:shadow-none shadow-primary/10`}>
-          <div className="p-6 flex items-center gap-3 border-b border-primary/5">
-            <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl text-white shadow-lg shadow-primary/20">
-              <span className="material-symbols-outlined fill-1">health_metrics</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-slate-900 dark:text-white leading-none">DamDiep</h1>
-            </div>
-          </div>
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
-            <Link className="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-2xl font-medium shadow-lg shadow-primary/10 transition-all" to={ROUTES.DOCTOR.DASHBOARD}>
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
-              <span>Bảng điều khiển</span>
-            </Link>
-            <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" to={ROUTES.DOCTOR.PATIENTS}>
-              <span className="material-symbols-outlined">groups</span>
-              <span>Danh sách bệnh nhân</span>
-            </Link>
-            <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" to={ROUTES.DOCTOR.ANALYTICS}>
-              <span className="material-symbols-outlined">analytics</span>
-              <span>Phân tích nguy cơ</span>
-            </Link>
-            <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" to={ROUTES.DOCTOR.PRESCRIPTIONS}>
-              <span className="material-symbols-outlined">prescriptions</span>
-              <span>Đơn thuốc điện tử</span>
-            </Link>
-            <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" to={ROUTES.DOCTOR.APPOINTMENTS}>
-              <span className="material-symbols-outlined">calendar_today</span>
-              <span>Lịch hẹn khám</span>
-            </Link>
-            <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" to={ROUTES.DOCTOR.MESSAGES}>
-              <span className="material-symbols-outlined">chat</span>
-              <span>Tin nhắn</span>
-              <span className="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">5</span>
-            </Link>
-          </nav>
-          <div className="p-4 mt-auto">
-            <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-              <div className="flex items-center gap-3 mb-3">
-                <div
-                  className="w-10 h-10 rounded-full bg-slate-200"
-                  data-alt="Bác sĩ Lê Minh Tâm portrait profile"
-                  style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDvD1gNLm_sBMkVyq8FuYHA20LjP97yY90_RzaDO9mjZaL9ubIXYPTKQeV1FDlhsH3p7qndF3QILzvglilx1ly9Sb7AtePxkBlVz8-5HPGNI5wMlA1c27CCvjNz865bvs_Y9uYkK2245BaMa66pFJCTPXK2wTV6-A4oQjShYdPHNg1nx01j-yW7I48c8aShwiEDSx2B_FE04UGkIxELFaJ-Ho65BrMgC_LF9Yk0dKK7BGEGWjFX4zFwmnNWi44sq8khTm_Q-D-Iig4')" }}>
-                </div>
-                <div className="overflow-hidden">
-                  <p className="text-sm font-bold truncate">BS. Lê Minh Tâm</p>
-                  <p className="text-xs text-slate-500">Chuyên khoa Nội</p>
-                </div>
-              </div>
-              <button className="w-full flex items-center justify-center gap-2 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                <span className="material-symbols-outlined text-sm">logout</span>
-                Đăng xuất
-              </button>
-            </div>
-          </div>
-        </aside>
+        <DoctorSidebar isSidebarOpen={isSidebarOpen} />
 
         {/* Main Content Area - Responsive Flex */}
         <main className="flex-1 lg:ml-72 min-h-screen flex flex-col transition-all duration-300">
@@ -325,7 +267,7 @@ export default function DoctorDashboard() {
 
           <div className="p-4 md:p-8 space-y-6 md:space-y-8">
             {/* Summary Cards */}
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {isLoading ? (
                 [...Array(4)].map((_, i) => (
                   <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-primary/5 shadow-sm space-y-4">
@@ -606,50 +548,49 @@ export default function DoctorDashboard() {
             </div>
 
             <section>
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-              <h2 className="text-xl font-extrabold">Quản lý bệnh nhân gần đây</h2>
-              <div className="flex items-center gap-4">
-                {isLoading ? (
-                  <div className="w-64 h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl"></div>
-                ) : (
-                  <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl relative overflow-hidden">
-                    {['TẤT CẢ', 'NGUY CƠ CAO', 'ỔN ĐỊNH'].map((opt) => (
-                      <button
-                        key={opt}
-                        onClick={() => setFilterRisk(opt === 'TẤT CẢ' ? 'ALL' : opt === 'NGUY CƠ CAO' ? 'HIGH_RISK' : 'STABLE')}
-                        className={`relative z-10 flex-1 px-5 py-2 text-[13px] font-bold transition-all duration-300 min-w-[110px] ${
-                          (filterRisk === 'ALL' && opt === 'TẤT CẢ') ||
-                          (filterRisk === 'HIGH_RISK' && opt === 'NGUY CƠ CAO') ||
-                          (filterRisk === 'STABLE' && opt === 'ỔN ĐỊNH')
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                <h2 className="text-xl font-extrabold">Quản lý bệnh nhân gần đây</h2>
+                <div className="flex items-center gap-4">
+                  {isLoading ? (
+                    <div className="w-64 h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl"></div>
+                  ) : (
+                    <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl relative overflow-hidden">
+                      {['TẤT CẢ', 'NGUY CƠ CAO', 'ỔN ĐỊNH'].map((opt) => (
+                        <button
+                          key={opt}
+                          onClick={() => setFilterRisk(opt === 'TẤT CẢ' ? 'ALL' : opt === 'NGUY CƠ CAO' ? 'HIGH_RISK' : 'STABLE')}
+                          className={`relative z-10 flex-1 px-5 py-2 text-[13px] font-bold transition-all duration-300 min-w-[110px] ${(filterRisk === 'ALL' && opt === 'TẤT CẢ') ||
+                            (filterRisk === 'HIGH_RISK' && opt === 'NGUY CƠ CAO') ||
+                            (filterRisk === 'STABLE' && opt === 'ỔN ĐỊNH')
                             ? 'text-primary'
                             : 'text-slate-500 hover:text-slate-700'
-                        }`}
-                      >
-                        {((filterRisk === 'ALL' && opt === 'TẤT CẢ') ||
-                          (filterRisk === 'HIGH_RISK' && opt === 'NGUY CƠ CAO') ||
-                          (filterRisk === 'STABLE' && opt === 'ỔN ĐỊNH')) && (
-                          <motion.div
-                            layoutId="activeTab"
-                            className="motion-active-bg"
-                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                          />
-                        )}
-                        <span className="relative z-10">{opt}</span>
-                      </button>
-                    ))}
+                            }`}
+                        >
+                          {((filterRisk === 'ALL' && opt === 'TẤT CẢ') ||
+                            (filterRisk === 'HIGH_RISK' && opt === 'NGUY CƠ CAO') ||
+                            (filterRisk === 'STABLE' && opt === 'ỔN ĐỊNH')) && (
+                              <motion.div
+                                layoutId="activeTab"
+                                className="motion-active-bg"
+                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                              />
+                            )}
+                          <span className="relative z-10">{opt}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleExportExcel}
+                      className="px-4 py-2 bg-white dark:bg-slate-800 border border-primary/10 rounded-xl text-[14px] font-bold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">download</span>
+                      Xuất báo cáo
+                    </button>
                   </div>
-                )}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={handleExportExcel}
-                    className="px-4 py-2 bg-white dark:bg-slate-800 border border-primary/10 rounded-xl text-[14px] font-bold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">download</span>
-                    Xuất báo cáo
-                  </button>
                 </div>
               </div>
-            </div>
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-primary/5 shadow-sm pb-10 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
@@ -699,65 +640,65 @@ export default function DoctorDashboard() {
                               key={p.id}
                               className="hover:bg-primary/5 transition-colors"
                             >
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                                  {p.fullName?.charAt(0)}
-                                </div>
-                                <div>
-                                  <p className="text-[16px] font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight">{p.fullName}</p>
-                                  <p className="text-[13px] text-slate-400 dark:text-slate-500 font-medium tracking-tight">Mã hồ sơ: {p.patientCode}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex gap-4">
-                                <div className="text-[13px]">
-                                  <p className="text-slate-400 font-medium">Glucose</p>
-                                  <p className="font-bold text-[14px] text-slate-700 dark:text-slate-200">{p.latestGlucose || 'N/A'}</p>
-                                </div>
-                                <div className="text-[13px]">
-                                  <p className="text-slate-400 font-medium">Huyết áp</p>
-                                  <p className="font-bold text-[14px] text-slate-700 dark:text-slate-200">{p.latestBp || 'N/A'}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`px-4 py-1.5 text-white text-[13px] font-bold rounded-full shadow-sm whitespace-nowrap inline-flex ${p.riskLevel === 'HIGH_RISK' ? 'bg-red-500' : p.riskLevel === 'MONITORING' ? 'bg-amber-500' : 'bg-emerald-500'
-                                }`}>
-                                {p.riskLevel === 'HIGH_RISK' ? 'Nguy cấp' : p.riskLevel === 'MONITORING' ? 'Cần theo dõi' : 'Ổn định'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-[14px] text-slate-500 font-medium">{p.lastUpdate || 'Vừa xong'}</td>
-                            <td className="px-6 py-4 text-right relative">
-                              <button
-                                onClick={() => setActiveMenu(activeMenu === p.id ? null : p.id)}
-                                className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 rounded-full transition-all ml-auto">
-                                <span className="material-symbols-outlined text-[22px]">more_vert</span>
-                              </button>
-                              {activeMenu === p.id && (
-                                <>
-                                  <div className="fixed inset-0 z-[100]" onClick={() => setActiveMenu(null)}></div>
-                                  <div className="absolute right-6 top-12 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2.5 z-[110] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 overflow-hidden text-left">
-                                    <button
-                                      onClick={() => { setSelectedPatient(p); setIsPatientDetailModalOpen(true); setActiveMenu(null); }}
-                                      className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                      <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">visibility</span>
-                                      <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Xem chi tiết hồ sơ</span>
-                                    </button>
-                                    <button
-                                      onClick={() => { setIsAdviceModalOpen(true); setAdvicePatientName(p.fullName); setAdvicePatientId(p.id); setActiveMenu(null); }}
-                                      className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                      <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">send</span>
-                                      <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Gửi lời khuyên</span>
-                                    </button>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                                    {p.fullName?.charAt(0)}
                                   </div>
-                                </>
-                              )}
-                            </td>
-                          </motion.tr>
-                        ))}
-                      </AnimatePresence>
+                                  <div>
+                                    <p className="text-[16px] font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight">{p.fullName}</p>
+                                    <p className="text-[13px] text-slate-400 dark:text-slate-500 font-medium tracking-tight">Mã hồ sơ: {p.patientCode}</p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="flex gap-4">
+                                  <div className="text-[13px]">
+                                    <p className="text-slate-400 font-medium">Glucose</p>
+                                    <p className="font-bold text-[14px] text-slate-700 dark:text-slate-200">{p.latestGlucose || 'N/A'}</p>
+                                  </div>
+                                  <div className="text-[13px]">
+                                    <p className="text-slate-400 font-medium">Huyết áp</p>
+                                    <p className="font-bold text-[14px] text-slate-700 dark:text-slate-200">{p.latestBp || 'N/A'}</p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className={`px-4 py-1.5 text-white text-[13px] font-bold rounded-full shadow-sm whitespace-nowrap inline-flex ${p.riskLevel === 'HIGH_RISK' ? 'bg-red-500' : p.riskLevel === 'MONITORING' ? 'bg-amber-500' : 'bg-emerald-500'
+                                  }`}>
+                                  {p.riskLevel === 'HIGH_RISK' ? 'Nguy cấp' : p.riskLevel === 'MONITORING' ? 'Cần theo dõi' : 'Ổn định'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-[14px] text-slate-500 font-medium">{p.lastUpdate || 'Vừa xong'}</td>
+                              <td className="px-6 py-4 text-right relative">
+                                <button
+                                  onClick={() => setActiveMenu(activeMenu === p.id ? null : p.id)}
+                                  className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 rounded-full transition-all ml-auto">
+                                  <span className="material-symbols-outlined text-[22px]">more_vert</span>
+                                </button>
+                                {activeMenu === p.id && (
+                                  <>
+                                    <div className="fixed inset-0 z-[100]" onClick={() => setActiveMenu(null)}></div>
+                                    <div className="absolute right-6 top-12 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2.5 z-[110] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 overflow-hidden text-left">
+                                      <button
+                                        onClick={() => { setSelectedPatient(p); setIsPatientDetailModalOpen(true); setActiveMenu(null); }}
+                                        className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
+                                        <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">visibility</span>
+                                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Xem chi tiết hồ sơ</span>
+                                      </button>
+                                      <button
+                                        onClick={() => { setIsAdviceModalOpen(true); setAdvicePatientName(p.fullName); setAdvicePatientId(p.id); setActiveMenu(null); }}
+                                        className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
+                                        <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">send</span>
+                                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Gửi lời khuyên</span>
+                                      </button>
+                                    </div>
+                                  </>
+                                )}
+                              </td>
+                            </motion.tr>
+                          ))}
+                        </AnimatePresence>
                       ) : (
                         <tr>
                           <td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">Chưa có bệnh nhân gần đây</td>

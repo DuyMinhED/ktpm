@@ -6,10 +6,10 @@ import AdminLayout from '../layouts/AdminLayout';
 import Dropdown from '../components/ui/Dropdown';
 import CreateUserModal from '../features/admin/components/CreateUserModal';
 import EditUserModal from '../features/admin/components/EditUserModal';
-import Toast from '../components/ui/Toast';
 import { clinicApi } from '../api/clinic';
 import { userApi } from '../api/user';
 import DeleteConfirmModal from '../components/ui/DeleteConfirmModal';
+import { useToast } from '../components/ui/ToastContext';
 
 interface UserSnippet {
   id: number;
@@ -36,12 +36,11 @@ export default function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [deletingUser, setDeletingUser] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastTitle, setToastTitle] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
+  const { showToast: showNotification } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pagination, setPagination] = useState({ page: 0, size: 10 });
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -94,7 +93,7 @@ export default function AdminUsers() {
   }, [selectedRole, selectedClinic, selectedStatus, debouncedSearch, pagination.page, pagination.size, clinics]);
 
   // Fetch Users with React Query
-  const { data: usersData, isLoading } = useQuery({
+  const { data: usersData, isLoading, isFetching } = useQuery({
     queryKey: ['users', queryParams],
     queryFn: async () => {
       const res = await userApi.getUsers(queryParams);
@@ -121,6 +120,12 @@ export default function AdminUsers() {
     }
   });
 
+  useEffect(() => {
+    if (usersData) {
+      setIsInitialLoad(false);
+    }
+  }, [usersData]);
+
   const userList = usersData?.list || [];
   const totalElements = usersData?.total || 0;
 
@@ -129,7 +134,7 @@ export default function AdminUsers() {
 
   const handleExport = async () => {
     const today = new Date().toLocaleDateString('vi-VN');
-    
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Danh Sách Người Dùng');
 
@@ -144,16 +149,16 @@ export default function AdminUsers() {
 
     // Header Row
     const headerRow = worksheet.addRow([
-      'Mã ĐD', 
-      'Họ và Tên', 
-      'Email', 
-      'Số Điện Thoại', 
-      'Vai Trò', 
-      'Cơ Sở Làm Việc', 
-      'Ngày Tham Gia', 
+      'Mã ĐD',
+      'Họ và Tên',
+      'Email',
+      'Số Điện Thoại',
+      'Vai Trò',
+      'Cơ Sở Làm Việc',
+      'Ngày Tham Gia',
       'Trạng Thái'
     ]);
-    
+
     headerRow.font = { bold: true, color: { argb: 'FF1E293B' } }; // slate-800
     headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }; // slate-100
     headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -184,12 +189,12 @@ export default function AdminUsers() {
         u.status
       ]);
       row.alignment = { vertical: 'middle', wrapText: true };
-      
+
       const statusCell = row.getCell(8);
       if (u.status === 'Hoạt động') {
-         statusCell.font = { color: { argb: 'FF10B981' }, bold: true }; // emerald-500
+        statusCell.font = { color: { argb: 'FF10B981' }, bold: true }; // emerald-500
       } else {
-         statusCell.font = { color: { argb: 'FFEF4444' }, bold: true }; // red-500
+        statusCell.font = { color: { argb: 'FFEF4444' }, bold: true }; // red-500
       }
     });
 
@@ -198,10 +203,10 @@ export default function AdminUsers() {
       if (rowNumber > 1) { // Skip main banner title
         row.eachCell({ includeEmpty: true }, (cell: ExcelJS.Cell) => {
           cell.border = {
-            top: {style:'thin', color: {argb:'FFCBD5E1'}},
-            left: {style:'thin', color: {argb:'FFCBD5E1'}},
-            bottom: {style:'thin', color: {argb:'FFCBD5E1'}},
-            right: {style:'thin', color: {argb:'FFCBD5E1'}}
+            top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
           };
         });
       }
@@ -224,8 +229,7 @@ export default function AdminUsers() {
     try {
       await userApi.createUser(apiData);
       setIsCreateModalOpen(false);
-      setToastTitle(`Tài khoản ${apiData.fullName} đã được khởi tạo!`);
-      setShowToast(true);
+      showNotification(`Tài khoản ${apiData.fullName} đã được khởi tạo!`, 'success');
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['userStats'] });
     } catch (error: any) {
@@ -241,8 +245,7 @@ export default function AdminUsers() {
     try {
       await userApi.updateUser(selectedUser.id, data);
       setIsEditModalOpen(false);
-      setToastTitle(`Cập nhật tài khoản ${data.fullName} thành công!`);
-      setShowToast(true);
+      showNotification(`Cập nhật tài khoản ${data.fullName} thành công!`, 'success');
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['userStats'] });
     } catch (error: any) {
@@ -261,14 +264,10 @@ export default function AdminUsers() {
       await userApi.toggleStatus(user.id);
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['userStats'] });
-      setToastType('success');
-      setToastTitle(`Đã ${action} tài khoản ${user.name}`);
-      setShowToast(true);
+      showNotification(`Đã ${action} tài khoản ${user.name}`, 'success');
     } catch (error: any) {
       console.error('Failed to toggle status:', error);
-      setToastType('error');
-      setToastTitle("Thao tác thất bại");
-      setShowToast(true);
+      showNotification("Thao tác thất bại", 'error');
     }
   };
 
@@ -283,8 +282,7 @@ export default function AdminUsers() {
     try {
       await userApi.deleteUser(deletingUser.id);
       setIsDeleteModalOpen(false);
-      setToastTitle(`Đã xóa tài khoản ${deletingUser.name}`);
-      setShowToast(true);
+      showNotification(`Đã xóa tài khoản ${deletingUser.name}`, 'success');
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['userStats'] });
     } catch (error: any) {
@@ -296,6 +294,14 @@ export default function AdminUsers() {
     }
   };
 
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setSelectedRole('Tất cả vai trò');
+    setSelectedClinic('Tất cả cơ sở');
+    setSelectedStatus('Tất cả trạng thái');
+    setPagination(prev => ({ ...prev, page: 0 }));
+  };
+
   return (
     <>
       <AdminLayout>
@@ -303,38 +309,38 @@ export default function AdminUsers() {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              {isLoading ? (
+              {isInitialLoad ? (
                 <div className="space-y-3 mb-2">
                   <div className="h-8 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-48 sm:w-72"></div>
                   <div className="h-4 bg-slate-100 dark:bg-slate-800/50 animate-pulse rounded w-64 sm:w-96"></div>
                 </div>
               ) : (
                 <>
-                  <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white">Quản lý người dùng</h2>
-                  <p className="text-[14px] md:text-[16px] text-slate-500 mt-1 font-medium">Phân quyền và quản lý tài khoản toàn hệ thống.</p>
+                  <h2 className="text-lg md:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">Quản lý người dùng</h2>
+                  <p className="text-[13px] md:text-[16px] text-slate-500 mt-1 font-medium">Phân quyền và quản lý tài khoản toàn hệ thống.</p>
                 </>
               )}
             </div>
-            <div className="flex flex-wrap gap-2">
-              {isLoading ? (
+            <div className="flex items-center gap-2">
+              {isInitialLoad ? (
                 <>
-                  <div className="w-32 h-10 bg-slate-200 dark:bg-slate-800 animate-pulse rounded-full shadow-sm"></div>
-                  <div className="w-48 h-10 bg-primary/20 animate-pulse rounded-full shadow-sm"></div>
+                  <div className="w-24 md:w-32 h-8 md:h-10 bg-slate-200 dark:bg-slate-800 animate-pulse rounded-full shadow-sm"></div>
+                  <div className="w-32 md:w-48 h-8 md:h-10 bg-primary/20 animate-pulse rounded-full shadow-sm"></div>
                 </>
               ) : (
                 <>
                   <button
                     onClick={handleExport}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-full font-bold transition-all text-[14px] border border-primary/10 shadow-sm group"
+                    className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-full font-bold transition-all text-[11px] md:text-[14px] border border-primary/10 shadow-sm group whitespace-nowrap"
                   >
-                    <span className="material-symbols-outlined text-[20px] group-hover:rotate-[20deg] transition-transform">download</span>
-                    Xuất danh sách
+                    <span className="material-symbols-outlined text-[16px] md:text-[20px] group-hover:rotate-[20deg] transition-transform">download</span>
+                    Xuất file
                   </button>
                   <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-full font-bold transition-all text-[14px] shadow-lg shadow-primary/20 hover:shadow-primary/30 group"
+                    className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-2.5 bg-primary text-white rounded-full font-bold transition-all text-[11px] md:text-[14px] shadow-lg shadow-primary/20 hover:shadow-primary/30 group whitespace-nowrap"
                   >
-                    <span className="material-symbols-outlined text-[20px]">person_add</span>
+                    <span className="material-symbols-outlined text-[16px] md:text-[20px]">person_add</span>
                     Thêm người dùng mới
                   </button>
                 </>
@@ -344,7 +350,7 @@ export default function AdminUsers() {
 
           {/* Summary Bento Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-8">
-            {isLoading || !userStats ? (
+            {isInitialLoad || !userStats ? (
               // Skeleton Stats Cards
               [...Array(5)].map((_, idx) => (
                 <div key={`user-stat-skeleton-${idx}`} className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm animate-pulse">
@@ -365,17 +371,17 @@ export default function AdminUsers() {
               ].map((stat, idx) => (
                 <div key={idx} className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all group hover:shadow-md">
                   <div className="flex justify-between items-start mb-3 md:mb-4">
-                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center ${stat.color === 'primary' ? 'bg-primary/10 text-primary' :
-                      stat.color === 'emerald' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600' :
-                        stat.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' :
-                          stat.color === 'amber' ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600' :
-                            'bg-slate-100 dark:bg-slate-800 text-slate-600'
+                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center ${stat.color === 'primary' ? 'bg-primary/20 text-primary' :
+                      stat.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' :
+                        stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' :
+                          stat.color === 'amber' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' :
+                            'bg-slate-200 dark:bg-slate-800 text-slate-600'
                       }`}>
                       <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>{stat.icon}</span>
                     </div>
                   </div>
-                  <p className="text-slate-500 text-[13px] md:text-[15px] font-medium mt-1">{stat.label}</p>
-                  <h3 className="text-lg md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{stat.value}</h3>
+                  <p className="text-slate-500 text-[12px] md:text-[15px] font-medium mt-1">{stat.label}</p>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">{stat.value}</h3>
                 </div>
               ))
             )}
@@ -383,18 +389,18 @@ export default function AdminUsers() {
 
           {/* Filter Section */}
           <div className="bg-white dark:bg-slate-900 p-4 md:p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4 md:space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] items-end gap-4 md:gap-6">
               <div className="relative">
                 <label className="text-[14px] font-medium text-slate-500  mb-2 block px-1">
-                  {isLoading ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-16 mb-2"></div> : "Tìm kiếm"}
+                  {isInitialLoad ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-16 mb-2"></div> : "Tìm kiếm"}
                 </label>
-                {isLoading ? (
+                {isInitialLoad ? (
                   <div className="h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-lg w-full"></div>
                 ) : (
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                  <div className="relative group">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-[16px] md:text-[18px] z-10 pointer-events-none group-focus-within:text-primary transition-colors">search</span>
                     <input
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 rounded-lg pl-10 pr-4 py-2.5 text-[14px] font-medium text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 shadow-sm outline-none text-slate-900 dark:text-white transition-all"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-700 rounded-full pl-10 pr-4 h-[38px] md:h-[42px] text-[13px] md:text-[14px] font-medium text-slate-700 dark:text-slate-200 outline-none hover:border-slate-500 dark:hover:border-slate-500 focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
                       placeholder="Tên hoặc Email..."
                       type="text"
                       value={searchTerm}
@@ -405,9 +411,9 @@ export default function AdminUsers() {
               </div>
               <div>
                 <label className="text-[14px] font-medium text-slate-500 mb-2 block px-1">
-                  {isLoading ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-12 mb-2"></div> : "Vai trò"}
+                  {isInitialLoad ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-12 mb-2"></div> : "Vai trò"}
                 </label>
-                {isLoading ? (
+                {isInitialLoad ? (
                   <div className="h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl w-full"></div>
                 ) : (
                   <Dropdown
@@ -419,9 +425,9 @@ export default function AdminUsers() {
               </div>
               <div>
                 <label className="text-[14px] font-medium text-slate-500 mb-2 block px-1">
-                  {isLoading ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-20 mb-2"></div> : "Phòng khám"}
+                  {isInitialLoad ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-20 mb-2"></div> : "Phòng khám"}
                 </label>
-                {isLoading ? (
+                {isInitialLoad ? (
                   <div className="h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl w-full"></div>
                 ) : (
                   <Dropdown
@@ -433,9 +439,9 @@ export default function AdminUsers() {
               </div>
               <div>
                 <label className="text-[14px] font-medium text-slate-500 mb-2 block px-1">
-                  {isLoading ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-16 mb-2"></div> : "Trạng thái"}
+                  {isInitialLoad ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-16 mb-2"></div> : "Trạng thái"}
                 </label>
-                {isLoading ? (
+                {isInitialLoad ? (
                   <div className="h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl w-full"></div>
                 ) : (
                   <Dropdown
@@ -445,6 +451,18 @@ export default function AdminUsers() {
                   />
                 )}
               </div>
+              {!isInitialLoad && (
+                <div className="col-span-2 lg:col-span-1 flex justify-end">
+                  <button
+                    onClick={handleResetFilters}
+                    className="h-[38px] md:h-[42px] flex items-center justify-center gap-2 px-4 text-[13px] font-bold bg-red-500 text-white hover:bg-red-600 rounded-full transition-all active:scale-95 shadow-lg shadow-red-200 dark:shadow-none whitespace-nowrap"
+                    title="Xóa tất cả bộ lọc"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">filter_alt_off</span>
+                    <span>Xóa bộ lọc</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -452,7 +470,7 @@ export default function AdminUsers() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 relative">
             {/* Mobile Card View */}
             <div className="block md:hidden">
-              {isLoading ? (
+              {isLoading || isFetching ? (
                 [...Array(5)].map((_, i) => (
                   <div key={`skeleton-m-${i}`} className="p-4 border-b border-slate-100 dark:border-slate-800 animate-pulse">
                     <div className="flex items-center gap-3 mb-3">
@@ -535,30 +553,30 @@ export default function AdminUsers() {
                 <thead>
                   <tr className="px-8 py-4 text-[15px] text-slate-500 leading-none">
                     <th className="px-6 py-5">
-                      {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-24"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Họ và tên</span>}
+                      {isLoading || isFetching ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-24"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Họ và tên</span>}
                     </th>
                     <th className="px-6 py-5">
-                      {isLoading ? <div className="h-4 bg-slate-300 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Liên hệ</span>}
+                      {isLoading || isFetching ? <div className="h-4 bg-slate-300 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Liên hệ</span>}
                     </th>
                     <th className="px-6 py-5">
-                      {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Vai trò</span>}
+                      {isLoading || isFetching ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Vai trò</span>}
                     </th>
                     <th className="px-6 py-5">
-                      {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-28"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Cơ sở</span>}
+                      {isLoading || isFetching ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-28"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Cơ sở</span>}
                     </th>
                     <th className="px-6 py-5">
-                      {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Ngày tạo</span>}
+                      {isLoading || isFetching ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Ngày tạo</span>}
                     </th>
                     <th className="px-6 py-5">
-                      {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Trạng thái</span>}
+                      {isLoading || isFetching ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Trạng thái</span>}
                     </th>
                     <th className="px-6 py-5 text-right">
-                      {isLoading ? <div className="h-4 bg-slate-300 dark:bg-slate-800 animate-pulse rounded w-16 ml-auto"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Thao tác</span>}
+                      {isLoading || isFetching ? <div className="h-4 bg-slate-300 dark:bg-slate-800 animate-pulse rounded w-16 ml-auto"></div> : <span className="text-[14px] font-bold leading-tight text-slate-900 dark:text-white">Thao tác</span>}
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-primary/5">
-                  {isLoading ? (
+                  {isLoading || isFetching ? (
                     // Skeleton Rows
                     [...Array(5)].map((_, i) => (
                       <tr key={`skeleton-${i}`} className="animate-pulse">
@@ -684,7 +702,7 @@ export default function AdminUsers() {
             {/* Pagination Box */}
             <div className="bg-slate-50 border-t border-slate-100 py-4">
               <div className="px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                {isLoading ? (
+                {isLoading || isFetching ? (
                   <>
                     <div className="flex gap-1 order-2">
                       <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse"></div>
@@ -726,14 +744,18 @@ export default function AdminUsers() {
         </section>
       </AdminLayout>
 
-      <DeleteConfirmModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleConfirmDelete}
-        title="Xác nhận xóa tài khoản"
-        description={`Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản ${deletingUser?.name}? Hành động này sẽ xóa tất cả dữ liệu liên quan và không thể hoàn tác.`}
-        isLoading={isSaving}
-      />
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <DeleteConfirmModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onConfirm={handleConfirmDelete}
+            title="Xác nhận xóa tài khoản"
+            description={`Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản ${deletingUser?.name}? Hành động này sẽ xóa tất cả dữ liệu liên quan và không thể hoàn tác.`}
+            isLoading={isSaving}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isCreateModalOpen && (
@@ -759,13 +781,6 @@ export default function AdminUsers() {
           />
         )}
       </AnimatePresence>
-
-      <Toast
-        show={showToast}
-        title={toastTitle}
-        type={toastType}
-        onClose={() => setShowToast(false)}
-      />
     </>
   );
 }

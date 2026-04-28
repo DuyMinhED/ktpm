@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import ClinicSidebar from '../components/common/ClinicSidebar';
-import TopBar from '../components/common/TopBar';
 import { clinicApi } from '../api/clinic';
 import Toast from '../components/ui/Toast';
+import ClinicSidebar from '../components/common/ClinicSidebar';
+import TopBar from '../components/common/TopBar';
 
 export default function ClinicSettings() {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
     const currentClinicId = localStorage.getItem('clinicId') || '1';
 
@@ -103,7 +103,7 @@ export default function ClinicSettings() {
                                 <div className="h-24 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent relative">
                                     <div className="absolute top-4 right-6 w-12 h-12 bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-full border border-white/20"></div>
                                 </div>
-                                
+
                                 <div className="px-8 pb-8 -mt-12 flex flex-col items-center text-center">
                                     {/* Avatar with Ring */}
                                     <div className="relative mb-6">

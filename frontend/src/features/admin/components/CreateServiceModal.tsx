@@ -172,8 +172,8 @@ const CreateServiceModal: React.FC<CreateServiceModalProps> = ({
                       {/* Service Name */}
                       <div className="lg:col-span-2 space-y-1.5">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Tên dịch vụ/Gói khám <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">medical_services</span>
+                        <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">medical_services</span>
                           <input
                             name="name"
                             value={formData.name}
@@ -198,8 +198,8 @@ const CreateServiceModal: React.FC<CreateServiceModalProps> = ({
                       {/* Price */}
                       <div className="space-y-1.5">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Giá niêm yết <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">payments</span>
+                        <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">payments</span>
                           <input
                             name="price"
                             value={formData.price}
@@ -214,8 +214,8 @@ const CreateServiceModal: React.FC<CreateServiceModalProps> = ({
                       {/* Duration */}
                       <div className="space-y-1.5">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Thời hạn/Đơn vị <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">schedule</span>
+                        <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">schedule</span>
                           <input
                             name="duration"
                             value={formData.duration}
@@ -256,8 +256,8 @@ const CreateServiceModal: React.FC<CreateServiceModalProps> = ({
                       <div className="space-y-2">
                         {formData.features.map((feature, idx) => (
                           <div key={idx} className="flex gap-2">
-                            <div className="relative flex-1">
-                              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 font-bold">check</span>
+                            <div className="relative flex-1 group">
+                              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-slate-500 font-bold z-10 pointer-events-none group-focus-within:text-primary transition-colors">check</span>
                               <input
                                 value={feature}
                                 onChange={(e) => handleFeatureChange(idx, e.target.value)}
@@ -278,7 +278,7 @@ const CreateServiceModal: React.FC<CreateServiceModalProps> = ({
                       <button
                         type="button"
                         onClick={addFeature}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-bold text-primary hover:bg-primary/5 rounded-lg transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium text-primary hover:bg-primary/5 rounded-lg transition-all"
                       >
                         <span className="material-symbols-outlined text-[18px]">add_circle</span>
                         Thêm đặc điểm

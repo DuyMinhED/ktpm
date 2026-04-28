@@ -170,10 +170,10 @@ export default function AdminAuditLogs() {
               </div>
             ) : (
               <>
-                <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+                <h2 className="text-lg md:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
                   Nhật ký hệ thống
                 </h2>
-                <p className="text-[14px] md:text-[16px] text-slate-500 mt-1 font-medium">Theo dõi và truy vết mọi hoạt động của người dùng trên toàn hệ thống.</p>
+                <p className="text-[13px] md:text-[16px] text-slate-500 mt-1 font-medium">Theo dõi và truy vết mọi hoạt động của người dùng trên toàn hệ thống.</p>
               </>
             )}
           </div>
@@ -182,7 +182,7 @@ export default function AdminAuditLogs() {
           ) : (
             <button
               onClick={handleExport}
-              className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-all text-[13px] border border-primary/10 active:scale-95 shadow-sm"
+              className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition-all text-[13px] border border-primary/10 active:scale-95 shadow-sm"
             >
               <span className="material-symbols-outlined text-[18px]">download</span>
               Xuất dữ liệu
@@ -192,7 +192,7 @@ export default function AdminAuditLogs() {
 
         {/* Filter Section */}
         <div className="bg-white dark:bg-slate-900 p-4 md:p-8 rounded-2xl shadow-sm border border-primary/5 space-y-4 md:space-y-6 text-left italic-none">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div className="relative text-left">
               <label className="text-[14px] font-medium text-slate-500 dark:text-slate-400 mb-2 block px-1">
                 {isLoading ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-32 mb-2"></div> : "Tìm kiếm sự kiện"}
@@ -201,9 +201,9 @@ export default function AdminAuditLogs() {
                 <div className="h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl w-full"></div>
               ) : (
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] z-10 pointer-events-none">search</span>
                   <input
-                    className="w-full h-[40px] bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-500 rounded-xl pl-10 pr-4 py-2 text-[14px] font-medium placeholder:font-medium focus:ring-4 focus:ring-primary/5 focus:border-primary shadow-sm outline-none text-slate-900 dark:text-white transition-all duration-300"
+                    className="w-full h-[38px] md:h-[42px] bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-500 rounded-full pl-10 pr-4 text-[13px] md:text-[14px] font-medium placeholder:font-medium focus:ring-4 focus:ring-primary/5 focus:border-primary shadow-sm outline-none text-slate-900 dark:text-white transition-all duration-300"
                     placeholder="Nội dung ví dụ: Khóa tài khoản..."
                     type="text"
                     value={searchTerm}
@@ -222,7 +222,7 @@ export default function AdminAuditLogs() {
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">person</span>
                   <input
-                    className="w-full h-[40px] bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-500 rounded-xl pl-10 pr-4 py-2 text-[14px] font-medium placeholder:font-medium focus:ring-4 focus:ring-primary/5 focus:border-primary shadow-sm outline-none text-slate-900 dark:text-white transition-all duration-300"
+                    className="w-full h-[38px] md:h-[42px] bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-500 rounded-full pl-10 pr-4 text-[13px] md:text-[14px] font-medium placeholder:font-medium focus:ring-4 focus:ring-primary/5 focus:border-primary shadow-sm outline-none text-slate-900 dark:text-white transition-all duration-300"
                     placeholder="Tên người thực hiện..."
                     type="text"
                     value={selectedUser}
@@ -242,6 +242,7 @@ export default function AdminAuditLogs() {
                   options={['Tất cả mô-đun', 'Quản lý người dùng', 'Quản lý phòng khám', 'Hồ sơ phòng khám', 'Báo cáo', 'Hệ thống', 'Auth']}
                   value={selectedModule}
                   onChange={setSelectedModule}
+                  className="max-md:[&_button]:min-h-[38px] max-md:[&_span]:text-[12.5px]"
                 />
               )}
             </div>

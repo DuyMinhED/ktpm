@@ -14,6 +14,10 @@ public class UpdateClinicRequest {
     @Size(max = 20, message = "Số điện thoại không được quá 20 ký tự")
     private String phone;
 
+    private String email;
+
+    private String description;
+
     private String imageUrl;
 
     private Long managerId;

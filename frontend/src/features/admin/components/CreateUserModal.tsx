@@ -164,8 +164,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       {/* Name */}
                       <div className="space-y-1.5 flex-1">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Họ và tên <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">person</span>
+                          <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">person</span>
                           <input
                             name="name"
                             value={formData.name}
@@ -180,8 +180,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       {/* Email */}
                       <div className="space-y-1.5 flex-1">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Email <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">mail</span>
+                        <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">mail</span>
                           <input
                             name="email"
                             value={formData.email}
@@ -196,8 +196,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       {/* Phone */}
                       <div className="space-y-1.5 flex-1 md:col-span-2">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Số điện thoại</label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">call</span>
+                        <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">call</span>
                           <input
                             name="phone"
                             value={formData.phone}
@@ -224,8 +224,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     {/* Username */}
                     <div className="space-y-1.5 md:col-span-2">
                       <label className="text-[14px] font-medium text-slate-500 ml-1">Tên đăng nhập <span className="text-red-500">*</span></label>
-                      <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">alternate_email</span>
+                      <div className="relative group">
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">alternate_email</span>
                         <input
                           name="username"
                           value={formData.username}
@@ -261,7 +261,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <div className="space-y-1.5 md:col-span-1">
                       <label className="text-[14px] font-medium text-slate-500 ml-1">Mật khẩu <span className="text-red-500">*</span></label>
                       <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400">lock</span>
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400 z-10 pointer-events-none">lock</span>
                         <input
                           type={showPassword ? "text" : "password"}
                           name="password"
@@ -284,7 +284,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <div className="space-y-1.5 md:col-span-1">
                       <label className="text-[14px] font-medium text-slate-500 ml-1">Xác nhận mật khẩu <span className="text-red-500">*</span></label>
                       <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400">lock_reset</span>
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400 z-10 pointer-events-none">lock_reset</span>
                         <input
                           type={showConfirmPassword ? "text" : "password"}
                           name="confirmPassword"

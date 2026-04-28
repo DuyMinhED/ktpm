@@ -69,11 +69,17 @@ public class PatientDashboardServiceImpl implements PatientDashboardService {
     @Override
     @Transactional
     public void dismissAlert(Long alertId) {
+        Patient patient = getCurrentPatient();
         PatientAlert alert = alertRepository.findById(alertId)
                 .orElseThrow(() -> new ResourceNotFoundException("Alert not found: " + alertId));
+        
+        if (!alert.getPatient().getId().equals(patient.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("You do not have permission to dismiss this alert");
+        }
+
         alert.setDismissed(true);
         alertRepository.save(alert);
-        log.info("Alert dismissed: id={}", alertId);
+        log.info("Alert dismissed: id={}, patientId={}", alertId, patient.getId());
     }
 
     // === Private Helpers ===

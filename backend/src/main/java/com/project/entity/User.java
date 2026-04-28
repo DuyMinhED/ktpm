@@ -28,8 +28,9 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 255)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String role; // ADMIN, DOCTOR, CLINIC_MANAGER, PATIENT
+    private UserRole role; // ADMIN, DOCTOR, CLINIC_MANAGER, PATIENT
 
     @Column(name = "full_name", length = 100)
     private String fullName;

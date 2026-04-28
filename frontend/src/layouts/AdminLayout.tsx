@@ -50,10 +50,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="p-6 flex items-center justify-between border-b border-primary/5">
           <Link to={ROUTES.HOME} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer">
             <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl text-white shadow-lg shadow-primary/20">
-            <span className="material-symbols-outlined fill-1" style={{ fontVariationSettings: "'FILL' 1" }}>health_metrics</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-black text-slate-900 dark:text-white leading-none">DamDiep</h1>
+              <span className="material-symbols-outlined fill-1" style={{ fontVariationSettings: "'FILL' 1" }}>health_metrics</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-slate-900 dark:text-white leading-none">DamDiep</h1>
             </div>
           </Link>
           <button
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <p className="text-[12px] text-slate-500 font-medium opacity-70 leading-tight">Quản trị viên</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => {
                 localStorage.removeItem('token');
                 window.location.href = '/login';

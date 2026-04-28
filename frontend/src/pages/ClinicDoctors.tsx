@@ -221,7 +221,7 @@ export default function ClinicDoctors() {
                         ) : (
                             <button
                                 onClick={() => setIsCreateModalOpen(true)}
-                                className="bg-primary text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all font-display whitespace-nowrap group shadow-sm"
+                                className="bg-primary text-white px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all font-display whitespace-nowrap group shadow-sm"
                             >
                                 <span className="material-symbols-outlined text-[20px]">add</span>
                                 Thêm bác sĩ mới
@@ -315,18 +315,18 @@ export default function ClinicDoctors() {
                     </div>
 
                     {/* Filters Bar (Standardized to match Patients) */}
-                    <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-4 italic-none">
+                    <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm grid grid-cols-2 md:flex md:flex-wrap items-center gap-4 italic-none">
                         {isLoading ? (
                             <>
-                                <div className="w-full md:w-[450px] h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
-                                <div className="w-48 h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
-                                <div className="w-48 h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
-                                <div className="w-48 h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
-                                <div className="w-48 h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
+                                <div className="col-span-2 md:w-[450px] h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
+                                <div className="w-full h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
+                                <div className="w-full h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
+                                <div className="w-full h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
+                                <div className="w-full h-11 bg-white/50 dark:bg-slate-800/50 rounded-lg animate-pulse"></div>
                             </>
                         ) : (
                             <>
-                                <div className="w-full md:w-[450px] relative group">
+                                <div className="col-span-2 md:w-[450px] relative group">
                                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">search</span>
                                     <input
                                         className="w-full pl-12 pr-6 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 text-sm font-medium text-slate-700 dark:text-slate-200 transition-all outline-none shadow-sm"

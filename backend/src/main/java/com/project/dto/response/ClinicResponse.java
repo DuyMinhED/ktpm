@@ -11,6 +11,9 @@ public class ClinicResponse {
     private String name;
     private String address;
     private String phone;
+    private String email;
+    private String description;
+    private String logoUrl;
     private String imageUrl;
     private String status;
     private Integer doctorCount;

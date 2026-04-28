@@ -61,6 +61,7 @@ public class DoctorPatientController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@securityService.canAccessPatient(#id)")
     @Operation(summary = "Get detailed information about a specific patient")
     public ApiResponse<DoctorPatientDetailResponse> getPatientDetail(@PathVariable Long id) {
         DoctorPatientDetailResponse result = doctorPatientService.getPatientDetail(id);

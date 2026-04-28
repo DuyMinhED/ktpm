@@ -57,7 +57,7 @@ public class PrescriptionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('DOCTOR') and @securityService.canAccessPatient(#request.patientId)")
     @Operation(summary = "Create a new electronic prescription")
     public ApiResponse<PrescriptionResponse> createPrescription(
             @Valid @RequestBody PrescriptionRequest request) {

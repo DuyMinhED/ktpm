@@ -1,5 +1,6 @@
 package com.project.service;
 
+import com.project.dto.response.AdminMedicalServiceStatsResponse;
 import com.project.entity.MedicalService;
 import java.util.List;
 
@@ -10,4 +11,5 @@ public interface MedicalServiceService {
     MedicalService updateService(Long id, MedicalService service);
     void deleteService(Long id);
     MedicalService toggleStatus(Long id);
+    AdminMedicalServiceStatsResponse getServiceStats();
 }

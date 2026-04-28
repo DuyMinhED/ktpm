@@ -12,11 +12,15 @@ interface ClinicSidebarProps {
 
 const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
     isSidebarOpen,
-    userName = "Phùng Thanh Độ",
-    userRole = "Bác Sĩ",
-    userAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuDs9fuTZde7EUIINhAwZDAYbGdWhfZuvszHFDZODEHBxXo3hRWmKfCmGfg6Xgckf0DONyYs8LQEOXng1sISGQVj9ec2pSs--Gz-xPlj6elGIG3KtZTO9U-57mPPcUxuNMtJbLamHmXAsWrVwobD4Ai-pKgNGU0yfv596RmDCRUawQMx8gmW7E2J_we-R_YITLa95pCcbtDZf6tkb7C6bWKKzwepNG2pc4L5uji1KMHQetqk8390TVAlxrRao3qco3laKWLu0uA-BmQ",
+    userName,
+    userRole,
+    userAvatar,
     isLoading = false
 }) => {
+    // Dynamic fallback to localStorage or generic text
+    const finalUserName = userName || localStorage.getItem('userName') || "Quản lý (Chưa có tên)";
+    const finalUserRole = userRole || localStorage.getItem('userRole') || "Quản lý phòng khám";
+    const finalUserAvatar = userAvatar || localStorage.getItem('userAvatar') || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0D8ABC&color=fff";
     const navItems = [
         { path: ROUTES.CLINIC.DASHBOARD, label: 'Tổng quan phòng khám', icon: 'dashboard' },
         { path: ROUTES.CLINIC.PATIENTS, label: 'Quản lý Bệnh nhân', icon: 'group' },
@@ -68,10 +72,10 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-4 border border-slate-100 dark:border-slate-800 flex items-center gap-3 group cursor-pointer hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm hover:shadow-md">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-blue-400 p-0.5 shadow-lg shadow-primary/20 overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
                         <img
-                            src={userAvatar}
-                            alt={userName}
+                            src={finalUserAvatar}
+                            alt={finalUserName}
                             onError={(e) => {
-                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`;
+                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=random`;
                             }}
                             className="w-full h-full object-cover rounded-[14px] border-2 border-white dark:border-slate-900"
                         />
@@ -84,8 +88,8 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
                             </div>
                         ) : (
                             <>
-                                <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate leading-tight tracking-tight ">{userName}</p>
-                                <p className="text-[12px] font-medium text-slate-600 dark:text-slate-500 mt-0.5 truncate">{userRole}</p>
+                                <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate leading-tight tracking-tight ">{finalUserName}</p>
+                                <p className="text-[12px] font-medium text-slate-600 dark:text-slate-500 mt-0.5 truncate">{finalUserRole}</p>
                             </>
                         )}
                     </div>

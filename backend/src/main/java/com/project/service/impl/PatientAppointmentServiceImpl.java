@@ -3,11 +3,14 @@ package com.project.service.impl;
 import com.project.dto.request.CreateAppointmentRequest;
 import com.project.dto.response.PatientAppointmentResponse;
 import com.project.entity.Appointment;
+import com.project.entity.AppointmentStatus;
 import com.project.entity.Patient;
+import com.project.entity.UserRole;
 import com.project.exception.ResourceNotFoundException;
 import com.project.repository.AppointmentRepository;
 import com.project.repository.PatientRepository;
 import com.project.service.NotificationService;
+import org.springframework.cache.annotation.CacheEvict;
 import com.project.service.PatientAppointmentService;
 import com.project.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "clinic_dashboard", allEntries = true)
     public PatientAppointmentResponse create(CreateAppointmentRequest request) {
         Patient patient = getCurrentPatient();
 
@@ -45,7 +49,7 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
                 .patient(patient)
                 .doctorId(request.getDoctorId())
                 .appointmentTime(request.getAppointmentTime())
-                .status("PENDING")
+                .status(AppointmentStatus.PENDING)
                 .type(request.getAppointmentType())
                 .doctorName(doctor != null ? doctor.getFullName() : null)
                 .doctorSpecialty(doctor != null ? doctor.getSpecialization() : null)
@@ -76,7 +80,7 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
     public List<PatientAppointmentResponse> getUpcoming() {
         Patient patient = getCurrentPatient();
         return appointmentRepository.findByPatientIdAndStatusInAndAppointmentTimeAfterOrderByAppointmentTimeAsc(
-                        patient.getId(), List.of("PENDING", "SCHEDULED"), LocalDateTime.now())
+                        patient.getId(), List.of(AppointmentStatus.PENDING, AppointmentStatus.SCHEDULED), LocalDateTime.now())
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -86,23 +90,24 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
     public Page<PatientAppointmentResponse> getHistory(Pageable pageable) {
         Patient patient = getCurrentPatient();
         return appointmentRepository.findByPatientIdAndStatusOrderByAppointmentTimeDesc(
-                patient.getId(), "COMPLETED", pageable)
+                patient.getId(), AppointmentStatus.COMPLETED, pageable)
                 .map(this::mapToResponse);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "clinic_dashboard", allEntries = true)
     public void cancel(Long id) {
         Appointment appointment = appointmentRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Lịch hẹn không tồn tại với ID: " + id));
-        appointment.setStatus("CANCELLED");
+        appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
         log.info("Appointment cancelled: id={}", id);
     }
     
     @Override
     public List<DoctorSimpleResponse> getAvailableDoctors() {
-        return userRepository.findByRole("DOCTOR").stream()
+        return userRepository.findByRole(UserRole.DOCTOR).stream()
             .filter(u -> "ACTIVE".equals(u.getStatus()))
             .map(u -> DoctorSimpleResponse.builder()
                 .id(u.getId())
@@ -133,7 +138,7 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
                 .appointmentType(a.getType())
                 .location(a.getLocation())
                 .meetingLink(a.getMeetingLink())
-                .status(a.getStatus())
+                .status(a.getStatus().name())
                 .diagnosisSummary(a.getDiagnosisSummary())
                 .build();
     }

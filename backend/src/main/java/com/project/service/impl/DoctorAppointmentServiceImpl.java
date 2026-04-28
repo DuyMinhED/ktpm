@@ -2,6 +2,7 @@ package com.project.service.impl;
 
 import com.project.dto.response.DoctorAppointmentResponse;
 import com.project.entity.Appointment;
+import com.project.entity.AppointmentStatus;
 import com.project.entity.Patient;
 import com.project.exception.ResourceNotFoundException;
 import com.project.repository.AppointmentRepository;
@@ -11,6 +12,7 @@ import com.project.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -31,7 +33,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
     public List<DoctorAppointmentResponse> getUpcomingAppointments() {
         Long doctorId = SecurityUtils.getCurrentUserId().orElseThrow();
         return appointmentRepository.findByDoctorIdAndStatusInAndAppointmentTimeAfterOrderByAppointmentTimeAsc(
-                        doctorId, java.util.List.of("PENDING", "SCHEDULED"), LocalDateTime.now().minusDays(1))
+                        doctorId, java.util.List.of(AppointmentStatus.PENDING, AppointmentStatus.SCHEDULED), LocalDateTime.now().minusDays(1))
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -47,6 +49,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "clinic_dashboard", allEntries = true)
     public DoctorAppointmentResponse updateStatus(Long appointmentId, String status) {
         Long doctorId = SecurityUtils.getCurrentUserId().orElseThrow();
         Appointment appointment = appointmentRepository.findById(appointmentId)
@@ -56,7 +59,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
             throw new RuntimeException("Unauthorized to modify this appointment");
         }
 
-        appointment.setStatus(status);
+        appointment.setStatus(AppointmentStatus.valueOf(status.toUpperCase()));
         Appointment saved = appointmentRepository.save(appointment);
 
         // Notify Patient
@@ -84,7 +87,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
                 .appointmentTime(a.getAppointmentTime())
                 .endTime(a.getEndTime())
                 .appointmentType(a.getType())
-                .status(a.getStatus())
+                .status(a.getStatus().name())
                 .location(a.getLocation())
                 .meetingLink(a.getMeetingLink())
                 .reason(a.getReason())
@@ -93,6 +96,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "clinic_dashboard", allEntries = true)
     public DoctorAppointmentResponse createAppointment(com.project.dto.request.DoctorCreateAppointmentRequest request) {
         Long doctorId = SecurityUtils.getCurrentUserId().orElseThrow();
         
@@ -106,7 +110,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
                 .doctorId(doctorId)
                 .patient(patient)
                 .appointmentTime(appointmentTime)
-                .status("SCHEDULED")
+                .status(AppointmentStatus.SCHEDULED)
                 .type(request.getType())
                 .reason(request.getNotes())
                 .build();

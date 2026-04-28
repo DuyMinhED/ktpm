@@ -14,4 +14,5 @@ public class DoctorSnippetDto {
     private String name;
     private String specialty;
     private String avatarUrl;
+    private int patientCount;
 }

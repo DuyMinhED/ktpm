@@ -24,7 +24,7 @@ const PatientLayout: React.FC = () => {
                 <PatientHeader setIsSidebarOpen={setIsSidebarOpen} />
                 
                 {/* Content View */}
-                <div className="flex-1 p-8">
+                <div className="flex-1 p-4 md:p-8">
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                         <Outlet />
                     </div>

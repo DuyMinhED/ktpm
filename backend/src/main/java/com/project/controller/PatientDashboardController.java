@@ -3,6 +3,7 @@ package com.project.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/patient/dashboard")
 @RequiredArgsConstructor
-// @PreAuthorize("hasRole('PATIENT')")
+@PreAuthorize("hasRole('PATIENT')")
 @Tag(name = "Patient Dashboard", description = "Patient dashboard aggregation APIs")
 public class PatientDashboardController {
 

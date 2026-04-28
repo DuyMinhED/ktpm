@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +67,7 @@ public class PatientHealthMetricServiceImpl implements PatientHealthMetricServic
 
     @Override
     @Transactional
+    @CacheEvict(value = "clinic_dashboard", allEntries = true)
     public HealthMetricResponse create(CreateHealthMetricRequest request) {
         Patient patient = getCurrentPatient();
         MetricType metricType = MetricType.valueOf(request.getMetricType());
@@ -201,12 +203,19 @@ public class PatientHealthMetricServiceImpl implements PatientHealthMetricServic
 
     @Override
     @Transactional
+    @CacheEvict(value = "clinic_dashboard", allEntries = true)
     public void delete(Long id) {
+        Patient patient = getCurrentPatient();
         HealthMetric metric = healthMetricRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Health metric not found: " + id));
+        
+        if (!metric.getPatient().getId().equals(patient.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("You do not have permission to delete this metric");
+        }
+
         metric.setDeleted(true);
         healthMetricRepository.save(metric);
-        log.info("Health metric soft-deleted: id={}", id);
+        log.info("Health metric soft-deleted: id={}, patientId={}", id, patient.getId());
     }
 
     // === Private Helpers ===

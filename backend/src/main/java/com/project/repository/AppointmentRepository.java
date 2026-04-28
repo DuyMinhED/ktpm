@@ -1,6 +1,7 @@
 package com.project.repository;
 
 import com.project.entity.Appointment;
+import com.project.entity.AppointmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,12 +15,12 @@ import java.util.List;
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
         // === Doctor-side queries ===
-        long countByDoctorIdAndStatusAndAppointmentTimeAfter(Long doctorId, String status, LocalDateTime time);
-        long countByDoctorIdAndStatusInAndAppointmentTimeAfter(Long doctorId, List<String> statuses, LocalDateTime time);
-        long countByDoctorIdAndStatus(Long doctorId, String status);
+        long countByDoctorIdAndStatusAndAppointmentTimeAfter(Long doctorId, AppointmentStatus status, LocalDateTime time);
+        long countByDoctorIdAndStatusInAndAppointmentTimeAfter(Long doctorId, List<AppointmentStatus> statuses, LocalDateTime time);
+        long countByDoctorIdAndStatus(Long doctorId, AppointmentStatus status);
 
         List<Appointment> findByDoctorIdAndStatusInAndAppointmentTimeAfterOrderByAppointmentTimeAsc(
-                        Long doctorId, List<String> statuses, LocalDateTime time);
+                        Long doctorId, List<AppointmentStatus> statuses, LocalDateTime time);
 
         List<Appointment> findByDoctorIdOrderByAppointmentTimeDesc(Long doctorId);
 
@@ -30,13 +31,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
         // === Patient-side queries ===
         List<Appointment> findByPatientIdAndStatusInAndAppointmentTimeAfterOrderByAppointmentTimeAsc(
-                        Long patientId, List<String> statuses, LocalDateTime after);
+                        Long patientId, List<AppointmentStatus> statuses, LocalDateTime after);
 
         List<Appointment> findByPatientIdAndStatusAndAppointmentTimeAfterOrderByAppointmentTimeAsc(
-                        Long patientId, String status, LocalDateTime after);
+                        Long patientId, AppointmentStatus status, LocalDateTime after);
 
         Page<Appointment> findByPatientIdAndStatusOrderByAppointmentTimeDesc(
-                        Long patientId, String status, Pageable pageable);
+                        Long patientId, AppointmentStatus status, Pageable pageable);
 
         List<Appointment> findByPatientIdOrderByAppointmentTimeDesc(Long patientId);
 
@@ -76,7 +77,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         long countByClinicIdAndCreatedAtAfter(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("since") LocalDateTime since);
 
         @Query("SELECT COUNT(a) FROM Appointment a JOIN User u ON a.doctorId = u.id WHERE u.clinicId = :clinicId AND a.status = :status AND a.isDeleted = false AND a.createdAt >= :since")
-        long countByClinicIdAndStatusAndCreatedAtAfter(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("status") String status, @org.springframework.data.repository.query.Param("since") LocalDateTime since);
+        long countByClinicIdAndStatusAndCreatedAtAfter(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("status") AppointmentStatus status, @org.springframework.data.repository.query.Param("since") LocalDateTime since);
 
         @Query("SELECT COUNT(a) FROM Appointment a JOIN User u ON a.doctorId = u.id " +
                "WHERE u.clinicId = :clinicId AND a.status = 'SCHEDULED' AND a.appointmentTime < :now AND a.isDeleted = false")

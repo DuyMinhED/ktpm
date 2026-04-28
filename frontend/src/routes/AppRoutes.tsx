@@ -37,7 +37,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path={ROUTES.HOME} element={<LandingPage />} />
 
-      
+
       {/* Patient Portal Routes */}
       <Route path="/patient" element={<PatientLayout />}>
         <Route index element={<PatientDashboard />} />

@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react';
 import { clinicApi } from '../api/clinic';
-import ClinicSidebar from '../components/common/ClinicSidebar';
-import TopBar from '../components/common/TopBar';
 import Toast from '../components/ui/Toast';
 import Dropdown from '../components/ui/Dropdown';
+import ClinicSidebar from '../components/common/ClinicSidebar';
+import TopBar from '../components/common/TopBar';
 
 export default function ClinicAssignment() {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
-    const currentClinicId = localStorage.getItem('clinicId') || '1';
-
-    // Data States
+    const currentClinicId = localStorage.getItem('clinicId') || '1';    // Data States
     const [unassignedPatients, setUnassignedPatients] = useState<any[]>([]);
     const [availableDoctors, setAvailableDoctors] = useState<any[]>([]);
     const [selectedPatient, setSelectedPatient] = useState<any>(null);
@@ -180,13 +178,7 @@ export default function ClinicAssignment() {
 
     return (
         <div className="flex h-screen font-display bg-[#f6f8f7] dark:bg-slate-950 text-slate-900 dark:text-slate-100 italic-none overflow-hidden">
-            <ClinicSidebar
-                isSidebarOpen={isSidebarOpen}
-                userName="Admin Sarah"
-                userRole="Senior Manager"
-                userAvatar="https://lh3.googleusercontent.com/aida-public/AB6AXuDs9fuTZde7EUIINhAwZDAYbGdWhfZuvszHFDZODEHBxXo3hRWmKfCmGfg6Xgckf0DONyYs8LQEOXng1sISGQVj9ec2pSs--Gz-xPlj6elGIG3KtZTO9U-57mPPcUxuNMtJbLamHmXAsWrVwobD4Ai-pKgNGU0yfv596RmDCRUawQMx8gmW7E2J_we-R_YITLa95pCcbtDZf6tkb7C6bWKKzwepNG2pc4L5uji1KMHQetqk8390TVAlxrRao3qco3laKWLu0uA-BmQ"
-                isLoading={isLoading}
-            />
+            <ClinicSidebar isSidebarOpen={isSidebarOpen} />
 
             <main className="flex-1 lg:ml-72 h-screen flex flex-col transition-all duration-300 overflow-hidden">
                 {isSidebarOpen && (
@@ -195,12 +187,8 @@ export default function ClinicAssignment() {
                         onClick={() => setIsSidebarOpen(false)}
                     ></div>
                 )}
-
-                <TopBar
-                    setIsSidebarOpen={setIsSidebarOpen}
-                    notifications={notifications}
-                    setNotifications={setNotifications}
-                />
+                
+                <TopBar setIsSidebarOpen={setIsSidebarOpen} notifications={notifications} setNotifications={setNotifications} />
 
                 <div className="p-4 md:p-8 flex-1 overflow-hidden flex flex-col space-y-4 md:space-y-6">
 

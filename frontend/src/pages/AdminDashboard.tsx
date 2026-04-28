@@ -55,15 +55,15 @@ export default function AdminDashboard() {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md p-3 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl">
-          <p className="text-[13px] font-bold text-slate-700 mb-1">{label}</p>
+          <p className="text-[12px] font-bold text-slate-700 mb-1">{label}</p>
           <div className="flex items-center gap-2">
-            <p className="text-[14px] font-medium text-slate-600 dark:text-white">
-              {selectedChartMetric === 'Doanh thu' 
+            <p className="text-[13px] font-medium text-slate-600 dark:text-white">
+              {selectedChartMetric === 'Doanh thu'
                 ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(payload[0].value)
                 : selectedChartMetric === 'Tỷ lệ hài lòng'
                   ? `${payload[0].value}%`
-                  : payload[0].value} 
-              <span className="text-slate-600 font-medium text-[12px] ml-1">
+                  : payload[0].value}
+              <span className="text-slate-600 font-medium text-[11px] ml-1">
                 {selectedChartMetric === 'Lượng bệnh nhân' && 'bệnh nhân mới'}
                 {selectedChartMetric === 'Lượt đặt lịch' && 'lượt đặt'}
                 {selectedChartMetric === 'Tỷ lệ hài lòng' && 'hài lòng'}
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
           dy={18}
           textAnchor={textAnchor}
           fill="#475569"
-          fontSize={13}
+          fontSize={window.innerWidth > 1024 ? 14 : 11}
           fontWeight={500}
         >
           {payload.value}
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
 
   const handleExportExcel = async () => {
     const today = new Date().toLocaleDateString('vi-VN');
-    
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Báo Cáo Tổng Hợp');
 
@@ -115,15 +115,15 @@ export default function AdminDashboard() {
 
     // Header Row
     const headerRow = worksheet.addRow([
-      'Mã Định Danh', 
-      'Tên Cơ Sở/Phòng Khám', 
-      'Liên Hệ', 
-      'Đội Ngũ Bác Sĩ', 
-      'Lượng Bệnh Nhân', 
-      'Tăng Trưởng', 
+      'Mã Định Danh',
+      'Tên Cơ Sở/Phòng Khám',
+      'Liên Hệ',
+      'Đội Ngũ Bác Sĩ',
+      'Lượng Bệnh Nhân',
+      'Tăng Trưởng',
       'Trạng Thái Kích Hoạt'
     ]);
-    
+
     headerRow.font = { bold: true, color: { argb: 'FF1E293B' } }; // slate-800
     headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }; // slate-100
     headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -153,12 +153,12 @@ export default function AdminDashboard() {
         displayStatus
       ]);
       row.alignment = { vertical: 'middle', wrapText: true };
-      
+
       const statusCell = row.getCell(7);
       if (c.status === 'ACTIVE') {
-         statusCell.font = { color: { argb: 'FF10B981' }, bold: true };
+        statusCell.font = { color: { argb: 'FF10B981' }, bold: true };
       } else {
-         statusCell.font = { color: { argb: 'FFEF4444' }, bold: true };
+        statusCell.font = { color: { argb: 'FFEF4444' }, bold: true };
       }
 
       // Format growth column
@@ -171,10 +171,10 @@ export default function AdminDashboard() {
       if (rowNumber > 1) {
         row.eachCell({ includeEmpty: true }, (cell) => {
           cell.border = {
-            top: {style:'thin', color: {argb:'FFCBD5E1'}},
-            left: {style:'thin', color: {argb:'FFCBD5E1'}},
-            bottom: {style:'thin', color: {argb:'FFCBD5E1'}},
-            right: {style:'thin', color: {argb:'FFCBD5E1'}}
+            top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
           };
         });
       }
@@ -231,8 +231,8 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <>
-                <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white">Tổng quan</h2>
-                <p className="text-[14px] md:text-[16px] text-slate-500 mt-1 font-medium italic-none">Theo dõi hiệu suất vận hành hệ thống</p>
+                <h2 className="text-lg md:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">Tổng quan</h2>
+                <p className="text-[13px] md:text-[16px] text-slate-500 mt-1 font-medium italic-none">Theo dõi hiệu suất vận hành hệ thống</p>
               </>
             )}
           </div>
@@ -246,16 +246,16 @@ export default function AdminDashboard() {
               <>
                 <button
                   onClick={() => setIsCreateModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-bold transition-all text-[13px] shadow-lg shadow-primary/20 hover:shadow-primary/30 whitespace-nowrap"
+                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-primary text-white rounded-xl font-bold transition-all text-[12px] md:text-[13px] shadow-lg shadow-primary/20 hover:shadow-primary/30 whitespace-nowrap"
                 >
-                  <span className="material-symbols-outlined text-[18px]">add</span>
+                  <span className="material-symbols-outlined text-[16px] md:text-[18px]">add</span>
                   Thêm phòng khám
                 </button>
                 <button
                   onClick={handleExportExcel}
-                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg font-bold transition-all text-[13px] border border-primary/10 shadow-sm whitespace-nowrap"
+                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl font-bold transition-all text-[12px] md:text-[13px] border border-primary/10 shadow-sm whitespace-nowrap"
                 >
-                  <span className="material-symbols-outlined text-[18px]">ios_share</span>
+                  <span className="material-symbols-outlined text-[16px] md:text-[18px]">ios_share</span>
                   Xuất báo cáo
                 </button>
               </>
@@ -284,56 +284,56 @@ export default function AdminDashboard() {
               {/* Card 1 */}
               <div className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-primary/5 shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-600">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center text-emerald-600">
                     <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>groups</span>
                   </div>
-                  <span className="text-[10px] md:text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">{stats?.patientGrowth || '+0%'}</span>
+                  <span className="text-[10px] md:text-[11px] font-bold text-white bg-emerald-500 px-2 py-1 rounded-lg">{stats?.patientGrowth || '+0%'}</span>
                 </div>
-                <div className="mt-3 md:mt-4">
-                  <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{stats?.totalPatients || 0}</h3>
-                  <p className="text-slate-500 text-[13px] md:text-[15px] font-medium mt-1 font-display">Tổng số bệnh nhân</p>
+                <div className="mt-2 md:mt-4">
+                  <h3 className="text-xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">{stats?.totalPatients || 0}</h3>
+                  <p className="text-slate-500 text-[12.5px] md:text-[16.5px] font-medium mt-1.5 font-display">Tổng số bệnh nhân</p>
                 </div>
               </div>
 
               {/* Card 2 */}
               <div className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-primary/5 shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center text-blue-600">
                     <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>apartment</span>
                   </div>
-                  <span className="text-[10px] md:text-[11px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg uppercase tracking-wider">{stats?.clinicTrend || 'Ổn định'}</span>
+                  <span className="text-[10px] md:text-[11px] font-bold text-white bg-blue-500 px-2 py-1 rounded-lg">{stats?.clinicTrend || 'Ổn định'}</span>
                 </div>
-                <div className="mt-3 md:mt-4">
-                  <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{stats?.activeClinics || 0}</h3>
-                  <p className="text-slate-500 text-[13px] md:text-[15px] font-medium mt-1 font-display">Phòng khám hoạt động</p>
+                <div className="mt-2 md:mt-4">
+                  <h3 className="text-xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">{stats?.activeClinics || 0}</h3>
+                  <p className="text-slate-500 text-[12.5px] md:text-[16.5px] font-medium mt-1.5 font-display">Phòng khám hoạt động</p>
                 </div>
               </div>
 
               {/* Card 3 */}
               <div className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-primary/5 shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center text-indigo-600">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl flex items-center justify-center text-indigo-600">
                     <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>stethoscope</span>
                   </div>
-                  <span className="text-[10px] md:text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">{stats?.doctorTrend || '+0 mới'}</span>
+                  <span className="text-[10px] md:text-[11px] font-bold text-white bg-indigo-500 px-2 py-1 rounded-lg">{stats?.doctorTrend || '+0 mới'}</span>
                 </div>
-                <div className="mt-3 md:mt-4">
-                  <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{stats?.totalDoctors || 0}</h3>
-                  <p className="text-slate-500 text-[13px] md:text-[15px] font-medium mt-1 font-display">Đội ngũ Bác sĩ</p>
+                <div className="mt-2 md:mt-4">
+                  <h3 className="text-xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">{stats?.totalDoctors || 0}</h3>
+                  <p className="text-slate-500 text-[12.5px] md:text-[16.5px] font-medium mt-1.5 font-display">Đội ngũ Bác sĩ</p>
                 </div>
               </div>
 
               {/* Card 4 - High Risk Level Style from Doctor */}
               <div className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-primary/5 shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center text-red-600">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-red-200 dark:bg-red-900/50 rounded-xl flex items-center justify-center text-red-600">
                     <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
                   </div>
-                  <span className="px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider">Theo dõi</span>
+                  <span className="px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded-full">Theo dõi</span>
                 </div>
-                <div className="mt-3 md:mt-4">
-                  <h3 className="text-xl md:text-3xl font-black text-red-600 tracking-tight">{stats?.highRiskAlerts || 0}</h3>
-                  <p className="text-slate-500 text-[13px] md:text-[15px] font-medium mt-1 font-display">Cảnh báo rủi ro cao</p>
+                <div className="mt-2 md:mt-4">
+                  <h3 className="text-xl md:text-4xl font-black text-red-600 tracking-tight leading-none">{stats?.highRiskAlerts || 0}</h3>
+                  <p className="text-slate-500 text-[12.5px] md:text-[16.5px] font-medium mt-1.5 font-display">Cảnh báo rủi ro cao</p>
                 </div>
               </div>
             </>
@@ -353,12 +353,12 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <>
-                    <h2 className="text-[16px] md:text-[19px] font-bold text-slate-900 dark:text-white tracking-tight">Thống kê vận hành hệ thống</h2>
-                    <p className="text-[13px] md:text-[15px] text-slate-500 mt-1">Báo cáo chi tiết theo {selectedChartMetric.toLowerCase()}</p>
+                    <h2 className="text-[14px] md:text-[19px] font-bold text-slate-900 dark:text-white tracking-tight">Thống kê vận hành hệ thống</h2>
+                    <p className="text-[11px] md:text-[15px] text-slate-500 mt-1">Báo cáo chi tiết theo {selectedChartMetric.toLowerCase()}</p>
                   </>
                 )}
               </div>
-              <div className="flex flex-wrap items-center gap-3 md:gap-6">
+              <div className="flex items-center justify-between gap-2 md:gap-6">
                 {/* Time Range Selector */}
                 {!stats ? (
                   <div className="w-40 h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl"></div>
@@ -366,7 +366,7 @@ export default function AdminDashboard() {
                   <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
                     <button
                       onClick={() => setTimeRange('DAY')}
-                      className={`px-4 py-1.5 text-[13px] font-bold rounded-lg transition-all ${timeRange === 'DAY'
+                      className={`px-2.5 md:px-4 py-1 md:py-1.5 text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${timeRange === 'DAY'
                         ? 'bg-white dark:bg-slate-700 text-[#3bb9f3] shadow-sm'
                         : 'text-slate-500 hover:text-slate-700'
                         }`}
@@ -375,7 +375,7 @@ export default function AdminDashboard() {
                     </button>
                     <button
                       onClick={() => setTimeRange('MONTH')}
-                      className={`px-4 py-1.5 text-[13px] font-bold rounded-lg transition-all ${timeRange === 'MONTH'
+                      className={`px-2.5 md:px-4 py-1 md:py-1.5 text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${timeRange === 'MONTH'
                         ? 'bg-white dark:bg-slate-700 text-[#3bb9f3] shadow-sm'
                         : 'text-slate-500 hover:text-slate-700'
                         }`}
@@ -384,7 +384,7 @@ export default function AdminDashboard() {
                     </button>
                     <button
                       onClick={() => setTimeRange('YEAR')}
-                      className={`px-4 py-1.5 text-[13px] font-bold rounded-lg transition-all ${timeRange === 'YEAR'
+                      className={`px-2.5 md:px-4 py-1 md:py-1.5 text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${timeRange === 'YEAR'
                         ? 'bg-white dark:bg-slate-700 text-[#3bb9f3] shadow-sm'
                         : 'text-slate-500 hover:text-slate-700'
                         }`}
@@ -397,12 +397,18 @@ export default function AdminDashboard() {
                 {!stats ? (
                   <div className="w-48 h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl"></div>
                 ) : (
-                  <Dropdown
-                    options={['Lượng bệnh nhân', 'Lượt đặt lịch', 'Doanh thu', 'Tỷ lệ hài lòng']}
-                    value={selectedChartMetric}
-                    onChange={setSelectedChartMetric}
-                    className="w-48"
-                  />
+                    <Dropdown
+                      options={[
+                        { label: 'Tổng bệnh nhân', value: 'Lượng bệnh nhân' },
+                        { label: 'Tổng lịch hẹn', value: 'Lượt đặt lịch' },
+                        { label: 'Doanh thu', value: 'Doanh thu' },
+                        { label: 'Tỷ lệ hài lòng', value: 'Tỷ lệ hài lòng' }
+                      ]}
+                      value={selectedChartMetric}
+                      onChange={setSelectedChartMetric}
+                      className="w-[140px] sm:w-[160px] sm:ml-auto"
+                      size="sm"
+                    />
                 )}
               </div>
             </div>
@@ -420,7 +426,7 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 30 }}>
+                  <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 30 }}>
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#3bb9f3" stopOpacity={0.2} />
@@ -432,6 +438,7 @@ export default function AdminDashboard() {
                       dataKey="label"
                       axisLine={false}
                       tickLine={false}
+                      padding={{ left: 10, right: 0 }}
                       tick={<CustomXAxisTick />}
                       ticks={[
                         chartData[0]?.label,
@@ -450,16 +457,34 @@ export default function AdminDashboard() {
                       type="monotone"
                       dataKey="value"
                       stroke="#3bb9f3"
-                      strokeWidth={4}
+                      strokeWidth={window.innerWidth > 1024 ? 4 : 2.5}
                       fillOpacity={1}
                       fill="url(#colorValue)"
                       animationDuration={2000}
-                      dot={{
-                        r: 6,
-                        fill: '#fff',
-                        stroke: '#3bb9f3',
-                        strokeWidth: 3,
-                        className: 'drop-shadow-md'
+                      dot={(props: any) => {
+                        const { cx, cy, index } = props;
+                        const isMajorTick = [
+                          0,
+                          Math.floor(chartData.length * 0.33),
+                          Math.floor(chartData.length * 0.66),
+                          chartData.length - 1
+                        ].includes(index);
+
+                        if (isMajorTick) {
+                          return (
+                            <circle
+                              key={index}
+                              cx={cx}
+                              cy={cy}
+                              r={6}
+                              fill="#fff"
+                              stroke="#3bb9f3"
+                              strokeWidth={3}
+                              className="drop-shadow-md"
+                            />
+                          );
+                        }
+                        return null;
                       }}
                       activeDot={{
                         r: 8,
@@ -481,12 +506,12 @@ export default function AdminDashboard() {
               {!stats ? (
                 <div className="h-6 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-48"></div>
               ) : (
-                <h2 className="text-[16px] md:text-[19px] font-bold text-slate-900 dark:text-white tracking-tight">Hoạt động hệ thống</h2>
+                <h2 className="text-[14px] md:text-[19px] font-bold text-slate-900 dark:text-white tracking-tight">Hoạt động hệ thống</h2>
               )}
               {!stats ? (
                 <div className="w-6 h-6 bg-slate-200 dark:bg-slate-800 animate-pulse rounded-full"></div>
               ) : (
-                <Link 
+                <Link
                   to={ROUTES.ADMIN.AUDIT_LOGS}
                   className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-primary transition-all group"
                   title="Xem tất cả nhật ký"
@@ -514,9 +539,9 @@ export default function AdminDashboard() {
                       <span className="material-symbols-outlined text-lg">{act.icon || 'history'}</span>
                     </div>
                     <div>
-                      <p className="text-[13px] md:text-[15px] font-bold text-slate-900 dark:text-white">{act.title}</p>
-                      <p className="text-[12px] md:text-[14px] text-slate-500 font-medium mt-0.5 leading-relaxed">{act.description}</p>
-                      <span className="text-[11px] md:text-[13px] font-medium text-slate-400 dark:text-slate-500 mt-2 inline-block italic-none tracking-tight">{act.timeAgo}</span>
+                      <p className="text-[12px] md:text-[15px] font-bold text-slate-900 dark:text-white">{act.title}</p>
+                      <p className="text-[11px] md:text-[14px] text-slate-500 font-medium mt-0.5 leading-relaxed">{act.description}</p>
+                      <span className="text-[10px] md:text-[13px] font-medium text-slate-400 dark:text-slate-500 mt-2 inline-block italic-none tracking-tight">{act.timeAgo}</span>
                     </div>
                   </div>
                 ))
@@ -541,8 +566,8 @@ export default function AdminDashboard() {
                 </>
               ) : (
                 <>
-                  <h3 className="text-[16px] md:text-[19px] font-bold text-slate-900 dark:text-white">Danh sách chi nhánh mới</h3>
-                  <p className="text-[13px] md:text-[15px] text-slate-500 mt-1">Lấy dữ liệu trực tiếp từ các phòng khám</p>
+                  <h3 className="text-[15px] md:text-[19px] font-bold text-slate-900 dark:text-white">Danh sách chi nhánh mới</h3>
+                  <p className="text-[12px] md:text-[15px] text-slate-500 mt-1">Lấy dữ liệu trực tiếp từ các phòng khám</p>
                 </>
               )}
             </div>
@@ -649,11 +674,13 @@ export default function AdminDashboard() {
                           <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[#3bb9f3]">
                             <span className="material-symbols-outlined text-[23px]">home_health</span>
                           </div>
-                          <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">{clinic.name}</p>
+                          <p className="text-sm font-medium text-slate-900 dark:text-white leading-none">{clinic.name}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <code className="text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">{clinic.clinicCode}</code>
+                        <code className="text-[14px] font-bold text-primary bg-primary/5 dark:bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 uppercase tracking-wider shadow-sm">
+                          {clinic.clinicCode}
+                        </code>
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{clinic.phone}</p>
@@ -668,7 +695,7 @@ export default function AdminDashboard() {
                         <span className="text-sm font-bold text-[#3bb9f3]">{clinic.growth}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 text-white text-[13px] font-bold rounded-full ${clinic.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                        <span className={`px-3 py-1 text-white text-[13px] md:text-[14.5px] font-bold rounded-xl ${clinic.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'}`}>
                           {clinic.status === 'ACTIVE' ? 'Hoạt động' : 'Ngưng hoạt động'}
                         </span>
                       </td>

@@ -278,7 +278,7 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
                 .appointmentTime(a.getAppointmentTime())
                 .endTime(a.getEndTime())
                 .appointmentType(a.getType())
-                .status(a.getStatus())
+                .status(a.getStatus().name())
                 .location(a.getLocation())
                 .reason(a.getReason())
                 .build();

@@ -41,6 +41,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     long countByClinicIdAndCreatedAtBetweenAndIsDeletedFalse(Long clinicId, java.time.LocalDateTime start, java.time.LocalDateTime end);
     long countByClinicIdAndRiskLevelAndCreatedAtBetweenAndIsDeletedFalse(Long clinicId, String riskLevel, java.time.LocalDateTime start, java.time.LocalDateTime end);
     long countByDoctorIdAndIsDeletedFalse(Long doctorId);
+    long countByRiskLevelAndIsDeletedFalse(String riskLevel);
 
     @Query("SELECT p.chronicCondition, COUNT(p) FROM Patient p WHERE p.clinicId = :clinicId AND p.isDeleted = false GROUP BY p.chronicCondition")
     List<Object[]> countPatientsByChronicCondition(Long clinicId);

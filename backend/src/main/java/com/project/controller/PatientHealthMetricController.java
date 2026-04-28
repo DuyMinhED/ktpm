@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.project.dto.request.CreateHealthMetricRequest;
 import com.project.dto.response.ApiResponse;
@@ -29,8 +30,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/patient/health-metrics")
 @RequiredArgsConstructor
-// @PreAuthorize("hasRole('PATIENT')") // DEMO BYPASS: Disabled for direct
-// testing
+@PreAuthorize("hasRole('PATIENT')")
 @Tag(name = "Patient Health Metrics", description = "Health metrics tracking APIs")
 public class PatientHealthMetricController {
 

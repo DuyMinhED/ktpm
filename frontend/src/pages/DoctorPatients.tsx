@@ -4,16 +4,16 @@ import PrescriptionModal from '../features/prescription/components/PrescriptionM
 import AdviceModal from '../features/patient/components/AdviceModal';
 import RescheduleModal from '../features/patient/components/RescheduleModal';
 import Toast from '../components/ui/Toast';
-import TopBar from '../components/common/TopBar';
 import FilterDropdown from '../components/ui/FilterDropdown';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import AddPatientModal from '../features/patient/components/AddPatientModal';
 import { doctorApi } from '../api/doctor';
+import TopBar from '../components/common/TopBar';
+import DoctorSidebar from '../components/common/DoctorSidebar';
 
 export default function DoctorPatients() {
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdviceModalOpen, setIsAdviceModalOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
@@ -23,6 +23,7 @@ export default function DoctorPatients() {
   const [isPatientDetailModalOpen, setIsPatientDetailModalOpen] = useState(false);
   const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Real data states
   const [patients, setPatients] = useState<any[]>([]);
@@ -206,78 +207,15 @@ export default function DoctorPatients() {
     document.body.removeChild(link);
   };
   return (
-    <div className="flex min-h-screen font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
-      {/* Sidebar Navigation */}
-      <aside className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-900 border-r border-primary/10 flex flex-col z-[150] transition-transform duration-300 w-72 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl lg:shadow-none shadow-primary/10`}>
-        <div className="p-6 flex items-center gap-3 border-b border-primary/5">
-          <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl text-white shadow-lg shadow-primary/20">
-            <span className="material-symbols-outlined fill-1">health_metrics</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-extrabold text-slate-900 dark:text-white leading-none">DamDiep</h1>
-          </div>
-        </div>
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
-          <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor">
-            <span className="material-symbols-outlined">dashboard</span>
-            <span>Bảng điều khiển</span>
-          </a>
+    <div className="flex min-h-screen font-display bg-[#f6f8f7] dark:bg-slate-950 text-slate-900 dark:text-slate-100 italic-none">
+      <DoctorSidebar isSidebarOpen={isSidebarOpen} />
 
-          <a className="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-2xl font-medium shadow-lg shadow-primary/10 transition-all" href="/doctor/patients">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>groups</span>
-            <span>Danh sách bệnh nhân</span>
-          </a>
-
-          <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor/analytics">
-            <span className="material-symbols-outlined">analytics</span>
-            <span>Phân tích nguy cơ</span>
-          </a>
-
-          <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor/prescriptions">
-            <span className="material-symbols-outlined">prescriptions</span>
-            <span>Đơn thuốc điện tử</span>
-          </a>
-
-          <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor/appointments">
-            <span className="material-symbols-outlined">calendar_today</span>
-            <span>Lịch hẹn khám</span>
-          </a>
-
-          <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor/messages">
-            <span className="material-symbols-outlined">chat</span>
-            <span>Tin nhắn</span>
-            <span className="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">5</span>
-          </a>
-        </nav>
-        <div className="p-4 mt-auto">
-          <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-            <div className="flex items-center gap-3 mb-3">
-              <div
-                className="w-10 h-10 rounded-full bg-slate-200"
-                data-alt="Bác sĩ Lê Minh Tâm portrait profile"
-                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDvD1gNLm_sBMkVyq8FuYHA20LjP97yY90_RzaDO9mjZaL9ubIXYPTKQeV1FDlhsH3p7qndF3QILzvglilx1ly9Sb7AtePxkBlVz8-5HPGNI5wMlA1c27CCvjNz865bvs_Y9uYkK2245BaMa66pFJCTPXK2wTV6-A4oQjShYdPHNg1nx01j-yW7I48c8aShwiEDSx2B_FE04UGkIxELFaJ-Ho65BrMgC_LF9Yk0dKK7BGEGWjFX4zFwmnNWi44sq8khTm_Q-D-Iig4')" }}>
-              </div>
-              <div className="overflow-hidden">
-                <p className="text-sm font-bold truncate">BS. Lê Minh Tâm</p>
-                <p className="text-xs text-slate-500">Chuyên khoa Nội</p>
-              </div>
-            </div>
-            <button className="w-full flex items-center justify-center gap-2 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-              <span className="material-symbols-outlined text-sm">logout</span>
-              Đăng xuất
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
       <main className="flex-1 lg:ml-72 min-h-screen flex flex-col transition-all duration-300">
-        {/* Mobile Sidebar Overlay */}
         {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[140] lg:hidden animate-in fade-in duration-300"
-            onClick={() => setIsSidebarOpen(false)}
-          ></div>
+            <div
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[140] lg:hidden animate-in fade-in duration-300"
+                onClick={() => setIsSidebarOpen(false)}
+            ></div>
         )}
         <TopBar
           setIsSidebarOpen={setIsSidebarOpen}
@@ -295,13 +233,13 @@ export default function DoctorPatients() {
             <div className="flex gap-3">
               <button
                 onClick={handleExportExcel}
-                className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50">
+                className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50">
                 <span className="material-symbols-outlined text-[20px]">ios_share</span>
                 Xuất danh sách
               </button>
               <button
                 onClick={() => setIsAddPatientModalOpen(true)}
-                className="bg-primary text-slate-900 px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shadow-lg shadow-primary/10 transition-all">
+                className="bg-primary text-slate-900 px-5 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 shadow-lg shadow-primary/10 transition-all">
                 <span className="material-symbols-outlined">person_add</span>
                 Thêm bệnh nhân mới
               </button>
@@ -309,7 +247,7 @@ export default function DoctorPatients() {
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <FilterDropdown
               label="Loại bệnh"
               icon="filter_list"

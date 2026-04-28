@@ -3,6 +3,7 @@ package com.project.mapper;
 import com.project.dto.response.AdminUserResponse;
 import com.project.entity.Clinic;
 import com.project.entity.User;
+import com.project.entity.UserRole;
 import com.project.repository.ClinicRepository;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ public class UserMapper {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .phone(user.getPhone())
-                .role(user.getRole())
+                .role(user.getRole() != null ? user.getRole().name() : null)
                 .roleName(mapRoleName(user.getRole()))
                 .clinicName(clinicName)
                 .clinicPhone(clinicPhone)
@@ -56,14 +57,14 @@ public class UserMapper {
                 .build();
     }
 
-    public String mapRoleName(String role) {
+    public String mapRoleName(UserRole role) {
         if (role == null) return "Thành viên";
         return switch (role) {
-            case "ADMIN" -> "Quản trị viên";
-            case "DOCTOR" -> "Bác sĩ";
-            case "CLINIC_MANAGER" -> "Quản lý phòng khám";
-            case "PATIENT" -> "Bệnh nhân";
-            default -> role;
+            case ADMIN -> "Quản trị viên";
+            case DOCTOR -> "Bác sĩ";
+            case CLINIC_MANAGER -> "Quản lý phòng khám";
+            case PATIENT -> "Bệnh nhân";
+            default -> role.name();
         };
     }
 }

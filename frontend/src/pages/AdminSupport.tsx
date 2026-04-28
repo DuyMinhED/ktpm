@@ -38,7 +38,7 @@ export default function AdminSupport() {
         page: currentPage - 1,
         size: itemsPerPage
       });
-      
+
       const mappedTickets = response.data.content.map((t: any) => ({
         id: t.ticketCode || `TKT-${t.id}`,
         dbId: t.id,
@@ -53,7 +53,7 @@ export default function AdminSupport() {
         date: new Date(t.createdAt).toLocaleDateString('vi-VN') + ' ' + new Date(t.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
         avatar: t.creator?.avatar || `https://i.pravatar.cc/150?u=${t.id}`
       }));
-      
+
       setTickets(mappedTickets);
       setTotalElements(response.data.totalElements);
     } catch (error) {
@@ -155,10 +155,10 @@ export default function AdminSupport() {
               </div>
             ) : (
               <>
-                <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+                <h2 className="text-lg md:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
                   Trung tâm hỗ trợ
                 </h2>
-                <p className="text-[14px] md:text-[16px] text-slate-500 mt-1 font-medium">Tiếp nhận và quản lý các yêu cầu kỹ thuật từ đội ngũ bác sĩ & phòng khám.</p>
+                <p className="text-[13px] md:text-[16px] text-slate-500 mt-1 font-medium">Tiếp nhận và quản lý các yêu cầu kỹ thuật từ đội ngũ bác sĩ & phòng khám.</p>
               </>
             )}
           </div>
@@ -187,8 +187,8 @@ export default function AdminSupport() {
           ) : (
             stats.map((stat, idx) => (
               <div key={idx} className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-primary/5 shadow-sm">
-                <p className="text-slate-500 text-[13px] md:text-[15px] font-medium mt-1">{stat.label}</p>
-                <h3 className="text-lg md:text-2xl font-black text-slate-900 dark:text-white mt-1">{stat.value}</h3>
+                <p className="text-slate-500 text-[12px] md:text-[15px] font-medium mt-1">{stat.label}</p>
+                <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-1 leading-none">{stat.value}</h3>
               </div>
             ))
           )}
@@ -196,8 +196,8 @@ export default function AdminSupport() {
 
         {/* Filters */}
         <div className="bg-white dark:bg-slate-900 p-4 md:p-8 rounded-2xl shadow-sm border border-primary/5 space-y-4 md:space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="relative">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="relative col-span-2 md:col-span-1">
               <label className="text-[14px] font-medium text-slate-500 mb-2 block px-1">
                 {isLoading ? <div className="h-3 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-32 mb-2"></div> : "Tìm kiếm yêu cầu"}
               </label>
@@ -205,9 +205,9 @@ export default function AdminSupport() {
                 <div className="h-11 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl w-full"></div>
               ) : (
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] md:text-[20px] z-10 pointer-events-none">search</span>
                   <input
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-700 rounded-xl pl-11 pr-4 min-h-[42px] text-[14px] font-medium text-slate-700 dark:text-slate-200 outline-none hover:border-slate-500 dark:hover:border-slate-500 focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-700 rounded-full pl-11 pr-4 h-[38px] md:h-[42px] text-[13px] md:text-[14px] font-medium text-slate-700 dark:text-slate-200 outline-none hover:border-slate-500 dark:hover:border-slate-500 focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
                     placeholder="Tiêu đề, mã yêu cầu hoặc người gửi..."
                     type="text"
                     value={searchTerm}

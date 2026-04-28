@@ -142,8 +142,8 @@ export default function AdminSettings() {
               </div>
             ) : (
               <div>
-                <h2 className="text-xl md:text-2xl font-black tracking-tighter text-slate-900 dark:text-white leading-tight">Cấu hình tham số hệ thống</h2>
-                <p className="text-[14px] md:text-[16px] text-slate-500 mt-2 font-medium italic-none">Kiểm soát vận hành, bảo mật và đồng bộ hóa mạng lưới phòng khám toàn quốc</p>
+                <h2 className="text-lg md:text-2xl font-black tracking-tighter text-slate-900 dark:text-white leading-tight">Cấu hình tham số hệ thống</h2>
+                <p className="text-[13px] md:text-[16px] text-slate-500 mt-2 font-medium italic-none">Kiểm soát vận hành, bảo mật và đồng bộ hóa mạng lưới phòng khám toàn quốc</p>
               </div>
             )}
 
@@ -153,9 +153,9 @@ export default function AdminSettings() {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className={`px-6 py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white rounded-xl font-bold transition-all text-[14px] flex items-center gap-2 whitespace-nowrap shadow-lg shadow-emerald-500/5 hover:shadow-emerald-500/20 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-6 py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white rounded-full font-medium transition-all text-[14px] flex items-center gap-2 whitespace-nowrap shadow-lg shadow-emerald-500/5 hover:shadow-emerald-500/20 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <span className={`material-symbols-outlined font-bold text-[20px] ${isLoading ? 'animate-spin' : ''}`}>
+                <span className={`material-symbols-outlined font-medium text-[20px] ${isLoading ? 'animate-spin' : ''}`}>
                   {isLoading ? 'progress_activity' : 'cloud_sync'}
                 </span>
                 {isLoading ? 'Đang lưu...' : (isLoadingPage ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-32"></div> : 'Lưu thay đổi ngay')}
@@ -177,7 +177,7 @@ export default function AdminSettings() {
                   {isLoadingPage ? (
                     <div className="h-6 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-48"></div>
                   ) : (
-                    <h3 className="text-[16px] md:text-[19px] font-black tracking-tight text-slate-900 dark:text-white leading-tight">Ngưỡng cảnh báo sinh tồn</h3>
+                    <h3 className="text-[15px] md:text-[19px] font-black tracking-tight text-slate-900 dark:text-white leading-tight">Ngưỡng cảnh báo sinh tồn</h3>
                   )}
                 </div>
                 {isLoadingPage ? (
@@ -185,7 +185,7 @@ export default function AdminSettings() {
                 ) : (
                   <button
                     onClick={handleRestoreDefaults}
-                    className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white px-4 py-2 rounded-xl text-[14px] font-bold shadow-lg shadow-primary/5 transition-all italic-none"
+                    className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white px-4 py-2 rounded-full text-[14px] font-medium shadow-lg shadow-primary/5 transition-all italic-none"
                   >
                     Khôi phục mặc định
                   </button>
