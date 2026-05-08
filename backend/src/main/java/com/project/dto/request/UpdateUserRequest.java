@@ -23,4 +23,6 @@ public class UpdateUserRequest {
     private String avatarUrl;
 
     private String status; // ACTIVE, INACTIVE
+
+    private String password;
 }

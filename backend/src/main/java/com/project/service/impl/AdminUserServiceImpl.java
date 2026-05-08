@@ -10,6 +10,7 @@ import com.project.exception.ResourceNotFoundException;
 import com.project.mapper.UserMapper;
 import com.project.repository.PatientRepository;
 import com.project.repository.UserRepository;
+import com.project.repository.SystemConfigRepository;
 import com.project.service.AdminUserService;
 import com.project.service.AuditService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final AuditService auditService;
+    private final SystemConfigRepository systemConfigRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -57,9 +59,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         return userRepository.findById(id).map(userMapper::toAdminUserResponse).orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
-    @Override
     @Transactional
     public AdminUserResponse createUser(CreateUserRequest request) {
+        validatePasswordPolicy(request.getPassword());
         User user = User.builder()
                 .fullName(request.getFullName()).email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -86,6 +88,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (request.getEmail() != null) user.setEmail(request.getEmail());
         if (request.getRole() != null) user.setRole(UserRole.valueOf(request.getRole().toUpperCase()));
         if (request.getStatus() != null) user.setStatus(request.getStatus());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            validatePasswordPolicy(request.getPassword());
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
         user.setClinicId(request.getClinicId());
         
         User saved = userRepository.save(user);
@@ -118,5 +124,26 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
         
         auditService.recordActivity("Xóa", "Quản lý người dùng", "Xóa tài khoản: " + user.getEmail(), "danger");
+    }
+
+    private void validatePasswordPolicy(String password) {
+        if (password == null || password.length() < 6) {
+            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự");
+        }
+
+        com.project.entity.SystemConfig config = systemConfigRepository.findFirstByOrderByIdAsc().orElse(null);
+        if (config == null) return;
+
+        if (config.isSpecialCharRequired()) {
+            if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\",.<>/?].*")) {
+                throw new IllegalArgumentException("Mật khẩu phải chứa ít nhất một ký tự đặc biệt");
+            }
+        }
+
+        if (config.isUpperNumberRequired()) {
+            if (!password.matches(".*[A-Z].*") || !password.matches(".*[0-9].*")) {
+                throw new IllegalArgumentException("Mật khẩu phải chứa ít nhất một chữ hoa và một chữ số");
+            }
+        }
     }
 }

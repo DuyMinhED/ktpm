@@ -19,6 +19,7 @@ interface CreateServiceModalProps {
   isSaving: boolean;
   onSave: (serviceData: any) => Promise<void>;
   initialData?: any;
+  existingCategories?: string[];
 }
 
 const CreateServiceModal: React.FC<CreateServiceModalProps> = ({
@@ -27,7 +28,9 @@ const CreateServiceModal: React.FC<CreateServiceModalProps> = ({
   isSaving,
   onSave,
   initialData,
+  existingCategories = [],
 }) => {
+  const [isNewCategory, setIsNewCategory] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     category: 'Gói điều trị',
@@ -186,13 +189,35 @@ const CreateServiceModal: React.FC<CreateServiceModalProps> = ({
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[14px] font-medium text-slate-500 ml-1">Danh mục</label>
-                        <Dropdown
-                          options={['Gói điều trị', 'Tư vấn online', 'Dịch vụ tại nhà', 'Xét nghiệm']}
-                          value={formData.category}
-                          onChange={(val) => setFormData(p => ({ ...p, category: val }))}
-                          icon={<span className="material-symbols-outlined text-[20px] text-slate-400">inventory_2</span>}
-                        />
+                        <div className="flex justify-between items-center ml-1">
+                          <label className="text-[14px] font-medium text-slate-500">Danh mục</label>
+                          <button 
+                            type="button"
+                            onClick={() => setIsNewCategory(!isNewCategory)}
+                            className="text-[11px] font-bold text-primary hover:underline"
+                          >
+                            {isNewCategory ? 'Chọn mục có sẵn' : 'Thêm mục mới'}
+                          </button>
+                        </div>
+                        {isNewCategory ? (
+                          <div className="relative group">
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-500 z-10 pointer-events-none group-focus-within:text-primary transition-colors">add_circle</span>
+                            <input
+                              name="category"
+                              value={formData.category}
+                              onChange={handleChange}
+                              placeholder="Nhập danh mục mới"
+                              className="w-full pl-11 pr-4 h-[42px] rounded-lg border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-primary transition-all"
+                            />
+                          </div>
+                        ) : (
+                          <Dropdown
+                            options={existingCategories.length > 0 ? existingCategories : ['Gói điều trị', 'Tư vấn online', 'Dịch vụ tại nhà', 'Xét nghiệm']}
+                            value={formData.category}
+                            onChange={(val) => setFormData(p => ({ ...p, category: val }))}
+                            icon={<span className="material-symbols-outlined text-[20px] text-slate-400">inventory_2</span>}
+                          />
+                        )}
                       </div>
 
                       {/* Price */}

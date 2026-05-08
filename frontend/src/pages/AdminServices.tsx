@@ -6,6 +6,7 @@ import CreateServiceModal from '../features/admin/components/CreateServiceModal'
 import DeleteConfirmModal from '../components/ui/DeleteConfirmModal';
 import { medicalServiceApi } from '../api/medicalService';
 import { useToast } from '../components/ui/ToastContext';
+import { useMemo } from 'react';
 
 export default function AdminServices() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,7 +53,10 @@ export default function AdminServices() {
     fetchServices();
   }, [fetchServices]);
 
-  const categories = ['Tất cả danh mục', 'Gói điều trị', 'Tư vấn online', 'Dịch vụ tại nhà', 'Xét nghiệm chuyên sâu'];
+  const categories = useMemo(() => {
+    const uniqueCategories = Array.from(new Set(services.map(s => s.category)));
+    return ['Tất cả danh mục', ...uniqueCategories];
+  }, [services]);
 
   const filteredServices = services.filter(s => {
     const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -373,6 +377,7 @@ export default function AdminServices() {
             isSaving={isSaving}
             onSave={handleSaveService}
             initialData={editingService}
+            existingCategories={categories.filter(c => c !== 'Tất cả danh mục')}
           />
         )}
 

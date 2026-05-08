@@ -128,10 +128,6 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     public AdminReportsResponse getReportsData(String reportType, String performanceFilter) {
         try {
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime startOfPeriod;
-            if ("NGÀY".equalsIgnoreCase(reportType)) startOfPeriod = now.minusDays(30);
-            else if ("QUÝ".equalsIgnoreCase(reportType)) startOfPeriod = now.minusMonths(3);
-            else startOfPeriod = now.withDayOfYear(1).withHour(0).withMinute(0);
 
             // Parallel fetching
             CompletableFuture<List<Clinic>> clinicsFuture = CompletableFuture.supplyAsync(clinicRepository::findAllActive);
