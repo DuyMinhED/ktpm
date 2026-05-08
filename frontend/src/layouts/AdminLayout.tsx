@@ -108,7 +108,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <button
               onClick={() => {
                 localStorage.removeItem('token');
-                window.location.href = '/login';
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('clinicId');
+                window.location.href = '/?action=login';
               }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all shrink-0 active:scale-90"
               title="Đăng xuất"

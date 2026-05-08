@@ -104,8 +104,21 @@ public class ClinicDoctorServiceImpl implements ClinicDoctorService {
     public List<DoctorSnippetDto> getAvailableDoctors(Long clinicId) {
         List<User> doctors = userRepository.findByClinicIdAndRoleAndIsDeletedFalse(clinicId, UserRole.DOCTOR);
         List<Object[]> counts = patientRepository.countPatientsByDoctorIds(clinicId);
-        java.util.Map<Long, Long> countMap = counts.stream()
-                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+        
+        java.util.Map<Long, Long> countMap = new java.util.HashMap<>();
+        if (counts != null) {
+            for (Object[] row : counts) {
+                if (row != null && row.length >= 2 && row[0] != null && row[1] != null) {
+                    try {
+                        Long doctorId = ((Number) row[0]).longValue();
+                        Long count = ((Number) row[1]).longValue();
+                        countMap.put(doctorId, count);
+                    } catch (Exception e) {
+                        // Log and skip invalid row
+                    }
+                }
+            }
+        }
 
         return doctors.stream().map(d -> DoctorSnippetDto.builder()
                 .id(d.getId())

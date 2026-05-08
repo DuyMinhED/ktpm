@@ -3,6 +3,7 @@ package com.project.security;
 import com.project.entity.Patient;
 import com.project.repository.PatientRepository;
 import com.project.util.SecurityUtils;
+import com.project.util.RoleUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,20 +17,20 @@ public class SecurityService {
     public boolean canAccessPatient(Long patientId) {
         CustomUserDetails user = SecurityUtils.getCurrentUserDetails().orElse(null);
         if (user == null) return false;
+        String role = user.getRole();
+        if (role == null) return false;
 
-        if ("ADMIN".equals(user.getRole())) return true;
+        if (RoleUtils.ADMIN.equals(role)) return true;
 
         Patient patient = patientRepository.findById(patientId).orElse(null);
         if (patient == null) return false;
 
-        if ("CLINIC_MANAGER".equals(user.getRole())) {
-            return patient.getClinicId().equals(user.getClinicId());
+        if (RoleUtils.CLINIC_MANAGER.equals(role)) {
+            return user.getClinicId() != null && user.getClinicId().equals(patient.getClinicId());
         }
 
-        if ("DOCTOR".equals(user.getRole())) {
-            // A doctor can access any patient in their clinic (or we could restrict to assigned patients)
-            // Restricted to clinic for now as doctors often collaborate
-            return patient.getClinicId().equals(user.getClinicId());
+        if (RoleUtils.DOCTOR.equals(role)) {
+            return user.getClinicId() != null && user.getClinicId().equals(patient.getClinicId());
         }
 
         if ("PATIENT".equals(user.getRole())) {
@@ -41,17 +42,23 @@ public class SecurityService {
 
     public boolean isClinicManagerOf(Long clinicId) {
         CustomUserDetails user = SecurityUtils.getCurrentUserDetails().orElse(null);
-        if (user == null) return false;
+        if (user == null || user.getRole() == null) return false;
 
-        if ("ADMIN".equals(user.getRole())) return true;
+        if (RoleUtils.ADMIN.equals(user.getRole())) return true;
 
-        return "CLINIC_MANAGER".equals(user.getRole()) && clinicId.equals(user.getClinicId());
+        return RoleUtils.CLINIC_MANAGER.equals(user.getRole()) && 
+               user.getClinicId() != null && 
+               user.getClinicId().equals(clinicId);
     }
-    
+
     public boolean isDoctorOfClinic(Long clinicId) {
         CustomUserDetails user = SecurityUtils.getCurrentUserDetails().orElse(null);
-        if (user == null) return false;
-        if ("ADMIN".equals(user.getRole())) return true;
-        return "DOCTOR".equals(user.getRole()) && clinicId.equals(user.getClinicId());
+        if (user == null || user.getRole() == null) return false;
+        
+        if (RoleUtils.ADMIN.equals(user.getRole())) return true;
+        
+        return RoleUtils.DOCTOR.equals(user.getRole()) && 
+               user.getClinicId() != null && 
+               user.getClinicId().equals(clinicId);
     }
 }

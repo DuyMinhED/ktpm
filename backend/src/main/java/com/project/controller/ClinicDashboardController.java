@@ -27,7 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @RequestMapping("/api/v1/clinics/{clinicId}")
 @RequiredArgsConstructor
 @Tag(name = "Clinic Management", description = "APIs for clinic managers")
-@PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
 public class ClinicDashboardController {
 
     private final ClinicDashboardService clinicDashboardService;
@@ -35,6 +34,7 @@ public class ClinicDashboardController {
     private final ClinicDoctorService clinicDoctorService;
 
     @GetMapping("/dashboard")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     @Operation(summary = "Get clinic dashboard", description = "Returns statistics for the specified clinic")
     public ApiResponse<ClinicDashboardResponse> getDashboard(
             @PathVariable Long clinicId,
@@ -44,6 +44,7 @@ public class ClinicDashboardController {
     }
 
     @GetMapping("/patients")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     @Operation(summary = "Get patients", description = "Returns active patient records for the specified clinic")
     public ApiResponse<Page<ClinicPatientResponse>> getPatients(
             @PathVariable Long clinicId,
@@ -61,6 +62,7 @@ public class ClinicDashboardController {
     }
 
     @PostMapping("/patients")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     @Operation(summary = "Add patient", description = "Registers a new patient for the specified clinic")
     public ApiResponse<Void> createPatient(@PathVariable Long clinicId,
             @Valid @RequestBody CreatePatientRequest request) {
@@ -70,6 +72,7 @@ public class ClinicDashboardController {
     }
 
     @PutMapping("/patients/{patientId}")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     @Operation(summary = "Update patient", description = "Updates patient record")
     public ApiResponse<Void> updatePatient(@PathVariable Long clinicId, @PathVariable Long patientId,
             @Valid @RequestBody CreatePatientRequest request) {
@@ -79,6 +82,7 @@ public class ClinicDashboardController {
     }
 
     @DeleteMapping("/patients/{patientId}")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     @Operation(summary = "Delete patient", description = "Deletes patient record")
     public ApiResponse<Void> deletePatient(@PathVariable Long clinicId, @PathVariable Long patientId) {
 
@@ -87,6 +91,7 @@ public class ClinicDashboardController {
     }
 
     @GetMapping("/doctors")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     @Operation(summary = "Get doctors", description = "Returns active doctor records for the specified clinic")
     public ApiResponse<Page<ClinicDoctorResponse>> getDoctors(
             @PathVariable Long clinicId,
@@ -104,6 +109,7 @@ public class ClinicDashboardController {
     }
 
     @PostMapping("/doctors")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     @Operation(summary = "Add doctor", description = "Registers a new doctor for the specified clinic")
     public ApiResponse<Void> createDoctor(@PathVariable Long clinicId,
             @Valid @RequestBody CreateDoctorRequest request) {
@@ -113,6 +119,7 @@ public class ClinicDashboardController {
     }
 
     @PutMapping("/doctors/{doctorId}")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     @Operation(summary = "Update doctor", description = "Updates doctor record")
     public ApiResponse<Void> updateDoctor(@PathVariable Long clinicId, @PathVariable Long doctorId,
             @Valid @RequestBody CreateDoctorRequest request) {
@@ -122,6 +129,7 @@ public class ClinicDashboardController {
     }
 
     @DeleteMapping("/doctors/{doctorId}")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     @Operation(summary = "Delete doctor", description = "Deletes doctor record (Soft delete)")
     public ApiResponse<Void> deleteDoctor(@PathVariable Long clinicId, @PathVariable Long doctorId) {
 
@@ -130,6 +138,7 @@ public class ClinicDashboardController {
     }
 
     @GetMapping("/doctors/available")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     public ApiResponse<List<DoctorSnippetDto>> getAvailableDoctors(@PathVariable Long clinicId) {
 
         return ApiResponse.success("Doctors fetched successfully",
@@ -137,12 +146,14 @@ public class ClinicDashboardController {
     }
 
     @GetMapping("/conditions")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     public ApiResponse<List<String>> getConditions(@PathVariable Long clinicId) {
 
         return ApiResponse.success("Conditions fetched successfully", clinicDashboardService.getChronicConditions());
     }
 
     @GetMapping("/appointments")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     public ApiResponse<Page<com.project.dto.response.ClinicAppointmentResponse>> getAppointments(
             @PathVariable Long clinicId,
             @RequestParam(defaultValue = "0") int page,
@@ -154,6 +165,7 @@ public class ClinicDashboardController {
     }
 
     @PostMapping("/patients/{patientId}/notify")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     public ApiResponse<Void> notifyPatient(
             @PathVariable Long clinicId,
             @PathVariable Long patientId,
@@ -164,12 +176,14 @@ public class ClinicDashboardController {
     }
 
     @GetMapping("/profile")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     public ApiResponse<com.project.dto.response.ClinicResponse> getProfile(@PathVariable Long clinicId) {
 
         return ApiResponse.success("Clinic profile fetched", clinicDashboardService.getClinicDetails(clinicId));
     }
 
     @PutMapping("/profile")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     public ApiResponse<Void> updateProfile(@PathVariable Long clinicId,
             @Valid @RequestBody com.project.dto.request.UpdateClinicRequest request) {
 
@@ -178,6 +192,7 @@ public class ClinicDashboardController {
     }
 
     @PatchMapping("/appointments/{appointmentId}/status")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "') and @securityService.isClinicManagerOf(#clinicId)")
     public ApiResponse<Void> updateAppointmentStatus(
             @PathVariable Long clinicId,
             @PathVariable Long appointmentId,
