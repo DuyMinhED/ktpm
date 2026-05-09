@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ExcelJS from 'exceljs';
 import TopBar from '../components/common/TopBar';
+import DoctorSidebar from '../components/common/DoctorSidebar';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import AdviceModal from '../features/patient/components/AdviceModal';
 import Toast from '../components/ui/Toast';
@@ -11,20 +12,27 @@ export default function DoctorAnalytics() {
     const [stats, setStats] = useState<any>(null);
     const [insights, setInsights] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [currentPage]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
             const [pRes, sRes, dRes] = await Promise.all([
-                doctorApi.getMyPatients({ riskLevel: 'HIGH_RISK', size: 10 }),
+                doctorApi.getMyPatients({ riskLevel: 'HIGH_RISK', size: 10, page: currentPage }),
                 doctorApi.getPatientStats(),
                 doctorApi.getDashboard()
             ]);
-            if (pRes.success) setPatients(pRes.data.content || []);
+            if (pRes.success) {
+                setPatients(pRes.data.content || []);
+                setTotalPages(pRes.data.totalPages || 0);
+                setTotalElements(pRes.data.totalElements || 0);
+            }
             if (sRes.success) setStats(sRes.data);
             if (dRes.success) setInsights(dRes.data.insights || []);
         } catch (error) {
@@ -151,62 +159,7 @@ export default function DoctorAnalytics() {
     return (
         <div className="flex min-h-screen font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
             {/* Sidebar Navigation */}
-            <aside className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-900 border-r border-primary/10 flex flex-col z-[150] transition-transform duration-300 w-72 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl lg:shadow-none shadow-primary/10`}>
-                <div className="p-6 flex items-center gap-3 border-b border-primary/5">
-                    <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl text-white shadow-lg shadow-primary/20">
-                        <span className="material-symbols-outlined fill-1">health_metrics</span>
-                    </div>
-                    <div>
-                        <h1 className="text-xl font-extrabold text-slate-900 dark:text-white leading-none">DamDiep</h1>
-                    </div>
-                </div>
-                <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
-                    <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor">
-                        <span className="material-symbols-outlined">dashboard</span>
-                        <span>Bảng điều khiển</span>
-                    </a>
-                    <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor/patients">
-                        <span className="material-symbols-outlined">groups</span>
-                        <span>Danh sách bệnh nhân</span>
-                    </a>
-                    <a className="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-2xl font-medium shadow-lg shadow-primary/10 transition-all" href="/doctor/analytics">
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
-                        <span>Phân tích nguy cơ</span>
-                    </a>
-                    <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor/prescriptions">
-                        <span className="material-symbols-outlined">prescriptions</span>
-                        <span>Đơn thuốc điện tử</span>
-                    </a>
-                    <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor/appointments">
-                        <span className="material-symbols-outlined">calendar_today</span>
-                        <span>Lịch hẹn khám</span>
-                    </a>
-                    <a className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded-2xl font-medium transition-all" href="/doctor/messages">
-                        <span className="material-symbols-outlined">chat</span>
-                        <span>Tin nhắn</span>
-                        <span className="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">5</span>
-                    </a>
-                </nav>
-                <div className="p-4 mt-auto">
-                    <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div
-                                className="w-10 h-10 rounded-full bg-slate-200"
-                                data-alt="Bác sĩ Lê Minh Tâm portrait profile"
-                                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDvD1gNLm_sBMkVyq8FuYHA20LjP97yY90_RzaDO9mjZaL9ubIXYPTKQeV1FDlhsH3p7qndF3QILzvglilx1ly9Sb7AtePxkBlVz8-5HPGNI5wMlA1c27CCvjNz865bvs_Y9uYkK2245BaMa66pFJCTPXK2wTV6-A4oQjShYdPHNg1nx01j-yW7I48c8aShwiEDSx2B_FE04UGkIxELFaJ-Ho65BrMgC_LF9Yk0dKK7BGEGWjFX4zFwmnNWi44sq8khTm_Q-D-Iig4')" }}>
-                            </div>
-                            <div className="overflow-hidden">
-                                <p className="text-sm font-bold truncate">BS. Lê Minh Tâm</p>
-                                <p className="text-xs text-slate-500">Chuyên khoa Nội</p>
-                            </div>
-                        </div>
-                        <button className="w-full flex items-center justify-center gap-2 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                            <span className="material-symbols-outlined text-sm">logout</span>
-                            Đăng xuất
-                        </button>
-                    </div>
-                </div>
-            </aside>
+            <DoctorSidebar isSidebarOpen={isSidebarOpen} />
 
             {/* Main Content Area */}
             <main className="flex-1 lg:ml-72 min-h-screen flex flex-col transition-all duration-300">
@@ -462,18 +415,27 @@ export default function DoctorAnalytics() {
                         {/* Pagination Footer - Redesigned */}
                         <div className="px-8 py-6 bg-slate-50/50 dark:bg-slate-800/20 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
                             <p className="text-[14px] font-medium text-slate-500">
-                                Hiển thị <span className="font-bold text-slate-900 dark:text-white">1</span> đến <span className="font-bold text-slate-900 dark:text-white">3</span> trong số <span className="font-bold text-slate-900 dark:text-white">42</span> ca
+                                Hiển thị <span className="font-bold text-slate-900 dark:text-white">{patients.length}</span> trên tổng số <span className="font-bold text-slate-900 dark:text-white">{totalElements}</span> ca nguy cơ cao
                             </p>
                             <div className="flex items-center gap-3">
-                                <button className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30" disabled>
+                                <button
+                                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                                    disabled={currentPage === 0}
+                                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
                                     <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                                 </button>
                                 <div className="flex items-center gap-1.5">
-                                    <button className="w-10 h-10 rounded-xl bg-primary text-white text-sm font-black shadow-lg shadow-primary/20">1</button>
-                                    <button className="w-10 h-10 rounded-xl hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 text-sm font-bold text-slate-500 transition-all">2</button>
-                                    <button className="w-10 h-10 rounded-xl hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 text-sm font-bold text-slate-500 transition-all">3</button>
+                                    <button className="w-10 h-10 rounded-xl bg-primary text-white text-sm font-black shadow-lg shadow-primary/20">
+                                        {currentPage + 1}
+                                    </button>
+                                    <span className="text-sm font-medium text-slate-400 mx-1">/ {totalPages || 1}</span>
                                 </div>
-                                <button className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all">
+                                <button
+                                    onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                                    disabled={currentPage >= totalPages - 1}
+                                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
                                     <span className="material-symbols-outlined text-[20px]">chevron_right</span>
                                 </button>
                             </div>

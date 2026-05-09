@@ -65,8 +65,8 @@ public class ClinicDashboardController {
     }
 
     @PostMapping("/patients")
-    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN
-            + "') and @securityService.isClinicManagerOf(#clinicId)")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "', '" + RoleUtils.DOCTOR
+            + "') and (@securityService.isClinicManagerOf(#clinicId) or @securityService.isDoctorOfClinic(#clinicId))")
     @Operation(summary = "Add patient", description = "Registers a new patient for the specified clinic")
     public ApiResponse<Void> createPatient(@PathVariable Long clinicId,
             @Valid @RequestBody CreatePatientRequest request) {

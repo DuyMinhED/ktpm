@@ -6,8 +6,9 @@ import RescheduleModal from '../features/patient/components/RescheduleModal';
 import Toast from '../components/ui/Toast';
 import FilterDropdown from '../components/ui/FilterDropdown';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
-import AddPatientModal from '../features/patient/components/AddPatientModal';
+import CreatePatientModal from '../features/clinic/components/CreatePatientModal';
 import { doctorApi } from '../api/doctor';
+import { clinicApi } from '../api/clinic';
 import TopBar from '../components/common/TopBar';
 import DoctorSidebar from '../components/common/DoctorSidebar';
 
@@ -529,20 +530,23 @@ export default function DoctorPatients() {
           patient={selectedPatient}
         />
 
-        <AddPatientModal
+        <CreatePatientModal
           isOpen={isAddPatientModalOpen}
           onClose={() => setIsAddPatientModalOpen(false)}
           isSaving={isSaving}
-          onAdd={async (data) => {
+          availableDoctors={[{ id: localStorage.getItem('userId'), name: localStorage.getItem('userName') || 'Bác sĩ' }]}
+          availableConditions={['Tiểu đường', 'Cao huyết áp', 'Tim mạch', 'Hô hấp', 'Khác']}
+          onSave={async (data) => {
             setIsSaving(true);
             try {
-              // In a real app, this calls the backend to register the patient
-              console.log('Adding patient:', data);
-              await new Promise(r => setTimeout(r, 500));
-              setIsAddPatientModalOpen(false);
-              setToast({ show: true, title: `Đã cấp tài khoản cho bệnh nhân ${data.fullName} thành công!`, type: 'success' });
-              fetchPatients();
-              fetchStats();
+              const currentClinicId = localStorage.getItem('clinicId') || '1';
+              const res = await clinicApi.createPatient(currentClinicId, data);
+              if (res.success) {
+                setIsAddPatientModalOpen(false);
+                setToast({ show: true, title: `Đã cấp tài khoản cho bệnh nhân ${data.name} thành công!`, type: 'success' });
+                fetchPatients();
+                fetchStats();
+              }
             } catch (e) {
               setToast({ show: true, title: 'Có lỗi khi thêm bệnh nhân', type: 'error' });
             } finally {

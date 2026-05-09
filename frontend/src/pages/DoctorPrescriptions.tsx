@@ -12,20 +12,43 @@ export default function DoctorPrescriptions() {
     const [loading, setLoading] = useState(true);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
+    
+    // Pagination & Filter States
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState('Tất cả trạng thái');
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [currentPage, selectedStatus, searchQuery]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
+            const statusMap: Record<string, string> = {
+                'Tất cả trạng thái': '',
+                'Đang hiệu lực': 'ACTIVE',
+                'Hết hạn': 'EXPIRED',
+                'Đã hủy': 'CANCELLED'
+            };
             const [pRes, sRes, patRes] = await Promise.all([
-                doctorApi.getPrescriptions(),
+                doctorApi.getPrescriptions({ 
+                    page: currentPage, 
+                    size: 10,
+                    search: searchQuery || undefined,
+                    status: statusMap[selectedStatus] || undefined
+                }),
                 doctorApi.getPrescriptionStats(),
                 doctorApi.getMyPatients({ size: 100 })
             ]);
-            if (pRes.success) setPrescriptions(pRes.data.content || []);
+            if (pRes.success) {
+                setPrescriptions(pRes.data.content || []);
+                setTotalPages(pRes.data.totalPages || 0);
+                setTotalElements(pRes.data.totalElements || 0);
+            }
             if (sRes.success) setStats(sRes.data);
             if (patRes.success) setMyPatients(patRes.data.content || []);
         } catch (error) {
@@ -34,8 +57,7 @@ export default function DoctorPrescriptions() {
             setLoading(false);
         }
     };
-    const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-    const [selectedStatus, setSelectedStatus] = useState('Tất cả trạng thái');
+
     const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
     const [isAddingNewMedicine, setIsAddingNewMedicine] = useState(false);
     const [medications, setMedications] = useState<any[]>([]);
@@ -202,8 +224,13 @@ export default function DoctorPrescriptions() {
                                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
                                 <input
                                     className="w-full pl-12 pr-4 py-3 bg-white border-2 border-transparent focus:border-primary/20 rounded-2xl focus:shadow-lg focus:shadow-primary/5 outline-none text-[15px] font-medium transition-all"
-                                    placeholder="Tìm bệnh nhân hoặc mã đơn..."
+                                    placeholder="Tìm theo tên bệnh nhân hoặc mã đơn..."
                                     type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => {
+                                        setSearchQuery(e.target.value);
+                                        setCurrentPage(0);
+                                    }}
                                 />
                             </div>
                             <div className="flex gap-2.5 w-full md:w-auto">
@@ -291,14 +318,28 @@ export default function DoctorPrescriptions() {
                                 </table>
                             </div>
                             <div className="p-6 flex items-center justify-between border-t border-slate-50 bg-slate-50/30">
-                                <p className="text-[13px] font-medium text-slate-400">Hiển thị 10/1,284 kết quả</p>
+                                <p className="text-[13px] font-medium text-slate-400">
+                                    Hiển thị {prescriptions.length}/{totalElements} kết quả
+                                </p>
                                 <div className="flex gap-2.5">
-                                    <button className="p-2.5 rounded-xl bg-white border border-slate-100 shadow-sm disabled:opacity-50 hover:bg-slate-50 transition-colors">
+                                    <button 
+                                        onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                                        disabled={currentPage === 0}
+                                        className="p-2.5 rounded-xl bg-white border border-slate-100 shadow-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
+                                    >
                                         <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                                     </button>
-                                    <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-slate-900 text-[14px] font-bold shadow-md shadow-primary/20">1</button>
-                                    <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-100 text-[14px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">2</button>
-                                    <button className="p-2.5 rounded-xl bg-white border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors">
+                                    <div className="flex items-center gap-1.5">
+                                        <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-white text-[14px] font-bold shadow-md shadow-primary/20">
+                                            {currentPage + 1}
+                                        </button>
+                                        <span className="text-sm font-medium text-slate-400 mx-1">/ {totalPages || 1}</span>
+                                    </div>
+                                    <button 
+                                        onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                                        disabled={currentPage >= totalPages - 1}
+                                        className="p-2.5 rounded-xl bg-white border border-slate-100 shadow-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
+                                    >
                                         <span className="material-symbols-outlined text-[18px]">chevron_right</span>
                                     </button>
                                 </div>

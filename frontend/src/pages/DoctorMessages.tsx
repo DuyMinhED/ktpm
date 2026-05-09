@@ -13,6 +13,7 @@ export default function DoctorMessages() {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [conversations, setConversations] = useState<any[]>([]);
     const [activeConv, setActiveConv] = useState<any | null>(null);
+    const [activePatient, setActivePatient] = useState<any | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
     const [msgInput, setMsgInput] = useState('');
     const [sending, setSending] = useState(false);
@@ -48,8 +49,18 @@ export default function DoctorMessages() {
         if (activeConv) {
             loadMessages(activeConv.id);
             doctorApi.markMessagesAsRead(activeConv.id).catch(console.error);
+            loadPatientDetail(activeConv.patientId);
         }
     }, [activeConv]);
+
+    const loadPatientDetail = async (patientId: number) => {
+        try {
+            const res = await doctorApi.getPatientDetail(patientId);
+            if (res.success) setActivePatient(res.data);
+        } catch (error) {
+            console.error('Error loading patient details:', error);
+        }
+    };
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -339,16 +350,16 @@ export default function DoctorMessages() {
 
                     {/* Right Column: Patient Summary */}
                     <section className="w-72 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col p-5 overflow-y-auto custom-scrollbar">
-                        {activeConv ? (
+                        {activePatient ? (
                         <>
                         <div className="text-center mb-6">
                             <div className="size-20 mx-auto rounded-full border-4 border-primary/20 p-1 mb-3">
-                                <img className="w-full h-full rounded-full object-cover bg-slate-200" src={activeConv.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(activeConv.patientName)} alt="Profile" />
+                                <img className="w-full h-full rounded-full object-cover bg-slate-200" src={activeConv?.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(activePatient.fullName)} alt="Profile" />
                             </div>
-                            <h3 className="font-bold text-xl mb-2">{activeConv.patientName}</h3>
+                            <h3 className="font-bold text-xl mb-2">{activePatient.fullName}</h3>
                             <div className="flex flex-col text-[15px] font-medium text-slate-500">
-                                <span>Giới tính: Trống</span>
-                                <span>Tuổi: Trống</span>
+                                <span>Giới tính: {activePatient.gender === 'MALE' ? 'Nam' : activePatient.gender === 'FEMALE' ? 'Nữ' : 'Khác'}</span>
+                                <span>Tuổi: {activePatient.dateOfBirth ? (new Date().getFullYear() - new Date(activePatient.dateOfBirth).getFullYear()) : 'Trống'}</span>
                             </div>
                         </div>
 
@@ -356,7 +367,7 @@ export default function DoctorMessages() {
                             <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
                                 <div className="flex items-center justify-between mb-4 px-1">
                                     <h4 className="text-[15px] font-medium text-slate-700 leading-none">Chỉ số sinh tồn</h4>
-                                    <span className="text-[13px] text-primary font-black tracking-tighter">1 giờ trước</span>
+                                    <span className="text-[13px] text-primary font-black tracking-tighter">Mới nhất</span>
                                 </div>
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between px-1">
@@ -364,21 +375,21 @@ export default function DoctorMessages() {
                                             <span className="material-symbols-outlined text-red-500 text-sm">blood_pressure</span>
                                             <span className="text-[15px] font-medium text-slate-600 dark:text-slate-400">Huyết áp</span>
                                         </div>
-                                        <span className="text-[15px] font-bold text-red-500">160/95</span>
+                                        <span className="text-[15px] font-bold text-red-500">{activePatient.latestBp || 'N/A'}</span>
                                     </div>
                                     <div className="flex items-center justify-between px-1">
                                         <div className="flex items-center gap-2">
                                             <span className="material-symbols-outlined text-blue-500 text-sm">favorite</span>
                                             <span className="text-[15px] font-medium text-slate-600 dark:text-slate-400">Nhịp tim</span>
                                         </div>
-                                        <span className="text-[15px] font-bold text-slate-900 dark:text-white">82 bpm</span>
+                                        <span className="text-[15px] font-bold text-slate-900 dark:text-white">{activePatient.latestHeartRate || 'N/A'} bpm</span>
                                     </div>
                                     <div className="flex items-center justify-between px-1">
                                         <div className="flex items-center gap-2">
                                             <span className="material-symbols-outlined text-orange-500 text-sm">water_drop</span>
                                             <span className="text-[15px] font-medium text-slate-600 dark:text-slate-400">Đường huyết</span>
                                         </div>
-                                        <span className="text-[15px] font-bold text-slate-900 dark:text-white">6.8 mmol/L</span>
+                                        <span className="text-[15px] font-bold text-slate-900 dark:text-white">{activePatient.latestGlucose ? `${activePatient.latestGlucose} mmol/L` : 'N/A'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -422,32 +433,13 @@ export default function DoctorMessages() {
                 patientName={activeConv?.patientName || "Bệnh nhân"}
             />
 
-            <PatientDetailModal
-                isOpen={isDetailModalOpen}
-                onClose={() => setIsDetailModalOpen(false)}
-                patient={{
-                    id: 1,
-                    name: "Nguyễn Văn A",
-                    gender: "Nam",
-                    age: 85,
-                    email: "nguyenvan.a@example.com",
-                    phone: "0901 222 333",
-                    address: "123 Đường Lê Lợi, Quận 1, TP.HCM",
-                    joinDate: "15/01/2024",
-                    risk: "Cao",
-                    lastVisit: "2 giờ trước",
-                    bloodType: "A+",
-                    height: "172 cm",
-                    weight: "68 kg",
-                    diagnose: "Tăng huyết áp vô căn, Đái tháo đường Tuýp 2",
-                    vitals: {
-                        bp: "160/95",
-                        hr: "82",
-                        temp: "36.8",
-                        glu: "6.8"
-                    }
-                }}
-            />
+            {activePatient && (
+                <PatientDetailModal
+                    isOpen={isDetailModalOpen}
+                    onClose={() => setIsDetailModalOpen(false)}
+                    patient={activePatient}
+                />
+            )}
 
             <MedicalHistoryModal
                 isOpen={isHistoryModalOpen}

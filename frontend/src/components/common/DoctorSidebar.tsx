@@ -1,27 +1,24 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 
 interface DoctorSidebarProps {
     isSidebarOpen: boolean;
-    userName?: string;
-    userRole?: string;
-    userAvatar?: string;
     isLoading?: boolean;
 }
 
 const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
     isSidebarOpen,
-    userName,
-    userRole,
-    userAvatar,
     isLoading = false
 }) => {
-    // Dynamic fallback to localStorage or generic text
-    const finalUserName = userName || localStorage.getItem('userName') || "Bác sĩ (Chưa có tên)";
-    const finalUserRole = userRole || localStorage.getItem('userRole') || "Chuyên khoa Nội";
-    const finalUserAvatar = userAvatar || localStorage.getItem('userAvatar') || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0D8ABC&color=fff";
-
+    const navigate = useNavigate();
+    const finalUserName = localStorage.getItem('userName') || "Bác sĩ chuyên khoa";
+    const finalUserAvatar = localStorage.getItem('userAvatar') || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0D8ABC&color=fff";
+    
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/?action=login');
+    };
     const navItems = [
         { path: ROUTES.DOCTOR.DASHBOARD, label: 'Bảng điều khiển', icon: 'dashboard' },
         { path: ROUTES.DOCTOR.PATIENTS, label: 'Danh sách bệnh nhân', icon: 'groups' },
@@ -73,30 +70,38 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
             </nav>
 
             <div className="p-4 mt-auto">
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-4 border border-slate-100 dark:border-slate-800 flex items-center gap-3 group cursor-pointer hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm hover:shadow-md">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-blue-400 p-0.5 shadow-lg shadow-primary/20 overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
-                        <img
-                            src={finalUserAvatar}
-                            alt={finalUserName}
-                            onError={(e) => {
-                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=random`;
-                            }}
-                            className="w-full h-full object-cover rounded-[14px] border-2 border-white dark:border-slate-900"
-                        />
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-4 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-blue-400 p-0.5 shadow-lg shadow-primary/20 shrink-0">
+                            <img
+                                src={finalUserAvatar}
+                                alt={finalUserName}
+                                onError={(e) => {
+                                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=random`;
+                                }}
+                                className="w-full h-full object-cover rounded-[14px] border-2 border-white dark:border-slate-900 bg-white"
+                            />
+                        </div>
+                        <div className="min-w-0">
+                            {isLoading ? (
+                                <div className="space-y-2 animate-pulse pr-2">
+                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-24"></div>
+                                </div>
+                            ) : (
+                                <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight tracking-tight pr-2" title={finalUserName}>
+                                    {finalUserName}
+                                </p>
+                            )}
+                        </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                        {isLoading ? (
-                            <div className="space-y-2 animate-pulse pr-2">
-                                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-24"></div>
-                                <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-16"></div>
-                            </div>
-                        ) : (
-                            <>
-                                <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate leading-tight tracking-tight ">{finalUserName}</p>
-                                <p className="text-[12px] font-medium text-slate-600 dark:text-slate-500 mt-0.5 truncate">{finalUserRole}</p>
-                            </>
-                        )}
-                    </div>
+                    
+                    <button 
+                        onClick={handleLogout}
+                        title="Đăng xuất"
+                        className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-500 hover:text-white transition-all shadow-sm group"
+                    >
+                        <span className="material-symbols-outlined text-[20px] font-bold group-hover:scale-110 transition-transform">logout</span>
+                    </button>
                 </div>
             </div>
 
