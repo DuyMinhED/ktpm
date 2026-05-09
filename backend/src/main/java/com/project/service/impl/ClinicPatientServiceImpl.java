@@ -8,6 +8,7 @@ import com.project.mapper.PatientMapper;
 import com.project.repository.NotificationRepository;
 import com.project.repository.PatientRepository;
 import com.project.repository.UserRepository;
+import com.project.repository.AppointmentRepository;
 import com.project.security.Audit;
 import com.project.service.ClinicPatientService;
 import com.project.entity.UserRole;
@@ -40,6 +41,7 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
     private final PasswordEncoder passwordEncoder;
     private final PatientMapper patientMapper;
     private final NotificationRepository notificationRepository;
+    private final AppointmentRepository appointmentRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -141,6 +143,30 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
                 userRepository.findById(drId).ifPresent(dr -> {
                     if (dr.getClinicId().equals(clinicId)) patient.setDoctorId(dr.getId());
                 });
+            }
+        }
+
+        if (request.getAssignmentDate() != null && request.getAssignmentTime() != null && patient.getDoctorId() != null) {
+            try {
+                java.time.LocalDate date = request.getAssignmentDate();
+                String[] timeParts = request.getAssignmentTime().split(":");
+                java.time.LocalTime time = java.time.LocalTime.of(Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1]));
+                java.time.LocalDateTime apptTime = java.time.LocalDateTime.of(date, time);
+                
+                com.project.entity.Appointment appointment = com.project.entity.Appointment.builder()
+                    .patient(patient)
+                    .doctorId(patient.getDoctorId())
+                    .appointmentTime(apptTime)
+                    .endTime(apptTime.plusMinutes(30))
+                    .status(com.project.entity.AppointmentStatus.SCHEDULED)
+                    .type(request.getAppointmentType() != null ? request.getAppointmentType() : "IN_PERSON")
+                    .meetingLink(request.getMeetingLink())
+                    .reason(request.getNotes())
+                    .location(patient.getAddress())
+                    .build();
+                appointmentRepository.save(appointment);
+            } catch (Exception e) {
+                log.error("Failed to create appointment for patient {}", patient.getId(), e);
             }
         }
 

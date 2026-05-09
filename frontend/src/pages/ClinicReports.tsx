@@ -76,6 +76,8 @@ export default function ClinicReports() {
         improvementRate: stats?.improvementRate || 0,
         avgConsultationTime: stats?.avgConsultationTime || 0,
         growthStats: stats?.growthStats || null,
+        highRiskGrowth: stats?.highRiskGrowth || '+0%',
+        riskIndexChart: stats?.riskIndexChart || [],
         diseaseAnalytics: stats?.diseaseAnalytics || [],
         diseaseRatios: stats?.diseaseRatios?.map((dr: any) => ({
             ...dr,
@@ -88,16 +90,16 @@ export default function ClinicReports() {
                     value: d.value,
                     inpatientValue: d.secondaryValue || Math.floor(d.value * 0.4)
                 }))
-                : [])
+                : [{ month: 'T1', value: 0 }, { month: 'T2', value: 0 }, { month: 'T3', value: 0 }, { month: 'T4', value: 0 }, { month: 'T5', value: 0 }, { month: 'T6', value: 0 }])
             : selectedChartMetric === 'Tải lượng bác sĩ'
-                ? (stats?.doctorLoadChart?.map((d: any) => ({
+                ? (stats?.doctorLoadChart && stats.doctorLoadChart.length > 0 ? stats.doctorLoadChart.map((d: any) => ({
                     month: d.month,
                     value: d.value
-                })) || [])
-                : (stats?.riskIndexChart?.map((d: any) => ({
+                })) : [{ month: 'T1', value: 0 }, { month: 'T2', value: 0 }, { month: 'T3', value: 0 }, { month: 'T4', value: 0 }, { month: 'T5', value: 0 }, { month: 'T6', value: 0 }])
+                : (stats?.riskIndexChart && stats.riskIndexChart.length > 0 ? stats.riskIndexChart.map((d: any) => ({
                     month: d.month,
                     value: d.value
-                })) || [])
+                })) : [{ month: 'T1', value: 0 }, { month: 'T2', value: 0 }, { month: 'T3', value: 0 }, { month: 'T4', value: 0 }, { month: 'T5', value: 0 }, { month: 'T6', value: 0 }])
     };
 
     const CustomXAxisTick = ({ x, y, payload, index, length }: any) => {
@@ -481,11 +483,7 @@ export default function ClinicReports() {
                                 <div className="flex-1 min-h-[120px] w-full mt-2 -mx-2">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart
-                                            data={[
-                                                { v: 40 }, { v: 70 }, { v: 30 }, { v: 85 },
-                                                { v: 25 }, { v: 95 }, { v: 40 }, { v: 80 },
-                                                { v: 35 }, { v: 75 }, { v: 45 }, { v: 65 }
-                                            ]}
+                                            data={mainStats?.riskIndexChart && mainStats.riskIndexChart.length > 0 ? mainStats.riskIndexChart.map((d: any) => ({ v: d.value || 0 })) : [{ v: 0 }, { v: 0 }]}
                                             margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
                                         >
                                             <defs>
@@ -511,14 +509,18 @@ export default function ClinicReports() {
 
                                 <div className="flex items-center justify-around mt-4 pt-4 border-t border-slate-50 dark:border-slate-800/50">
                                     <div className="text-center">
-                                        <p className="text-[15px] font-medium text-slate-600">Công suất</p>
-                                        <p className="text-[18px] font-black text-slate-800 dark:text-white">88%</p>
+                                        <p className="text-[15px] font-medium text-slate-600">Tuân thủ</p>
+                                        <p className="text-[18px] font-black text-slate-800 dark:text-white">
+                                            {mainStats?.adherenceRate ? (mainStats.adherenceRate * 100).toFixed(0) : 0}%
+                                        </p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-[15px] font-medium text-slate-600">Xu hướng</p>
-                                        <p className="text-[18px] font-black text-primary flex items-center justify-center gap-1">
-                                            <span className="material-symbols-outlined text-[20px] font-black">trending_up</span>
-                                            Tốt
+                                        <p className="text-[15px] font-medium text-slate-600">Xu hướng Rủi ro</p>
+                                        <p className={`text-[18px] font-black flex items-center justify-center gap-1 ${mainStats?.highRiskGrowth?.startsWith('-') ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                            <span className="material-symbols-outlined text-[20px] font-black">
+                                                {mainStats?.highRiskGrowth?.startsWith('-') ? 'trending_down' : 'trending_up'}
+                                            </span>
+                                            {mainStats?.highRiskGrowth?.startsWith('-') ? 'Giảm' : 'Tăng'}
                                         </p>
                                     </div>
                                 </div>
@@ -723,7 +725,12 @@ export default function ClinicReports() {
                                         </td>
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-2">
-                                                <span className={`text-[12px] font-bold px-3 py-1 rounded-full text-white shadow-sm ${item.statusColor.replace('emerald', 'green').replace('100', '500').replace('400', '500')}`}>
+                                                <span className={`text-[12px] font-bold px-3 py-1 rounded-full text-white shadow-sm ${
+                                                    item.assessment === 'Ổn định' ? 'bg-emerald-500' :
+                                                    item.assessment === 'Cần lưu ý' ? 'bg-amber-500' :
+                                                    item.assessment === 'Rủi ro cao' ? 'bg-rose-500' :
+                                                    'bg-slate-500'
+                                                }`}>
                                                     {item.assessment}
                                                 </span>
                                             </div>

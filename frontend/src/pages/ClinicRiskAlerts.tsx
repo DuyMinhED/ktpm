@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import ClinicSidebar from '../components/common/ClinicSidebar';
 import TopBar from '../components/common/TopBar';
 import { clinicApi } from '../api/clinic';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../constants/routes';
 
 export default function ClinicRiskAlerts() {
+    const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [alertTimeFilter, setAlertTimeFilter] = useState('Hôm nay');
     const [notifications, setNotifications] = useState<any[]>([]);
@@ -13,18 +16,25 @@ export default function ClinicRiskAlerts() {
     const [highRiskPatients, setHighRiskPatients] = useState<any[]>([]);
     const currentClinicId = localStorage.getItem('clinicId') || '1';
 
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
+
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoading(true);
             try {
                 const [dashRes, patientsRes] = await Promise.all([
                     clinicApi.getDashboard(currentClinicId),
-                    clinicApi.getPatients(currentClinicId, { riskLevel: 'Nguy cơ cao', size: 5 })
+                    clinicApi.getPatients(currentClinicId, { riskLevel: 'Nguy cơ cao', size: 5, page })
                 ]);
                 if (dashRes.success) {
                     setDashboardStats(dashRes.data);
                 }
                 if (patientsRes.success) {
                     setHighRiskPatients(patientsRes.data.content);
+                    setTotalPages(patientsRes.data.totalPages);
+                    setTotalElements(patientsRes.data.totalElements);
                 }
             } catch (error) {
                 console.error('Failed to fetch risk alerts:', error);
@@ -33,16 +43,13 @@ export default function ClinicRiskAlerts() {
             }
         };
         fetchData();
-    }, [currentClinicId]);
+    }, [currentClinicId, page]);
 
     return (
         <div className="flex min-h-screen font-display bg-[#f6f8f7] dark:bg-slate-950 text-slate-900 dark:text-slate-100 italic-none">
             {/* Sidebar Navigation - Shared Component */}
             <ClinicSidebar
                 isSidebarOpen={isSidebarOpen}
-                userName="Admin Sarah"
-                userRole="Senior Manager"
-                userAvatar="https://lh3.googleusercontent.com/aida-public/AB6AXuDs9fuTZde7EUIINhAwZDAYbGdWhfZuvszHFDZODEHBxXo3hRWmKfCmGfg6Xgckf0DONyYs8LQEOXng1sISGQVj9ec2pSs--Gz-xPlj6elGIG3KtZTO9U-57mPPcUxuNMtJbLamHmXAsWrVwobD4Ai-pKgNGU0yfv596RmDCRUawQMx8gmW7E2J_we-R_YITLa95pCcbtDZf6tkb7C6bWKKzwepNG2pc4L5uji1KMHQetqk8390TVAlxrRao3qco3laKWLu0uA-BmQ"
                 isLoading={isLoading}
             />
 
@@ -114,11 +121,11 @@ export default function ClinicRiskAlerts() {
                                 <div className="bg-white dark:bg-slate-900 p-4 md:p-5 rounded-2xl shadow-sm relative overflow-hidden group border border-primary/5">
                                     <div className="relative z-10">
                                         <p className="text-[12px] md:text-sm font-medium text-slate-500 mb-3 md:mb-4">Tổng cảnh báo</p>
-                                        <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-none">{dashboardStats?.highRiskAlerts || 0}</h3>
+                                        <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-none">{(dashboardStats?.highRiskAlerts || 0) + (dashboardStats?.pendingFollowUps || 0)}</h3>
                                     </div>
                                     <div className="mt-4 md:mt-6 flex items-center text-primary text-[11px] md:text-[13px] font-bold gap-1">
-                                        <span className="material-symbols-outlined text-sm">trending_up</span>
-                                        +12% so với hôm qua
+                                        <span className="material-symbols-outlined text-sm">monitor_heart</span>
+                                        Theo dõi thời gian thực
                                     </div>
                                 </div>
 
@@ -127,9 +134,9 @@ export default function ClinicRiskAlerts() {
                                         <div className="flex items-center gap-2 mb-3 md:mb-4">
                                             <p className="text-[12px] md:text-sm font-bold text-red-500">Khẩn cấp</p>
                                         </div>
-                                        <h3 className="text-xl md:text-3xl font-black text-red-500 leading-none">{Math.max(0, (dashboardStats?.highRiskAlerts || 0) - 7)}</h3>
+                                        <h3 className="text-xl md:text-3xl font-black text-red-500 leading-none">{dashboardStats?.highRiskAlerts || 0}</h3>
                                     </div>
-                                    <p className="text-red-600/70 text-[12px] md:text-[14px] font-medium mt-3 md:mt-4">Cần can thiệp ngay lập tức</p>
+                                    <p className="text-red-600/70 text-[12px] md:text-[14px] font-medium mt-3 md:mt-4">Nguy cơ cao</p>
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-4 md:p-5 rounded-2xl shadow-sm relative overflow-hidden group border border-amber-100 dark:border-amber-900/30">
@@ -139,13 +146,14 @@ export default function ClinicRiskAlerts() {
                                         </div>
                                         <h3 className="text-xl md:text-3xl font-black text-amber-600 leading-none">{dashboardStats?.pendingFollowUps || 0}</h3>
                                     </div>
-                                    <p className="text-amber-600/70 text-[12px] md:text-[14px] font-medium mt-3 md:mt-4">Đang trong ngưỡng nguy cơ</p>
+                                    <p className="text-amber-600/70 text-[12px] md:text-[14px] font-medium mt-3 md:mt-4">Đang trong ngưỡng theo dõi</p>
                                 </div>
                                 <div className="bg-white dark:bg-slate-900 p-4 md:p-5 rounded-2xl shadow-sm border border-primary/5">
                                     <div>
-                                        <p className="text-[12px] md:text-sm font-medium text-slate-500 mb-3 md:mb-4">Đã xử lý</p>
-                                        <h3 className="text-xl md:text-3xl font-black text-emerald-600 leading-none">07</h3>
+                                        <p className="text-[12px] md:text-sm font-medium text-slate-500 mb-3 md:mb-4">Ổn định</p>
+                                        <h3 className="text-xl md:text-3xl font-black text-emerald-600 leading-none">{Math.max(0, (dashboardStats?.totalPatients || 0) - (dashboardStats?.highRiskAlerts || 0) - (dashboardStats?.pendingFollowUps || 0))}</h3>
                                     </div>
+                                    <p className="text-emerald-600/70 text-[12px] md:text-[14px] font-medium mt-3 md:mt-4">Đã an toàn</p>
                                 </div>
                             </>
                         )}
@@ -237,19 +245,24 @@ export default function ClinicRiskAlerts() {
                                                     </td>
                                                 </tr>
                                             ) : highRiskPatients.map((patient, idx) => {
-                                                // Generate mock vital data based on condition just for visual
-                                                const isRed = idx % 2 === 0;
-                                                const valueLabel = isRed ? '185/115' : '15.5';
-                                                const unitLabel = isRed ? 'mmHg' : 'mmol/L';
+                                                const conditionStr = patient.chronicCondition || patient.condition || '';
+                                                let isRed = false;
+                                                let valueLabel = 'Không có DLTN';
+                                                
+                                                if (conditionStr.includes('huyết áp')) {
+                                                    isRed = true;
+                                                } else if (conditionStr.includes('Tiểu đường')) {
+                                                    isRed = false;
+                                                }
 
                                                 return (
                                                     <tr key={idx} className="group">
                                                         <td className="px-8 py-5">
                                                             <div className="flex items-center gap-3">
-                                                                <img alt="Bệnh nhân" className="w-10 h-10 rounded-xl object-cover ring-2 ring-primary/10" src={patient.img || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT-wP05202-0C6gA-L8_9Z7wB6g_b6C1C1-V1wT13_9A2y-6G0D_1w-5969566_8-6oYg7KEx-iWv43R6wX7T--2_n0vM28148mX0G23-xQwTj_8-B7O-i-lE_h4QnO-aV4-Yw4H-x-L1-m0T8_m1mS2A5z-oV5019-3Yn'} />
+                                                                <img alt="Bệnh nhân" className="w-10 h-10 rounded-xl object-cover ring-2 ring-primary/10" src={patient.avatarUrl || patient.img || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT-wP05202-0C6gA-L8_9Z7wB6g_b6C1C1-V1wT13_9A2y-6G0D_1w-5969566_8-6oYg7KEx-iWv43R6wX7T--2_n0vM28148mX0G23-xQwTj_8-B7O-i-lE_h4QnO-aV4-Yw4H-x-L1-m0T8_m1mS2A5z-oV5019-3Yn'} />
                                                                 <div>
-                                                                    <p className="text-sm font-bold text-slate-900 dark:text-white">{patient.name}</p>
-                                                                    <p className="text-[13px] text-slate-500 font-medium">{patient.condition}</p>
+                                                                    <p className="text-sm font-bold text-slate-900 dark:text-white">{patient.fullName || patient.name}</p>
+                                                                    <p className="text-[13px] text-slate-500 font-medium">{conditionStr}</p>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -258,33 +271,32 @@ export default function ClinicRiskAlerts() {
                                                                 {patient.age || '—'}
                                                             </span>
                                                         </td>
-                                                        <td className="px-4 py-5 font-medium text-sm text-slate-600">{patient.id}</td>
+                                                        <td className="px-4 py-5 font-medium text-sm text-slate-600">{patient.patientCode || patient.id}</td>
                                                         <td className="px-4 py-5">
                                                             <div className="flex flex-col">
-                                                                <span className={`text-sm font-bold ${isRed ? 'text-red-500' : 'text-amber-500'}`}>
-                                                                    {isRed ? 'HA ' : 'Glu '}{valueLabel}
+                                                                <span className={`text-[13px] font-bold ${isRed ? 'text-red-500' : 'text-amber-500'}`}>
+                                                                    {valueLabel}
                                                                 </span>
-                                                                <span className="text-[13px] text-slate-400 font-medium">{unitLabel}</span>
                                                             </div>
                                                         </td>
                                                         <td className="px-4 py-5 font-medium text-sm text-slate-500 italic-none">
-                                                            {patient.alertTime || patient.lastTime || '10:45 AM'}
+                                                            Vừa cập nhật
                                                         </td>
                                                         <td className="px-4 py-5">
                                                             <div className="flex justify-center">
-                                                                <span className={`inline-flex px-4 py-1.5 ${isRed ? 'bg-red-500' : 'bg-amber-500'} text-white text-[13px] font-bold rounded-full shadow-sm whitespace-nowrap`}>
-                                                                    {isRed ? 'Khẩn cấp' : 'Theo dõi'}
+                                                                <span className={`inline-flex px-4 py-1.5 ${patient.riskLevel === 'Nguy cơ cao' ? 'bg-red-500' : 'bg-amber-500'} text-white text-[13px] font-bold rounded-full shadow-sm whitespace-nowrap`}>
+                                                                    {patient.riskLevel || 'Nguy cơ cao'}
                                                                 </span>
                                                             </div>
                                                         </td>
-                                                        <td className="px-8 py-5 text-right space-x-1">
-                                                            <button className="p-2 text-red-500 rounded-lg" title="Can thiệp gấp">
+                                                        <td className="px-8 py-5 text-right space-x-2">
+                                                            <button onClick={() => window.open(`tel:${patient.phone || '19001234'}`)} className="p-2 text-red-500 rounded-lg hover:bg-red-50 transition-colors" title="Can thiệp gấp">
                                                                 <span className="material-symbols-outlined text-[22px]">call</span>
                                                             </button>
-                                                            <button className="p-2 text-primary rounded-lg" title="Xem hồ sơ">
+                                                            <button onClick={() => navigate(ROUTES.CLINIC.PATIENTS)} className="p-2 text-primary rounded-lg hover:bg-primary/10 transition-colors" title="Xem hồ sơ">
                                                                 <span className="material-symbols-outlined text-[22px]">visibility</span>
                                                             </button>
-                                                            <button className="p-2 text-slate-400 rounded-lg" title="Kê đơn nhanh">
+                                                            <button onClick={() => alert('Tính năng Kê đơn nhanh đang được phát triển')} className="p-2 text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Kê đơn nhanh">
                                                                 <span className="material-symbols-outlined text-[22px]">prescriptions</span>
                                                             </button>
                                                         </td>
@@ -307,16 +319,39 @@ export default function ClinicRiskAlerts() {
                                     ) : (
                                         <>
                                             <p className="text-[14px] font-medium text-slate-500">
-                                                Hiển thị <span className="font-bold text-slate-900 dark:text-white">1</span> đến <span className="font-bold text-slate-900 dark:text-white">{highRiskPatients.length}</span> trong số <span className="font-bold text-slate-900 dark:text-white">{highRiskPatients.length}</span> ca
+                                                Hiển thị <span className="font-bold text-slate-900 dark:text-white">{totalElements === 0 ? 0 : (page * 5) + 1}</span> đến <span className="font-bold text-slate-900 dark:text-white">{Math.min((page + 1) * 5, totalElements)}</span> trong số <span className="font-bold text-slate-900 dark:text-white">{totalElements}</span> ca
                                             </p>
                                             <div className="flex items-center gap-3">
-                                                <button className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30" disabled>
+                                                <button 
+                                                    onClick={() => setPage(Math.max(0, page - 1))}
+                                                    disabled={page === 0}
+                                                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30"
+                                                >
                                                     <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                                                 </button>
                                                 <div className="flex items-center gap-1.5">
-                                                    <button className="w-10 h-10 rounded-xl bg-primary text-white text-sm font-black shadow-lg shadow-primary/20 transition-all">1</button>
+                                                    {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                                                        // Show at most 5 pages around the current page
+                                                        let pageNum = idx;
+                                                        if (totalPages > 5 && page > 2) {
+                                                            pageNum = Math.min(page - 2 + idx, totalPages - 5 + idx);
+                                                        }
+                                                        return (
+                                                            <button 
+                                                                key={pageNum}
+                                                                onClick={() => setPage(pageNum)}
+                                                                className={`w-10 h-10 rounded-xl text-sm font-black transition-all ${page === pageNum ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'}`}
+                                                            >
+                                                                {pageNum + 1}
+                                                            </button>
+                                                        )
+                                                    })}
                                                 </div>
-                                                <button className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30" disabled>
+                                                <button 
+                                                    onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                                                    disabled={page >= totalPages - 1 || totalPages === 0}
+                                                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30"
+                                                >
                                                     <span className="material-symbols-outlined text-[20px]">chevron_right</span>
                                                 </button>
                                             </div>
@@ -344,16 +379,20 @@ export default function ClinicRiskAlerts() {
                                         ))
                                     ) : (
                                         [
-                                            { icon: 'contact_phone', label: 'Trạm y tế gần nhất' },
-                                            { icon: 'description', label: 'Xuất hồ sơ khẩn cấp' },
-                                            { icon: 'history_edu', label: 'Lịch sử phác đồ' }
-                                        ].map((action, idx) => (
-                                            <button key={idx} className="w-full flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl group">
+                                            { icon: 'contact_phone', label: 'Trạm y tế gần nhất', action: () => alert('Đang tìm kiếm các trạm y tế và bệnh viện liên kết lân cận...') },
+                                            { icon: 'description', label: 'Xuất hồ sơ khẩn cấp', action: () => alert('Tính năng xuất hồ sơ cấp cứu (PDF) đang được phát triển.') },
+                                            { icon: 'history_edu', label: 'Lịch sử phác đồ', action: () => alert('Hệ thống lưu trữ phác đồ điều trị đang được tích hợp.') }
+                                        ].map((item, idx) => (
+                                            <button 
+                                                key={idx} 
+                                                onClick={item.action}
+                                                className="w-full flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors rounded-2xl group"
+                                            >
                                                 <div className="flex items-center gap-3 text-slate-700 dark:text-slate-200">
-                                                    <span className="material-symbols-outlined text-primary text-lg">{action.icon}</span>
-                                                    <span className="text-sm font-bold">{action.label}</span>
+                                                    <span className="material-symbols-outlined text-primary text-lg">{item.icon}</span>
+                                                    <span className="text-sm font-bold">{item.label}</span>
                                                 </div>
-                                                <span className="material-symbols-outlined text-slate-300">chevron_right</span>
+                                                <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">chevron_right</span>
                                             </button>
                                         ))
                                     )}

@@ -107,4 +107,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
         @Query("SELECT COUNT(a) FROM Appointment a JOIN User u ON a.doctorId = u.id WHERE u.clinicId = :clinicId AND a.status = :status AND a.isDeleted = false")
         long countByClinicIdAndStatus(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("status") AppointmentStatus status);
+
+        @Query("SELECT a.appointmentTime, a.endTime FROM Appointment a JOIN User u ON a.doctorId = u.id WHERE u.clinicId = :clinicId AND a.status = 'COMPLETED' AND a.endTime IS NOT NULL AND a.isDeleted = false")
+        List<Object[]> findCompletedAppointmentTimesByClinic(@org.springframework.data.repository.query.Param("clinicId") Long clinicId);
 }

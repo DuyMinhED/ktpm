@@ -33,8 +33,14 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
   patients = []
 }) => {
   const [selectedPatientId, setSelectedPatientId] = useState<string>(patients.length > 0 ? patients[0].id.toString() : '');
-  const [appointmentType, setAppointmentType] = useState('OFFLINE');
+  const [appointmentType, setAppointmentType] = useState('IN_PERSON');
   const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    if (patients.length > 0 && !selectedPatientId) {
+      setSelectedPatientId(patients[0].id.toString());
+    }
+  }, [patients, selectedPatientId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -66,17 +72,23 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
         <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar text-left">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
             <div className="space-y-6">
-              <div className="space-y-2">
+              <div className="space-y-2 relative z-20">
                 <label className="text-sm font-bold border-l-4 border-primary pl-2">Thông tin bệnh nhân</label>
                   <Dropdown 
                     options={patients.map(p => ({
-                      label: `${p.fullName} - ID: ${p.patientCode || p.id}`,
+                      label: `${p.fullName} - Mã BN: ${p.patientCode || p.id}${!p.doctorId ? ' (⚠️ Chưa gán BS)' : ''}`,
                       value: p.id.toString()
                     }))}
                     value={selectedPatientId}
                     onChange={setSelectedPatientId}
                     className="w-full"
                   />
+                  {selectedPatientId && patients.find(p => p.id.toString() === selectedPatientId) && !patients.find(p => p.id.toString() === selectedPatientId).doctorId && (
+                    <p className="text-xs text-red-500 font-medium mt-1 pl-2">
+                      <span className="material-symbols-outlined text-[14px] align-text-bottom mr-1">warning</span>
+                      Bệnh nhân này chưa có BS phụ trách. Vui lòng gán BS trước khi đặt lịch.
+                    </p>
+                  )}
               </div>
 
               <div className="space-y-3">
@@ -144,8 +156,8 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                 <div className="flex gap-4">
                   <label className="flex-1 cursor-pointer group">
                     <input 
-                      checked={appointmentType === 'OFFLINE'} 
-                      onChange={() => setAppointmentType('OFFLINE')} 
+                      checked={appointmentType === 'IN_PERSON'} 
+                      onChange={() => setAppointmentType('IN_PERSON')} 
                       className="peer hidden" 
                       name="resched-type" 
                       type="radio" 
@@ -219,8 +231,8 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
               type: appointmentType,
               notes: notes
             })}
-            disabled={isSaving || !selectedPatientId}
-            className="px-10 py-3 text-sm font-medium text-slate-900 bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-xl shadow-primary/20 flex items-center gap-3 active:scale-95 transform disabled:opacity-50 disabled:cursor-wait"
+            disabled={isSaving || !selectedPatientId || (selectedPatientId && !patients.find(p => p.id.toString() === selectedPatientId)?.doctorId)}
+            className="px-10 py-3 text-sm font-medium text-slate-900 bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-xl shadow-primary/20 flex items-center gap-3 active:scale-95 transform disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>

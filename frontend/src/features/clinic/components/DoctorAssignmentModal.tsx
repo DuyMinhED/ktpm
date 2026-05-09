@@ -208,7 +208,7 @@ export default function DoctorAssignmentModal({
                     </div>
                 </div>
 
-                <div className="overflow-hidden">
+                <div className="overflow-y-auto custom-scrollbar flex-1 pb-32">
                     {/* Fixed Metrics Section */}
                     <div className="px-6 md:px-8 pt-1 pb-2 space-y-6 shrink-0">
                         <div className="space-y-4">
@@ -252,8 +252,8 @@ export default function DoctorAssignmentModal({
                     </div>
 
                     {/* Infinite Scrolling Table Section */}
-                    <div className="px-6 md:px-8 pt-4 pb-0 overflow-hidden">
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <div className="px-6 md:px-8 pt-4 pb-0">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                             {/* Table Controls */}
                             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-4 items-center justify-between shrink-0 bg-slate-50/40 dark:bg-slate-800/20">
                                 <div className="flex bg-slate-200/50 dark:bg-slate-800 p-1 rounded-xl">
@@ -261,13 +261,13 @@ export default function DoctorAssignmentModal({
                                         onClick={() => { setActiveTab('assigned'); setVisibleCount(10); }}
                                         className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all ${activeTab === 'assigned' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                                     >
-                                        Bệnh nhân đang trực ({assignedPatients.length})
+                                        Đang phụ trách ({assignedPatients.length})
                                     </button>
                                     <button
                                         onClick={() => { setActiveTab('new'); setVisibleCount(10); }}
                                         className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all ${activeTab === 'new' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                                     >
-                                        Chỉ định mới ({unassignedPatients.length})
+                                        Chờ phân công ({unassignedPatients.length})
                                     </button>
                                 </div>
                                 <div className="relative w-full md:w-80">
@@ -283,7 +283,7 @@ export default function DoctorAssignmentModal({
                             </div>
 
                             {/* Table content (Scrolling) */}
-                            <div className="overflow-y-auto custom-scrollbar relative max-h-[calc(92vh-460px)]">
+                            <div className="relative pb-10">
                                 {isLoading ? (
                                     <div className="flex flex-col items-center justify-center py-24 gap-4">
                                         <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>

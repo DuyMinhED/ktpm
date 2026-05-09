@@ -30,8 +30,9 @@ export default function ClinicAppointments() {
                 setToast({ show: true, title: 'Đặt lịch thành công!', type: 'success' });
                 loadAppointments();
             }
-        } catch (e) {
-            setToast({ show: true, title: 'Có lỗi khi đặt lịch', type: 'error' });
+        } catch (e: any) {
+            const errorMsg = e.response?.data?.message || 'Có lỗi khi đặt lịch. Vui lòng thử lại!';
+            setToast({ show: true, title: errorMsg, type: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -48,7 +49,8 @@ export default function ClinicAppointments() {
             const mappedPatients = (res.data.content || []).map((p: any) => ({
                 id: p.dbId || p.id,
                 fullName: p.name || p.fullName,
-                patientCode: p.id || p.patientCode
+                patientCode: p.id || p.patientCode,
+                doctorId: p.doctorId
             }));
             setPatients(mappedPatients);
         } catch (error) {
@@ -160,7 +162,7 @@ export default function ClinicAppointments() {
                             </div>
                             <div className="flex items-end justify-between">
                                 <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                                    {appointments.filter(a => a.appointmentType === 'ONSITE').length}
+                                    {appointments.filter(a => a.appointmentType === 'IN_PERSON').length}
                                 </span>
                                 <span className="text-xs font-bold text-primary flex items-center gap-0.5">
                                     <span className="material-symbols-outlined text-xs">trending_up</span>
@@ -216,15 +218,31 @@ export default function ClinicAppointments() {
                                 <div
                                     className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <h3 className="text-lg font-bold">Tháng 10, 2023</h3>
+                                        <h3 className="text-lg font-bold">Tháng {currentMonth + 1}, {currentYear}</h3>
                                         <div
                                             className="flex border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                                             <button
+                                                onClick={() => {
+                                                    if (currentMonth === 0) {
+                                                        setCurrentMonth(11);
+                                                        setCurrentYear(currentYear - 1);
+                                                    } else {
+                                                        setCurrentMonth(currentMonth - 1);
+                                                    }
+                                                }}
                                                 className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-r border-slate-200 dark:border-slate-700">
                                                 <span
                                                     className="material-symbols-outlined text-lg leading-none">chevron_left</span>
                                             </button>
                                             <button
+                                                onClick={() => {
+                                                    if (currentMonth === 11) {
+                                                        setCurrentMonth(0);
+                                                        setCurrentYear(currentYear + 1);
+                                                    } else {
+                                                        setCurrentMonth(currentMonth + 1);
+                                                    }
+                                                }}
                                                 className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                                                 <span
                                                     className="material-symbols-outlined text-lg leading-none">chevron_right</span>
@@ -274,77 +292,41 @@ export default function ClinicAppointments() {
                                         <div
                                             className="bg-slate-50 dark:bg-slate-800 p-2 text-center text-xs font-bold text-slate-400">
                                             T7</div>
-                                        {/* Calendar Days (Static example) */}
-                                        {/* Offset */}
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2 opacity-50"></div>
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2 opacity-50"></div>
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2 opacity-50"></div>
-                                        {/* Start 1st */}
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2">
-                                            <span className="text-sm font-medium">1</span>
-                                        </div>
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2">
-                                            <span className="text-sm font-medium">2</span>
-                                        </div>
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2">
-                                            <span className="text-sm font-medium">3</span>
-                                        </div>
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2">
-                                            <span className="text-sm font-medium">4</span>
-                                        </div>
-                                        <div
-                                            onClick={() => { setSelectedDay(5); setIsRescheduleModalOpen(true); }}
-                                            className="bg-primary/5 dark:bg-primary/10 min-h-[100px] p-2 relative ring-2 ring-inset ring-primary cursor-pointer hover:bg-primary/10 transition-colors">
-                                            <span
-                                                className="text-sm font-bold text-primary underline underline-offset-4 decoration-2">5</span>
-                                            <div className="mt-2 space-y-1">
+                                        {/* Dynamic Calendar Cells */}
+                                        {Array.from({ length: new Date(currentYear, currentMonth, 1).getDay() }).map((_, i) => (
+                                            <div key={`empty-${i}`} className="bg-white dark:bg-slate-800 min-h-[100px] p-2 opacity-50"></div>
+                                        ))}
+                                        
+                                        {Array.from({ length: new Date(currentYear, currentMonth + 1, 0).getDate() }).map((_, i) => {
+                                            const day = i + 1;
+                                            const dayAppointments = appointments.filter(a => {
+                                                const d = new Date(a.appointmentTime);
+                                                return d.getDate() === day && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+                                            });
+                                            const isSelected = selectedDay === day;
+
+                                            return (
                                                 <div
-                                                    className="text-[10px] p-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded border-l-2 border-blue-500 truncate">
-                                                    8:00 - Nguyễn Vy</div>
-                                                <div
-                                                    className="text-[10px] p-1 bg-primary/20 dark:bg-primary/30 text-primary-dark rounded border-l-2 border-primary truncate">
-                                                    9:30 - Trần Đạt</div>
-                                                <div
-                                                    className="text-[10px] p-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded border-l-2 border-slate-400 truncate">
-                                                    +22 khác</div>
-                                            </div>
-                                        </div>
-                                        <div
-                                            className="bg-white dark:bg-slate-800 min-h-[100px] p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                                            <span className="text-sm font-medium">6</span>
-                                            <div className="mt-2 flex gap-1 flex-wrap">
-                                                <div className="size-1.5 rounded-full bg-blue-500"></div>
-                                                <div className="size-1.5 rounded-full bg-amber-500"></div>
-                                            </div>
-                                        </div>
-                                        <div
-                                            className="bg-white dark:bg-slate-800 min-h-[100px] p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                                            <span className="text-sm font-medium">7</span>
-                                        </div>
-                                        <div
-                                            className="bg-white dark:bg-slate-800 min-h-[100px] p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                                            <span className="text-sm font-medium">8</span>
-                                        </div>
-                                        <div
-                                            className="bg-white dark:bg-slate-800 min-h-[100px] p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                                            <span className="text-sm font-medium">9</span>
-                                        </div>
-                                        <div
-                                            className="bg-white dark:bg-slate-800 min-h-[100px] p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                                            <span className="text-sm font-medium">10</span>
-                                            <div className="mt-2 flex gap-1 flex-wrap">
-                                                <div className="size-1.5 rounded-full bg-red-500"></div>
-                                            </div>
-                                        </div>
-                                        {/* Fill the rest simple for UI look */}
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2"><span
-                                            className="text-sm font-medium">11</span></div>
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2"><span
-                                            className="text-sm font-medium">12</span></div>
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2"><span
-                                            className="text-sm font-medium">13</span></div>
-                                        <div className="bg-white dark:bg-slate-800 min-h-[100px] p-2"><span
-                                            className="text-sm font-medium">14</span></div>
+                                                    key={day}
+                                                    onClick={() => setSelectedDay(day)}
+                                                    className={`${isSelected ? 'bg-primary/5 dark:bg-primary/10 ring-2 ring-inset ring-primary' : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'} min-h-[100px] p-2 transition-colors cursor-pointer relative`}
+                                                >
+                                                    <span className={`text-sm font-medium ${isSelected ? 'text-primary font-bold underline decoration-2 underline-offset-4' : ''}`}>{day}</span>
+                                                    <div className="mt-2 space-y-1 overflow-hidden">
+                                                        {dayAppointments.slice(0, 2).map((appt, idx) => (
+                                                            <div key={idx} className={`text-[10px] p-1 rounded border-l-2 truncate ${appt.appointmentType === 'ONLINE' ? 'bg-primary/20 text-primary-dark border-primary' : 'bg-blue-100 text-blue-600 border-blue-500'}`}>
+                                                                {formatTime(appt.appointmentTime)} - {appt.patientName.split(' ').pop()}
+                                                            </div>
+                                                        ))}
+                                                        {dayAppointments.length > 2 && (
+                                                            <div className="text-[10px] p-1 bg-slate-100 text-slate-600 rounded border-l-2 border-slate-400 truncate">
+                                                                +{dayAppointments.length - 2} khác
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
