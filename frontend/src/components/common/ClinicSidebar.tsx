@@ -5,17 +5,11 @@ import { clinicApi } from '../../api/clinic';
 
 interface ClinicSidebarProps {
     isSidebarOpen: boolean;
-    userName?: string;
-    userRole?: string;
-    userAvatar?: string;
     isLoading?: boolean;
 }
 
 const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
     isSidebarOpen,
-    userName,
-    userRole,
-    userAvatar,
     isLoading = false
 }) => {
     const navigate = useNavigate();
@@ -39,7 +33,7 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
     
     const handleLogout = () => {
         localStorage.clear();
-        navigate('/login');
+        navigate('/?action=login');
     };
     const navItems = [
         { path: ROUTES.CLINIC.DASHBOARD, label: 'Tổng quan phòng khám', icon: 'dashboard' },

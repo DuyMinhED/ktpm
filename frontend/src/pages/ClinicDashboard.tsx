@@ -58,9 +58,6 @@ export default function ClinicDashboard() {
     <div className="flex min-h-screen font-display bg-background-light dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased italic-none">
       <ClinicSidebar
         isSidebarOpen={isSidebarOpen}
-        userName="Clinic Manager"
-        userRole="Quản lý phòng khám"
-        userAvatar="https://images.unsplash.com/photo-1559839734-2b71f1536780?auto=format&fit=crop&q=80&w=100&h=100"
       />
 
       <div className="lg:ml-72 min-h-screen flex-1 flex flex-col bg-background-light dark:bg-slate-950">
