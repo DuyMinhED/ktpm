@@ -30,8 +30,10 @@ axiosInstance.interceptors.response.use(
   (error: AxiosError) => {
     // Handle global errors like 401 Unauthorized
     if (error.response?.status === 401) {
-      // localStorage.removeItem('token');
-      // window.location.href = '/login';
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('clinicId');
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

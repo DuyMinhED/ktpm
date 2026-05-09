@@ -62,6 +62,16 @@ export const clinicApi = {
     return response.data;
   },
 
+  getAppointments: async (clinicId: string | number, params?: any) => {
+    const response = await axiosInstance.get(`/v1/clinics/${clinicId}/appointments`, { params });
+    return response.data;
+  },
+
+  createAppointment: async (clinicId: string | number, data: any) => {
+    const response = await axiosInstance.post(`/v1/clinics/${clinicId}/appointments`, data);
+    return response.data;
+  },
+
   updateProfile: async (clinicId: string | number, data: any) => {
     const response = await axiosInstance.put(`/v1/clinics/${clinicId}/profile`, data);
     return response.data;

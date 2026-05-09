@@ -366,7 +366,14 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
                 </div>
                 <div className="flex flex-col gap-2 mt-4">
                   <button
-                    onClick={() => window.location.href = '/doctor/appointments'}
+                    onClick={() => {
+                        const role = localStorage.getItem('role');
+                        if (role === 'ROLE_CLINIC_MANAGER') {
+                            window.location.href = '/clinic/assignment';
+                        } else {
+                            window.location.href = '/doctor/appointments';
+                        }
+                    }}
                     className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:shadow-md transition-all group"
                   >
                     <span className="flex items-center gap-2">
@@ -549,14 +556,19 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
                     <h3 className="font-bold text-red-900 dark:text-red-400">Ghi chú quan trọng</h3>
                   </div>
                   <ul className="space-y-3">
-                    <li className="flex gap-3 text-sm text-red-700 dark:text-red-300">
-                      <span className="material-symbols-outlined text-sm mt-1">circle</span>
-                      Bệnh nhân có tiền sử sốc phản vệ với kháng sinh nhóm Penicillin.
-                    </li>
-                    <li className="flex gap-3 text-sm text-red-700 dark:text-red-300">
-                      <span className="material-symbols-outlined text-sm mt-1">circle</span>
-                      Cần theo dõi sát chỉ số huyết áp tại nhà vào buổi sáng.
-                    </li>
+                    {profile?.clinicalNotes ? (
+                        profile.clinicalNotes.split('\n').map((note: string, idx: number) => note.trim() && (
+                            <li key={idx} className="flex gap-3 text-sm text-red-700 dark:text-red-300">
+                              <span className="material-symbols-outlined text-sm mt-1">circle</span>
+                              {note}
+                            </li>
+                        ))
+                    ) : (
+                        <li className="flex gap-3 text-sm text-red-700 dark:text-red-300">
+                          <span className="material-symbols-outlined text-sm mt-1">circle</span>
+                          Chưa có ghi chú đặc biệt nào.
+                        </li>
+                    )}
                   </ul>
                 </div>
 

@@ -38,13 +38,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Object>> handleRuntimeException(RuntimeException ex) {
+        // Log the actual error internally (omitted here for brevity, assuming standard logging exists)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Internal Server Error: " + ex.getMessage()));
+                .body(ApiResponse.error("Hệ thống đang bận hoặc có lỗi xảy ra. Vui lòng thử lại sau."));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Global Error: " + ex.getMessage()));
+                .body(ApiResponse.error("Đã xảy ra lỗi không xác định. Vui lòng liên hệ quản trị viên."));
     }
 }

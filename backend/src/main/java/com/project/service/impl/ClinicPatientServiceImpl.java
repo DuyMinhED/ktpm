@@ -133,10 +133,15 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
             userRepository.save(user);
         }
 
-        if (request.getDoctorId() != null) {
-            userRepository.findById(request.getDoctorId()).ifPresent(dr -> {
-                if (dr.getClinicId().equals(clinicId)) patient.setDoctorId(dr.getId());
-            });
+        Long drId = getDoctorId(clinicId, request);
+        if (drId != null) {
+            if (drId == -1L) {
+                patient.setDoctorId(null);
+            } else {
+                userRepository.findById(drId).ifPresent(dr -> {
+                    if (dr.getClinicId().equals(clinicId)) patient.setDoctorId(dr.getId());
+                });
+            }
         }
 
         patientRepository.save(patient);
@@ -206,6 +211,19 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
         if (request.getTreatmentStatus() != null) patient.setTreatmentStatus(request.getTreatmentStatus());
         if (request.getStatus() != null) patient.setProfileStatus(request.getStatus());
         if (request.getIdentityCard() != null) patient.setIdentityCard(request.getIdentityCard());
+        if (request.getOccupation() != null) patient.setOccupation(request.getOccupation());
+        if (request.getEthnicity() != null) patient.setEthnicity(request.getEthnicity());
+        if (request.getInsuranceNumber() != null) patient.setHealthInsuranceNumber(request.getInsuranceNumber());
+        if (request.getNotes() != null) patient.setClinicalNotes(request.getNotes());
+        
+        if (request.getDateOfBirth() != null) {
+            patient.setDateOfBirth(request.getDateOfBirth());
+        } else if (request.getAge() != null && !request.getAge().isBlank()) {
+            try {
+                int ageNum = Integer.parseInt(request.getAge());
+                patient.setDateOfBirth(LocalDate.now().minusYears(ageNum));
+            } catch (Exception ignored) {}
+        }
     }
 
     private void updateUserFields(User user, Patient patient, CreatePatientRequest request) {

@@ -27,8 +27,20 @@ public class ClinicDashboardResponse {
     private GrowthStatsDto growthStats;
     private List<DiseaseAnalysisDto> diseaseAnalytics;
     private List<DoctorPerformanceDto> doctorPerformances;
+    private List<RiskPatientDto> riskPatients;
     private List<String> insights;
     private double averageDoctorLoad;
+
+    @Data
+    @Builder
+    public static class RiskPatientDto {
+        private Long id;
+        private String name;
+        private String avatar;
+        private String condition;
+        private String riskLevel;
+        private String lastUpdate;
+    }
 
     @Data
     @Builder

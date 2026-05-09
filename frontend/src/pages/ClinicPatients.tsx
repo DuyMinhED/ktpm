@@ -7,6 +7,7 @@ import ClinicFilterDropdown from '../components/common/ClinicFilterDropdown';
 import ClinicSidebar from '../components/common/ClinicSidebar';
 import TopBar from '../components/common/TopBar';
 import Toast from '../components/ui/Toast';
+import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 
 export default function ClinicPatients() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function ClinicPatients() {
     // Edit/Delete Modal States
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<any>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -457,7 +459,11 @@ export default function ClinicPatients() {
                                                 </td>
                                                 <td className="px-8 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-2 transition-all">
-                                                        <button className="p-2 text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors" title="Xem hồ sơ">
+                                                        <button 
+                                                            onClick={() => { setSelectedPatient(p); setIsDetailModalOpen(true); }}
+                                                            className="p-2 text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors" 
+                                                            title="Xem hồ sơ"
+                                                        >
                                                             <span className="material-symbols-outlined text-[20px]">visibility</span>
                                                         </button>
                                                         <button
@@ -560,6 +566,12 @@ export default function ClinicPatients() {
                 isDeleting={isDeleting}
                 onDelete={handleDeletePatient}
                 patientData={selectedPatient}
+            />
+
+            <PatientDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                patient={selectedPatient}
             />
 
 

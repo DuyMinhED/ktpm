@@ -18,12 +18,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.entity.UserRole;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.project.entity.Patient;
+import org.springframework.data.domain.PageRequest;
 
 @SuppressWarnings("null")
 @Slf4j
@@ -53,25 +56,119 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDate = "7d".equals(period) ? now.minusDays(6) : "30d".equals(period) ? now.minusDays(29) : "1y".equals(period) ? now.minusMonths(11) : now.minusMonths(5);
 
-        var patientStatsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> patientRepository.countMonthlyPatients(clinicId, startDate));
+        var patientStatsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+            List<Long> doctorIds = userRepository.findByClinicIdAndRoleAndIsDeletedFalse(clinicId, UserRole.DOCTOR).stream().map(User::getId).collect(Collectors.toList());
+            return doctorIds.isEmpty() ? List.<Object[]>of() : appointmentRepository.countMonthlyAppointmentsByDoctorIds(doctorIds, startDate);
+        });
         var riskStatsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> patientRepository.countMonthlyHighRiskPatients(clinicId, AppConstants.RISK_HIGH, startDate));
+        var riskPatientsListFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> 
+            patientRepository.findByClinicIdAndFilters(clinicId, null, null, AppConstants.RISK_HIGH, null, null, PageRequest.of(0, 5)).getContent());
 
-        java.util.concurrent.CompletableFuture.allOf(totalPatientsFuture, highRiskCountFuture, monitoringCountFuture, pathologyFuture, insightsFuture, patientStatsFuture, riskStatsFuture).join();
+        java.util.concurrent.CompletableFuture.allOf(totalPatientsFuture, highRiskCountFuture, monitoringCountFuture, pathologyFuture, insightsFuture, patientStatsFuture, riskStatsFuture, riskPatientsListFuture).join();
 
-        // Mapping and calculation logic (kept here as it's dashboard specific)
+        // Mapping and calculation logic
         long totalPatients = totalPatientsFuture.join();
         long highRiskCount = highRiskCountFuture.join();
         long monitoringCount = monitoringCountFuture.join();
+
+        // Calculate basic trends (simplified)
+        String patientGrowth = "+0%";
+        String riskTrend = "0%";
+        
+        try {
+            long prevTotal = patientRepository.countByClinicIdAndCreatedAtBetweenAndIsDeletedFalse(clinicId, startDate.minusMonths(1), startDate);
+            if (prevTotal > 0) {
+                patientGrowth = String.format("+%.1f%%", (double)(totalPatients - prevTotal) * 100 / prevTotal);
+            }
+            
+            long prevRisk = patientRepository.countByClinicIdAndRiskLevelAndCreatedAtBetweenAndIsDeletedFalse(clinicId, AppConstants.RISK_HIGH, startDate.minusMonths(1), startDate);
+            if (prevRisk > 0) {
+                double diff = (double)(highRiskCount - prevRisk) * 100 / prevRisk;
+                riskTrend = String.format("%+.1f%%", diff);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to calculate dashboard trends: {}", e.getMessage());
+        }
         
         List<ClinicDashboardResponse.DiseaseRatioDto> diseaseRatios = calculateDiseaseRatios(clinicId, totalPatients);
+
+        List<ClinicDashboardResponse.PatientGrowthChartDto> growthChart = patientStatsFuture.join().stream()
+                .map(row -> ClinicDashboardResponse.PatientGrowthChartDto.builder()
+                        .month(row[0] + "/" + row[1])
+                        .value(((Number) row[2]).intValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<ClinicDashboardResponse.PatientGrowthChartDto> riskChart = riskStatsFuture.join().stream()
+                .map(row -> ClinicDashboardResponse.PatientGrowthChartDto.builder()
+                        .month(row[0] + "/" + row[1])
+                        .value(((Number) row[2]).intValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<ClinicDashboardResponse.RiskPatientDto> riskPatients = riskPatientsListFuture.join().stream()
+                .map((Patient p) -> ClinicDashboardResponse.RiskPatientDto.builder()
+                        .id(p.getId())
+                        .name(p.getFullName())
+                        .avatar(p.getAvatarUrl())
+                        .condition(p.getChronicCondition())
+                        .riskLevel(p.getRiskLevel())
+                        .lastUpdate("Vừa cập nhật")
+                        .build())
+                .collect(Collectors.toList());
+
+        // Calculate additional clinical stats
+        double adherenceRate = calculateAdherenceRate(clinicId);
+        double improvementRate = 12.5; // (mẫu)
+        double avgConsultationTime = 18.2; // (mẫu) - minutes
+        
+        List<ClinicDashboardResponse.DiseaseAnalysisDto> diseaseAnalytics = diseaseRatios.stream()
+                .map((ClinicDashboardResponse.DiseaseRatioDto ratio) -> ClinicDashboardResponse.DiseaseAnalysisDto.builder()
+                        .diseaseName(ratio.getLabel())
+                        .totalCases((int)ratio.getValue())
+                        .averageIndex("126 mg/dL") // (mẫu)
+                        .riskVariation("-4.2%") // (mẫu)
+                        .assessment("Ổn định") // (mẫu)
+                        .statusColor("emerald")
+                        .build())
+                .collect(Collectors.toList());
+
+        List<ClinicDashboardResponse.DoctorPerformanceDto> doctorPerformances = userRepository.findByClinicIdAndRoleAndIsDeletedFalse(clinicId, UserRole.DOCTOR).stream()
+                .map((User doctor) -> ClinicDashboardResponse.DoctorPerformanceDto.builder()
+                        .dbId(doctor.getId())
+                        .name(doctor.getFullName())
+                        .specialty("Nội tiết") // (mẫu)
+                        .load((int) appointmentRepository.countByDoctorIdAndStatus(doctor.getId(), AppointmentStatus.PENDING))
+                        .rating("4.8") // (mẫu)
+                        .reviews(24) // (mẫu)
+                        .color("blue")
+                        .build())
+                .collect(Collectors.toList());
 
         return ClinicDashboardResponse.builder()
                 .totalPatients(totalPatients)
                 .highRiskAlerts(highRiskCount)
                 .pendingFollowUps(monitoringCount)
                 .diseaseRatios(diseaseRatios)
+                .patientGrowthChart(growthChart)
+                .riskIndexChart(riskChart)
+                .riskPatients(riskPatients)
                 .insights(insightsFuture.join())
+                .patientGrowth(patientGrowth)
+                .highRiskGrowth(riskTrend)
+                .adherenceRate(adherenceRate)
+                .improvementRate(improvementRate)
+                .avgConsultationTime(avgConsultationTime)
+                .diseaseAnalytics(diseaseAnalytics)
+                .doctorPerformances(doctorPerformances)
                 .build();
+    }
+
+    private double calculateAdherenceRate(Long clinicId) {
+        long totalAppointments = appointmentRepository.countByClinicId(clinicId);
+        if (totalAppointments == 0) return 0.0;
+        long completed = appointmentRepository.countByClinicIdAndStatus(clinicId, AppointmentStatus.COMPLETED);
+        return (double) completed / totalAppointments;
     }
 
     @Override
@@ -168,6 +265,51 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .userId(appointment.getPatient().getUserId())
                 .title("Cập nhật lịch hẹn")
                 .message("Lịch hẹn với BS. " + appointment.getDoctorName() + " chuyển sang: " + status)
+                .read(false)
+                .build());
+    }
+
+    @Override
+    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "clinic_dashboard", allEntries = true)
+    @Audit(action = "CREATE_APPOINTMENT", module = "CLINIC_MANAGEMENT")
+    public void createAppointment(Long clinicId, com.project.dto.request.DoctorCreateAppointmentRequest request) {
+        Patient patient = patientRepository.findById(request.getPatientId())
+                .orElseThrow(() -> new com.project.exception.ResourceNotFoundException("Bệnh nhân không tồn tại"));
+
+        if (!clinicId.equals(patient.getClinicId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Unauthorized");
+        }
+
+        if (patient.getDoctorId() == null) {
+            throw new RuntimeException("Bệnh nhân chưa được phân công cho bác sĩ nào. Vui lòng vào 'Điều phối bệnh nhân' để gán bác sĩ trước.");
+        }
+
+        java.time.LocalDateTime appointmentTime = java.time.LocalDateTime.parse(request.getAppointmentDate() + "T" + request.getAppointmentTime());
+
+        Appointment appointment = Appointment.builder()
+                .doctorId(patient.getDoctorId())
+                .patient(patient)
+                .appointmentTime(appointmentTime)
+                .status(AppointmentStatus.SCHEDULED)
+                .type(request.getType())
+                .reason(request.getNotes())
+                .build();
+
+        if (patient.getDoctorId() != null) {
+            com.project.entity.User doctor = userRepository.findById(patient.getDoctorId()).orElse(null);
+            if (doctor != null) {
+                appointment.setDoctorName(doctor.getFullName());
+            }
+        }
+
+        appointmentRepository.save(appointment);
+
+        // Notify patient
+        notificationRepository.save(com.project.entity.Notification.builder()
+                .userId(patient.getUserId())
+                .title("Lịch hẹn mới")
+                .message("Phòng khám đã đặt lịch hẹn mới cho bạn vào lúc " + request.getAppointmentTime() + " ngày " + request.getAppointmentDate())
                 .type("APPOINTMENT")
                 .read(false)
                 .build());

@@ -35,6 +35,7 @@ public class PatientMapper {
                 .primaryCondition(p.getChronicCondition() != null ? p.getChronicCondition() : "Chưa có chẩn đoán")
                 .riskLevel(p.getRiskLevel() != null ? p.getRiskLevel() : "Ổn định")
                 .doctor(p.getDoctorId() != null ? doctorMap.getOrDefault(p.getDoctorId(), "Chưa phân công") : "Chưa phân công")
+                .doctorId(p.getDoctorId())
                 .location(p.getRoomLocation() != null ? p.getRoomLocation() : "Ngoại trú")
                 .status(p.getProfileStatus() != null ? p.getProfileStatus() : "Hoạt động")
                 .treatmentStatus(p.getTreatmentStatus() != null ? p.getTreatmentStatus() : "Đang điều trị")

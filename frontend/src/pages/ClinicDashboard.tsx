@@ -5,6 +5,7 @@ import ClinicSidebar from '../components/common/ClinicSidebar';
 import TopBar from '../components/common/TopBar';
 import Dropdown from '../components/ui/Dropdown';
 import { clinicApi } from '../api/clinic';
+import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
@@ -18,6 +19,8 @@ export default function ClinicDashboard() {
   const [riskPatients, setRiskPatients] = useState<any[]>([]);
   const [diseaseDistribution, setDiseaseDistribution] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
+  const [isPatientDetailModalOpen, setIsPatientDetailModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -25,20 +28,28 @@ export default function ClinicDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // For demo/mock purposes, if API fails we use mock data
       const clinicId = 1; // This should come from auth context
       const res = await clinicApi.getDashboard(clinicId, selectedPeriod);
 
       if (res && res.data) {
-        setStats(res.data.stats);
+        setStats({
+          ...res.data,
+          // Mapping backend fields to frontend names if they differ
+          chronicPatients: res.data.totalPatients,
+          highRiskCount: res.data.highRiskAlerts,
+          missedFollowUps: res.data.pendingFollowUps,
+          chronicRate: res.data.adherenceRate ? `${(res.data.adherenceRate * 100).toFixed(1)}%` : '0%',
+          followUpRate: res.data.adherenceRate ? `${(res.data.adherenceRate * 100).toFixed(1)}%` : '0%',
+          patientGrowth: res.data.patientGrowth,
+          riskTrend: res.data.highRiskGrowth,
+          insight: res.data.insights && res.data.insights.length > 0 ? res.data.insights[0] : null
+        });
         setRiskPatients(res.data.riskPatients || []);
-        setDiseaseDistribution(res.data.diseaseDistribution || []);
-        setChartData(res.data.chartData || []);
+        setDiseaseDistribution(res.data.diseaseRatios || []);
+        setChartData(res.data.patientGrowthChart || []);
       }
     } catch (error) {
       console.error('Failed to fetch clinic dashboard data:', error);
-    } finally {
-      // Loading state can be added here if needed in future
     }
   };
 
@@ -92,7 +103,7 @@ export default function ClinicDashboard() {
                   <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-[11px] font-bold rounded-lg">{stats?.patientGrowth}</span>
                 </div>
                 <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{stats?.chronicPatients || 0}</h3>
-                <p className="text-slate-500 text-[14px] font-medium mt-1">Bệnh nhân mãn tính</p>
+                <p className="text-slate-500 text-[14px] font-medium mt-1">Quản lý Bệnh lý Mãn tính</p>
                 <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center gap-2 text-[12px] text-slate-400">
                   <span className="font-bold text-slate-600 dark:text-slate-300">{stats?.totalPatients}</span>
                   <span>tổng số bệnh nhân</span>
@@ -108,14 +119,9 @@ export default function ClinicDashboard() {
                   <span className="px-2 py-1 bg-red-50 text-red-600 text-[11px] font-bold rounded-lg">{stats?.riskTrend}</span>
                 </div>
                 <h3 className="text-3xl font-black text-red-600 tracking-tight">{stats?.highRiskCount || 0}</h3>
-                <p className="text-slate-500 text-[14px] font-medium mt-1">Ca nguy cơ cao</p>
+                <p className="text-slate-500 text-[14px] font-medium mt-1">Cảnh báo Nguy cơ Cao</p>
                 <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map(i => (
-                      <img key={i} src={`https://i.pravatar.cc/100?u=${i + 10}`} className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900" alt="avatar" />
-                    ))}
-                  </div>
-                  <span className="text-[12px] text-slate-400 font-medium">Cần xử lý ngay</span>
+                  <span className="text-[12px] text-slate-400 font-medium">Báo cáo cập nhật theo thời gian thực</span>
                 </div>
               </div>
 
@@ -128,9 +134,10 @@ export default function ClinicDashboard() {
                   <span className="px-2 py-1 bg-amber-50 text-amber-600 text-[11px] font-bold rounded-lg">{stats?.followUpRate} tỷ lệ tái khám</span>
                 </div>
                 <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{stats?.missedFollowUps || 0}</h3>
-                <p className="text-slate-500 text-[14px] font-medium mt-1">Bệnh nhân chưa tái khám</p>
-                <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800">
-                  <button className="text-[12px] font-bold text-primary hover:underline">Gửi nhắc nhở hàng loạt</button>
+                <p className="text-slate-500 text-[14px] font-medium mt-1">Theo dõi Tái khám</p>
+                <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between">
+                  <span className="text-[12px] text-slate-400 font-medium">(Mẫu)</span>
+                  <button className="text-[12px] font-bold text-primary hover:underline">Gửi nhắc nhở</button>
                 </div>
               </div>
 
@@ -142,11 +149,11 @@ export default function ClinicDashboard() {
                     <span className="material-symbols-outlined text-xl">analytics</span>
                   </div>
                   <h3 className="text-3xl font-black tracking-tight leading-none">{stats?.chronicRate}</h3>
-                  <p className="text-white/80 text-[14px] font-medium mt-1">Tỷ lệ bệnh mãn tính</p>
+                  <p className="text-white/80 text-[14px] font-medium mt-1">Tỷ lệ bệnh mãn tính (Mẫu)</p>
                 </div>
                 <div className="relative z-10 mt-4 h-12 flex items-end gap-1">
-                  {[40, 60, 45, 70, 55, 80, 65].map((h, i) => (
-                    <div key={i} className="flex-1 bg-white/30 rounded-t-sm" style={{ height: `${h}%` }}></div>
+                  {chartData.slice(-7).map((d, i) => (
+                    <div key={i} className="flex-1 bg-white/30 rounded-t-sm" style={{ height: `${(d.value / (stats?.chronicPatients || 10) * 100) || 20}%` }}></div>
                   ))}
                 </div>
               </div>
@@ -160,13 +167,13 @@ export default function ClinicDashboard() {
                 <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
                   <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">Lượt khám & Theo dõi</h3>
-                      <p className="text-sm text-slate-500 font-medium">Thống kê theo từng ngày trong tuần</p>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">Lưu lượng Tiếp nhận & Quản lý Ca bệnh</h3>
+                      <p className="text-sm text-slate-500 font-medium">Biến động lưu lượng điều trị theo thời gian</p>
                     </div>
                     <div className="flex gap-2">
                       <div className="flex items-center gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-primary"></div>
-                        <span className="text-[12px] font-medium text-slate-500">Bệnh nhân mới</span>
+                        <span className="text-[12px] font-medium text-slate-500">Ca tiếp nhận mới</span>
                       </div>
                     </div>
                   </div>
@@ -205,68 +212,67 @@ export default function ClinicDashboard() {
                   </div>
                 </div>
 
-                {/* Disease Distribution Table/Chart */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Cơ cấu bệnh tật</h3>
-                    <div className="h-[240px] flex items-center justify-center relative">
+                {/* Disease Distribution Section */}
+                <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cơ cấu bệnh tật</h3>
+                      <p className="text-sm text-slate-500 font-medium">Phân bổ bệnh nhân theo mặt bệnh mãn tính</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                    <div className="w-full md:w-1/2 h-[280px] flex items-center justify-center relative">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
-                            data={diseaseDistribution}
+                            data={diseaseDistribution.length > 0 ? diseaseDistribution : [{ name: 'Trống', value: 1, color: '#f1f5f9' }]}
                             cx="50%"
                             cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
+                            innerRadius={75}
+                            outerRadius={100}
+                            paddingAngle={diseaseDistribution.length > 0 ? 5 : 0}
                             dataKey="value"
+                            stroke="none"
                           >
-                            {diseaseDistribution.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
+                            {diseaseDistribution.length > 0 ? (
+                              diseaseDistribution.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color || `hsl(${index * 45}, 70%, 60%)`} />
+                              ))
+                            ) : (
+                              <Cell fill="#f1f5f9" />
+                            )}
                           </Pie>
-                          <Tooltip />
+                          <Tooltip 
+                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span className="text-2xl font-black text-slate-900 dark:text-white">840</span>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Ca bệnh</span>
+                        <span className="text-3xl font-black text-slate-900 dark:text-white">{stats?.chronicPatients || 0}</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Tổng bệnh nhân</span>
                       </div>
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-4">
-                      {diseaseDistribution.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></div>
-                          <span className="text-[12px] font-bold text-slate-600 dark:text-slate-400 truncate">{item.name}</span>
-                          <span className="text-[12px] font-black text-slate-900 dark:text-white ml-auto">{item.value}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">Hiệu suất Bác sĩ</h3>
-                      <Link to={ROUTES.CLINIC.DOCTORS} className="text-primary text-[12px] font-bold hover:underline">Xem tất cả</Link>
-                    </div>
-                    <div className="space-y-4">
-                      {[
-                        { name: 'BS. Lê Minh', patients: 120, satisfaction: 98, avatar: 'https://i.pravatar.cc/150?u=11' },
-                        { name: 'BS. Trần Hà', patients: 95, satisfaction: 96, avatar: 'https://i.pravatar.cc/150?u=12' },
-                        { name: 'BS. Ngô Quân', patients: 88, satisfaction: 92, avatar: 'https://i.pravatar.cc/150?u=13' },
-                      ].map((doc, idx) => (
-                        <div key={idx} className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl group hover:bg-primary/5 transition-colors cursor-pointer">
-                          <img src={doc.avatar} className="w-10 h-10 rounded-full object-cover" alt={doc.name} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[14px] font-bold text-slate-900 dark:text-white truncate">{doc.name}</p>
-                            <p className="text-[12px] text-slate-500 font-medium">{doc.patients} bệnh nhân</p>
+                    
+                    <div className="w-full md:w-1/2 space-y-4">
+                      {diseaseDistribution.length > 0 ? (
+                        diseaseDistribution.map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-transparent hover:border-slate-100 transition-all">
+                            <div className="flex items-center gap-3">
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color || `hsl(${idx * 45}, 70%, 60%)` }}></div>
+                              <span className="text-[14px] font-bold text-slate-700 dark:text-slate-300">{item.label || item.name}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[14px] font-black text-slate-900 dark:text-white">{item.percentage || `${item.value}%`}</span>
+                              <p className="text-[10px] text-slate-400 font-bold">{item.value} bệnh nhân</p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-[13px] font-black text-emerald-600">{doc.satisfaction}%</p>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase">Hài lòng</p>
-                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-slate-400 text-sm italic">Chưa có dữ liệu phân bổ bệnh tật</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>
@@ -274,47 +280,68 @@ export default function ClinicDashboard() {
 
               {/* Right Column: High Risk Alerts */}
               <div className="lg:col-span-4 space-y-6">
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col h-full">
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col">
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h3 className="text-lg font-bold text-slate-900 dark:text-white">Bệnh nhân nguy cơ</h3>
                       <p className="text-sm text-slate-500 font-medium">Cần can thiệp khẩn cấp</p>
                     </div>
-                    <div className="w-8 h-8 bg-red-50 text-red-600 rounded-full flex items-center justify-center animate-pulse">
-                      <span className="material-symbols-outlined text-[20px]">notifications_active</span>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${riskPatients.length > 0 ? 'bg-red-50 text-red-600 animate-pulse' : 'bg-emerald-50 text-emerald-600'}`}>
+                      <span className="material-symbols-outlined text-[20px]">
+                        {riskPatients.length > 0 ? 'notifications_active' : 'verified_user'}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="space-y-4 flex-1">
-                    {riskPatients.map((patient) => (
-                      <div key={patient.id} className="p-4 rounded-2xl border border-slate-50 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary/20 transition-all group cursor-pointer relative overflow-hidden">
-                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${patient.riskLevel === 'HIGH' ? 'bg-red-500' : 'bg-amber-500'}`}></div>
-                        <div className="flex items-start gap-4">
-                          <img src={patient.avatar} className="w-12 h-12 rounded-xl object-cover" alt={patient.name} />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">{patient.name}</p>
-                              <span className="text-[10px] text-slate-400 font-medium">{patient.lastUpdate}</span>
-                            </div>
-                            <p className="text-[13px] text-slate-500 font-medium mb-2">{patient.condition}</p>
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${patient.riskLevel === 'HIGH' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'
-                                }`}>
-                                {patient.riskLevel === 'HIGH' ? 'Rất cao' : 'Trung bình'}
-                              </span>
-                              <button className="ml-auto text-[12px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                                Chi tiết <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                              </button>
+                  <div className="space-y-4">
+                    {riskPatients.length > 0 ? (
+                      riskPatients.slice(0, 5).map((patient) => (
+                        <div key={patient.id} className="p-4 rounded-2xl border border-slate-50 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary/20 transition-all group cursor-pointer relative overflow-hidden">
+                          <div className={`absolute left-0 top-0 bottom-0 w-1 ${patient.riskLevel === 'HIGH' ? 'bg-red-500' : 'bg-amber-500'}`}></div>
+                          <div className="flex items-start gap-4">
+                            <img src={patient.avatar || `https://i.pravatar.cc/100?u=${patient.id}`} className="w-12 h-12 rounded-xl object-cover" alt={patient.name} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">{patient.name}</p>
+                                <span className="text-[10px] text-slate-400 font-medium">{patient.lastUpdate}</span>
+                              </div>
+                              <p className="text-[13px] text-slate-500 font-medium mb-2">{patient.condition}</p>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${patient.riskLevel === 'HIGH' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'
+                                  }`}>
+                                  {patient.riskLevel === 'HIGH' ? 'Rất cao' : 'Trung bình'}
+                                </span>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedPatient(patient);
+                                    setIsPatientDetailModalOpen(true);
+                                  }}
+                                  className="ml-auto text-[12px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+                                >
+                                  Chi tiết <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="py-10 px-4 flex flex-col items-center justify-center text-center">
+                        <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 rounded-full flex items-center justify-center mb-4">
+                          <span className="material-symbols-outlined text-3xl">check_circle</span>
+                        </div>
+                        <h4 className="text-slate-900 dark:text-white font-bold mb-1">An toàn lâm sàng</h4>
+                        <p className="text-slate-400 text-[13px] font-medium leading-relaxed">
+                          Hiện tại không có bệnh nhân nào ở mức nguy cơ cao cần can thiệp.
+                        </p>
                       </div>
-                    ))}
+                    )}
                   </div>
 
                   <Link
                     to={ROUTES.CLINIC.ALERTS}
-                    className="mt-6 w-full py-3 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 rounded-2xl font-bold text-sm text-center hover:bg-slate-100 transition-colors"
+                    className="mt-6 w-full py-3 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 rounded-2xl font-bold text-sm text-center hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                   >
                     Xem tất cả cảnh báo
                   </Link>
@@ -322,13 +349,13 @@ export default function ClinicDashboard() {
 
                 {/* Quick Actions / Tips */}
                 <div className="bg-gradient-to-br from-primary to-blue-600 p-6 rounded-3xl text-white shadow-lg shadow-primary/20">
-                  <h4 className="font-bold mb-2">Mẹo Quản lý</h4>
+                  <h4 className="font-bold mb-2">Thông tin Phân tích</h4>
                   <p className="text-white/80 text-sm mb-4 leading-relaxed">
-                    Bệnh nhân tiểu đường có tỷ lệ bỏ tái khám cao hơn 15% vào mùa lễ. Hãy thiết lập nhắc nhở tự động.
+                    {stats?.insight || "Hệ thống đang phân tích dữ liệu để đưa ra các khuyến nghị lâm sàng phù hợp."}
                   </p>
-                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl text-sm font-bold transition-all">
-                    Thiết lập ngay
-                  </button>
+                  <Link to={ROUTES.CLINIC.REPORTS} className="inline-block px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl text-sm font-bold transition-all">
+                    Xem báo cáo chi tiết
+                  </Link>
                 </div>
               </div>
             </div>
@@ -336,6 +363,11 @@ export default function ClinicDashboard() {
         </main>
       </div>
 
+      <PatientDetailModal 
+        isOpen={isPatientDetailModalOpen}
+        onClose={() => setIsPatientDetailModalOpen(false)}
+        patient={selectedPatient}
+      />
     </div>
   );
 }

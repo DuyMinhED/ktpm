@@ -381,7 +381,7 @@ export default function ClinicDoctors() {
                                             {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[15px] font-medium text-slate-700">Liên hệ</span>}
                                         </th>
                                         <th className="px-6 py-4 text-center">
-                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16 mx-auto"></div> : <span className="text-[15px] font-medium text-slate-700">Bệnh nhân</span>}
+                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16 mx-auto"></div> : <span className="text-[15px] font-medium text-slate-700">Lượng bệnh nhân</span>}
                                         </th>
                                         <th className="px-6 py-4">
                                             {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-24"></div> : <span className="text-[15px] font-medium text-slate-700">CC hành nghề</span>}
@@ -437,10 +437,10 @@ export default function ClinicDoctors() {
                                                 <td className="px-8 py-4">
                                                     <div className="flex items-center gap-4">
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); openImagePreview(dr.img, `Ảnh bác sĩ: ${dr.name}`); }}
+                                                            onClick={(e) => { e.stopPropagation(); openImagePreview(dr.img || `https://ui-avatars.com/api/?name=${encodeURIComponent(dr.name)}&background=e0f2fe&color=0369a1`, `Ảnh bác sĩ: ${dr.name}`); }}
                                                             className="relative shrink-0 group/avatar overflow-hidden rounded-xl"
                                                         >
-                                                            <img alt={dr.name} className="w-11 h-11 rounded-xl object-cover ring-2 ring-primary/10 transition-transform duration-500 group-hover/avatar:scale-110" src={dr.img} />
+                                                            <img alt={dr.name} className="w-11 h-11 rounded-xl object-cover ring-2 ring-primary/10 transition-transform duration-500 group-hover/avatar:scale-110" src={dr.img || `https://ui-avatars.com/api/?name=${encodeURIComponent(dr.name)}&background=e0f2fe&color=0369a1`} />
                                                             <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity border-0">
                                                                 <span className="material-symbols-outlined text-white text-[16px]">zoom_in</span>
                                                             </div>
@@ -482,12 +482,14 @@ export default function ClinicDoctors() {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12px] font-bold italic-none shadow-md transition-all text-white ${dr.statusColor === 'primary' ? 'bg-emerald-500' :
-                                                        dr.statusColor === 'amber' ? 'bg-amber-500' :
-                                                            dr.statusColor === 'rose' ? 'bg-rose-500' :
-                                                                'bg-slate-400'
+                                                    <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12px] font-bold italic-none shadow-md transition-all text-white ${dr.status === 'ACTIVE' ? 'bg-emerald-500' :
+                                                            dr.status === 'ON_LEAVE' ? 'bg-amber-500' :
+                                                                dr.status === 'INACTIVE' ? 'bg-rose-500' :
+                                                                    'bg-slate-400'
                                                         }`}>
-                                                        {dr.status}
+                                                        {dr.status === 'ACTIVE' ? 'Đang hoạt động' :
+                                                            dr.status === 'ON_LEAVE' ? 'Nghỉ phép' :
+                                                                dr.status === 'INACTIVE' ? 'Ngưng hoạt động' : dr.status}
                                                     </span>
                                                 </td>
                                                 <td className="px-8 py-4 text-right whitespace-nowrap">

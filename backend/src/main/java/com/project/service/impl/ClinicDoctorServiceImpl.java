@@ -34,8 +34,24 @@ public class ClinicDoctorServiceImpl implements ClinicDoctorService {
     @Transactional(readOnly = true)
     public Page<ClinicDoctorResponse> getDoctorRecords(Long clinicId, String keyword, String status, String specialty, 
                                                       String degree, String experience, Pageable pageable) {
+        List<Object[]> counts = patientRepository.countPatientsByDoctorIds(clinicId);
+        java.util.Map<Long, Long> countMap = new java.util.HashMap<>();
+        if (counts != null) {
+            for (Object[] row : counts) {
+                if (row != null && row.length >= 2 && row[0] != null && row[1] != null) {
+                    try {
+                        countMap.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+                    } catch (Exception e) {}
+                }
+            }
+        }
+
         return userRepository.findByFilters(UserRole.DOCTOR, status, clinicId, specialty, degree, experience, keyword, pageable)
-                .map(this::mapToDoctorResponse);
+                .map(u -> {
+                    ClinicDoctorResponse res = mapToDoctorResponse(u);
+                    res.setLoad(countMap.getOrDefault(u.getId(), 0L).intValue());
+                    return res;
+                });
     }
 
     @Override
@@ -58,6 +74,9 @@ public class ClinicDoctorServiceImpl implements ClinicDoctorService {
                 .experience(request.getExperience())
                 .licenseNumber(request.getLicenseNumber())
                 .status("ACTIVE")
+                .avatarUrl(request.getAvatarUrl())
+                .licenseImageUrl(request.getLicenseImageUrl())
+                .bio(request.getBio())
                 .build();
         userRepository.save(user);
     }
@@ -77,6 +96,10 @@ public class ClinicDoctorServiceImpl implements ClinicDoctorService {
         user.setDegree(request.getDegree());
         user.setExperience(request.getExperience());
         user.setLicenseNumber(request.getLicenseNumber());
+        if (request.getAvatarUrl() != null && !request.getAvatarUrl().isEmpty()) user.setAvatarUrl(request.getAvatarUrl());
+        if (request.getLicenseImageUrl() != null && !request.getLicenseImageUrl().isEmpty()) user.setLicenseImageUrl(request.getLicenseImageUrl());
+        if (request.getBio() != null) user.setBio(request.getBio());
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) user.setPassword(passwordEncoder.encode(request.getPassword()));
         if (request.getStatus() != null) user.setStatus(request.getStatus());
 
         userRepository.save(user);
@@ -141,6 +164,8 @@ public class ClinicDoctorServiceImpl implements ClinicDoctorService {
                 .experience(u.getExperience())
                 .status(u.getStatus())
                 .licenseNumber(u.getLicenseNumber())
+                .img(u.getAvatarUrl())
+                .licenseImageUrl(u.getLicenseImageUrl())
                 .build();
     }
 }

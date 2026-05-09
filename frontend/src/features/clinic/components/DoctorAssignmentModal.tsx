@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { clinicApi } from '../../../api/clinic';
 import Toast from '../../../components/ui/Toast';
 import Dropdown from '../../../components/ui/Dropdown';
+import EditPatientModal from './EditPatientModal';
 
 interface DoctorAssignmentModalProps {
     isOpen: boolean;
@@ -18,6 +19,9 @@ export default function DoctorAssignmentModal({
     const [searchQuery, setSearchQuery] = useState('');
     const [assignedPatients, setAssignedPatients] = useState<any[]>([]);
     const [unassignedPatients, setUnassignedPatients] = useState<any[]>([]);
+    const [doctors, setDoctors] = useState<any[]>([]);
+    const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
+    const [isSavingPatient, setIsSavingPatient] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isAssigning, setIsAssigning] = useState(false);
     const [showToast, setShowToast] = useState(false);
@@ -25,7 +29,6 @@ export default function DoctorAssignmentModal({
     const [activeTab, setActiveTab] = useState<'assigned' | 'new'>('assigned');
     const [visibleCount, setVisibleCount] = useState(10);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [doctors, setDoctors] = useState<any[]>([]);
 
     const currentClinicId = localStorage.getItem('clinicId') || '1';
     const doctorId = doctorData?.dbId || doctorData?.id;
@@ -107,28 +110,71 @@ export default function DoctorAssignmentModal({
         }, 400);
     };
 
-    const handleAssign = async (patient: any, targetDoctorId?: string) => {
+    const handleAssign = async (patient: any, targetDoctorId: string) => {
         setIsAssigning(true);
-        const selectedId = targetDoctorId || doctorId;
-        const targetDoctor = doctors.find(d => d.id === selectedId || d.dbId === selectedId) || doctorData;
-
         try {
-            const updateRes = await clinicApi.updatePatient(currentClinicId, patient.dbId || patient.id, {
-                ...patient,
-                doctorId: selectedId
+            const res = await clinicApi.updatePatient(currentClinicId, patient.dbId || patient.id, {
+                doctorId: targetDoctorId
             });
-
-            if (updateRes.success) {
-                setToastMsg(`Đã gán bệnh nhân ${patient.name} cho bác sĩ ${targetDoctor.name}`);
+            if (res.success) {
+                setToastMsg('Gán bệnh nhân thành công!');
                 setShowToast(true);
-                fetchData();
+                fetchData(); // Refresh list
+            } else {
+                setToastMsg('Lỗi khi gán bệnh nhân!');
+                setShowToast(true);
             }
         } catch (error) {
-            console.error('Failed to assign patient:', error);
-            setToastMsg('Lỗi khi gán bệnh nhân');
+            console.error('Lỗi khi gán:', error);
+            setToastMsg('Đã có lỗi xảy ra!');
             setShowToast(true);
         } finally {
             setIsAssigning(false);
+        }
+    };
+
+    const handleUnassign = async (patient: any) => {
+        setIsAssigning(true);
+        try {
+            const res = await clinicApi.updatePatient(currentClinicId, patient.dbId || patient.id, {
+                doctorId: -1 // Special value to unassign
+            });
+            if (res.success) {
+                setToastMsg('Gỡ phân công thành công!');
+                setShowToast(true);
+                fetchData(); // Refresh list
+            } else {
+                setToastMsg('Lỗi khi gỡ phân công!');
+                setShowToast(true);
+            }
+        } catch (error) {
+            console.error('Lỗi khi gỡ phân công:', error);
+            setToastMsg('Đã có lỗi xảy ra!');
+            setShowToast(true);
+        } finally {
+            setIsAssigning(false);
+        }
+    };
+
+    const handleSavePatient = async (updatedData: any) => {
+        setIsSavingPatient(true);
+        try {
+            const res = await clinicApi.updatePatient(currentClinicId, updatedData.dbId || updatedData.id, updatedData);
+            if (res.success) {
+                setToastMsg('Cập nhật hồ sơ thành công!');
+                setShowToast(true);
+                setSelectedPatient(null);
+                fetchData();
+            } else {
+                setToastMsg('Lỗi khi cập nhật!');
+                setShowToast(true);
+            }
+        } catch (error) {
+            console.error(error);
+            setToastMsg('Lỗi kết nối!');
+            setShowToast(true);
+        } finally {
+            setIsSavingPatient(false);
         }
     };
 
@@ -294,10 +340,12 @@ export default function DoctorAssignmentModal({
                                                         <td className="px-6 py-4 text-right">
                                                             {activeTab === 'assigned' ? (
                                                                 <div className="flex items-center justify-end gap-2.5">
-                                                                    <button title="Xem hồ sơ" className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary hover:border-primary transition-all flex items-center justify-center group/btn shadow-sm">
+                                                                    <button onClick={() => {
+                                                                        setSelectedPatient(patient);
+                                                                    }} title="Xem hồ sơ" className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary hover:border-primary transition-all flex items-center justify-center group/btn shadow-sm">
                                                                         <span className="material-symbols-outlined text-[18px]">visibility</span>
                                                                     </button>
-                                                                    <button title="Gỡ phân công" className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:border-red-500 transition-all flex items-center justify-center group/btn shadow-sm">
+                                                                    <button onClick={() => handleUnassign(patient)} title="Gỡ phân công" className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:border-red-500 transition-all flex items-center justify-center group/btn shadow-sm">
                                                                         <span className="material-symbols-outlined text-[18px]">person_remove</span>
                                                                     </button>
                                                                 </div>
@@ -356,6 +404,16 @@ export default function DoctorAssignmentModal({
                     </div>
                 </div>
                 <Toast show={showToast} title={toastMsg} onClose={() => setShowToast(false)} />
+                {selectedPatient && (
+                    <EditPatientModal
+                        isOpen={!!selectedPatient}
+                        onClose={() => setSelectedPatient(null)}
+                        isSaving={isSavingPatient}
+                        onSave={handleSavePatient}
+                        patientData={selectedPatient}
+                        availableDoctors={doctors}
+                    />
+                )}
             </div>
         </div>,
         document.body

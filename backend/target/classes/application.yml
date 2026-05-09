@@ -5,9 +5,9 @@ spring:
     init:
       mode: always
   datasource:
-    url: jdbc:postgresql://ep-delicate-moon-a1jfnlax-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&preparedThreshold=0
-    username: neondb_owner
-    password: npg_N1lq4SYCHGov
+    url: ${DB_URL:jdbc:postgresql://ep-delicate-moon-a1jfnlax-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&preparedThreshold=0}
+    username: ${DB_USERNAME:neondb_owner}
+    password: ${DB_PASSWORD:npg_N1lq4SYCHGov}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -37,14 +37,16 @@ server:
 
 jwt:
   # Secret must be at least 256 bits (32 chars length)
-  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
   expiration: 86400000 # 24 hours in ms
   refresh-expiration: 604800000 # 7 days in ms
 
 springdoc:
   api-docs:
     path: /v3/api-docs
+    enabled: ${SWAGGER_ENABLED:false}
   swagger-ui:
     path: /swagger-ui.html
+    enabled: ${SWAGGER_ENABLED:false}
 
 

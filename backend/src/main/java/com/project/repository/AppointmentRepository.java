@@ -101,4 +101,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                       "WHERE is_deleted = false AND created_at >= :startDate " +
                       "GROUP BY y ORDER BY y ASC", nativeQuery = true)
         List<Object[]> countAllAppointmentsByYearNative(@org.springframework.data.repository.query.Param("startDate") LocalDateTime startDate);
+
+        @Query("SELECT COUNT(a) FROM Appointment a JOIN User u ON a.doctorId = u.id WHERE u.clinicId = :clinicId AND a.isDeleted = false")
+        long countByClinicId(@org.springframework.data.repository.query.Param("clinicId") Long clinicId);
+
+        @Query("SELECT COUNT(a) FROM Appointment a JOIN User u ON a.doctorId = u.id WHERE u.clinicId = :clinicId AND a.status = :status AND a.isDeleted = false")
+        long countByClinicIdAndStatus(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("status") AppointmentStatus status);
 }

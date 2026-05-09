@@ -24,6 +24,7 @@ export const ROUTES = {
     DOCTORS: '/clinic/doctors',
     ASSIGNMENT: '/clinic/assignment',
     SETTINGS: '/clinic/settings',
+    APPOINTMENTS: '/clinic/appointments',
   },
   ADMIN: {
     DASHBOARD: '/admin',

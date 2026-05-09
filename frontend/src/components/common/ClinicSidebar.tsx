@@ -28,6 +28,7 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
         { path: ROUTES.CLINIC.REPORTS, label: 'Báo cáo', icon: 'analytics' },
         { path: ROUTES.CLINIC.ALERTS, label: 'Cảnh báo nguy cơ', icon: 'warning' },
         { path: ROUTES.CLINIC.ASSIGNMENT, label: 'Điều phối bệnh nhân', icon: 'assignment_ind' },
+        { path: ROUTES.CLINIC.APPOINTMENTS, label: 'Lịch hẹn khám', icon: 'calendar_today' },
         { path: ROUTES.CLINIC.SETTINGS, label: 'Cấu hình phòng khám', icon: 'settings' },
     ];
 

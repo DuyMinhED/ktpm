@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import ProtectedRoute from '../components/auth/ProtectedRoute';
 import DoctorDashboard from '../pages/DoctorDashboard';
 import DoctorAppointments from '../pages/DoctorAppointments';
 import DoctorMessages from '../pages/DoctorMessages';
@@ -21,6 +22,7 @@ import ClinicPatients from '../pages/ClinicPatients';
 import ClinicDoctors from '../pages/ClinicDoctors';
 import ClinicAssignment from '../pages/ClinicAssignment';
 import ClinicSettings from '../pages/ClinicSettings';
+import ClinicAppointments from '../pages/ClinicAppointments';
 
 import LandingPage from '../pages/VelorahLandingPage';
 import PatientLayout from '../layouts/PatientLayout';
@@ -37,9 +39,12 @@ const AppRoutes = () => {
     <Routes>
       <Route path={ROUTES.HOME} element={<LandingPage />} />
 
-
-      {/* Patient Portal Routes */}
-      <Route path="/patient" element={<PatientLayout />}>
+      {/* Patient Portal Routes — Only PATIENT role */}
+      <Route path="/patient" element={
+        <ProtectedRoute allowedRoles={['PATIENT']}>
+          <PatientLayout />
+        </ProtectedRoute>
+      }>
         <Route index element={<PatientDashboard />} />
         <Route path="metrics" element={<PatientHealthMetrics />} />
         <Route path="appointments" element={<PatientAppointments />} />
@@ -47,27 +52,34 @@ const AppRoutes = () => {
         <Route path="messages" element={<PatientMessages />} />
         <Route path="profile" element={<PatientProfile />} />
       </Route>
-      <Route path={ROUTES.DOCTOR.DASHBOARD} element={<DoctorDashboard />} />
-      <Route path={ROUTES.DOCTOR.ANALYTICS} element={<DoctorAnalytics />} />
-      <Route path={ROUTES.DOCTOR.APPOINTMENTS} element={<DoctorAppointments />} />
-      <Route path={ROUTES.DOCTOR.MESSAGES} element={<DoctorMessages />} />
-      <Route path={ROUTES.DOCTOR.PATIENTS} element={<DoctorPatients />} />
-      <Route path={ROUTES.DOCTOR.PRESCRIPTIONS} element={<DoctorPrescriptions />} />
-      <Route path={ROUTES.CLINIC.DASHBOARD} element={<ClinicDashboard />} />
-      <Route path={ROUTES.CLINIC.REPORTS} element={<ClinicReports />} />
-      <Route path={ROUTES.CLINIC.ALERTS} element={<ClinicRiskAlerts />} />
-      <Route path={ROUTES.CLINIC.PATIENTS} element={<ClinicPatients />} />
-      <Route path={ROUTES.CLINIC.DOCTORS} element={<ClinicDoctors />} />
-      <Route path={ROUTES.CLINIC.ASSIGNMENT} element={<ClinicAssignment />} />
-      <Route path={ROUTES.CLINIC.SETTINGS} element={<ClinicSettings />} />
-      <Route path={ROUTES.ADMIN.DASHBOARD} element={<AdminDashboard />} />
-      <Route path={ROUTES.ADMIN.CLINICS} element={<AdminClinics />} />
-      <Route path={ROUTES.ADMIN.USERS} element={<AdminUsers />} />
-      <Route path={ROUTES.ADMIN.SERVICES} element={<AdminServices />} />
-      <Route path={ROUTES.ADMIN.REPORTS} element={<AdminReports />} />
-      <Route path={ROUTES.ADMIN.AUDIT_LOGS} element={<AdminAuditLogs />} />
-      <Route path={ROUTES.ADMIN.SUPPORT} element={<AdminSupport />} />
-      <Route path={ROUTES.ADMIN.SETTINGS} element={<AdminSettings />} />
+
+      {/* Doctor Routes — Only DOCTOR role */}
+      <Route path={ROUTES.DOCTOR.DASHBOARD} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorDashboard /></ProtectedRoute>} />
+      <Route path={ROUTES.DOCTOR.ANALYTICS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorAnalytics /></ProtectedRoute>} />
+      <Route path={ROUTES.DOCTOR.APPOINTMENTS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorAppointments /></ProtectedRoute>} />
+      <Route path={ROUTES.DOCTOR.MESSAGES} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorMessages /></ProtectedRoute>} />
+      <Route path={ROUTES.DOCTOR.PATIENTS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorPatients /></ProtectedRoute>} />
+      <Route path={ROUTES.DOCTOR.PRESCRIPTIONS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorPrescriptions /></ProtectedRoute>} />
+
+      {/* Clinic Manager Routes — Only CLINIC_MANAGER or ADMIN */}
+      <Route path={ROUTES.CLINIC.DASHBOARD} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicDashboard /></ProtectedRoute>} />
+      <Route path={ROUTES.CLINIC.REPORTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicReports /></ProtectedRoute>} />
+      <Route path={ROUTES.CLINIC.ALERTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicRiskAlerts /></ProtectedRoute>} />
+      <Route path={ROUTES.CLINIC.PATIENTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicPatients /></ProtectedRoute>} />
+      <Route path={ROUTES.CLINIC.DOCTORS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicDoctors /></ProtectedRoute>} />
+      <Route path={ROUTES.CLINIC.ASSIGNMENT} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicAssignment /></ProtectedRoute>} />
+      <Route path={ROUTES.CLINIC.APPOINTMENTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicAppointments /></ProtectedRoute>} />
+      <Route path={ROUTES.CLINIC.SETTINGS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicSettings /></ProtectedRoute>} />
+
+      {/* Admin Routes — Only ADMIN */}
+      <Route path={ROUTES.ADMIN.DASHBOARD} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
+      <Route path={ROUTES.ADMIN.CLINICS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminClinics /></ProtectedRoute>} />
+      <Route path={ROUTES.ADMIN.USERS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminUsers /></ProtectedRoute>} />
+      <Route path={ROUTES.ADMIN.SERVICES} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminServices /></ProtectedRoute>} />
+      <Route path={ROUTES.ADMIN.REPORTS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminReports /></ProtectedRoute>} />
+      <Route path={ROUTES.ADMIN.AUDIT_LOGS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAuditLogs /></ProtectedRoute>} />
+      <Route path={ROUTES.ADMIN.SUPPORT} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSupport /></ProtectedRoute>} />
+      <Route path={ROUTES.ADMIN.SETTINGS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSettings /></ProtectedRoute>} />
     </Routes>
   );
 };

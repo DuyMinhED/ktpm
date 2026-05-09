@@ -37,7 +37,7 @@ export default function DeleteDoctorModal({
 
   if (!isOpen || !doctorData) return null;
 
-  const isConfirmed = confirmName === doctorData.name && confirmPhrase.toLowerCase() === targetPhrase;
+  const isConfirmed = confirmName === doctorData.name && confirmPhrase.toLowerCase() === targetPhrase.toLowerCase();
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left font-display">
