@@ -245,17 +245,50 @@ const PatientAppointments: React.FC = () => {
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
                         <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
+                            {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map(d => (
                                 <span key={d} className="text-[10px] font-bold text-slate-400 uppercase">{d}</span>
                             ))}
                         </div>
                         <div className="grid grid-cols-7 gap-1 text-center">
-                            {/* Days of current month approx */}
-                            {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
-                                <div key={d} className={`py-2 text-xs font-medium cursor-pointer hover:bg-primary/20 hover:text-primary rounded-full transition-all ${d === new Date().getDate() ? 'bg-primary text-slate-900 font-bold shadow-lg shadow-primary/20 scale-110' : ''}`}>
-                                    {d}
-                                </div>
-                            ))}
+                            {(() => {
+                                const now = new Date();
+                                const year = now.getFullYear();
+                                const month = now.getMonth();
+                                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                                const firstDayOfWeek = new Date(year, month, 1).getDay();
+                                const appointmentDays = [...upcoming, ...history]
+                                    .filter(a => {
+                                        const ad = new Date(a.appointmentTime);
+                                        return ad.getMonth() === month && ad.getFullYear() === year;
+                                    })
+                                    .map(a => new Date(a.appointmentTime).getDate());
+                                const cells = [];
+                                for (let i = 0; i < firstDayOfWeek; i++) {
+                                    cells.push(<div key={`empty-${i}`} />);
+                                }
+                                for (let d = 1; d <= daysInMonth; d++) {
+                                    const isToday = d === now.getDate();
+                                    const hasAppt = appointmentDays.includes(d);
+                                    cells.push(
+                                        <div
+                                            key={d}
+                                            className={`py-2 text-xs font-medium rounded-full transition-all relative ${
+                                                isToday
+                                                    ? 'bg-primary text-slate-900 font-bold shadow-lg shadow-primary/20 scale-110'
+                                                    : hasAppt
+                                                    ? 'text-primary font-bold'
+                                                    : ''
+                                            }`}
+                                        >
+                                            {d}
+                                            {hasAppt && !isToday && (
+                                                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                                            )}
+                                        </div>
+                                    );
+                                }
+                                return cells;
+                            })()}
                         </div>
                     </div>
                 </section>

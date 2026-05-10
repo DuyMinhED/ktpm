@@ -15,6 +15,10 @@ public class ConversationResponse {
     private String doctorSpecialty;
     private String doctorAvatarUrl;
     
+    private String doctorExperience;
+    private String doctorBio;
+    private String doctorClinicName;
+    
     private Long patientId;
     private String patientName;
     private String patientAvatarUrl;

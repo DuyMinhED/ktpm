@@ -33,6 +33,7 @@ public class PatientMessageServiceImpl implements PatientMessageService {
     private final MessageRepository messageRepository;
     private final PatientRepository patientRepository;
     private final com.project.repository.UserRepository userRepository;
+    private final com.project.repository.ClinicRepository clinicRepository;
 
     @Override
     public List<ConversationResponse> getConversations() {
@@ -55,12 +56,23 @@ public class PatientMessageServiceImpl implements PatientMessageService {
                     // Fetch Doctor Details
                     com.project.entity.User doctor = userRepository.findById(conv.getDoctorId()).orElse(null);
 
+                    // Resolve clinic name
+                    String clinicName = null;
+                    if (doctor != null && doctor.getClinicId() != null) {
+                        clinicName = clinicRepository.findById(doctor.getClinicId())
+                                .map(c -> c.getName())
+                                .orElse(null);
+                    }
+
                     return ConversationResponse.builder()
                             .id(conv.getId())
                             .doctorId(conv.getDoctorId())
                             .doctorName(doctor != null ? doctor.getFullName() : "Bác sĩ")
                             .doctorSpecialty(doctor != null && doctor.getSpecialization() != null ? doctor.getSpecialization() : "Bác sĩ đa khoa")
                             .doctorAvatarUrl(doctor != null ? doctor.getAvatarUrl() : null)
+                            .doctorExperience(doctor != null ? doctor.getExperience() : null)
+                            .doctorBio(doctor != null ? doctor.getBio() : null)
+                            .doctorClinicName(clinicName)
                             .isOnline(true) // Default to online for now
                             .lastMessage(lastMsg)
                             .lastMessageAt(conv.getLastMessageAt())
@@ -80,6 +92,13 @@ public class PatientMessageServiceImpl implements PatientMessageService {
             Conversation savedConv = conversationRepository.save(newConv);
             
             com.project.entity.User doctor = userRepository.findById(patient.getDoctorId()).orElse(null);
+
+            String clinicName = null;
+            if (doctor != null && doctor.getClinicId() != null) {
+                clinicName = clinicRepository.findById(doctor.getClinicId())
+                        .map(c -> c.getName())
+                        .orElse(null);
+            }
             
             conversations.add(ConversationResponse.builder()
                     .id(savedConv.getId())
@@ -87,6 +106,9 @@ public class PatientMessageServiceImpl implements PatientMessageService {
                     .doctorName(doctor != null ? doctor.getFullName() : "Bác sĩ")
                     .doctorSpecialty(doctor != null && doctor.getSpecialization() != null ? doctor.getSpecialization() : "Bác sĩ đa khoa")
                     .doctorAvatarUrl(doctor != null ? doctor.getAvatarUrl() : null)
+                    .doctorExperience(doctor != null ? doctor.getExperience() : null)
+                    .doctorBio(doctor != null ? doctor.getBio() : null)
+                    .doctorClinicName(clinicName)
                     .isOnline(true)
                     .lastMessage("")
                     .lastMessageAt(savedConv.getLastMessageAt())

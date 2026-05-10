@@ -147,18 +147,20 @@ const PatientDashboard: React.FC = () => {
                                 <p className="text-sm font-medium text-slate-500">Đường huyết ({bloodSugar?.unit || 'mmol/L'})</p>
                                 <span className={`px-2 py-0.5 text-xs font-bold rounded ${bloodSugar?.status === 'NORMAL' ? 'bg-green-100 text-green-700' : bloodSugar?.status === 'HIGH' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
                                     }`}>
-                                    {bloodSugar ? getStatusVn(bloodSugar.status) : 'Cận cao'}
+                                    {bloodSugar ? getStatusVn(bloodSugar.status) : 'Chưa có'}
                                 </span>
                             </div>
                             <div className="flex items-baseline gap-2 mb-6">
-                                <p className="text-3xl font-bold">{bloodSugar?.latestValue || '6.5'}</p>
+                                <p className="text-3xl font-bold">{bloodSugar?.latestValue || '--'}</p>
+                                {bloodSugar?.changePercentage && (
                                 <p className={`text-sm font-bold flex items-center ${bloodSugar?.trend === 'UP' ? 'text-red-500' : 'text-green-500'
                                     }`}>
                                     <span className="material-symbols-outlined text-sm">
                                         {bloodSugar?.trend === 'UP' ? 'trending_up' : 'trending_down'}
                                     </span>
-                                    {bloodSugar?.changePercentage || '0.2%'}
+                                    {bloodSugar.changePercentage}
                                 </p>
+                                )}
                             </div>
                             <div className="h-44 w-full mt-4">
                                 {bloodSugar?.chartData && bloodSugar.chartData.length > 0 ? (
@@ -218,21 +220,23 @@ const PatientDashboard: React.FC = () => {
                                 <p className="text-sm font-medium text-slate-500">Huyết áp ({bloodPressure?.unit || 'mmHg'})</p>
                                 <span className={`px-2 py-0.5 text-xs font-bold rounded ${bloodPressure?.status === 'NORMAL' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
                                     }`}>
-                                    {bloodPressure ? getStatusVn(bloodPressure.status) : 'Ổn định'}
+                                    {bloodPressure ? getStatusVn(bloodPressure.status) : 'Chưa có'}
                                 </span>
                             </div>
                             <div className="flex items-baseline gap-2 mb-6">
                                 <p className="text-3xl font-bold">
-                                    {bloodPressure?.latestValue || '120'}
-                                    {bloodPressure?.latestValueSecondary ? `/${bloodPressure.latestValueSecondary}` : '/80'}
+                                    {bloodPressure?.latestValue || '--'}
+                                    {bloodPressure?.latestValueSecondary ? `/${bloodPressure.latestValueSecondary}` : ''}
                                 </p>
+                                {bloodPressure?.changePercentage && (
                                 <p className={`text-sm font-bold flex items-center ${bloodPressure?.trend === 'UP' ? 'text-red-500' : 'text-green-500'
                                     }`}>
                                     <span className="material-symbols-outlined text-sm">
                                         {bloodPressure?.trend === 'UP' ? 'trending_up' : 'trending_down'}
                                     </span>
-                                    {bloodPressure?.changePercentage || '1.0%'}
+                                    {bloodPressure.changePercentage}
                                 </p>
+                                )}
                             </div>
                             <div className="h-44 w-full mt-4">
                                 {bloodPressure?.chartData && bloodPressure.chartData.length > 0 ? (
@@ -290,7 +294,7 @@ const PatientDashboard: React.FC = () => {
                             <div>
                                 <p className="text-[14px] text-slate-500">Nhịp tim</p>
                                 <p className="text-lg font-bold">
-                                    {heartRate?.latestValue || '72'} <span className="text-xs font-normal text-slate-400">{heartRate?.unit || 'bpm'}</span>
+                                    {heartRate?.latestValue || '--'} <span className="text-xs font-normal text-slate-400">{heartRate?.unit || 'bpm'}</span>
                                 </p>
                             </div>
                         </div>
@@ -301,7 +305,7 @@ const PatientDashboard: React.FC = () => {
                             <div>
                                 <p className="text-[14px] text-slate-500">SpO2</p>
                                 <p className="text-lg font-bold">
-                                    {spO2?.latestValue || '98'}<span className="text-xs font-normal text-slate-400">{spO2?.unit || '%'}</span>
+                                    {spO2?.latestValue || '--'}<span className="text-xs font-normal text-slate-400">{spO2?.unit || '%'}</span>
                                 </p>
                             </div>
                         </div>
@@ -312,7 +316,7 @@ const PatientDashboard: React.FC = () => {
                             <div>
                                 <p className="text-[14px] text-slate-500">HbA1c</p>
                                 <p className="text-lg font-bold">
-                                    {hbA1c?.latestValue || '6.8'}<span className="text-xs font-normal text-slate-400">{hbA1c?.unit || '%'}</span>
+                                    {hbA1c?.latestValue || '--'}<span className="text-xs font-normal text-slate-400">{hbA1c?.unit || '%'}</span>
                                 </p>
                             </div>
                         </div>

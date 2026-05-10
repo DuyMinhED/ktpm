@@ -245,44 +245,46 @@ const PatientMessages: React.FC = () => {
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">{activeConv.doctorName}</h3>
                     <p className="text-slate-500 text-sm mt-1">{activeConv.doctorSpecialty}</p>
+                    {activeConv.doctorExperience && (
                     <div className="flex justify-center gap-2 mt-4">
                         <div className="bg-white dark:bg-slate-800 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex-1">
                             <p className="text-[14px] text-slate-400 font-medium">Kinh nghiệm</p>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white">12 năm</p>
-                        </div>
-                        <div className="bg-white dark:bg-slate-800 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex-1">
-                            <p className="text-[14px] text-slate-400 font-medium">Đánh giá</p>
-                            <p className="text-sm font-bold flex items-center gap-1 justify-center text-slate-900 dark:text-white">4.9 <span className="material-symbols-outlined text-yellow-400 text-[14px] fill-1">star</span></p>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white">{activeConv.doctorExperience}</p>
                         </div>
                     </div>
+                    )}
                 </div>
                 <div className="px-6 space-y-6 flex-1 py-4">
+                    {activeConv.doctorBio && (
                     <div>
                         <h4 className="text-sm font-bold text-slate-500 mb-3">Giới thiệu</h4>
                         <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic">
-                            Chuyên gia điều trị các bệnh lý, {activeConv.doctorSpecialty || "Bác sĩ chuyên khoa"}.
+                            {activeConv.doctorBio}
                         </p>
                     </div>
+                    )}
                     <div>
                         <h4 className="text-sm font-bold text-slate-500 mb-3">Thông tin liên hệ</h4>
                         <ul className="space-y-3">
+                            {activeConv.doctorClinicName && (
                             <li className="flex items-center gap-3 text-sm">
                                 <span className="material-symbols-outlined text-primary text-sm font-bold">location_on</span>
-                                <span className="text-slate-600 dark:text-slate-400 font-medium">Phòng khám Quận 1, TP.HCM</span>
+                                <span className="text-slate-600 dark:text-slate-400 font-medium">{activeConv.doctorClinicName}</span>
                             </li>
+                            )}
                             <li className="flex items-center gap-3 text-sm">
-                                <span className="material-symbols-outlined text-primary text-sm font-bold">schedule</span>
-                                <span className="text-slate-600 dark:text-slate-400 font-medium">08:00 - 17:00 (T2 - T7)</span>
+                                <span className="material-symbols-outlined text-primary text-sm font-bold">medical_services</span>
+                                <span className="text-slate-600 dark:text-slate-400 font-medium">{activeConv.doctorSpecialty}</span>
                             </li>
                         </ul>
                     </div>
                     <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-                        <button className="w-full py-3 bg-primary text-slate-900 font-medium rounded-full shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all mb-3 flex items-center justify-center gap-2 text-sm">
+                        <button 
+                            onClick={() => window.location.href = '/patient/appointments'}
+                            className="w-full py-3 bg-primary text-slate-900 font-medium rounded-full shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all mb-3 flex items-center justify-center gap-2 text-sm"
+                        >
                             <span className="material-symbols-outlined text-sm font-bold">event</span>
                             Đặt lịch hẹn ngay
-                        </button>
-                        <button className="w-full py-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium rounded-full border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-all text-sm">
-                            Xem hồ sơ chi tiết
                         </button>
                     </div>
                 </div>
