@@ -167,4 +167,49 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
 
         return mapToResponse(updated);
     }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "clinic_dashboard", allEntries = true)
+    public int batchReschedule(java.time.LocalDate sourceDate, java.time.LocalDate targetDate) {
+        Long doctorId = SecurityUtils.getCurrentUserId().orElseThrow();
+
+        LocalDateTime dayStart = sourceDate.atStartOfDay();
+        LocalDateTime dayEnd = sourceDate.plusDays(1).atStartOfDay();
+
+        List<Appointment> appointments = appointmentRepository.findByDoctorIdAndDateRangeAndStatuses(
+                doctorId, dayStart, dayEnd,
+                List.of(AppointmentStatus.PENDING, AppointmentStatus.SCHEDULED));
+
+        if (appointments.isEmpty()) {
+            return 0;
+        }
+
+        long daysDiff = java.time.temporal.ChronoUnit.DAYS.between(sourceDate, targetDate);
+
+        for (Appointment a : appointments) {
+            LocalDateTime newTime = a.getAppointmentTime().plusDays(daysDiff);
+            a.setAppointmentTime(newTime);
+            if (a.getEndTime() != null) {
+                a.setEndTime(a.getEndTime().plusDays(daysDiff));
+            }
+            appointmentRepository.save(a);
+
+            // Notify each patient
+            try {
+                notificationService.sendNotification(
+                    a.getPatient().getUserId(),
+                    "Thay đổi lịch hẹn",
+                    "Bác sĩ đã dời lịch hẹn của bạn sang ngày " + targetDate.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    "warning",
+                    "/patient/appointments"
+                );
+            } catch (Exception e) {
+                log.warn("Failed to notify patient {} about batch reschedule", a.getPatient().getId(), e);
+            }
+        }
+
+        log.info("Batch rescheduled {} appointments from {} to {} for doctor {}", appointments.size(), sourceDate, targetDate, doctorId);
+        return appointments.size();
+    }
 }

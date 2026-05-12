@@ -110,4 +110,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
         @Query("SELECT a.appointmentTime, a.endTime FROM Appointment a JOIN User u ON a.doctorId = u.id WHERE u.clinicId = :clinicId AND a.status = 'COMPLETED' AND a.endTime IS NOT NULL AND a.isDeleted = false")
         List<Object[]> findCompletedAppointmentTimesByClinic(@org.springframework.data.repository.query.Param("clinicId") Long clinicId);
+
+        @Query("SELECT a FROM Appointment a WHERE a.doctorId = :doctorId AND a.appointmentTime >= :start AND a.appointmentTime < :end AND a.status IN :statuses AND a.isDeleted = false ORDER BY a.appointmentTime ASC")
+        List<Appointment> findByDoctorIdAndDateRangeAndStatuses(
+                @org.springframework.data.repository.query.Param("doctorId") Long doctorId,
+                @org.springframework.data.repository.query.Param("start") LocalDateTime start,
+                @org.springframework.data.repository.query.Param("end") LocalDateTime end,
+                @org.springframework.data.repository.query.Param("statuses") List<AppointmentStatus> statuses);
 }

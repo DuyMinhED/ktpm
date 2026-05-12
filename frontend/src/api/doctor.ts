@@ -60,6 +60,13 @@ export const doctorApi = {
     return response.data;
   },
 
+  batchReschedule: async (sourceDate: string, targetDate: string) => {
+    const response = await axiosInstance.put('/v1/doctor/appointments/batch-reschedule', null, {
+      params: { sourceDate, targetDate }
+    });
+    return response.data;
+  },
+
   updateAppointmentStatus: async (id: number, status: string) => {
     const response = await axiosInstance.put(`/v1/doctor/appointments/${id}/status`, null, { params: { status } });
     return response.data;

@@ -60,4 +60,17 @@ public class DoctorAppointmentController {
         return ResponseEntity.ok(ApiResponse.success(
                 "Lịch hẹn đã được dời thành công", service.rescheduleAppointment(id, request)));
     }
+
+    @PutMapping("/batch-reschedule")
+    @Operation(summary = "Batch reschedule all appointments from one date to another")
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> batchReschedule(
+            @RequestParam String sourceDate,
+            @RequestParam String targetDate) {
+        java.time.LocalDate source = java.time.LocalDate.parse(sourceDate);
+        java.time.LocalDate target = java.time.LocalDate.parse(targetDate);
+        int count = service.batchReschedule(source, target);
+        return ResponseEntity.ok(ApiResponse.success(
+                "Đã dời " + count + " lịch hẹn thành công",
+                java.util.Map.of("movedCount", count)));
+    }
 }

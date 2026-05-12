@@ -10,4 +10,5 @@ public interface DoctorAppointmentService {
     DoctorAppointmentResponse updateStatus(Long appointmentId, String status);
     DoctorAppointmentResponse createAppointment(DoctorCreateAppointmentRequest request);
     DoctorAppointmentResponse rescheduleAppointment(Long appointmentId, DoctorCreateAppointmentRequest request);
+    int batchReschedule(java.time.LocalDate sourceDate, java.time.LocalDate targetDate);
 }

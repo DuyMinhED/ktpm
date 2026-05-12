@@ -5,6 +5,7 @@ import Toast from '../components/ui/Toast';
 import { doctorApi } from '../api/doctor';
 import DoctorSidebar from '../components/common/DoctorSidebar';
 import ConfirmActionModal from '../components/ui/ConfirmActionModal';
+import BatchRescheduleModal from '../features/patient/components/BatchRescheduleModal';
 
 export default function DoctorAppointments() {
     const [appointments, setAppointments] = useState<any[]>([]);
@@ -23,6 +24,7 @@ export default function DoctorAppointments() {
     const [prefilledPatientId, setPrefilledPatientId] = useState<string | undefined>(undefined);
     const [reschedulingAppointmentId, setReschedulingAppointmentId] = useState<number | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; appointmentId?: number }>({ show: false });
+    const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
 
     const handleSaveReschedule = async (appointmentData: any) => {
         setIsSaving(true);
