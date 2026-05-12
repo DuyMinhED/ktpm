@@ -64,4 +64,8 @@ public class Appointment extends BaseEntity {
 
     @Column(name = "doctor_avatar_url", length = 500)
     private String doctorAvatarUrl;
+
+    @Builder.Default
+    @Column(name = "reminder_enabled", nullable = false)
+    private boolean reminderEnabled = false;
 }

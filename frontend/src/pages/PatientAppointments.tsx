@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddAppointmentModal from '../features/patient/components/AddAppointmentModal';
 import Toast from '../components/ui/Toast';
+import ConfirmActionModal from '../components/ui/ConfirmActionModal';
 import { patientApi } from '../api/patient';
 
 const PatientAppointments: React.FC = () => {
@@ -11,6 +12,26 @@ const PatientAppointments: React.FC = () => {
     const [upcoming, setUpcoming] = useState<any[]>([]);
     const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Cancellation confirmation state
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [selectedCancelId, setSelectedCancelId] = useState<number | null>(null);
+    const [isCancelling, setIsCancelling] = useState(false);
+
+    const handleToggleReminder = async (id: number, currentStatus: boolean) => {
+        try {
+            const nextStatus = !currentStatus;
+            await patientApi.toggleReminder(id, nextStatus);
+            if (nextStatus) {
+                setToast({ show: true, title: 'Thiết lập nhắc nhở thành công', type: 'success' });
+            }
+            // Update localized upcoming state optimistically for instant feedback
+            setUpcoming(prev => prev.map(item => item.id === id ? { ...item, reminderEnabled: nextStatus } : item));
+        } catch (error) {
+            console.error(error);
+            setToast({ show: true, title: 'Lỗi khi thiết lập nhắc nhở', type: 'error' });
+        }
+    };
 
     useEffect(() => {
         loadData();
@@ -69,15 +90,24 @@ const PatientAppointments: React.FC = () => {
         }
     };
 
-    const handleCancel = async (id: number) => {
-        if (!window.confirm("Bạn có chắc chắn muốn hủy lịch hẹn này?")) return;
+    const handleOpenCancelModal = (id: number) => {
+        setSelectedCancelId(id);
+        setIsCancelModalOpen(true);
+    };
+
+    const confirmCancel = async () => {
+        if (!selectedCancelId) return;
+        setIsCancelling(true);
         try {
-            await patientApi.cancelAppointment(id);
+            await patientApi.cancelAppointment(selectedCancelId);
             setToast({ show: true, title: 'Hủy lịch hẹn thành công', type: 'success' });
+            setIsCancelModalOpen(false);
             loadData();
         } catch (error) {
             console.error(error);
             setToast({ show: true, title: 'Lỗi khi hủy lịch hẹn', type: 'error' });
+        } finally {
+            setIsCancelling(false);
         }
     };
 
@@ -166,10 +196,31 @@ const PatientAppointments: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex gap-3">
-                                <button className="flex-1 bg-primary text-white py-2.5 rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors">
-                                    {appt.appointmentType === 'ONLINE' ? 'Vào phòng chờ' : 'Nhắc tôi'}
+                                <button 
+                                    onClick={() => {
+                                        if (appt.appointmentType === 'ONLINE') {
+                                            window.open(appt.meetingLink || '#', '_blank');
+                                        } else {
+                                            handleToggleReminder(appt.id, appt.reminderEnabled);
+                                        }
+                                    }}
+                                    className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all active:scale-95 flex items-center justify-center gap-2 ${
+                                    appt.appointmentType === 'ONLINE' 
+                                        ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90' 
+                                        : appt.reminderEnabled
+                                            ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' 
+                                            : 'bg-[#37b5eb] text-white hover:bg-[#37b5eb]/90 shadow-lg shadow-[#37b5eb]/20'
+                                    }`}>
+                                    <span className="material-symbols-outlined text-[18px]">
+                                        {appt.appointmentType === 'ONLINE' ? 'video_call' : 'notifications_active'}
+                                    </span>
+                                    {appt.appointmentType === 'ONLINE' 
+                                        ? 'Tham gia tư vấn' 
+                                        : appt.reminderEnabled
+                                            ? 'Đã thiết lập nhắc nhở' 
+                                            : 'Nhắc tôi'}
                                 </button>
-                                <button onClick={() => handleCancel(appt.id)} className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Hủy lịch</button>
+                                <button onClick={() => handleOpenCancelModal(appt.id)} className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-95">Hủy lịch</button>
                             </div>
                         </div>
                         ))}
@@ -330,6 +381,18 @@ const PatientAppointments: React.FC = () => {
                 onSave={handleSaveAppointment}
                 isSaving={isSaving}
                 doctors={doctors}
+            />
+            <ConfirmActionModal
+                isOpen={isCancelModalOpen}
+                onClose={() => setIsCancelModalOpen(false)}
+                onConfirm={confirmCancel}
+                title="Xác nhận hủy lịch"
+                description="Bạn có chắc chắn muốn hủy buổi khám này không? Thao tác này sẽ giải phóng khung giờ đã đặt và không thể phục hồi."
+                confirmText="Xác nhận hủy"
+                cancelText="Không, quay lại"
+                iconName="event_busy"
+                isLoading={isCancelling}
+                variant="warning"
             />
             <Toast
                 show={toast.show}

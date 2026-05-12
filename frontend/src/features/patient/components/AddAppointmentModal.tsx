@@ -37,7 +37,13 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({ isOpen, onClo
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            if (!doctors || doctors.length === 0) {
+            if (doctors && doctors.length > 0) {
+                setLocalDoctors(doctors);
+                // Auto-select first doctor if none chosen yet
+                if (!specialty) {
+                    setSpecialty(doctors[0].id.toString());
+                }
+            } else {
                 fetchDoctors();
             }
         } else {
@@ -52,8 +58,12 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({ isOpen, onClo
         setIsLoadingDoctors(true);
         try {
             const res = await patientApi.getAvailableDoctors();
-            if (res.success) {
-                setLocalDoctors(res.data || []);
+            if (res.success && res.data) {
+                setLocalDoctors(res.data);
+                // Auto-select first doctor if none chosen yet
+                if (res.data.length > 0 && !specialty) {
+                    setSpecialty(res.data[0].id.toString());
+                }
             }
         } catch (error) {
             console.error('Failed to fetch available doctors:', error);

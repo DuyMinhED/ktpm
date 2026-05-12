@@ -105,6 +105,11 @@ export const patientApi = {
     const response = await axiosInstance.put(`/v1/patient/appointments/${id}/cancel`);
     return response.data;
   },
+  
+  toggleReminder: async (id: number, enabled: boolean) => {
+    const response = await axiosInstance.put(`/v1/patient/appointments/${id}/reminder`, null, { params: { enabled } });
+    return response.data;
+  },
 
   // Messages APIs
   getConversations: async () => {

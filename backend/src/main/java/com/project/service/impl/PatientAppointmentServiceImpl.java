@@ -98,24 +98,69 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
     @Transactional
     @CacheEvict(value = "clinic_dashboard", allEntries = true)
     public void cancel(Long id) {
-        Appointment appointment = appointmentRepository.findById(Objects.requireNonNull(id))
-                .orElseThrow(() -> new ResourceNotFoundException("Lịch hẹn không tồn tại với ID: " + id));
-        appointment.setStatus(AppointmentStatus.CANCELLED);
-        appointmentRepository.save(appointment);
-        log.info("Appointment cancelled: id={}", id);
+        try {
+            Patient currentPatient = getCurrentPatient();
+            Appointment appointment = appointmentRepository.findById(Objects.requireNonNull(id))
+                    .orElseThrow(() -> new ResourceNotFoundException("Lịch hẹn không tồn tại với ID: " + id));
+            
+            // Safety Check: Ensure patient owns this appointment
+            if (!appointment.getPatient().getId().equals(currentPatient.getId())) {
+                log.warn("Unauthorized cancel attempt! PatientId={} tried to cancel ApptId={} owned by PatientId={}",
+                        currentPatient.getId(), id, appointment.getPatient().getId());
+                throw new RuntimeException("Bạn không có quyền hủy lịch hẹn này.");
+            }
+
+            // Safety Check: Do not cancel completed ones
+            if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+                throw new RuntimeException("Không thể hủy lịch hẹn đã hoàn tất.");
+            }
+
+            appointment.setStatus(AppointmentStatus.CANCELLED);
+            appointmentRepository.saveAndFlush(appointment); // Force flush
+            
+            log.info("Successfully cancelled appointment: id={}, by patient={}", id, currentPatient.getId());
+        } catch (Exception e) {
+            log.error("CRITICAL FAILURE cancelling appointment id={}: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Lỗi hệ thống khi hủy lịch hẹn: " + e.getMessage());
+        }
     }
     
     @Override
     public List<DoctorSimpleResponse> getAvailableDoctors() {
-        return userRepository.findByRole(UserRole.DOCTOR).stream()
-            .filter(u -> "ACTIVE".equals(u.getStatus()))
+        Patient p = getCurrentPatient();
+        java.util.List<com.project.entity.User> doctors = new java.util.ArrayList<>();
+        
+        if (p.getClinicId() != null) {
+            doctors = userRepository.findByClinicIdAndRoleAndIsDeletedFalse(p.getClinicId(), UserRole.DOCTOR);
+        }
+        
+        // Strictly enforce clinic boundary, no system-wide fallback permitted.
+        return doctors.stream()
+            .filter(u -> !u.isDeleted())
+            .filter(u -> u.getStatus() == null || "ACTIVE".equalsIgnoreCase(u.getStatus()))
             .map(u -> DoctorSimpleResponse.builder()
                 .id(u.getId())
                 .name(u.getFullName())
-                .specialty(u.getSpecialization() != null ? u.getSpecialization() : "Bác sĩ đa khoa")
+                .specialty(u.getSpecialization() != null && !u.getSpecialization().isEmpty() ? u.getSpecialization() : "Bác sĩ điều trị")
                 .avatarUrl(u.getAvatarUrl())
                 .build())
             .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void toggleReminder(Long id, boolean enabled) {
+        Patient currentPatient = getCurrentPatient();
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Lịch hẹn không tồn tại!"));
+        
+        if (!appointment.getPatient().getId().equals(currentPatient.getId())) {
+            throw new RuntimeException("Không có quyền thực hiện.");
+        }
+
+        appointment.setReminderEnabled(enabled);
+        appointmentRepository.saveAndFlush(appointment);
+        log.info("Toggled reminder for apptId={} to {}", id, enabled);
     }
 
     // === Private Helpers ===
@@ -140,6 +185,7 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
                 .meetingLink(a.getMeetingLink())
                 .status(a.getStatus().name())
                 .diagnosisSummary(a.getDiagnosisSummary())
+                .reminderEnabled(a.isReminderEnabled())
                 .build();
     }
 }

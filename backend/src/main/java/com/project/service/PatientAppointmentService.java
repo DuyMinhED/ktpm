@@ -18,4 +18,6 @@ public interface PatientAppointmentService {
     void cancel(Long id);
     
     List<com.project.dto.response.DoctorSimpleResponse> getAvailableDoctors();
+    
+    void toggleReminder(Long id, boolean enabled);
 }

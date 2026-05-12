@@ -21,4 +21,5 @@ public class PatientAppointmentResponse {
     private String status;
     private String reason;
     private String diagnosisSummary;
+    private boolean reminderEnabled;
 }

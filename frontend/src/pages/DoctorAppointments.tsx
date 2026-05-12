@@ -50,14 +50,20 @@ export default function DoctorAppointments() {
         }
     };
 
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
     const updateStatus = async (id: number, status: string) => {
+        if (isUpdatingStatus) return; // Guard duplicate click
+        setIsUpdatingStatus(true);
         try {
             await doctorApi.updateAppointmentStatus(id, status);
-            loadAppointments();
             setToast({ show: true, title: 'Cập nhật thành công', type: 'success' });
+            await loadAppointments();
         } catch (error) {
             console.error(error);
             setToast({ show: true, title: 'Lỗi khi cập nhật', type: 'error' });
+        } finally {
+            setIsUpdatingStatus(false);
         }
     };
 
@@ -371,14 +377,22 @@ export default function DoctorAppointments() {
                                                             </>
                                                         )}
                                                     </div>
-                                                    <div className="flex gap-2">
+                                                    <div className="flex gap-1.5">
                                                         {isPending ? (
                                                             <>
-                                                                <button onClick={() => updateStatus(appt.id, 'SCHEDULED')} className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[13px] font-medium rounded-full transition-all outline-none">
-                                                                    Xác nhận
+                                                                <button 
+                                                                    onClick={() => updateStatus(appt.id, 'SCHEDULED')} 
+                                                                    disabled={isUpdatingStatus}
+                                                                    title="Xác nhận lịch hẹn"
+                                                                    className="size-8 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full hover:bg-emerald-600 hover:text-white transition-all duration-300 active:scale-90 group/btn disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                    <span className="material-symbols-outlined text-[18px] font-bold group-hover/btn:scale-110 transition-transform">done</span>
                                                                 </button>
-                                                                <button onClick={() => updateStatus(appt.id, 'CANCELLED')} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors">
-                                                                    <span className="material-symbols-outlined text-lg">cancel</span>
+                                                                <button 
+                                                                    onClick={() => updateStatus(appt.id, 'CANCELLED')} 
+                                                                    disabled={isUpdatingStatus}
+                                                                    title="Từ chối/Hủy bỏ"
+                                                                    className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                    <span className="material-symbols-outlined text-[18px] font-bold group-hover/btn:scale-110 transition-transform">close</span>
                                                                 </button>
                                                             </>
                                                         ) : isOnline ? (
@@ -387,11 +401,17 @@ export default function DoctorAppointments() {
                                                             </button>
                                                         ) : (
                                                             <>
-                                                                <button className="p-1.5 text-slate-400 hover:text-primary transition-colors">
-                                                                    <span className="material-symbols-outlined text-lg">edit_calendar</span>
+                                                                <button 
+                                                                    title="Dời lịch hẹn"
+                                                                    className="size-8 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 active:scale-90 group/btn disabled:opacity-50">
+                                                                    <span className="material-symbols-outlined text-[18px] font-bold group-hover/btn:scale-110 transition-transform">edit_calendar</span>
                                                                 </button>
-                                                                <button onClick={() => updateStatus(appt.id, 'CANCELLED')} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors">
-                                                                    <span className="material-symbols-outlined text-lg">cancel</span>
+                                                                <button 
+                                                                    onClick={() => updateStatus(appt.id, 'CANCELLED')} 
+                                                                    disabled={isUpdatingStatus}
+                                                                    title="Hủy lịch hẹn"
+                                                                    className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn disabled:opacity-50">
+                                                                    <span className="material-symbols-outlined text-[18px] font-bold group-hover/btn:scale-110 transition-transform">close</span>
                                                                 </button>
                                                             </>
                                                         )}

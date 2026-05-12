@@ -55,6 +55,15 @@ public class PatientAppointmentController {
         return ResponseEntity.ok(ApiResponse.success("Appointment cancelled successfully", null));
     }
     
+    @PutMapping("/{id}/reminder")
+    @Operation(summary = "Toggle appointment reminder state")
+    public ResponseEntity<ApiResponse<Void>> toggleReminder(
+            @PathVariable Long id,
+            @RequestParam boolean enabled) {
+        service.toggleReminder(id, enabled);
+        return ResponseEntity.ok(ApiResponse.success("Reminder status toggled successfully", null));
+    }
+    
     @GetMapping("/doctors")
     @Operation(summary = "Get available doctors")
     public ResponseEntity<ApiResponse<List<com.project.dto.response.DoctorSimpleResponse>>> getDoctors() {
