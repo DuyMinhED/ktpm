@@ -350,7 +350,9 @@ const PatientDashboard: React.FC = () => {
                                 {alerts.slice(0, 2).map((alert: any) => (
                                     <div key={alert.id} className="border-b border-red-200 dark:border-red-900/40 pb-2 last:border-0">
                                         <p className="text-red-800 dark:text-red-400 font-bold text-xs uppercase mb-1">{alert.title}</p>
-                                        <p className="text-sm text-red-700 dark:text-red-300">{alert.message}</p>
+                                        <p className="text-sm text-red-700 dark:text-red-300">
+                                            {alert.message?.replace(/\bHIGH\b/g, 'CAO').replace(/\bLOW\b/g, 'THẤP')}
+                                        </p>
                                     </div>
                                 ))}
                             </div>

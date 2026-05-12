@@ -14,5 +14,6 @@ public class PrescriptionResponse {
     private String diagnosis;
     private String status;
     private String colorCode;
+    private String patientAvatarUrl;
     private LocalDateTime createdAt;
 }

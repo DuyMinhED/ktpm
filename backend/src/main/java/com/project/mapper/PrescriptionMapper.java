@@ -20,6 +20,7 @@ public class PrescriptionMapper {
                 .diagnosis(prescription.getDiagnosis())
                 .status(mapStatusForUI(prescription.getStatus()))
                 .colorCode(mapColorCode(prescription.getStatus()))
+                .patientAvatarUrl(prescription.getPatient().getAvatarUrl())
                 .createdAt(prescription.getCreatedAt())
                 .build();
     }

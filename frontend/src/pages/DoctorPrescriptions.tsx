@@ -296,8 +296,16 @@ export default function DoctorPrescriptions() {
                                                     <td className="px-6 py-5 text-[15px] font-medium text-slate-500">{row.prescriptionCode || `#RX-${row.id}`}</td>
                                                     <td className="px-6 py-5">
                                                         <div className="flex items-center gap-3">
-                                                            <div className={`w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary`}>
-                                                                {row.patientName?.charAt(0)}
+                                                            {row.patientAvatarUrl ? (
+                                                                <img 
+                                                                    src={row.patientAvatarUrl} 
+                                                                    alt="" 
+                                                                    className="w-9 h-9 rounded-full object-cover border border-slate-100 shadow-sm"
+                                                                    onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement?.querySelector('.fallback-avatar')?.classList.remove('hidden'); }} 
+                                                                />
+                                                            ) : null}
+                                                            <div className={`fallback-avatar ${row.patientAvatarUrl ? 'hidden' : ''} w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary`}>
+                                                                {row.patientInitial || row.patientName?.charAt(0)}
                                                             </div>
                                                             <span className="text-[15px] font-bold text-slate-900 dark:text-white">{row.patientName}</span>
                                                         </div>
