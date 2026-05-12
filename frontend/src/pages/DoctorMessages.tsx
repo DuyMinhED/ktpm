@@ -431,6 +431,7 @@ export default function DoctorMessages() {
                 isSaving={isSaving}
                 onSave={handleSaveAdvice}
                 patientName={activeConv?.patientName || "Bệnh nhân"}
+                patientAvatar={activeConv?.patientAvatarUrl}
             />
 
             {activePatient && (

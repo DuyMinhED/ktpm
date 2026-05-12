@@ -15,4 +15,5 @@ public class PatientDashboardResponse {
     private PatientAppointmentResponse nextAppointment;
     private List<PatientAlertResponse> alerts;
     private ConversationResponse primaryDoctorChat;
+    private String latestAdvice;
 }

@@ -18,6 +18,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     Optional<Message> findTopByConversationIdOrderBySentAtDesc(Long conversationId);
 
+    Optional<Message> findTopByConversationIdAndContentStartingWithOrderBySentAtDesc(Long conversationId, String prefix);
+
     @Modifying
     @Query("UPDATE Message m SET m.isRead = true WHERE m.conversation.id = :conversationId AND m.senderId <> :readerId")
     void markAllAsRead(@Param("conversationId") Long conversationId, @Param("readerId") Long readerId);

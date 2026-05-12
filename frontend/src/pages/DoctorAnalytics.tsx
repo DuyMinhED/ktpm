@@ -463,6 +463,7 @@ export default function DoctorAnalytics() {
                 isSaving={isAdviceSaving}
                 onSave={handleSaveAdvice}
                 patientName={advicePatient?.fullName || ""}
+                patientAvatar={advicePatient?.avatarUrl}
             />
 
             <Toast

@@ -579,6 +579,8 @@ export default function DoctorPatients() {
         <AdviceModal
           isOpen={isAdviceModalOpen}
           onClose={() => setIsAdviceModalOpen(false)}
+          patientName={selectedPatient?.fullName || ''}
+          patientAvatar={selectedPatient?.avatarUrl}
           adviceCategory={adviceCategory}
           setAdviceCategory={setAdviceCategory}
           adviceContent={adviceContent}

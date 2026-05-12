@@ -57,6 +57,7 @@ export default function DoctorDashboard() {
   const [isAdviceSaving, setIsAdviceSaving] = useState(false);
   const [advicePatientId, setAdvicePatientId] = useState<number | null>(null);
   const [advicePatientName, setAdvicePatientName] = useState('');
+  const [advicePatientAvatar, setAdvicePatientAvatar] = useState('');
 
   // Toast State
   const [showToast, setShowToast] = useState(false);
@@ -381,7 +382,7 @@ export default function DoctorDashboard() {
                                 <span className="material-symbols-outlined text-base">chat</span>
                               </Link>
                               <button
-                                onClick={() => { setIsAdviceModalOpen(true); setAdvicePatientName(p.fullName); setAdvicePatientId(p.id); }}
+                                onClick={() => { setIsAdviceModalOpen(true); setAdvicePatientName(p.fullName); setAdvicePatientId(p.id); setAdvicePatientAvatar(p.avatarUrl); }}
                                 className="flex-1 sm:flex-none bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
                                 <span className="material-symbols-outlined text-base">campaign</span>
                               </button>
@@ -687,7 +688,7 @@ export default function DoctorDashboard() {
                                         <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Xem chi tiết hồ sơ</span>
                                       </button>
                                       <button
-                                        onClick={() => { setIsAdviceModalOpen(true); setAdvicePatientName(p.fullName); setAdvicePatientId(p.id); setActiveMenu(null); }}
+                                        onClick={() => { setIsAdviceModalOpen(true); setAdvicePatientName(p.fullName); setAdvicePatientId(p.id); setAdvicePatientAvatar(p.avatarUrl); setActiveMenu(null); }}
                                         className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
                                         <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">send</span>
                                         <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Gửi lời khuyên</span>
@@ -763,6 +764,7 @@ export default function DoctorDashboard() {
           isSaving={isAdviceSaving}
           onSave={handleSaveAdvice}
           patientName={advicePatientName}
+          patientAvatar={advicePatientAvatar}
         />
 
         <Toast

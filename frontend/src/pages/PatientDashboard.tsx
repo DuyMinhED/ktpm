@@ -12,6 +12,7 @@ const PatientDashboard: React.FC = () => {
     const [appointments, setAppointments] = useState<any[]>([]);
     const [conversation, setConversation] = useState<any>(null);
     const [alerts, setAlerts] = useState<any[]>([]);
+    const [latestAdvice, setLatestAdvice] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddAppointmentModalOpen, setIsAddAppointmentModalOpen] = useState(false);
     const [isSavingAppointment, setIsSavingAppointment] = useState(false);
@@ -35,6 +36,7 @@ const PatientDashboard: React.FC = () => {
                 setAppointments(data.nextAppointment ? [data.nextAppointment] : []);
                 setAlerts(data.alerts || []);
                 setConversation(data.primaryDoctorChat);
+                setLatestAdvice(data.latestAdvice);
             }
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
@@ -64,6 +66,16 @@ const PatientDashboard: React.FC = () => {
     const heartRate = getMetric('HEART_RATE');
     const spO2 = getMetric('SPO2');
     const hbA1c = getMetric('HBA1C');
+    
+    const parseAdvice = (text: string | null) => {
+        if (!text) return null;
+        const match = text.match(/^\[Tư vấn ([^\]]+)\](.*)/s);
+        if (match) {
+            return { category: match[1].trim(), content: match[2].trim() };
+        }
+        return { category: 'Chung', content: text };
+    };
+    const currentAdvice = parseAdvice(latestAdvice);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
@@ -485,6 +497,28 @@ const PatientDashboard: React.FC = () => {
                             <div className="text-sm text-slate-500 font-medium py-2 text-center">Không có lịch khám sắp tới</div>
                         )}
                     </div>
+
+                    {/* 5.5 Latest Medical Advice (Spotlight) */}
+                    {currentAdvice && (
+                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 border border-amber-200 dark:border-amber-900/30 rounded-xl p-5 relative overflow-hidden text-left shadow-sm">
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-200/20 rounded-full -mr-8 -mt-8 animate-pulse"></div>
+                            <div className="flex items-center justify-between mb-3 relative z-10">
+                                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-extrabold text-sm tracking-wide uppercase">
+                                    <span className="material-symbols-outlined text-[18px] filled">tips_and_updates</span>
+                                    Lời khuyên mới nhất
+                                </div>
+                                <span className="bg-amber-200 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">
+                                    {currentAdvice.category}
+                                </span>
+                            </div>
+                            <p className="text-slate-800 dark:text-slate-100 font-bold text-[15px] leading-relaxed relative z-10 italic">
+                                "{currentAdvice.content}"
+                            </p>
+                            <div className="mt-3 flex justify-end relative z-10">
+                                <p className="text-[11px] font-medium text-amber-600/70 dark:text-amber-500/70">- Từ Bác sĩ phụ trách</p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* 6. Doctor Chat */}
                     <div 

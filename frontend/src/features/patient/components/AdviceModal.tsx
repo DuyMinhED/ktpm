@@ -10,6 +10,7 @@ interface AdviceModalProps {
   isSaving: boolean;
   onSave: () => Promise<void>;
   patientName: string;
+  patientAvatar?: string;
 }
 
 const AdviceModal: React.FC<AdviceModalProps> = ({
@@ -21,7 +22,8 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
   setAdviceContent,
   isSaving,
   onSave,
-  patientName
+  patientName,
+  patientAvatar
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -54,7 +56,7 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
           <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 p-5 md:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 relative group overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-slate-200 overflow-hidden shadow-inner flex-shrink-0 border-2 border-primary/20 relative z-10"
-              style={{ backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuBUstbGh5q911TPTLus7gX2RIO2ML_RSZbjV67EFkDBw0zf6vQQzS7IP3LwXkWI6OWS4mwx5KhEFyn-NJ5T-OeMOhMLb321T1uEw1ypz_mfVSy4RJSGZA4h5NHgwDOx8syKTRjqsnQ5cRRZlRIs0lxo8cA7nJHIBpBUgVAUxh3e6QkBpGR5iW1WaEsU3Xu5JdVd5WA_HjKsBFimtKG_GF5CgYz-JAa03FTdaPVVyoP_Kqd8-PCCC03jKnqOMbqTRYOC5StfAJMV2wM')`, backgroundSize: 'cover' }}>
+              style={{ backgroundImage: `url('${patientAvatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuBUstbGh5q911TPTLus7gX2RIO2ML_RSZbjV67EFkDBw0zf6vQQzS7IP3LwXkWI6OWS4mwx5KhEFyn-NJ5T-OeMOhMLb321T1uEw1ypz_mfVSy4RJSGZA4h5NHgwDOx8syKTRjqsnQ5cRRZlRIs0lxo8cA7nJHIBpBUgVAUxh3e6QkBpGR5iW1WaEsU3Xu5JdVd5WA_HjKsBFimtKG_GF5CgYz-JAa03FTdaPVVyoP_Kqd8-PCCC03jKnqOMbqTRYOC5StfAJMV2wM"}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
             </div>
             <div className="relative z-10 flex-1 text-center sm:text-left">
               <div className="flex flex-col sm:flex-row items-center gap-2">

@@ -4,6 +4,7 @@ import com.project.dto.response.*;
 import com.project.entity.Patient;
 import com.project.entity.PatientAlert;
 import com.project.exception.ResourceNotFoundException;
+import com.project.repository.MessageRepository;
 import com.project.repository.PatientAlertRepository;
 import com.project.repository.PatientRepository;
 import com.project.service.*;
@@ -29,6 +30,7 @@ public class PatientDashboardServiceImpl implements PatientDashboardService {
     private final PatientMessageService messageService;
     private final PatientAlertRepository alertRepository;
     private final PatientRepository patientRepository;
+    private final MessageRepository messageRepository;
 
     @Override
     public PatientDashboardResponse getDashboard() {
@@ -46,6 +48,14 @@ public class PatientDashboardServiceImpl implements PatientDashboardService {
         List<ConversationResponse> conversations = messageService.getConversations();
         ConversationResponse primaryChat = conversations.isEmpty() ? null : conversations.get(0);
 
+        String latestAdvice = null;
+        if (primaryChat != null) {
+            var opt = messageRepository.findTopByConversationIdAndContentStartingWithOrderBySentAtDesc(primaryChat.getId(), "[Tư vấn");
+            if (opt.isPresent()) {
+                latestAdvice = opt.get().getContent();
+            }
+        }
+
         return PatientDashboardResponse.builder()
                 .profile(profile)
                 .healthMetrics(healthMetrics)
@@ -53,6 +63,7 @@ public class PatientDashboardServiceImpl implements PatientDashboardService {
                 .nextAppointment(nextAppointment)
                 .alerts(alerts)
                 .primaryDoctorChat(primaryChat)
+                .latestAdvice(latestAdvice)
                 .build();
     }
 
