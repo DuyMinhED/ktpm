@@ -22,6 +22,12 @@ ALTER TABLE patients ADD COLUMN IF NOT EXISTS health_insurance_number VARCHAR(50
 ALTER TABLE patients ADD COLUMN IF NOT EXISTS clinical_notes TEXT;
 ALTER TABLE patients ADD COLUMN IF NOT EXISTS room_location VARCHAR(100);
 
+-- appointments columns
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_enabled BOOLEAN DEFAULT FALSE;
+UPDATE appointments SET reminder_enabled = FALSE WHERE reminder_enabled IS NULL;
+-- Ensure column is not nullable going forward
+ALTER TABLE appointments ALTER COLUMN reminder_enabled SET NOT NULL;
+
 -- users columns
 ALTER TABLE users ADD COLUMN IF NOT EXISTS specialization TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS department TEXT;

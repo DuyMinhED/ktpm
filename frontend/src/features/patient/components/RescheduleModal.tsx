@@ -15,6 +15,8 @@ interface RescheduleModalProps {
   isSaving: boolean;
   onSave: (appointmentData: any) => Promise<void>;
   patients?: any[];
+  initialPatientId?: string;
+  isRescheduling?: boolean;
 }
 
 const RescheduleModal: React.FC<RescheduleModalProps> = ({
@@ -30,17 +32,24 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
   setSelectedTime,
   isSaving,
   onSave,
-  patients = []
+  patients: _patients = [],
+  initialPatientId,
+  isRescheduling
 }) => {
+  const patients = Array.isArray(_patients) ? _patients : [];
   const [selectedPatientId, setSelectedPatientId] = useState<string>(patients.length > 0 ? patients[0].id.toString() : '');
   const [appointmentType, setAppointmentType] = useState('IN_PERSON');
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
-    if (patients.length > 0 && !selectedPatientId) {
-      setSelectedPatientId(patients[0].id.toString());
+    if (isOpen) {
+      if (initialPatientId) {
+        setSelectedPatientId(initialPatientId);
+      } else if (patients.length > 0 && !selectedPatientId) {
+        setSelectedPatientId(patients[0].id.toString());
+      }
     }
-  }, [patients, selectedPatientId]);
+  }, [isOpen, initialPatientId, patients]);
 
   useEffect(() => {
     if (isOpen) {
@@ -65,7 +74,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
       <div className="relative bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] md:max-h-[90vh] animate-in fade-in zoom-in duration-200 border border-primary/10 transition-all mx-2 md:mx-4">
         <div className="px-6 md:px-10 py-5 md:py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-10 transition-all">
           <div>
-            <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white">Đặt lịch tái khám</h2>
+            <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white">{isRescheduling ? 'Cập nhật/Dời lịch hẹn' : 'Đặt lịch tái khám'}</h2>
           </div>
         </div>
 
@@ -82,6 +91,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                     value={selectedPatientId}
                     onChange={setSelectedPatientId}
                     className="w-full"
+                    disabled={isRescheduling}
                   />
                   {selectedPatientId && patients.find(p => p.id.toString() === selectedPatientId) && !patients.find(p => p.id.toString() === selectedPatientId).doctorId && (
                     <p className="text-xs text-red-500 font-medium mt-1 pl-2">

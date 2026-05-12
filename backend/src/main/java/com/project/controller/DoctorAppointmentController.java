@@ -51,4 +51,13 @@ public class DoctorAppointmentController {
         return ResponseEntity.ok(ApiResponse.success(
                 "Appointment created successfully", service.createAppointment(request)));
     }
+
+    @PutMapping("/{id}/reschedule")
+    @Operation(summary = "Reschedule an existing appointment")
+    public ResponseEntity<ApiResponse<DoctorAppointmentResponse>> rescheduleAppointment(
+            @PathVariable Long id,
+            @jakarta.validation.Valid @RequestBody com.project.dto.request.DoctorCreateAppointmentRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Lịch hẹn đã được dời thành công", service.rescheduleAppointment(id, request)));
+    }
 }

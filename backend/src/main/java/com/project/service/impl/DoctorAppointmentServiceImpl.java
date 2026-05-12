@@ -128,4 +128,43 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
 
         return mapToResponse(saved);
     }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "clinic_dashboard", allEntries = true)
+    public DoctorAppointmentResponse rescheduleAppointment(Long appointmentId, com.project.dto.request.DoctorCreateAppointmentRequest request) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Lịch hẹn không tồn tại"));
+
+        LocalDateTime appointmentTime = LocalDateTime.parse(request.getAppointmentDate() + "T" + request.getAppointmentTime());
+        
+        appointment.setAppointmentTime(appointmentTime);
+        appointment.setType(request.getType());
+        appointment.setReason(request.getNotes());
+        
+        // Update location/meetingLink based on new type
+        if ("ONLINE".equals(request.getType())) {
+            appointment.setLocation(null);
+            appointment.setMeetingLink("https://meet.google.com/abc-xyz");
+        } else {
+            appointment.setLocation("Phòng khám Đa khoa Hoàn Mỹ");
+            appointment.setMeetingLink(null);
+        }
+        
+        // Keep status as SCHEDULED (confirmed) when doctor reschedules
+        appointment.setStatus(AppointmentStatus.SCHEDULED);
+
+        Appointment updated = appointmentRepository.save(appointment);
+
+        // Notify patient
+        notificationService.sendNotification(
+            updated.getPatient().getUserId(),
+            "Thay đổi lịch hẹn",
+            "Bác sĩ đã dời lịch hẹn của bạn sang lúc " + request.getAppointmentTime() + " ngày " + request.getAppointmentDate(),
+            "warning",
+            "/patient/appointments"
+        );
+
+        return mapToResponse(updated);
+    }
 }

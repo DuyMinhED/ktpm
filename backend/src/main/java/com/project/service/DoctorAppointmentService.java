@@ -9,4 +9,5 @@ public interface DoctorAppointmentService {
     List<DoctorAppointmentResponse> getAllAppointments();
     DoctorAppointmentResponse updateStatus(Long appointmentId, String status);
     DoctorAppointmentResponse createAppointment(DoctorCreateAppointmentRequest request);
+    DoctorAppointmentResponse rescheduleAppointment(Long appointmentId, DoctorCreateAppointmentRequest request);
 }

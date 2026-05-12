@@ -55,6 +55,11 @@ export const doctorApi = {
     return response.data;
   },
 
+  rescheduleAppointment: async (id: number, data: any) => {
+    const response = await axiosInstance.put(`/v1/doctor/appointments/${id}/reschedule`, data);
+    return response.data;
+  },
+
   updateAppointmentStatus: async (id: number, status: string) => {
     const response = await axiosInstance.put(`/v1/doctor/appointments/${id}/status`, null, { params: { status } });
     return response.data;

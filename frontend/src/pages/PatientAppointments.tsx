@@ -166,11 +166,24 @@ const PatientAppointments: React.FC = () => {
                                         <p className="text-sm text-primary font-medium">{appt.doctorSpecialty || "Chuyên môn trống"}</p>
                                     </div>
                                 </div>
-                                {appt.appointmentType === 'ONLINE' ? (
-                                    <div className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Online</div>
-                                ) : (
-                                    <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Trực tiếp</div>
-                                )}
+                                <div className="flex flex-col items-end gap-2">
+                                    {appt.appointmentType === 'ONLINE' ? (
+                                        <div className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Online</div>
+                                    ) : (
+                                        <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Trực tiếp</div>
+                                    )}
+                                    {appt.status === 'PENDING' ? (
+                                        <div className="bg-amber-50 text-amber-600 border border-amber-100 px-3 py-1 rounded-full text-[10px] font-bold uppercase flex items-center gap-1 animate-pulse">
+                                            <span className="size-1.5 rounded-full bg-amber-500"></span>
+                                            Chờ xác nhận
+                                        </div>
+                                    ) : (
+                                        <div className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full text-[10px] font-bold uppercase flex items-center gap-1">
+                                            <span className="size-1.5 rounded-full bg-emerald-500"></span>
+                                            Đã duyệt
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="space-y-3 mb-6">
                                 <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
@@ -182,11 +195,15 @@ const PatientAppointments: React.FC = () => {
                                     <span className="text-sm">{formatTime(appt.appointmentTime)} - {appt.endTime ? formatTime(appt.endTime) : (parseInt(formatTime(appt.appointmentTime).split(":")[0]) + 1).toString().padStart(2, '0') + ":" + formatTime(appt.appointmentTime).split(":")[1]}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                                    {appt.appointmentType === 'ONLINE' ? (
-                                    <>
-                                        <span className="material-symbols-outlined text-sm text-blue-500">videocam</span>
-                                        <span className="text-sm font-medium text-blue-500 underline cursor-pointer">{appt.meetingLink || "Sẽ cập nhật Link sau"}</span>
-                                    </>
+                                     {appt.appointmentType === 'ONLINE' ? (
+                                     <>
+                                         <span className="material-symbols-outlined text-sm text-blue-500">videocam</span>
+                                         {appt.status === 'PENDING' ? (
+                                             <span className="text-sm font-medium text-slate-400 italic">Link sẽ có sau khi bác sĩ duyệt</span>
+                                         ) : (
+                                             <span className="text-sm font-medium text-blue-500 underline cursor-pointer" onClick={() => window.open(appt.meetingLink || '#', '_blank')}>{appt.meetingLink || "Sẽ cập nhật Link sau"}</span>
+                                         )}
+                                     </>
                                     ) : (
                                     <>
                                         <span className="material-symbols-outlined text-sm">location_on</span>
@@ -197,6 +214,7 @@ const PatientAppointments: React.FC = () => {
                             </div>
                             <div className="flex gap-3">
                                 <button 
+                                    disabled={appt.status === 'PENDING'}
                                     onClick={() => {
                                         if (appt.appointmentType === 'ONLINE') {
                                             window.open(appt.meetingLink || '#', '_blank');
@@ -205,20 +223,24 @@ const PatientAppointments: React.FC = () => {
                                         }
                                     }}
                                     className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all active:scale-95 flex items-center justify-center gap-2 ${
-                                    appt.appointmentType === 'ONLINE' 
-                                        ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90' 
-                                        : appt.reminderEnabled
-                                            ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' 
-                                            : 'bg-[#37b5eb] text-white hover:bg-[#37b5eb]/90 shadow-lg shadow-[#37b5eb]/20'
+                                    appt.status === 'PENDING'
+                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                                        : appt.appointmentType === 'ONLINE' 
+                                            ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90' 
+                                            : appt.reminderEnabled
+                                                ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' 
+                                                : 'bg-[#37b5eb] text-white hover:bg-[#37b5eb]/90 shadow-lg shadow-[#37b5eb]/20'
                                     }`}>
                                     <span className="material-symbols-outlined text-[18px]">
-                                        {appt.appointmentType === 'ONLINE' ? 'video_call' : 'notifications_active'}
+                                        {appt.status === 'PENDING' ? 'hourglass_top' : appt.appointmentType === 'ONLINE' ? 'video_call' : 'notifications_active'}
                                     </span>
-                                    {appt.appointmentType === 'ONLINE' 
-                                        ? 'Tham gia tư vấn' 
-                                        : appt.reminderEnabled
-                                            ? 'Đã thiết lập nhắc nhở' 
-                                            : 'Nhắc tôi'}
+                                    {appt.status === 'PENDING'
+                                        ? 'Đang chờ duyệt...'
+                                        : appt.appointmentType === 'ONLINE' 
+                                            ? 'Tham gia tư vấn' 
+                                            : appt.reminderEnabled
+                                                ? 'Đã thiết lập nhắc nhở' 
+                                                : 'Nhắc tôi'}
                                 </button>
                                 <button onClick={() => handleOpenCancelModal(appt.id)} className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-95">Hủy lịch</button>
                             </div>

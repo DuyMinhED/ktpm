@@ -4,10 +4,12 @@ import RescheduleModal from '../features/patient/components/RescheduleModal';
 import Toast from '../components/ui/Toast';
 import { doctorApi } from '../api/doctor';
 import DoctorSidebar from '../components/common/DoctorSidebar';
+import ConfirmActionModal from '../components/ui/ConfirmActionModal';
 
 export default function DoctorAppointments() {
     const [appointments, setAppointments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [patients, setPatients] = useState<any[]>([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
     const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
@@ -18,18 +20,32 @@ export default function DoctorAppointments() {
     const [isSaving, setIsSaving] = useState(false);
     const [toast, setToast] = useState({ show: false, title: '', type: 'success' as 'success' | 'warning' | 'error' });
     const [activeView, setActiveView] = useState<'month' | 'week' | 'day'>('month');
+    const [prefilledPatientId, setPrefilledPatientId] = useState<string | undefined>(undefined);
+    const [reschedulingAppointmentId, setReschedulingAppointmentId] = useState<number | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ show: boolean; appointmentId?: number }>({ show: false });
 
     const handleSaveReschedule = async (appointmentData: any) => {
         setIsSaving(true);
         try {
-            const res = await doctorApi.createAppointment(appointmentData);
+            let res;
+            let successMsg = '';
+            if (reschedulingAppointmentId) {
+                res = await doctorApi.rescheduleAppointment(reschedulingAppointmentId, appointmentData);
+                successMsg = 'Đã dời lịch hẹn thành công!';
+            } else {
+                res = await doctorApi.createAppointment(appointmentData);
+                successMsg = 'Đặt lịch hẹn mới thành công!';
+            }
+
             if (res.success) {
                 setIsRescheduleModalOpen(false);
-                setToast({ show: true, title: 'Đặt lịch thành công!', type: 'success' });
+                setReschedulingAppointmentId(null); // clear state
+                setToast({ show: true, title: successMsg, type: 'success' });
                 loadAppointments();
             }
         } catch (e) {
-            setToast({ show: true, title: 'Có lỗi khi đặt lịch', type: 'error' });
+            console.error(e);
+            setToast({ show: true, title: 'Có lỗi xảy ra khi thực hiện thao tác', type: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -43,6 +59,9 @@ export default function DoctorAppointments() {
         try {
             const res = await doctorApi.getAllAppointments();
             setAppointments(res.data || []);
+            
+            const pRes = await doctorApi.getMyPatients({ size: 100 });
+            setPatients(pRes.data?.content || []);
         } catch (error) {
             console.error(error);
         } finally {
@@ -388,7 +407,7 @@ export default function DoctorAppointments() {
                                                                     <span className="material-symbols-outlined text-[18px] font-bold group-hover/btn:scale-110 transition-transform">done</span>
                                                                 </button>
                                                                 <button 
-                                                                    onClick={() => updateStatus(appt.id, 'CANCELLED')} 
+                                                                    onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })} 
                                                                     disabled={isUpdatingStatus}
                                                                     title="Từ chối/Hủy bỏ"
                                                                     className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn disabled:opacity-50 disabled:cursor-not-allowed">
@@ -402,12 +421,17 @@ export default function DoctorAppointments() {
                                                         ) : (
                                                             <>
                                                                 <button 
+                                                                    onClick={() => {
+                                                                        setPrefilledPatientId(appt.patientId.toString());
+                                                                        setReschedulingAppointmentId(appt.id);
+                                                                        setIsRescheduleModalOpen(true);
+                                                                    }}
                                                                     title="Dời lịch hẹn"
                                                                     className="size-8 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 active:scale-90 group/btn disabled:opacity-50">
                                                                     <span className="material-symbols-outlined text-[18px] font-bold group-hover/btn:scale-110 transition-transform">edit_calendar</span>
                                                                 </button>
                                                                 <button 
-                                                                    onClick={() => updateStatus(appt.id, 'CANCELLED')} 
+                                                                    onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })} 
                                                                     disabled={isUpdatingStatus}
                                                                     title="Hủy lịch hẹn"
                                                                     className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn disabled:opacity-50">
@@ -422,7 +446,11 @@ export default function DoctorAppointments() {
                                     })}
                                     {/* Empty/Add slot */}
                                     <button
-                                        onClick={() => setIsRescheduleModalOpen(true)}
+                                        onClick={() => {
+                                            setPrefilledPatientId(undefined);
+                                            setReschedulingAppointmentId(null);
+                                            setIsRescheduleModalOpen(true);
+                                        }}
                                         className="w-full p-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:text-primary hover:border-primary transition-all">
                                         <span className="material-symbols-outlined">add_circle</span>
                                         <span className="text-sm font-medium">Đặt lịch cho giờ trống tiếp theo</span>
@@ -448,7 +476,7 @@ export default function DoctorAppointments() {
 
             <RescheduleModal
                 isOpen={isRescheduleModalOpen}
-                onClose={() => setIsRescheduleModalOpen(false)}
+                onClose={() => { setIsRescheduleModalOpen(false); setReschedulingAppointmentId(null); }}
                 currentMonth={currentMonth}
                 setCurrentMonth={setCurrentMonth}
                 currentYear={currentYear}
@@ -459,6 +487,26 @@ export default function DoctorAppointments() {
                 setSelectedTime={setSelectedTime}
                 isSaving={isSaving}
                 onSave={handleSaveReschedule}
+                patients={patients}
+                initialPatientId={prefilledPatientId}
+                isRescheduling={!!reschedulingAppointmentId}
+            />
+
+            <ConfirmActionModal
+                isOpen={confirmModal.show}
+                title="Xác nhận hủy lịch"
+                description="Bác sĩ có chắc chắn muốn hủy lịch hẹn này không? Hệ thống sẽ tự động gửi thông báo cho bệnh nhân."
+                confirmText="Đồng ý hủy"
+                cancelText="Quay lại"
+                variant="danger"
+                iconName="cancel"
+                onClose={() => setConfirmModal({ show: false })}
+                onConfirm={async () => {
+                    if (confirmModal.appointmentId) {
+                        await updateStatus(confirmModal.appointmentId, 'CANCELLED');
+                    }
+                    setConfirmModal({ show: false });
+                }}
             />
 
             {toast.show && (
