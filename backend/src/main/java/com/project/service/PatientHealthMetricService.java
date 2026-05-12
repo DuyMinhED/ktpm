@@ -11,6 +11,7 @@ import java.util.List;
 public interface PatientHealthMetricService {
 
     HealthMetricResponse create(CreateHealthMetricRequest request);
+    HealthMetricResponse recordMetricForPatient(Long patientId, CreateHealthMetricRequest request);
 
     List<HealthMetricSummaryResponse> getMetricsSummary(String period);
 

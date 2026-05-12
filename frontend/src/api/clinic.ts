@@ -82,6 +82,11 @@ export const clinicApi = {
     return response.data;
   },
 
+  recordHealthMetric: async (clinicId: string | number, patientId: string | number, data: any) => {
+    const response = await axiosInstance.post(`/v1/clinics/${clinicId}/patients/${patientId}/health-metrics`, data);
+    return response.data;
+  },
+
   // Admin Clinic Management (if needed by Admin role)
   getClinics: async (params?: any) => {
     const response = await axiosInstance.get('/v1/admin/clinics', { params });

@@ -202,6 +202,13 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
                 .avatarUrl(p.getAvatarUrl())
                 .healthTrend(healthTrendData[0])
                 .trendColor(healthTrendData[1])
+                .address(p.getAddress())
+                .identityCard(p.getIdentityCard())
+                .occupation(p.getOccupation())
+                .ethnicity(p.getEthnicity())
+                .healthInsuranceNumber(p.getHealthInsuranceNumber())
+                .profileStatus(p.getProfileStatus())
+                .clinicalNotes(p.getClinicalNotes())
                 .build();
     }
 

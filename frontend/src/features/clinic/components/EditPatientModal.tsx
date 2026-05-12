@@ -27,7 +27,7 @@ export default function EditPatientModal({
         email: '',
         address: '',
         condition: 'Tiểu đường Type 2',
-        riskLevel: 'Theo dõi (MONITORING)',
+        riskLevel: 'Theo dõi',
         assignedDoctor: '',
         notes: '',
         password: '',
@@ -61,25 +61,32 @@ export default function EditPatientModal({
             const currentDoctorId = patientData.doctorId ? patientData.doctorId.toString() :
                 (availableDoctors.find(d => d.name === patientData.doctor)?.id.toString() || (availableDoctors[0]?.id.toString() || ''));
 
+            let rawRisk = patientData.riskLevel || 'Theo dõi';
+            if (rawRisk === 'HIGH_RISK') rawRisk = 'Nguy cơ cao';
+            else if (rawRisk === 'MONITORING') rawRisk = 'Theo dõi';
+            else if (rawRisk === 'STABLE') rawRisk = 'Ổn định';
+            
+            const cleanRisk = rawRisk.replace(/\([^)]*\)/g, '').trim();
+
             setFormData({
-                name: patientData.name || '',
+                name: patientData.fullName || patientData.name || '',
                 age: patientData.age || '',
                 gender: patientData.gender || 'Nam',
                 phone: patientData.phone || '',
                 email: patientData.email || '',
                 address: patientData.address || '',
-                condition: patientData.condition || 'Tiểu đường Type 2',
-                riskLevel: patientData.riskLevel || 'Theo dõi (MONITORING)',
+                condition: patientData.chronicCondition || patientData.condition || 'Tiểu đường Type 2',
+                riskLevel: cleanRisk,
                 assignedDoctor: currentDoctorId,
-                notes: patientData.notes || '',
+                notes: patientData.clinicalNotes || patientData.notes || '',
                 password: '',
                 confirmPassword: '',
                 identityCard: patientData.identityCard || '',
                 occupation: patientData.occupation || '',
                 ethnicity: patientData.ethnicity || '',
-                insuranceNumber: patientData.insuranceNumber || patientData.healthInsuranceNumber || '',
+                insuranceNumber: patientData.healthInsuranceNumber || patientData.insuranceNumber || '',
                 avatarUrl: patientData.avatarUrl || patientData.img || '',
-                status: patientData.status || 'Hoạt động',
+                status: patientData.profileStatus || patientData.status || 'Hoạt động',
                 treatmentStatus: patientData.treatmentStatus || 'Đang điều trị'
             });
             setAvatarError(false);

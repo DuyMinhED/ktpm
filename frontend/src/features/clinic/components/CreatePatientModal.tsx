@@ -27,7 +27,7 @@ export default function CreatePatientModal({
         email: '',
         address: '',
         condition: '', // Primary Condition
-        riskLevel: 'Theo dõi (MONITORING)',
+        riskLevel: 'Theo dõi',
         assignedDoctor: '',
         notes: '',
         password: '',
@@ -38,7 +38,10 @@ export default function CreatePatientModal({
         ethnicity: '',
         avatarUrl: '',
         status: 'Hoạt động',
-        treatmentStatus: 'Đang điều trị'
+        treatmentStatus: 'Đang điều trị',
+        initialGlucose: '',
+        initialBpSystolic: '',
+        initialBpDiastolic: ''
     });
 
     const [showPassword, setShowPassword] = useState(false);
@@ -513,8 +516,51 @@ export default function CreatePatientModal({
 
                                 {/* Status was here - moved to administrative section */}
 
+                                {/* Baseline Vital Signs */}
+                                <div className="lg:col-span-3 border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
+                                    <h4 className="text-[13px] font-bold text-slate-400 dark:text-slate-500 flex items-center gap-2 mb-4 uppercase tracking-wide">
+                                        <span className="material-symbols-outlined text-[18px]">vital_signs</span>
+                                        Chỉ số sinh tồn khởi điểm (Baseline - Không bắt buộc)
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                        <div className="space-y-1.5">
+                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Đường huyết (mmol/L)</label>
+                                            <input
+                                                type="text"
+                                                name="initialGlucose"
+                                                value={formData.initialGlucose}
+                                                onChange={handleChange}
+                                                placeholder="VD: 6.5"
+                                                className="w-full h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 text-[15px] font-bold text-slate-900 dark:text-white transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Huyết áp Tâm thu (Systolic)</label>
+                                            <input
+                                                type="text"
+                                                name="initialBpSystolic"
+                                                value={formData.initialBpSystolic}
+                                                onChange={handleChange}
+                                                placeholder="VD: 120"
+                                                className="w-full h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 text-[15px] font-bold text-slate-900 dark:text-white transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Huyết áp Tâm trương (Diastolic)</label>
+                                            <input
+                                                type="text"
+                                                name="initialBpDiastolic"
+                                                value={formData.initialBpDiastolic}
+                                                onChange={handleChange}
+                                                placeholder="VD: 80"
+                                                className="w-full h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 text-[15px] font-bold text-slate-900 dark:text-white transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {/* Clinical Notes */}
-                                <div className="lg:col-span-3 space-y-1.5">
+                                <div className="lg:col-span-3 space-y-1.5 mt-2">
                                     <label className="text-[14px] font-medium text-slate-500 ml-1">Ghi chú lâm sàng ban đầu</label>
                                     <textarea
                                         name="notes"

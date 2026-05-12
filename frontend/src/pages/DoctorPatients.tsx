@@ -7,6 +7,8 @@ import Toast from '../components/ui/Toast';
 import FilterDropdown from '../components/ui/FilterDropdown';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import CreatePatientModal from '../features/clinic/components/CreatePatientModal';
+import EditPatientModal from '../features/clinic/components/EditPatientModal';
+import RecordMetricModal from '../features/clinic/components/RecordMetricModal';
 import { doctorApi } from '../api/doctor';
 import { clinicApi } from '../api/clinic';
 import TopBar from '../components/common/TopBar';
@@ -23,6 +25,8 @@ export default function DoctorPatients() {
   const [riskFilter, setRiskFilter] = useState('Mọi mức độ');
   const [isPatientDetailModalOpen, setIsPatientDetailModalOpen] = useState(false);
   const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
+  const [isEditPatientModalOpen, setIsEditPatientModalOpen] = useState(false);
+  const [isRecordMetricModalOpen, setIsRecordMetricModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
 
@@ -119,6 +123,62 @@ export default function DoctorPatients() {
     }
   };
 
+  const handleSaveHealthMetrics = async (data: any) => {
+    if (!selectedPatient?.id) return;
+    setIsSaving(true);
+    try {
+      const currentClinicId = localStorage.getItem('clinicId') || '1';
+      const promises = [];
+
+      if (data.glucose) {
+        promises.push(clinicApi.recordHealthMetric(currentClinicId, selectedPatient.id, {
+          metricType: 'BLOOD_SUGAR',
+          value: data.glucose,
+          unit: 'mmol/L',
+          notes: data.notes
+        }));
+      }
+      
+      if (data.bpSystolic) {
+        promises.push(clinicApi.recordHealthMetric(currentClinicId, selectedPatient.id, {
+          metricType: 'BLOOD_PRESSURE',
+          value: data.bpSystolic,
+          valueSecondary: data.bpDiastolic,
+          unit: 'mmHg',
+          notes: data.notes
+        }));
+      }
+
+      if (data.heartRate) {
+        promises.push(clinicApi.recordHealthMetric(currentClinicId, selectedPatient.id, {
+          metricType: 'HEART_RATE',
+          value: data.heartRate,
+          unit: 'bpm',
+          notes: data.notes
+        }));
+      }
+
+      if (data.spo2) {
+        promises.push(clinicApi.recordHealthMetric(currentClinicId, selectedPatient.id, {
+          metricType: 'SPO2',
+          value: data.spo2,
+          unit: '%',
+          notes: data.notes
+        }));
+      }
+
+      await Promise.all(promises);
+      setIsRecordMetricModalOpen(false);
+      setToast({ show: true, title: 'Đã ghi nhận chỉ số sức khỏe thành công!', type: 'success' });
+      fetchPatients();
+    } catch (e) {
+      console.error("Save error:", e);
+      setToast({ show: true, title: 'Có lỗi xảy ra khi lưu chỉ số', type: 'error' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleExportExcel = async () => {
     const today = new Date().toLocaleDateString('vi-VN');
     const workbook = new ExcelJS.Workbook();
@@ -135,15 +195,15 @@ export default function DoctorPatients() {
 
     // Header Row
     const headerRow = worksheet.addRow([
-      'Họ và Tên', 
-      'Mã Bệnh Nhân', 
-      'Tuổi', 
-      'Bệnh Lý', 
-      'Chỉ Số Gần Nhất', 
-      'Cập Nhật Cuối', 
+      'Họ và Tên',
+      'Mã Bệnh Nhân',
+      'Tuổi',
+      'Bệnh Lý',
+      'Chỉ Số Gần Nhất',
+      'Cập Nhật Cuối',
       'Mức Độ Nguy Cơ'
     ]);
-    
+
     headerRow.font = { bold: true, color: { argb: 'FF1E293B' } }; // slate-800
     headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }; // slate-100
     headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -162,6 +222,11 @@ export default function DoctorPatients() {
 
     // Data Rows
     patients.forEach(p => {
+      let rowRisk = p.riskLevel || 'Ổn định';
+      if (rowRisk === 'HIGH_RISK') rowRisk = 'Nguy cơ cao';
+      else if (rowRisk === 'MONITORING') rowRisk = 'Theo dõi';
+      else if (rowRisk === 'STABLE') rowRisk = 'Ổn định';
+
       const row = worksheet.addRow([
         p.fullName,
         p.patientCode || 'N/A',
@@ -169,17 +234,17 @@ export default function DoctorPatients() {
         p.chronicCondition || 'N/A',
         `${p.latestGlucose || ''} | ${p.latestBp || ''}`,
         p.lastUpdate || 'N/A',
-        p.riskLevel || 'Ổn định'
+        rowRisk
       ]);
       row.alignment = { vertical: 'middle', wrapText: true };
-      
+
       const riskCell = row.getCell(7);
       if (p.riskLevel?.includes('Nguy cơ cao') || p.riskLevel === 'HIGH_RISK') {
-         riskCell.font = { color: { argb: 'FFEF4444' }, bold: true };
+        riskCell.font = { color: { argb: 'FFEF4444' }, bold: true };
       } else if (p.riskLevel?.includes('theo dõi') || p.riskLevel === 'MONITORING') {
-         riskCell.font = { color: { argb: 'FFF59E0B' }, bold: true };
+        riskCell.font = { color: { argb: 'FFF59E0B' }, bold: true };
       } else {
-         riskCell.font = { color: { argb: 'FF10B981' }, bold: true };
+        riskCell.font = { color: { argb: 'FF10B981' }, bold: true };
       }
     });
 
@@ -188,10 +253,10 @@ export default function DoctorPatients() {
       if (rowNumber > 1) {
         row.eachCell({ includeEmpty: true }, (cell) => {
           cell.border = {
-            top: {style:'thin', color: {argb:'FFCBD5E1'}},
-            left: {style:'thin', color: {argb:'FFCBD5E1'}},
-            bottom: {style:'thin', color: {argb:'FFCBD5E1'}},
-            right: {style:'thin', color: {argb:'FFCBD5E1'}}
+            top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
           };
         });
       }
@@ -213,10 +278,10 @@ export default function DoctorPatients() {
 
       <main className="flex-1 lg:ml-72 min-h-screen flex flex-col transition-all duration-300">
         {isSidebarOpen && (
-            <div
-                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[140] lg:hidden animate-in fade-in duration-300"
-                onClick={() => setIsSidebarOpen(false)}
-            ></div>
+          <div
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[140] lg:hidden animate-in fade-in duration-300"
+            onClick={() => setIsSidebarOpen(false)}
+          ></div>
         )}
         <TopBar
           setIsSidebarOpen={setIsSidebarOpen}
@@ -304,9 +369,10 @@ export default function DoctorPatients() {
                   <tr className="bg-slate-50/50">
                     <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Bệnh nhân</th>
                     <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Mã Bệnh nhân</th>
-                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Tuổi</th>
+                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Tuổi / Giới tính</th>
                     <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Chỉ số</th>
                     <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Cập nhật</th>
+                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Xu hướng</th>
                     <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Nguy cơ</th>
                     <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide text-right">Thao tác</th>
                   </tr>
@@ -325,87 +391,129 @@ export default function DoctorPatients() {
                       </tr>
                     ))
                   ) : patients.length === 0 ? (
-                    <tr><td colSpan={7} className="px-6 py-16 text-center text-slate-400 text-sm">Chưa có bệnh nhân nào được phân công</td></tr>
+                    <tr><td colSpan={8} className="px-6 py-16 text-center text-slate-400 text-sm">Chưa có bệnh nhân nào được phân công</td></tr>
                   ) : patients.map((p: any) => {
-                    const isHighRisk = p.riskLevel?.includes('Nguy cơ cao') || p.riskLevel === 'HIGH_RISK';
-                    const isMonitor = p.riskLevel?.includes('theo dõi') || p.riskLevel === 'MONITORING';
+                    const isHighRisk = p.riskLevel?.toUpperCase().includes('HIGH_RISK') || p.riskLevel?.toLowerCase().includes('nguy cơ cao');
+                    const isMonitor = p.riskLevel?.toUpperCase().includes('MONITORING') || p.riskLevel?.toLowerCase().includes('theo dõi');
                     const riskColor = isHighRisk ? 'red' : isMonitor ? 'orange' : 'emerald';
-                    const riskLabel = p.riskLevel || 'Ổn định';
+                    let rawRiskLabel = p.riskLevel || 'Ổn định';
+                    // Normalize English database enums to Vietnamese
+                    if (rawRiskLabel === 'HIGH_RISK') rawRiskLabel = 'Nguy cơ cao';
+                    else if (rawRiskLabel === 'MONITORING') rawRiskLabel = 'Theo dõi';
+                    else if (rawRiskLabel === 'STABLE') rawRiskLabel = 'Ổn định';
+                    
+                    const riskLabel = rawRiskLabel.replace(/\([^)]*\)/g, '').trim();
                     const menuKey = `p-${p.id}`;
                     return (
-                    <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                            {p.fullName?.split(' ').pop()?.charAt(0).toUpperCase() || '?'}
+                      <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                              {p.avatarUrl ? (
+                                <img src={p.avatarUrl} alt={p.fullName} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm">
+                                  {p.fullName?.split(' ').pop()?.charAt(0).toUpperCase() || '?'}
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-[16px] font-bold text-slate-900 group-hover:text-primary transition-colors tracking-tight">{p.fullName}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <p className="text-[13px] text-slate-500 font-medium tracking-tight">{p.chronicCondition || 'Chưa xác định'}</p>
+                                {p.phone && (
+                                  <>
+                                    <span className="text-slate-300 text-[10px]">•</span>
+                                    <p className="text-[12px] text-slate-400 font-bold flex items-center gap-0.5 tracking-tight">
+                                      <span className="material-symbols-outlined text-[13px]">call</span>
+                                      {p.phone}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-[16px] font-bold text-slate-900 group-hover:text-primary transition-colors tracking-tight">{p.fullName}</p>
-                            <p className="text-[13px] text-slate-500 font-medium tracking-tight">{p.chronicCondition || 'Chưa xác định'}</p>
+                        </td>
+                        <td className="px-6 py-5 text-[15px] font-bold text-slate-600">{p.patientCode || 'N/A'}</td>
+                        <td className="px-6 py-5 text-[15px] font-bold text-slate-600">{p.age || '-'}<span className="text-slate-300 font-medium mx-1">/</span><span className="text-slate-400 text-[14px] font-medium">{p.gender || '-'}</span></td>
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-2">
+                            <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[13px] font-bold rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">{p.latestGlucose || 'N/A'}</span>
+                            <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[13px] font-bold rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">{p.latestBp || 'N/A'}</span>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-5 text-[15px] font-bold text-slate-600">{p.patientCode || 'N/A'}</td>
-                      <td className="px-6 py-5 text-[15px] font-bold text-slate-600">{p.age || '-'}</td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-2">
-                          <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[13px] font-bold rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">{p.latestGlucose || 'N/A'}</span>
-                          <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[13px] font-bold rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">{p.latestBp || 'N/A'}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-5 text-[14px] text-slate-500 font-medium">{p.lastUpdate || 'Chưa ghi nhận'}</td>
-                      <td className="px-6 py-5">
-                        <span
-                          className={`px-4 py-1.5 text-[13px] font-bold rounded-full text-white shadow-sm whitespace-nowrap inline-flex ${
-                            riskColor === 'red' ? 'bg-red-500 shadow-red-500/10' :
-                            riskColor === 'orange' ? 'bg-amber-500 shadow-amber-500/10' :
-                            'bg-emerald-500 shadow-emerald-500/10'
-                          }`}
-                        >
-                          {riskLabel}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5 text-right relative">
-                        <button
-                          onClick={() => setActiveMenu(activeMenu === menuKey ? null : menuKey)}
-                          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 rounded-full transition-all ml-auto">
-                          <span className="material-symbols-outlined text-[22px]">more_vert</span>
-                        </button>
+                        </td>
+                        <td className="px-6 py-5 text-[14px] text-slate-500 font-medium">{p.lastUpdate || 'Chưa ghi nhận'}</td>
+                        <td className="px-6 py-5">
+                          <div className={`flex items-center gap-1 inline-flex px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/50 ${p.trendColor || 'text-slate-500'} font-bold text-[13px]`}>
+                            <span className="material-symbols-outlined text-[18px]">
+                              {p.trendColor?.includes('emerald') ? 'trending_up' : p.trendColor?.includes('rose') ? 'trending_down' : 'trending_flat'}
+                            </span>
+                            {p.healthTrend || 'Ổn định'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span
+                            className={`px-4 py-1.5 text-[13px] font-bold rounded-full text-white shadow-sm whitespace-nowrap inline-flex ${riskColor === 'red' ? 'bg-red-500 shadow-red-500/10' :
+                                riskColor === 'orange' ? 'bg-amber-500 shadow-amber-500/10' :
+                                  'bg-emerald-500 shadow-emerald-500/10'
+                              }`}
+                          >
+                            {riskLabel}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 text-right relative">
+                          <button
+                            onClick={() => setActiveMenu(activeMenu === menuKey ? null : menuKey)}
+                            className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 rounded-full transition-all ml-auto">
+                            <span className="material-symbols-outlined text-[22px]">more_vert</span>
+                          </button>
 
-                        {activeMenu === menuKey && (
-                          <>
-                            <div className="fixed inset-0 z-[100]" onClick={() => setActiveMenu(null)}></div>
-                            <div className="absolute right-6 top-12 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2.5 z-[110] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 overflow-hidden text-left">
-                                <button 
+                          {activeMenu === menuKey && (
+                            <>
+                              <div className="fixed inset-0 z-[100]" onClick={() => setActiveMenu(null)}></div>
+                              <div className="absolute right-6 top-12 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2.5 z-[110] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 overflow-hidden text-left">
+                                <button
                                   onClick={() => { setSelectedPatient(p); setIsPatientDetailModalOpen(true); setActiveMenu(null); }}
                                   className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
                                   <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">visibility</span>
                                   <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Xem chi tiết hồ sơ</span>
                                 </button>
-                              <button
-                                onClick={() => { setSelectedPatient(p); setIsAdviceModalOpen(true); setActiveMenu(null); }}
-                                className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">send</span>
-                                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Gửi lời khuyên</span>
-                              </button>
-                              <button
-                                onClick={() => { setSelectedPatient(p); setIsPrescriptionModalOpen(true); setActiveMenu(null); }}
-                                className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">description</span>
-                                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Kê đơn thuốc</span>
-                              </button>
-                              <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
-                              <button
-                                onClick={() => { setIsModalOpen(true); setActiveMenu(null); }}
-                                className="w-full px-4 py-3 text-left hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors flex items-center gap-3 group">
-                                <span className="material-symbols-outlined text-primary text-xl">event</span>
-                                <span className="text-sm font-bold text-primary">Đặt lịch tái khám</span>
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </td>
-                    </tr>
+                                <button
+                                  onClick={() => { setSelectedPatient(p); setIsEditPatientModalOpen(true); setActiveMenu(null); }}
+                                  className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
+                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">edit</span>
+                                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Chỉnh sửa thông tin</span>
+                                </button>
+                                <button
+                                  onClick={() => { setSelectedPatient(p); setIsRecordMetricModalOpen(true); setActiveMenu(null); }}
+                                  className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
+                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-rose-500 text-xl" style={{fontVariationSettings: "'FILL' 1"}}>monitor_heart</span>
+                                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Ghi nhận chỉ số</span>
+                                </button>
+                                <button
+                                  onClick={() => { setSelectedPatient(p); setIsAdviceModalOpen(true); setActiveMenu(null); }}
+                                  className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
+                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">send</span>
+                                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Gửi lời khuyên</span>
+                                </button>
+                                <button
+                                  onClick={() => { setSelectedPatient(p); setIsPrescriptionModalOpen(true); setActiveMenu(null); }}
+                                  className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
+                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">description</span>
+                                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Kê đơn thuốc</span>
+                                </button>
+                                <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+                                <button
+                                  onClick={() => { setIsModalOpen(true); setActiveMenu(null); }}
+                                  className="w-full px-4 py-3 text-left hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors flex items-center gap-3 group">
+                                  <span className="material-symbols-outlined text-primary text-xl">event</span>
+                                  <span className="text-sm font-bold text-primary">Đặt lịch tái khám</span>
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </td>
+                      </tr>
                     );
                   })}
                 </tbody>
@@ -524,7 +632,7 @@ export default function DoctorPatients() {
           patients={patients}
         />
 
-        <PatientDetailModal 
+        <PatientDetailModal
           isOpen={isPatientDetailModalOpen}
           onClose={() => setIsPatientDetailModalOpen(false)}
           patient={selectedPatient}
@@ -553,6 +661,39 @@ export default function DoctorPatients() {
               setIsSaving(false);
             }
           }}
+        />
+
+        <EditPatientModal
+          isOpen={isEditPatientModalOpen}
+          onClose={() => setIsEditPatientModalOpen(false)}
+          isSaving={isSaving}
+          patientData={selectedPatient}
+          availableDoctors={[{ id: localStorage.getItem('userId'), name: localStorage.getItem('userName') || 'Bác sĩ' }]}
+          onSave={async (data) => {
+            if (!selectedPatient?.id) return;
+            setIsSaving(true);
+            try {
+              const currentClinicId = localStorage.getItem('clinicId') || '1';
+              const res = await clinicApi.updatePatient(currentClinicId, selectedPatient.id, data);
+              if (res.success) {
+                setIsEditPatientModalOpen(false);
+                setToast({ show: true, title: `Đã cập nhật thông tin thành công!`, type: 'success' });
+                fetchPatients();
+              }
+            } catch (e) {
+              setToast({ show: true, title: 'Có lỗi khi cập nhật thông tin', type: 'error' });
+            } finally {
+              setIsSaving(false);
+            }
+          }}
+        />
+
+        <RecordMetricModal
+          isOpen={isRecordMetricModalOpen}
+          onClose={() => setIsRecordMetricModalOpen(false)}
+          isSaving={isSaving}
+          patientData={selectedPatient}
+          onSave={handleSaveHealthMetrics}
         />
 
         <Toast

@@ -27,4 +27,12 @@ public class DoctorPatientResponse {
     private String avatarUrl;
     private String healthTrend; // e.g., "Worsening", "Improving", "Stable"
     private String trendColor; // e.g., "text-rose-500", "text-emerald-500", "text-slate-400"
+    // Additional profile fields for complete detail availability
+    private String address;
+    private String identityCard;
+    private String occupation;
+    private String ethnicity;
+    private String healthInsuranceNumber;
+    private String profileStatus;
+    private String clinicalNotes;
 }

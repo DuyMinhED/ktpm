@@ -42,6 +42,7 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
     private final PatientMapper patientMapper;
     private final NotificationRepository notificationRepository;
     private final AppointmentRepository appointmentRepository;
+    private final com.project.service.PatientHealthMetricService healthMetricService;
 
     @Override
     @Transactional(readOnly = true)
@@ -112,7 +113,29 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
                 .healthInsuranceNumber(request.getInsuranceNumber() != null ? request.getInsuranceNumber() : request.getHealthInsuranceNumber())
                 .avatarUrl(request.getAvatarUrl())
                 .build();
-        patientRepository.save(patient);
+        patient = Objects.requireNonNull(patientRepository.save(patient));
+
+        // Record baseline metrics if provided
+        if (request.getInitialGlucose() != null) {
+            healthMetricService.recordMetricForPatient(patient.getId(), 
+                com.project.dto.request.CreateHealthMetricRequest.builder()
+                    .metricType("BLOOD_SUGAR")
+                    .value(request.getInitialGlucose())
+                    .unit("mmol/L")
+                    .notes("Chỉ số nền ban đầu")
+                    .build());
+        }
+
+        if (request.getInitialBpSystolic() != null) {
+            healthMetricService.recordMetricForPatient(patient.getId(), 
+                com.project.dto.request.CreateHealthMetricRequest.builder()
+                    .metricType("BLOOD_PRESSURE")
+                    .value(request.getInitialBpSystolic())
+                    .valueSecondary(request.getInitialBpDiastolic())
+                    .unit("mmHg")
+                    .notes("Chỉ số nền ban đầu")
+                    .build());
+        }
     }
 
     @Override

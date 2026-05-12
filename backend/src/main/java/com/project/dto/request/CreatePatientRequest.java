@@ -37,4 +37,9 @@ public class CreatePatientRequest {
     private String assignmentTime;
     private String appointmentType;
     private String meetingLink;
+    
+    // Baseline Clinical Metrics (Optional during creation)
+    private java.math.BigDecimal initialGlucose;
+    private java.math.BigDecimal initialBpSystolic;
+    private java.math.BigDecimal initialBpDiastolic;
 }

@@ -32,6 +32,7 @@ public class ClinicDashboardController {
     private final ClinicDashboardService clinicDashboardService;
     private final ClinicPatientService clinicPatientService;
     private final ClinicDoctorService clinicDoctorService;
+    private final com.project.service.PatientHealthMetricService patientHealthMetricService;
 
     @GetMapping("/dashboard")
     @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN
@@ -229,5 +230,18 @@ public class ClinicDashboardController {
 
         clinicDashboardService.updateAppointmentStatus(clinicId, appointmentId, body.get("status"));
         return ApiResponse.success("Appointment status updated", null);
+    }
+
+    @PostMapping("/patients/{patientId}/health-metrics")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "', '" + RoleUtils.DOCTOR
+            + "') and (@securityService.isClinicManagerOf(#clinicId) or @securityService.isDoctorOfClinic(#clinicId))")
+    @Operation(summary = "Record patient health metric", description = "Allows doctor or clinic manager to record measurements during visits")
+    public ApiResponse<com.project.dto.response.HealthMetricResponse> recordPatientMetric(
+            @PathVariable Long clinicId,
+            @PathVariable Long patientId,
+            @Valid @RequestBody com.project.dto.request.CreateHealthMetricRequest request) {
+
+        com.project.dto.response.HealthMetricResponse response = patientHealthMetricService.recordMetricForPatient(patientId, request);
+        return ApiResponse.success("Health metric recorded successfully", response);
     }
 }

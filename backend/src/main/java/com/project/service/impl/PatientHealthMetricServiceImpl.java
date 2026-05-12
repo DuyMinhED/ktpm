@@ -70,6 +70,19 @@ public class PatientHealthMetricServiceImpl implements PatientHealthMetricServic
     @CacheEvict(value = "clinic_dashboard", allEntries = true)
     public HealthMetricResponse create(CreateHealthMetricRequest request) {
         Patient patient = getCurrentPatient();
+        return processAndSave(patient, request);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "clinic_dashboard", allEntries = true)
+    public HealthMetricResponse recordMetricForPatient(Long patientId, CreateHealthMetricRequest request) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + patientId));
+        return processAndSave(patient, request);
+    }
+
+    private HealthMetricResponse processAndSave(Patient patient, CreateHealthMetricRequest request) {
         MetricType metricType = MetricType.valueOf(request.getMetricType());
 
         String status = evaluateStatus(metricType, request.getValue(), request.getValueSecondary());
@@ -79,7 +92,7 @@ public class PatientHealthMetricServiceImpl implements PatientHealthMetricServic
                 .metricType(metricType)
                 .value(request.getValue())
                 .valueSecondary(request.getValueSecondary())
-                .unit(request.getUnit())
+                .unit(request.getUnit() != null ? request.getUnit() : UNITS.getOrDefault(metricType, ""))
                 .status(status)
                 .notes(request.getNotes())
                 .measuredAt(request.getMeasuredAt() != null ? request.getMeasuredAt() : LocalDateTime.now())
@@ -125,7 +138,7 @@ public class PatientHealthMetricServiceImpl implements PatientHealthMetricServic
             }
         }
 
-        log.info("Health metric created: type={}, patientId={}", metricType, patient.getId());
+        log.info("Health metric recorded: type={}, patientId={}", metricType, patient.getId());
         return mapToResponse(saved);
     }
 
