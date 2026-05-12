@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DoctorPatientResponse {
     private Long id;
+    private Long doctorId;
     private String patientCode;
     private String fullName;
     private int age;

@@ -16,6 +16,7 @@ interface PrescriptionModalProps {
   isAddingNewMedicine: boolean;
   setIsAddingNewMedicine: React.Dispatch<React.SetStateAction<boolean>>;
   medications: Medication[];
+  setMedications: React.Dispatch<React.SetStateAction<Medication[]>>;
   removeMedication: (id: number) => void;
   newMedForm: {
     name: string;
@@ -57,6 +58,7 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
   isAddingNewMedicine,
   setIsAddingNewMedicine,
   medications,
+  setMedications,
   removeMedication,
   newMedForm,
   setNewMedForm,
@@ -73,6 +75,19 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
   const [returnDate, setReturnDate] = useState('');
   useEffect(() => {
     if (isOpen) {
+      setDiagnosis('');
+      setNote('');
+      setReturnDate('');
+      setMedications([]);
+      setFormErrors({ name: false, dosage: false, frequency: false, duration: false, intakeType: false });
+      setNewMedForm({ name: '', dosage: '', frequency: '', duration: '', intakeType: '' });
+      if (patients && patients.length > 1) {
+        setSelectedPatientId(''); // Only reset if multiple choice, otherwise let single-auto-select run below
+      }
+    }
+  }, [isOpen]);
+  useEffect(() => {
+    if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -81,6 +96,12 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && patients && patients.length === 1 && !selectedPatientId) {
+      setSelectedPatientId(String(patients[0].id));
+    }
+  }, [isOpen, patients, selectedPatientId]);
 
   if (!isOpen) return null;
 
@@ -106,7 +127,7 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
               <div className="space-y-2 text-left">
                 <label className="text-[15px] font-medium text-slate-500 dark:text-slate-400">Bệnh nhân</label>
                   <Dropdown 
-                    options={patients.map(p => ({ label: p.name, value: p.id }))}
+                    options={patients.map(p => ({ label: p.fullName || p.name, value: p.id }))}
                     value={selectedPatientId}
                     onChange={(val: any) => {
                       setSelectedPatientId(String(val));
@@ -163,7 +184,7 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
                         <td className="px-4 py-4 text-slate-900 dark:text-white">{med.frequency}</td>
                         <td className="px-4 py-4 font-medium text-slate-900 dark:text-white">{med.duration}</td>
                         <td className="px-4 py-4 text-right">
-                          <button onClick={() => removeMedication(med.id)} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors active:scale-90">
+                          <button type="button" onClick={(e) => { e.stopPropagation(); removeMedication(med.id); }} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors active:scale-90">
                             <span className="material-symbols-outlined text-[22px]">delete</span>
                           </button>
                         </td>
@@ -232,19 +253,16 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
             <button onClick={onClose} className="px-6 py-2.5 rounded-lg font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Hủy</button>
             <button
               onClick={() => onSave({
-                patientId: selectedPatientId,
+                patientId: Number(selectedPatientId),
                 diagnosis,
-                note,
-                returnVisitDate: returnDate,
-                medications: medications.map(m => ({
-                  medicineName: m.name,
+                notes: note,
+                items: medications.map(m => ({
+                  medicationName: m.name,
                   dosage: m.dosage,
-                  frequency: m.frequency,
-                  duration: m.duration,
-                  intakeType: m.intakeType
+                  usageInstructions: `${m.frequency} | ${m.duration} | ${m.intakeType}`
                 }))
               })}
-              disabled={isSaving || !selectedPatientId}
+              disabled={isSaving || !selectedPatientId || medications.length === 0 || !diagnosis}
               className="px-8 py-2.5 rounded-lg font-bold bg-primary text-slate-900 hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-wait"
             >
               {isSaving ? (

@@ -211,6 +211,7 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
 
         return DoctorPatientResponse.builder()
                 .id(p.getId())
+                .doctorId(p.getDoctorId())
                 .patientCode(p.getPatientCode())
                 .fullName(p.getFullName())
                 .age(age)

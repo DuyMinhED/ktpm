@@ -231,7 +231,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
               type: appointmentType,
               notes: notes
             })}
-            disabled={Boolean(isSaving || !selectedPatientId || (selectedPatientId && !patients.find(p => p.id.toString() === selectedPatientId)?.doctorId))}
+            disabled={Boolean(isSaving || !selectedPatientId)}
             className="px-10 py-3 text-sm font-medium text-slate-900 bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-xl shadow-primary/20 flex items-center gap-3 active:scale-95 transform disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? (

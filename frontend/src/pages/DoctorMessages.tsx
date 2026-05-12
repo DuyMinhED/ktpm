@@ -56,7 +56,20 @@ export default function DoctorMessages() {
     const loadPatientDetail = async (patientId: number) => {
         try {
             const res = await doctorApi.getPatientDetail(patientId);
-            if (res.success) setActivePatient(res.data);
+            if (res.success && res.data) {
+                const d = res.data;
+                const list = d.recentMetrics || [];
+                const bp = list.find((m: any) => m.metricType === 'BLOOD_PRESSURE');
+                const hr = list.find((m: any) => m.metricType === 'HEART_RATE');
+                const gl = list.find((m: any) => m.metricType === 'BLOOD_SUGAR');
+                
+                setActivePatient({
+                    ...(d.profile || {}),
+                    latestBp: bp ? `${bp.value}/${bp.valueSecondary}` : null,
+                    latestHeartRate: hr ? hr.value : null,
+                    latestGlucose: gl ? gl.value : null
+                });
+            }
         } catch (error) {
             console.error('Error loading patient details:', error);
         }
@@ -100,7 +113,7 @@ export default function DoctorMessages() {
     };
 
     const removeMedication = (id: number) => {
-        setMedications(medications.filter(m => m.id !== id));
+        setMedications(prev => prev.filter(m => m.id !== id));
     };
 
     const addMedicationToPrescription = () => {
@@ -455,6 +468,7 @@ export default function DoctorMessages() {
                 isAddingNewMedicine={isAddingNewMedicine}
                 setIsAddingNewMedicine={setIsAddingNewMedicine}
                 medications={medications}
+                setMedications={setMedications}
                 removeMedication={removeMedication}
                 newMedForm={newMedForm}
                 setNewMedForm={setNewMedForm}

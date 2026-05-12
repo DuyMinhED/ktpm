@@ -108,10 +108,17 @@ const PatientPrescriptions: React.FC = () => {
                                             </div>
                                             <div className="mt-2 space-y-2">
                                                 {rx.items?.map((item: any) => (
-                                                    <p key={item.id} className="text-sm flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                                                        <span className="material-symbols-outlined text-base text-primary">pill</span>
-                                                        <span className="font-medium">{item.medicationName} - {item.dosage}</span>
-                                                    </p>
+                                                    <div key={item.id} className="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                                                        <p className="text-sm flex items-center gap-2 text-slate-900 dark:text-white font-bold">
+                                                            <span className="material-symbols-outlined text-base text-primary">pill</span>
+                                                            {item.medicationName} - {item.dosage}
+                                                        </p>
+                                                        {item.usageInstructions && (
+                                                            <p className="text-[13px] text-slate-500 dark:text-slate-400 ml-6 mt-0.5 font-medium italic">
+                                                                {item.usageInstructions}
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>

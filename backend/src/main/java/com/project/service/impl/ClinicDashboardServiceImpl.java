@@ -331,7 +331,13 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         }
 
         if (patient.getDoctorId() == null) {
-            throw new RuntimeException("Bệnh nhân chưa được phân công cho bác sĩ nào. Vui lòng vào 'Điều phối bệnh nhân' để gán bác sĩ trước.");
+            List<User> clinicDoctors = userRepository.findByClinicIdAndRoleAndIsDeletedFalse(clinicId, UserRole.DOCTOR);
+            if (clinicDoctors != null && !clinicDoctors.isEmpty()) {
+                patient.setDoctorId(clinicDoctors.get(0).getId());
+                patientRepository.save(patient);
+            } else {
+                throw new RuntimeException("Không thể đặt lịch: Hệ thống chưa có bác sĩ nào để phân công cho bệnh nhân!");
+            }
         }
 
         java.time.LocalDateTime appointmentTime = java.time.LocalDateTime.parse(request.getAppointmentDate() + "T" + request.getAppointmentTime());

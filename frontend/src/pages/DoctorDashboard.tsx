@@ -114,7 +114,7 @@ export default function DoctorDashboard() {
   const [notifications, setNotifications] = useState<any[]>([]);
 
   const removeMedication = (id: number) => {
-    setMedications(medications.filter(m => m.id !== id));
+    setMedications(prev => prev.filter(m => m.id !== id));
   };
 
   const addMedicationToPrescription = () => {
@@ -735,6 +735,7 @@ export default function DoctorDashboard() {
           isAddingNewMedicine={isAddingNewMedicine}
           setIsAddingNewMedicine={setIsAddingNewMedicine}
           medications={medications}
+          setMedications={setMedications}
           removeMedication={removeMedication}
           newMedForm={newMedForm}
           setNewMedForm={setNewMedForm}
