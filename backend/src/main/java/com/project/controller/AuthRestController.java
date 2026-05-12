@@ -43,7 +43,7 @@ public class AuthRestController {
             String role = userDetails.getAuthorities().iterator().next().getAuthority();
             
             log.info("Login successful for user: {}, role: {}", loginRequest.getEmail(), role);
-            return ApiResponse.<JwtAuthenticationResponse>success("Login successful", new JwtAuthenticationResponse(jwt, userDetails.getId(), userDetails.getClinicId(), role));
+            return ApiResponse.<JwtAuthenticationResponse>success("Login successful", new JwtAuthenticationResponse(jwt, userDetails.getId(), userDetails.getClinicId(), role, userDetails.getFullName(), userDetails.getAvatarUrl()));
         } catch (Exception e) {
             log.error("Login failed for user: {}. Error: {}", loginRequest.getEmail(), e.getMessage());
             throw e;

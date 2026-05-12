@@ -149,8 +149,8 @@ public class ClinicDashboardController {
     }
 
     @GetMapping("/doctors/available")
-    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN
-            + "') and @securityService.isClinicManagerOf(#clinicId)")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "', '" + RoleUtils.DOCTOR
+            + "') and (@securityService.isClinicManagerOf(#clinicId) or @securityService.isDoctorOfClinic(#clinicId))")
     public ApiResponse<List<DoctorSnippetDto>> getAvailableDoctors(@PathVariable Long clinicId) {
 
         return ApiResponse.success("Doctors fetched successfully",
@@ -158,8 +158,8 @@ public class ClinicDashboardController {
     }
 
     @GetMapping("/conditions")
-    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN
-            + "') and @securityService.isClinicManagerOf(#clinicId)")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "', '" + RoleUtils.DOCTOR
+            + "') and (@securityService.isClinicManagerOf(#clinicId) or @securityService.isDoctorOfClinic(#clinicId))")
     public ApiResponse<List<String>> getConditions(@PathVariable Long clinicId) {
 
         return ApiResponse.success("Conditions fetched successfully", clinicDashboardService.getChronicConditions());

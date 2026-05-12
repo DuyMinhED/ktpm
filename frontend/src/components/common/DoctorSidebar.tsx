@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
+import { authApi } from '../../api/auth';
 
 interface DoctorSidebarProps {
     isSidebarOpen: boolean;
@@ -12,8 +13,35 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
     isLoading = false
 }) => {
     const navigate = useNavigate();
-    const finalUserName = localStorage.getItem('userName') || "Bác sĩ chuyên khoa";
-    const finalUserAvatar = localStorage.getItem('userAvatar') || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0D8ABC&color=fff";
+    const [userInfo, setUserInfo] = useState({
+        name: localStorage.getItem('userName') || "Bác sĩ chuyên khoa",
+        avatar: localStorage.getItem('userAvatar')
+    });
+
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const response = await authApi.getMe();
+                if (response.success && response.data) {
+                    const { fullName, avatarUrl } = response.data;
+                    setUserInfo({
+                        name: fullName || "Bác sĩ chuyên khoa",
+                        avatar: avatarUrl
+                    });
+                    if (fullName) localStorage.setItem('userName', fullName);
+                    if (avatarUrl) localStorage.setItem('userAvatar', avatarUrl);
+                }
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+            }
+        };
+
+        fetchUserProfile();
+    }, []);
+
+    const finalUserName = userInfo.name;
+    const displayName = finalUserName === "Bác sĩ chuyên khoa" || finalUserName.includes("Bác sĩ") ? finalUserName : `Bác sĩ ${finalUserName}`;
+    const finalUserAvatar = userInfo.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0D8ABC&color=fff";
     
     const handleLogout = () => {
         localStorage.clear();
@@ -88,8 +116,8 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
                                     <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-24"></div>
                                 </div>
                             ) : (
-                                <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight tracking-tight pr-2" title={finalUserName}>
-                                    {finalUserName}
+                                <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight tracking-tight pr-2" title={displayName}>
+                                    {displayName}
                                 </p>
                             )}
                         </div>

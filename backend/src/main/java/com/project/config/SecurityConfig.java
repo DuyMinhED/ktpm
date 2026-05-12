@@ -42,7 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/clinics/**").hasAnyRole("CLINIC_MANAGER", "ADMIN")
+                        .requestMatchers("/api/v1/clinics/**").hasAnyRole("CLINIC_MANAGER", "ADMIN", "DOCTOR")
                         .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthenticationFilter,

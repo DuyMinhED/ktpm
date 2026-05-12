@@ -35,11 +35,15 @@ const VelorahLandingPage = () => {
         return;
       }
 
-      const { accessToken, role, clinicId, id } = response.data;
+      console.log('Login Response:', response.data);
+
+      const { accessToken, role, clinicId, id, fullName, avatarUrl } = response.data;
 
       localStorage.setItem('token', accessToken);
       localStorage.setItem('userRole', role);
       localStorage.setItem('userId', id.toString());
+      if (fullName) localStorage.setItem('userName', fullName);
+      if (avatarUrl) localStorage.setItem('userAvatar', avatarUrl);
       if (clinicId) localStorage.setItem('clinicId', clinicId.toString());
 
       if (role === 'ROLE_ADMIN') {
