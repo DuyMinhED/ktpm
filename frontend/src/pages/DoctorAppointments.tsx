@@ -26,7 +26,6 @@ export default function DoctorAppointments() {
     const [reschedulingAppointmentId, setReschedulingAppointmentId] = useState<number | null>(null);
     const [prefilledMeetingLink, setPrefilledMeetingLink] = useState<string | undefined>(undefined);
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; appointmentId?: number }>({ show: false });
-    const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
     const [linkPrompt, setLinkPrompt] = useState<{ show: boolean; apptId?: number; initialLink?: string }>({ show: false });
     const [completePrompt, setCompletePrompt] = useState<{ show: boolean; apptId?: number; patientName?: string }>({ show: false });
     const [viewMode, setViewMode] = useState<'active' | 'history'>('active');

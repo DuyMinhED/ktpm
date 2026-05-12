@@ -50,6 +50,7 @@ interface PrescriptionModalProps {
   isSaving: boolean;
   onSave: (prescriptionData: any) => Promise<void>;
   patients: any[];
+  preSelectedPatientId?: string;
 }
 
 const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
@@ -67,7 +68,8 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
   addMedicationToPrescription,
   isSaving,
   onSave,
-  patients
+  patients,
+  preSelectedPatientId
 }) => {
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
   const [diagnosis, setDiagnosis] = useState('');
@@ -81,8 +83,11 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
       setMedications([]);
       setFormErrors({ name: false, dosage: false, frequency: false, duration: false, intakeType: false });
       setNewMedForm({ name: '', dosage: '', frequency: '', duration: '', intakeType: '' });
-      if (patients && patients.length > 1) {
-        setSelectedPatientId(''); // Only reset if multiple choice, otherwise let single-auto-select run below
+      
+      if (preSelectedPatientId) {
+        setSelectedPatientId(preSelectedPatientId);
+      } else if (patients && patients.length > 1) {
+        setSelectedPatientId('');
       }
     }
   }, [isOpen]);

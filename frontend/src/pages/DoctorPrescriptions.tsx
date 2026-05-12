@@ -20,6 +20,7 @@ export default function DoctorPrescriptions() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('Tất cả trạng thái');
+    const [selectedPatientForRenewal, setSelectedPatientForRenewal] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         fetchData();
@@ -148,7 +149,10 @@ export default function DoctorPrescriptions() {
                         <p className="text-slate-500 mt-1">Quản lý và theo dõi phác đồ điều trị của bệnh nhân trực tiếp qua hệ thống</p>
                     </div>
                     <button
-                        onClick={() => setIsPrescriptionModalOpen(true)}
+                        onClick={() => {
+                            setSelectedPatientForRenewal(undefined);
+                            setIsPrescriptionModalOpen(true);
+                        }}
                         className="bg-primary text-slate-900 font-bold px-6 py-3.5 rounded-2xl text-[15px] flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-primary/20 active:scale-95"
                     >
                         <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
@@ -301,16 +305,32 @@ export default function DoctorPrescriptions() {
                                                     <td className="px-6 py-5 text-[15px] text-slate-600 dark:text-slate-400 font-medium max-w-[250px] truncate">{row.diagnosis}</td>
                                                     <td className="px-6 py-5">
                                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                                                            row.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' :
-                                                            row.status === 'PENDING_RENEWAL' ? 'bg-amber-50 text-amber-600 animate-pulse' :
+                                                            (row.status?.toLowerCase().includes('active') || row.status === 'Active') ? 'bg-emerald-50 text-emerald-600' :
+                                                            (row.status?.toLowerCase().includes('renewal') || row.status === 'Pending Renewal') ? 'bg-amber-50 text-amber-600 animate-pulse' :
                                                             'bg-slate-100 text-slate-500'
                                                         }`}>
-                                                            {row.status === 'ACTIVE' ? 'Hiệu lực' : 
-                                                             row.status === 'PENDING_RENEWAL' ? 'Cần cấp lại' : row.status}
+                                                            {(row.status?.toLowerCase().includes('active') || row.status === 'Active') ? 'Hiệu lực' : 
+                                                             (row.status?.toLowerCase().includes('renewal') || row.status === 'Pending Renewal') ? 'Cần cấp lại' : row.status}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            {(row.status?.toLowerCase().includes('renewal') || row.status === 'Pending Renewal') && (
+                                                                <button 
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        // Backend maps patient ID differently? Let's check row properties in user data. Usually row.patientId is available or fetched.
+                                                                        // If unavailable, the system has patientName. Let's ensure doctor selects correct one or lookup by name!
+                                                                        // Wait, let me check how to match the patient from existing dataset!
+                                                                        const match = myPatients.find(p => p.fullName === row.patientName);
+                                                                        if (match) setSelectedPatientForRenewal(String(match.id));
+                                                                        setIsPrescriptionModalOpen(true);
+                                                                    }}
+                                                                    title="Tái cấp ngay"
+                                                                    className="p-2 hover:bg-amber-50 rounded-lg text-amber-600 hover:text-amber-700 transition-colors flex items-center gap-1 font-bold text-xs">
+                                                                    <span className="material-symbols-outlined text-lg animate-spin-slow">autorenew</span>
+                                                                </button>
+                                                            )}
                                                             <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-primary transition-colors">
                                                                 <span className="material-symbols-outlined text-lg">visibility</span>
                                                             </button>
@@ -438,6 +458,7 @@ export default function DoctorPrescriptions() {
                 isAddingNewMedicine={isAddingNewMedicine}
                 setIsAddingNewMedicine={setIsAddingNewMedicine}
                 medications={medications}
+                setMedications={setMedications}
                 removeMedication={removeMedication}
                 newMedForm={newMedForm}
                 setNewMedForm={setNewMedForm}
@@ -447,6 +468,7 @@ export default function DoctorPrescriptions() {
                 isSaving={isSavingPrescription}
                 onSave={handleSavePrescription}
                 patients={myPatients}
+                preSelectedPatientId={selectedPatientForRenewal}
             />
             {/* Success Toast Notification */}
             <Toast
