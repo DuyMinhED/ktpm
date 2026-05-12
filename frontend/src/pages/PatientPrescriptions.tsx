@@ -173,8 +173,18 @@ const PatientPrescriptions: React.FC = () => {
                                                 <td className="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">{row.prescriptionCode}</td>
                                                 <td className="px-6 py-4 text-slate-500 dark:text-slate-400 font-medium">{row.diagnosis || 'N/A'}</td>
                                                 <td className="px-6 py-4">
-                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                                                        {row.status === 'COMPLETED' ? 'Hoàn thành' : row.status === 'EXPIRED' ? 'Hết hạn' : row.status}
+                                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                                                        row.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' : 
+                                                        row.status === 'PENDING_RENEWAL' ? 'bg-amber-100 text-amber-700' :
+                                                        row.status === 'EXPIRED' ? 'bg-rose-100 text-rose-700' : 
+                                                        'bg-slate-100 text-slate-600'
+                                                    }`}>
+                                                        {
+                                                            row.status === 'COMPLETED' ? 'Hoàn thành' : 
+                                                            row.status === 'PENDING_RENEWAL' ? 'Chờ cấp lại' :
+                                                            row.status === 'EXPIRED' ? 'Hết hạn' :
+                                                            row.status === 'ACTIVE' ? 'Đang dùng' : row.status
+                                                        }
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">

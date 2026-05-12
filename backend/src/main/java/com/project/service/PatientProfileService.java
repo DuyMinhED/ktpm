@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface PatientProfileService {
 
+
     PatientProfileResponse getCurrentPatientProfile();
     PatientProfileResponse getPatientProfileById(Long patientId);
     PatientProfileResponse updateProfile(UpdatePatientProfileRequest request);

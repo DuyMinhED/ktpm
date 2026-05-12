@@ -19,6 +19,9 @@ const PatientAppointments: React.FC = () => {
     const [selectedCancelId, setSelectedCancelId] = useState<number | null>(null);
     const [isCancelling, setIsCancelling] = useState(false);
     const [selectedResult, setSelectedResult] = useState<any>(null);
+    const [selectedDoctorId, setSelectedDoctorId] = useState<number | undefined>(undefined);
+    const [isSearchVisible, setIsSearchVisible] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const handleToggleReminder = async (id: number, currentStatus: boolean) => {
         try {
@@ -125,6 +128,13 @@ const PatientAppointments: React.FC = () => {
         return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     };
 
+    const filteredHistory = history.filter(item => {
+        if (!searchQuery.trim()) return true;
+        const query = searchQuery.toLowerCase();
+        return (item.doctorName?.toLowerCase() || "").includes(query) || 
+               (item.diagnosisSummary?.toLowerCase() || "").includes(query);
+    });
+
     return (
         <div className="flex flex-col lg:flex-row -m-8 h-[calc(100vh-64px)] overflow-hidden animate-in fade-in duration-700 font-display">
             {/* Main Content Area */}
@@ -136,9 +146,12 @@ const PatientAppointments: React.FC = () => {
                         <p className="text-slate-500 dark:text-slate-400">Quản lý và theo dõi các buổi khám của bạn</p>
                     </div>
                     <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-full font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20 active:scale-95 font-display text-sm"
-                    >
+                    onClick={() => {
+                        setSelectedDoctorId(undefined);
+                        setIsModalOpen(true);
+                    }}
+                    className="px-6 py-3.5 bg-primary hover:bg-primary/90 text-slate-900 font-extrabold rounded-full shadow-lg shadow-primary/30 hover:shadow-primary/50 active:scale-95 transition-all flex items-center gap-2 group text-[15px] tracking-tight"
+                >
                         <span className="material-symbols-outlined">add_circle</span>
                         Đặt lịch mới
                     </button>
@@ -257,16 +270,43 @@ const PatientAppointments: React.FC = () => {
 
                 {/* History Section */}
                 <section>
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Lịch sử khám bệnh</h3>
-                        <div className="flex gap-2">
-                            <button className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors">
-                                <span className="material-symbols-outlined text-slate-500">filter_list</span>
-                            </button>
-                            <button className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors">
-                                <span className="material-symbols-outlined text-slate-500">search</span>
-                            </button>
-                        </div>
+                    <div className="flex items-center justify-between mb-4 gap-4 h-10">
+                        {!isSearchVisible ? (
+                            <>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white animate-in slide-in-from-left-2">Lịch sử khám bệnh</h3>
+                                <div className="flex gap-2">
+                                    <button className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors text-slate-400 hover:text-primary" title="Lọc">
+                                        <span className="material-symbols-outlined">filter_list</span>
+                                    </button>
+                                    <button onClick={() => setIsSearchVisible(true)} className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors text-slate-400 hover:text-primary" title="Tìm kiếm">
+                                        <span className="material-symbols-outlined">search</span>
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="flex-1 flex items-center gap-2 animate-in slide-in-from-right-2 duration-200">
+                                <div className="relative flex-1">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+                                    <input 
+                                        autoFocus
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Tìm kiếm theo tên bác sĩ hoặc chẩn đoán..."
+                                        className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all font-bold text-slate-900 dark:text-white"
+                                    />
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        setIsSearchVisible(false);
+                                        setSearchQuery("");
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                                >
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
@@ -281,12 +321,14 @@ const PatientAppointments: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                    {history.length === 0 ? (
+                                    {filteredHistory.length === 0 ? (
                                         <tr>
-                                            <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Chưa có lịch sử khám bệnh</td>
+                                            <td colSpan={5} className="px-6 py-10 text-center text-slate-400 font-medium">
+                                                Không tìm thấy lịch sử khám nào phù hợp.
+                                            </td>
                                         </tr>
                                     ) : (
-                                    history.map((row) => (
+                                    filteredHistory.map((row) => (
                                         <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-700 dark:text-slate-300">{formatDate(row.appointmentTime)}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
@@ -383,7 +425,13 @@ const PatientAppointments: React.FC = () => {
                     <h4 className="font-bold mb-4 text-slate-900 dark:text-white">Bác sĩ khả dụng</h4>
                     <div className="space-y-4">
                         {doctors.slice(0, 3).map((doc) => (
-                            <div key={doc.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all cursor-pointer group hover:shadow-sm">
+                            <div key={doc.id} 
+                                onClick={() => {
+                                    setSelectedDoctorId(doc.id);
+                                    setIsModalOpen(true);
+                                }}
+                                className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all cursor-pointer group hover:shadow-sm"
+                            >
                                 <div className="flex items-center gap-3">
                                     <div className="size-10 rounded-full overflow-hidden shadow-inner ring-1 ring-slate-100">
                                         <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 bg-slate-200" src={doc.avatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(doc.name)} alt={doc.name} />
@@ -415,6 +463,7 @@ const PatientAppointments: React.FC = () => {
                 onSave={handleSaveAppointment}
                 isSaving={isSaving}
                 doctors={doctors}
+                preSelectedDoctorId={selectedDoctorId}
             />
             <ConfirmActionModal
                 isOpen={isCancelModalOpen}

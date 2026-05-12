@@ -31,6 +31,7 @@ export default function DoctorPrescriptions() {
             const statusMap: Record<string, string> = {
                 'Tất cả trạng thái': '',
                 'Đang hiệu lực': 'ACTIVE',
+                'Chờ tái cấp': 'PENDING_RENEWAL',
                 'Hết hạn': 'EXPIRED',
                 'Đã hủy': 'CANCELLED'
             };
@@ -246,7 +247,7 @@ export default function DoctorPrescriptions() {
 
                                     {isStatusDropdownOpen && (
                                         <div className="absolute top-full left-0 mt-2 w-full min-w-[200px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
-                                            {['Tất cả trạng thái', 'Đang hiệu lực', 'Hết hạn', 'Đã hủy'].map((status) => (
+                                            {['Tất cả trạng thái', 'Đang hiệu lực', 'Chờ tái cấp', 'Hết hạn', 'Đã hủy'].map((status) => (
                                                 <button
                                                     key={status}
                                                     onClick={() => {
@@ -276,6 +277,7 @@ export default function DoctorPrescriptions() {
                                             <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400">Mã đơn</th>
                                             <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400">Bệnh nhân</th>
                                             <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400">Chẩn đoán</th>
+                                            <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400">Trạng thái</th>
                                             <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400 text-right">Thao tác</th>
                                         </tr>
                                     </thead>
@@ -297,6 +299,16 @@ export default function DoctorPrescriptions() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-5 text-[15px] text-slate-600 dark:text-slate-400 font-medium max-w-[250px] truncate">{row.diagnosis}</td>
+                                                    <td className="px-6 py-5">
+                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                                                            row.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' :
+                                                            row.status === 'PENDING_RENEWAL' ? 'bg-amber-50 text-amber-600 animate-pulse' :
+                                                            'bg-slate-100 text-slate-500'
+                                                        }`}>
+                                                            {row.status === 'ACTIVE' ? 'Hiệu lực' : 
+                                                             row.status === 'PENDING_RENEWAL' ? 'Cần cấp lại' : row.status}
+                                                        </span>
+                                                    </td>
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-primary transition-colors">

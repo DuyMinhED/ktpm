@@ -9,9 +9,10 @@ interface AddAppointmentModalProps {
     onSave?: (data: any) => void;
     isSaving?: boolean;
     doctors?: any[];
+    preSelectedDoctorId?: number;
 }
 
-const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({ isOpen, onClose, onSave, isSaving, doctors = [] }) => {
+const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({ isOpen, onClose, onSave, isSaving, doctors = [], preSelectedDoctorId }) => {
     const [localDoctors, setLocalDoctors] = useState<any[]>(doctors);
     const [isLoadingDoctors, setIsLoadingDoctors] = useState(false);
     
@@ -39,8 +40,10 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({ isOpen, onClo
             document.body.style.overflow = 'hidden';
             if (doctors && doctors.length > 0) {
                 setLocalDoctors(doctors);
-                // Auto-select first doctor if none chosen yet
-                if (!specialty) {
+                // Pre-select specific doctor if passed, otherwise default to first
+                if (preSelectedDoctorId) {
+                    setSpecialty(preSelectedDoctorId.toString());
+                } else if (!specialty && doctors.length > 0) {
                     setSpecialty(doctors[0].id.toString());
                 }
             } else {

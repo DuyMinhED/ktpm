@@ -29,6 +29,7 @@ export default function DoctorAppointments() {
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
     const [linkPrompt, setLinkPrompt] = useState<{ show: boolean; apptId?: number; initialLink?: string }>({ show: false });
     const [completePrompt, setCompletePrompt] = useState<{ show: boolean; apptId?: number; patientName?: string }>({ show: false });
+    const [viewMode, setViewMode] = useState<'active' | 'history'>('active');
 
     const handleSaveReschedule = async (appointmentData: any) => {
         setIsSaving(true);
@@ -100,13 +101,17 @@ export default function DoctorAppointments() {
 
 
     // Create a helper for filtering active appointments only
-    const activeAppointments = appointments.filter(a => a.status !== 'CANCELLED');
+    const activeAppointments = appointments.filter(a => a.status !== 'CANCELLED' && a.status !== 'COMPLETED');
 
     const todayActiveCount = activeAppointments.filter(a => {
         const d = new Date(a.appointmentTime);
         const today = new Date();
         return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
     }).length;
+
+    const completedHistory = appointments
+        .filter(a => a.status === 'COMPLETED')
+        .sort((a, b) => new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime());
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -384,16 +389,38 @@ export default function DoctorAppointments() {
                         <div className="lg:col-span-4 space-y-6">
                             <div
                                 className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col h-full">
-                                <div className="p-6 border-b border-slate-100 dark:border-slate-700">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">Quản lý lịch hẹn</h3>
+                                <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+                                    <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                                        <button
+                                            onClick={() => setViewMode('active')}
+                                            className={`flex-1 py-2 px-3 text-[12px] font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                                                viewMode === 'active' 
+                                                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' 
+                                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                            }`}
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">calendar_today</span>
+                                            Lịch khám
+                                        </button>
+                                        <button
+                                            onClick={() => setViewMode('history')}
+                                            className={`flex-1 py-2 px-3 text-[12px] font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                                                viewMode === 'history' 
+                                                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' 
+                                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                            }`}
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">history</span>
+                                            Lịch sử
+                                        </button>
                                     </div>
                                 </div>
                                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-5 max-h-[600px]">
                                     {loading ? (
                                         <div className="text-center text-slate-500 text-sm py-8">Đang tải...</div>
                                     ) : (
-                                        <>
+                                        viewMode === 'active' ? (
+                                            <>
                                             {/* 1. Pending queue at the top */}
                                             {activeAppointments.filter(a => a.status === 'PENDING').length > 0 && (
                                                 <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
@@ -605,7 +632,57 @@ export default function DoctorAppointments() {
                                                     );
                                                 })}
                                             </div>
-                                        </>
+                                            </>
+                                        ) : (
+                                            /* 3. History Perspective */
+                                            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                                                <div className="flex items-center justify-between px-1">
+                                                    <h4 className="text-[13px] font-extrabold uppercase tracking-wider text-slate-500">Lịch sử khám gần đây</h4>
+                                                    <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold">{completedHistory.length} ca</span>
+                                                </div>
+                                                
+                                                {completedHistory.length === 0 ? (
+                                                    <div className="text-center text-slate-400 py-12 px-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center gap-2">
+                                                        <span className="material-symbols-outlined text-3xl opacity-50">history_toggle_off</span>
+                                                        <p className="text-[13px] font-medium">Chưa có lịch sử khám nào được ghi nhận.</p>
+                                                    </div>
+                                                ) : (
+                                                    completedHistory.map(appt => (
+                                                        <div key={`hist-${appt.id}`} className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+                                                            <div className="absolute top-0 right-0 w-1 h-full bg-emerald-500 opacity-60"></div>
+                                                            <div className="flex items-start justify-between mb-3">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="size-10 rounded-full overflow-hidden bg-slate-100 ring-2 ring-slate-50 dark:ring-slate-800 shadow-sm">
+                                                                        <img className="size-full object-cover"
+                                                                            src={appt.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(appt.patientName)} />
+                                                                    </div>
+                                                                    <div>
+                                                                        <h4 className="text-[14px] font-bold text-slate-900 dark:text-white">{appt.patientName}</h4>
+                                                                        <p className="text-[11px] text-slate-500 font-bold flex items-center gap-1 mt-0.5">
+                                                                            <span className="material-symbols-outlined text-[14px]">event_available</span>
+                                                                            {new Date(appt.appointmentTime).toLocaleDateString('vi-VN')}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-1 border border-emerald-100 dark:border-emerald-800">
+                                                                    <span className="material-symbols-outlined text-[12px] font-bold">check_circle</span>
+                                                                    Đã xong
+                                                                </span>
+                                                            </div>
+                                                            <div className="pl-13 mt-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                                                <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-1 flex items-center gap-1">
+                                                                    <span className="material-symbols-outlined text-[14px]">note_alt</span>
+                                                                    Chẩn đoán
+                                                                </p>
+                                                                <p className="text-[13px] leading-relaxed text-slate-700 dark:text-slate-300 font-medium line-clamp-2 italic">
+                                                                    {appt.diagnosisSummary ? `"${appt.diagnosisSummary}"` : "Chưa ghi chú chẩn đoán chi tiết."}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        )
                                     )}
                                     {/* Empty/Add slot */}
                                     <button

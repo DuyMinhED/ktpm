@@ -35,6 +35,7 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
     private final AppointmentRepository appointmentRepository;
     private final PatientRepository patientRepository;
     private final com.project.repository.UserRepository userRepository;
+    private final com.project.repository.ClinicRepository clinicRepository;
     private final NotificationService notificationService;
 
     @Override
@@ -45,6 +46,19 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
 
         com.project.entity.User doctor = userRepository.findById(request.getDoctorId()).orElse(null);
 
+        // Resolve Dynamic Clinic Name
+        String finalLocation = "Phòng khám Đa khoa"; // fallback
+        if (patient.getClinicId() != null) {
+            try {
+                com.project.entity.Clinic c = clinicRepository.findById(patient.getClinicId()).orElse(null);
+                if (c != null && c.getName() != null) {
+                    finalLocation = c.getName();
+                }
+            } catch (Exception e) {
+                log.warn("Failed to resolve clinic name dynamically for appointment creation: {}", e.getMessage());
+            }
+        }
+
         Appointment appointment = Appointment.builder()
                 .patient(patient)
                 .doctorId(request.getDoctorId())
@@ -54,7 +68,7 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
                 .doctorName(doctor != null ? doctor.getFullName() : null)
                 .doctorSpecialty(doctor != null ? doctor.getSpecialization() : null)
                 .doctorAvatarUrl(doctor != null ? doctor.getAvatarUrl() : null)
-                .location(request.getAppointmentType().equals("IN_PERSON") ? "Phòng khám Đa khoa Hoàn Mỹ" : null)
+                .location(request.getAppointmentType().equals("IN_PERSON") ? finalLocation : null)
                 .meetingLink(request.getAppointmentType().equals("ONLINE") ? "https://meet.google.com/abc-xyz" : null)
                 .build();
 
@@ -177,15 +191,50 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
     }
 
     private PatientAppointmentResponse mapToResponse(Appointment a) {
+        String finalDoctorName = a.getDoctorName();
+        String finalDoctorSpecialty = a.getDoctorSpecialty();
+        String finalDoctorAvatar = a.getDoctorAvatarUrl();
+
+        // Just-In-Time fallback for legacy data missing cached doctor details
+        if ((finalDoctorName == null || finalDoctorName.isEmpty()) && a.getDoctorId() != null) {
+            try {
+                com.project.entity.User docUser = userRepository.findById(a.getDoctorId()).orElse(null);
+                if (docUser != null) {
+                    finalDoctorName = docUser.getFullName();
+                    finalDoctorSpecialty = docUser.getSpecialization();
+                    finalDoctorAvatar = docUser.getAvatarUrl();
+                }
+            } catch (Exception e) {
+                log.warn("Failed to fetch JIT doctor fallback for appointment ID {}: {}", a.getId(), e.getMessage());
+            }
+        }
+
+        String location = a.getLocation();
+        // Clean up legacy hardcoded data on the fly for UI consistency
+        if (location != null && location.equals("Phòng khám Đa khoa Hoàn Mỹ")) {
+            location = "Phòng khám Đa khoa"; // Clean default fallback
+            try {
+                // Try resolving from patient's clinic quickly
+                if (a.getPatient() != null && a.getPatient().getClinicId() != null) {
+                    com.project.entity.Clinic c = clinicRepository.findById(a.getPatient().getClinicId()).orElse(null);
+                    if (c != null && c.getName() != null) {
+                        location = c.getName();
+                    }
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+
         return PatientAppointmentResponse.builder()
                 .id(a.getId())
-                .doctorName(a.getDoctorName())
-                .doctorSpecialty(a.getDoctorSpecialty())
-                .doctorAvatarUrl(a.getDoctorAvatarUrl())
+                .doctorName(finalDoctorName)
+                .doctorSpecialty(finalDoctorSpecialty)
+                .doctorAvatarUrl(finalDoctorAvatar)
                 .appointmentTime(a.getAppointmentTime())
                 .endTime(a.getEndTime())
                 .appointmentType(a.getType())
-                .location(a.getLocation())
+                .location(location)
                 .meetingLink(a.getMeetingLink())
                 .status(a.getStatus().name())
                 .diagnosisSummary(a.getDiagnosisSummary())
