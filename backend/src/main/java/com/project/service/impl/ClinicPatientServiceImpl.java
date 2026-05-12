@@ -264,6 +264,9 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
         if (request.getEthnicity() != null) patient.setEthnicity(request.getEthnicity());
         if (request.getInsuranceNumber() != null) patient.setHealthInsuranceNumber(request.getInsuranceNumber());
         if (request.getNotes() != null) patient.setClinicalNotes(request.getNotes());
+        if (request.getWeightKg() != null) patient.setWeightKg(request.getWeightKg());
+        if (request.getHeightCm() != null) patient.setHeightCm(request.getHeightCm());
+        if (request.getBloodType() != null) patient.setBloodType(request.getBloodType());
         
         if (request.getDateOfBirth() != null) {
             patient.setDateOfBirth(request.getDateOfBirth());

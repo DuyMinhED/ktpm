@@ -9,8 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 public class SendMessageRequest {
 
-    @NotNull(message = "Conversation ID is required")
     private Long conversationId;
+    private Long receiverId;
 
     @NotBlank(message = "Content is required")
     private String content;

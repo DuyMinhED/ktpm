@@ -77,8 +77,8 @@ public class ClinicDashboardController {
     }
 
     @PutMapping("/patients/{patientId}")
-    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN
-            + "') and @securityService.isClinicManagerOf(#clinicId)")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "', '" + RoleUtils.DOCTOR
+            + "') and (@securityService.isClinicManagerOf(#clinicId) or @securityService.isDoctorOfClinic(#clinicId))")
     @Operation(summary = "Update patient", description = "Updates patient record")
     public ApiResponse<Void> updatePatient(@PathVariable Long clinicId, @PathVariable Long patientId,
             @Valid @RequestBody CreatePatientRequest request) {

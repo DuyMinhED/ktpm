@@ -172,6 +172,30 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
             log.debug("No BP data for patient {}", p.getId());
         }
 
+        String latestHeartRate = "N/A";
+        try {
+            Optional<HealthMetric> hr = healthMetricRepository
+                    .findTopByPatientIdAndMetricTypeAndIsDeletedFalseOrderByMeasuredAtDesc(p.getId(),
+                            MetricType.HEART_RATE);
+            if (hr.isPresent()) {
+                latestHeartRate = hr.get().getValue().intValue() + " bpm";
+            }
+        } catch (Exception e) {
+            log.debug("No heart rate for patient {}", p.getId());
+        }
+
+        String latestSpo2 = "N/A";
+        try {
+            Optional<HealthMetric> spo2 = healthMetricRepository
+                    .findTopByPatientIdAndMetricTypeAndIsDeletedFalseOrderByMeasuredAtDesc(p.getId(),
+                            MetricType.SPO2);
+            if (spo2.isPresent()) {
+                latestSpo2 = spo2.get().getValue().intValue() + " %";
+            }
+        } catch (Exception e) {
+            log.debug("No SpO2 for patient {}", p.getId());
+        }
+
         String lastUpdate = "Chưa ghi nhận";
         try {
             var recentMetrics = healthMetricRepository.findRecentByPatientId(p.getId(), PageRequest.of(0, 1));
@@ -199,6 +223,8 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
                 .lastUpdate(lastUpdate)
                 .latestGlucose(latestGlucose)
                 .latestBp(latestBp)
+                .latestHeartRate(latestHeartRate)
+                .latestSpo2(latestSpo2)
                 .avatarUrl(p.getAvatarUrl())
                 .healthTrend(healthTrendData[0])
                 .trendColor(healthTrendData[1])
@@ -209,6 +235,9 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
                 .healthInsuranceNumber(p.getHealthInsuranceNumber())
                 .profileStatus(p.getProfileStatus())
                 .clinicalNotes(p.getClinicalNotes())
+                .heightCm(p.getHeightCm())
+                .weightKg(p.getWeightKg())
+                .bloodType(p.getBloodType())
                 .build();
     }
 
@@ -231,6 +260,10 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
             } else if (diff < -0.5) { // Significant decrease (Good for blood sugar)
                 return new String[]{"Đang cải thiện", "text-emerald-500"};
             } else {
+                // Check if stable at an unhealthy level
+                if (latest > 7.0) {
+                    return new String[]{"Duy trì mức cao", "text-amber-600"};
+                }
                 return new String[]{"Ổn định", "text-sky-500"};
             }
         } catch (Exception e) {

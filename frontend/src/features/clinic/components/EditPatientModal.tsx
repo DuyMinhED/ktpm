@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Dropdown from '../../../components/ui/Dropdown';
 import { uploadToCloudinary } from '../../../utils/cloudinary';
 
@@ -38,7 +38,10 @@ export default function EditPatientModal({
         insuranceNumber: '',
         avatarUrl: '',
         status: 'Hoạt động',
-        treatmentStatus: 'Đang điều trị'
+        treatmentStatus: 'Đang điều trị',
+        weightKg: '',
+        heightCm: '',
+        bloodType: ''
     });
 
     const [showPassword, setShowPassword] = useState(false);
@@ -87,7 +90,10 @@ export default function EditPatientModal({
                 insuranceNumber: patientData.healthInsuranceNumber || patientData.insuranceNumber || '',
                 avatarUrl: patientData.avatarUrl || patientData.img || '',
                 status: patientData.profileStatus || patientData.status || 'Hoạt động',
-                treatmentStatus: patientData.treatmentStatus || 'Đang điều trị'
+                treatmentStatus: patientData.treatmentStatus || 'Đang điều trị',
+                weightKg: patientData.weightKg || '',
+                heightCm: patientData.heightCm || '',
+                bloodType: patientData.bloodType || ''
             });
             setAvatarError(false);
             setFormErrors({});
@@ -99,6 +105,15 @@ export default function EditPatientModal({
             document.body.style.overflow = 'unset';
         };
     }, [isOpen, patientData, availableDoctors]);
+
+    const calculatedBmi = useMemo(() => {
+        const weight = parseFloat(formData.weightKg);
+        const height = parseFloat(formData.heightCm);
+        if (weight > 0 && height > 0) {
+            return (weight / ((height/100) ** 2)).toFixed(1);
+        }
+        return null;
+    }, [formData.weightKg, formData.heightCm]);
 
     if (!isOpen || !patientData) return null;
 
@@ -113,6 +128,7 @@ export default function EditPatientModal({
             });
         }
     };
+
 
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -152,8 +168,8 @@ export default function EditPatientModal({
             errors.email = 'Email không hợp lệ';
         }
 
-        if (formData.identityCard && !/^\d{12}$/.test(formData.identityCard.trim())) {
-            errors.identityCard = 'Số CCCD phải bao gồm 12 chữ số';
+        if (formData.identityCard && !/^\d{9,12}$/.test(formData.identityCard.trim())) {
+            errors.identityCard = 'Số CCCD/CMND không hợp lệ (9 hoặc 12 chữ số)';
         }
 
         if (formData.password && formData.password.length < 6) {
@@ -173,7 +189,15 @@ export default function EditPatientModal({
 
     const handleSubmit = () => {
         if (validateForm()) {
-            onSave({ ...patientData, ...formData });
+            // Sanitize empty numbers to actual null values before transmission
+            const submissionPayload = {
+                ...patientData,
+                ...formData,
+                weightKg: formData.weightKg === '' ? null : Number(formData.weightKg),
+                heightCm: formData.heightCm === '' ? null : Number(formData.heightCm),
+                bloodType: formData.bloodType === 'Chưa xác định' ? '' : formData.bloodType
+            };
+            onSave(submissionPayload);
         }
     };
 
@@ -399,7 +423,63 @@ export default function EditPatientModal({
                                             onChange={(status: string) => setFormData(prev => ({ ...prev, status }))}
                                         />
                                     </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-slate-500 ml-1">Cân nặng (kg)</label>
+                                        <div className="relative">
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">weight</span>
+                                            <input
+                                                name="weightKg"
+                                                type="number"
+                                                step="0.1"
+                                                placeholder="Ví dụ: 65.5"
+                                                value={formData.weightKg}
+                                                onChange={handleChange}
+                                                className="w-full pl-11 pr-4 h-[42px] rounded-lg border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 transition-all"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-slate-500 ml-1">Chiều cao (cm)</label>
+                                        <div className="relative">
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">straighten</span>
+                                            <input
+                                                name="heightCm"
+                                                type="number"
+                                                placeholder="Ví dụ: 170"
+                                                value={formData.heightCm}
+                                                onChange={handleChange}
+                                                className="w-full pl-11 pr-4 h-[42px] rounded-lg border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 transition-all"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-slate-500 ml-1">Nhóm máu</label>
+                                        <Dropdown
+                                            options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Chưa xác định']}
+                                            value={formData.bloodType || 'Chưa xác định'}
+                                            onChange={(bloodType: string) => setFormData(prev => ({ ...prev, bloodType }))}
+                                        />
+                                    </div>
                                 </div>
+                                
+                                {calculatedBmi && (
+                                    <div className="mt-3 mb-1 px-4 py-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 flex items-center gap-3 animate-in slide-in-from-top-2">
+                                        <span className="material-symbols-outlined text-indigo-600 text-[22px]">health_and_safety</span>
+                                        <div className="text-sm">
+                                            <span className="text-slate-600 dark:text-slate-300 font-medium">Chỉ số BMI tự động tính: </span>
+                                            <strong className="text-indigo-700 dark:text-indigo-400 text-base font-extrabold">{calculatedBmi} kg/m²</strong>
+                                            <span className="ml-2 text-[12px] px-2 py-0.5 rounded-full font-bold bg-white dark:bg-slate-800 text-indigo-600 border border-indigo-200">
+                                                {(() => {
+                                                    const v = parseFloat(calculatedBmi);
+                                                    if (v < 18.5) return 'Thiếu cân';
+                                                    if (v < 25) return 'Bình thường';
+                                                    if (v < 30) return 'Tiền béo phì';
+                                                    return 'Béo phì';
+                                                })()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Security/Password */}
                                 <div className="mt-4">

@@ -55,12 +55,24 @@ export default function RecordMetricModal({
                 if (parts.length >= 2 && !isNaN(parseInt(parts[1]))) currentDia = parts[1];
             }
 
+            let currentHR = '';
+            if (patientData?.latestHeartRate && patientData.latestHeartRate !== 'N/A') {
+                const match = patientData.latestHeartRate.match(/^(\d+)/);
+                if (match) currentHR = match[1];
+            }
+
+            let currentSpo2 = '';
+            if (patientData?.latestSpo2 && patientData.latestSpo2 !== 'N/A') {
+                const match = patientData.latestSpo2.match(/^(\d+)/);
+                if (match) currentSpo2 = match[1];
+            }
+
             setFormData({
                 glucose: currentG,
                 bpSystolic: currentSys,
                 bpDiastolic: currentDia,
-                heartRate: '',
-                spo2: '',
+                heartRate: currentHR,
+                spo2: currentSpo2,
                 notes: ''
             });
             setErrors({});

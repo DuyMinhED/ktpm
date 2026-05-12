@@ -40,6 +40,146 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
   const appointments = detailData?.appointmentHistory || [];
   const adherence = detailData?.adherenceRate || 0;
 
+  const getCleanRisk = (raw: string) => {
+    if (!raw) return 'Ổn định';
+    let norm = raw;
+    if (norm === 'HIGH_RISK') norm = 'Nguy cơ cao';
+    else if (norm === 'MONITORING') norm = 'Theo dõi';
+    else if (norm === 'STABLE') norm = 'Ổn định';
+    return norm.replace(/\([^)]*\)/g, '').trim();
+  };
+
+  const currentRisk = getCleanRisk(profile?.riskLevel || 'Ổn định');
+
+  // 📊 Real-time dynamic SVG line generator
+  const glucoseSeries = [...metrics]
+    .filter((m: any) => m.metricType === 'BLOOD_SUGAR')
+    .sort((a, b) => new Date(a.measuredAt).getTime() - new Date(b.measuredAt).getTime());
+    
+  const bpSeries = [...metrics]
+    .filter((m: any) => m.metricType === 'BLOOD_PRESSURE')
+    .sort((a, b) => new Date(a.measuredAt).getTime() - new Date(b.measuredAt).getTime());
+
+  const generateSvgPath = (dataset: any[], valGetter: (o: any) => number, rangeMin: number, rangeMax: number, closePath = false) => {
+    if (!dataset || dataset.length === 0) return "";
+    const width = 800;
+    const height = 200;
+    const padding = 20;
+    
+    const points = dataset.map((d, i) => {
+      const x = dataset.length > 1 ? (i / (dataset.length - 1)) * width : width / 2;
+      const val = valGetter(d);
+      // clamp clamped
+      const clamped = Math.max(rangeMin, Math.min(rangeMax, val));
+      const pct = (clamped - rangeMin) / (rangeMax - rangeMin);
+      // SVG Y goes 0 to H, so invert pct
+      const y = (height - padding) - (pct * (height - 2 * padding));
+      return { x, y };
+    });
+
+    if (points.length === 1) {
+      // For single data point, render horizontal line
+      const p = points[0];
+      return `M${p.x - 20},${p.y} L${p.x + 20},${p.y}`;
+    }
+
+    // Start path
+    let d = `M${points[0].x},${points[0].y}`;
+    // Draw smooth curve using Cubic Bezier midpoints
+    for (let i = 0; i < points.length - 1; i++) {
+      const curr = points[i];
+      const next = points[i + 1];
+      const cx = (curr.x + next.x) / 2;
+      d += ` C${cx},${curr.y} ${cx},${next.y} ${next.x},${next.y}`;
+    }
+
+    if (closePath) {
+      d += ` V${height} H${points[0].x} Z`;
+    }
+    return d;
+  };
+
+  // Setup Dynamic Ranges & Paths
+  const getSafeMax = (series: any[], fallback: number) => {
+    if (series.length === 0) return fallback;
+    const vals = series.map(m => Number(m.value));
+    return Math.max(fallback, Math.max(...vals));
+  };
+  const getSafeMin = (series: any[], fallback: number) => {
+    if (series.length === 0) return fallback;
+    const vals = series.map(m => Number(m.value));
+    return Math.min(fallback, Math.min(...vals));
+  };
+
+  const maxG = getSafeMax(glucoseSeries, 12);
+  const minG = getSafeMin(glucoseSeries, 0);
+  const maxB = getSafeMax(bpSeries, 160);
+  const minB = getSafeMin(bpSeries, 60);
+
+  const glucosePath = generateSvgPath(glucoseSeries, m => Number(m.value), minG, maxG);
+  const glucoseFillPath = generateSvgPath(glucoseSeries, m => Number(m.value), minG, maxG, true);
+  const bpPath = generateSvgPath(bpSeries, m => Number(m.value), minB, maxB);
+
+  // Generate label dates from dataset
+  const getTimelineLabels = () => {
+    const dates = metrics.map((m: any) => new Date(m.measuredAt))
+      .sort((a: any, b: any) => a - b);
+    
+    if (dates.length < 2) return ["--", "--", "--", "--", "Hiện tại"];
+    
+    // Check if ALL dates fall on the same day, to decide format
+    const firstDateStr = dates[0].toDateString();
+    const allSameDay = dates.every((d: Date) => d.toDateString() === firstDateStr);
+
+    const step = Math.max(1, Math.floor(dates.length / 4));
+    const result = [];
+    for (let i = 0; i < dates.length; i += step) {
+      if (result.length >= 5) break;
+      const d = dates[i];
+      const dateLabel = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+      const timeLabel = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+      result.push(allSameDay ? timeLabel : dateLabel);
+    }
+    
+    if (result.length < 5 && dates.length > 0) {
+      const ld = dates[dates.length - 1];
+      const dateLabel = `${ld.getDate().toString().padStart(2, '0')}/${(ld.getMonth() + 1).toString().padStart(2, '0')}`;
+      const timeLabel = `${ld.getHours().toString().padStart(2, '0')}:${ld.getMinutes().toString().padStart(2, '0')}`;
+      result.push(allSameDay ? timeLabel : dateLabel);
+    }
+    return result;
+  };
+
+  const timelineLabels = getTimelineLabels();
+
+  const renderStatusBadge = (status: string) => {
+    if (!status) return null;
+    
+    let text = 'Bình thường';
+    let style = 'text-primary bg-primary/10';
+    
+    switch(status) {
+      case 'NORMAL': 
+        text = 'Bình thường'; 
+        style = 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20';
+        break;
+      case 'HIGH': 
+        text = 'Cao'; 
+        style = 'text-red-600 bg-red-50 dark:bg-red-900/20';
+        break;
+      case 'BORDERLINE_HIGH':
+        text = 'Cảnh báo';
+        style = 'text-amber-600 bg-amber-50 dark:bg-amber-900/20';
+        break;
+      case 'LOW':
+      case 'BORDERLINE_LOW':
+        text = 'Thấp';
+        style = 'text-orange-600 bg-orange-50 dark:bg-orange-900/20';
+        break;
+    }
+    return <span className={`text-[13px] font-bold px-2 py-0.5 rounded ${style}`}>{text}</span>;
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -325,11 +465,11 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
                     <div className="flex items-center gap-3 flex-wrap">
                       <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{profile?.fullName || 'Nguyễn Văn A'}</h2>
                       <span
-                        className={`px-3 py-1 text-[13px] font-bold rounded-full tracking-wide border ${profile?.riskLevel?.includes('Nguy cơ cao') ? 'bg-red-50 text-red-500 border-red-100' :
-                          profile?.riskLevel?.includes('theo dõi') ? 'bg-orange-50 text-orange-500 border-orange-100' :
+                        className={`px-3 py-1 text-[13px] font-bold rounded-full tracking-wide border ${currentRisk?.includes('Nguy cơ cao') ? 'bg-red-50 text-red-500 border-red-100' :
+                          currentRisk?.includes('Theo dõi') ? 'bg-orange-50 text-orange-500 border-orange-100' :
                             'bg-green-50 text-green-500 border-green-100'
                           }`}>
-                        {profile?.riskLevel || 'Ổn định'}
+                        {currentRisk}
                       </span>
                     </div>
                     <div className="flex flex-col gap-0.5 mt-1">
@@ -401,44 +541,51 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
               <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="material-symbols-outlined text-red-500">blood_pressure</span>
-                  {profile?.latestBp && parseInt(profile.latestBp) > 140 && <span className="text-[13px] font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded">Cao</span>}
+                  {renderStatusBadge(metrics.find((i: any) => i.metricType === 'BLOOD_PRESSURE')?.status)}
                 </div>
                 <p className="text-slate-400 text-[13px] font-medium">Huyết áp</p>
                 <div className="flex items-baseline gap-1 mt-1">
-                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{profile?.latestBp || 'N/A'}</h4>
+                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">
+                    {(() => {
+                      const m = metrics.find((i: any) => i.metricType === 'BLOOD_PRESSURE');
+                      return m ? `${m.value}/${m.valueSecondary || '?'}` : 'N/A';
+                    })()}
+                  </h4>
                   <span className="text-[12px] text-slate-400 font-medium ml-1">mmHg</span>
                 </div>
               </div>
               <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="material-symbols-outlined text-amber-500">bloodtype</span>
-                  <span className="text-[13px] font-bold text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded">Cảnh báo</span>
+                  {renderStatusBadge(metrics.find((i: any) => i.metricType === 'BLOOD_SUGAR')?.status)}
                 </div>
                 <p className="text-slate-400 text-[13px] font-medium">Đường huyết</p>
                 <div className="flex items-baseline gap-1 mt-1">
-                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{profile?.latestGlucose?.split(' ')[0] || 'N/A'}</h4>
+                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">
+                    {metrics.find((i: any) => i.metricType === 'BLOOD_SUGAR')?.value || 'N/A'}
+                  </h4>
                   <span className="text-[12px] text-slate-400 font-medium ml-1">mmol/L</span>
                 </div>
               </div>
               <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="material-symbols-outlined text-primary">favorite</span>
-                  <span className="text-[13px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">Bình thường</span>
+                  {renderStatusBadge(metrics.find((m: any) => m.metricType === 'HEART_RATE')?.status)}
                 </div>
                 <p className="text-slate-400 text-[13px] font-medium">Nhịp tim</p>
                 <div className="flex items-baseline gap-1 mt-1">
-                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{metrics.find((m: any) => m.metricType === 'HEART_RATE')?.value || '82'}</h4>
+                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{metrics.find((m: any) => m.metricType === 'HEART_RATE')?.value || 'N/A'}</h4>
                   <span className="text-[12px] text-slate-400 font-medium ml-1">bpm</span>
                 </div>
               </div>
               <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="material-symbols-outlined text-blue-500">air</span>
-                  <span className="text-[13px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">Tốt</span>
+                  {renderStatusBadge(metrics.find((m: any) => m.metricType === 'SPO2')?.status)}
                 </div>
                 <p className="text-slate-400 text-[13px] font-medium">SpO2</p>
                 <div className="flex items-baseline gap-1 mt-1">
-                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{metrics.find((m: any) => m.metricType === 'SPO2')?.value || '98'}</h4>
+                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{metrics.find((m: any) => m.metricType === 'SPO2')?.value || 'N/A'}</h4>
                   <span className="text-[12px] text-slate-400 font-medium ml-1">%</span>
                 </div>
               </div>
@@ -449,7 +596,11 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
                 </div>
                 <p className="text-slate-400 text-[13px] font-medium">BMI</p>
                 <div className="flex items-baseline gap-1 mt-1">
-                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{(profile?.weightKg / ((profile?.heightCm/100)**2)).toFixed(1) || '24.5'}</h4>
+                  <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">
+                    {profile?.weightKg && profile?.heightCm 
+                      ? (profile.weightKg / ((profile.heightCm/100)**2)).toFixed(1) 
+                      : 'N/A'}
+                  </h4>
                   <span className="text-[12px] text-slate-400 font-medium ml-1">kg/m²</span>
                 </div>
               </div>
@@ -475,14 +626,26 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
                       />
                     </div>
                   </div>
-                  <div className="h-64 relative w-full overflow-hidden">
-                    <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 200">
-                      <path d="M0,150 Q50,140 100,160 T200,130 T300,140 T400,110 T500,120 T600,80 T700,90 T800,60" fill="none" stroke="#4ade80" strokeWidth="3" />
-                      <path className="fill-primary/5" d="M0,150 Q50,140 100,160 T200,130 T300,140 T400,110 T500,120 T600,80 T700,90 T800,60 V200 H0 Z" />
-                      <path d="M0,100 Q50,90 100,110 T200,80 T300,90 T400,60 T500,70 T600,30 T700,40 T800,10" fill="none" stroke="#ef4444" strokeDasharray="5,5" strokeWidth="2" />
-                    </svg>
-                    <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] text-slate-400 font-bold uppercase pt-4">
-                      <span>01/10</span><span>07/10</span><span>14/10</span><span>21/10</span><span>28/10</span>
+                  <div className="h-64 relative w-full overflow-hidden border-b border-slate-100 dark:border-slate-800">
+                    {(!metrics || metrics.length === 0) ? (
+                      <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">Chưa đủ dữ liệu để vẽ biểu đồ</div>
+                    ) : (
+                      <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 200">
+                        {/* Gridlines */}
+                        <line x1="0" y1="20" x2="800" y2="20" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />
+                        <line x1="0" y1="90" x2="800" y2="90" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />
+                        <line x1="0" y1="160" x2="800" y2="160" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />
+                        
+                        {/* Dynamic Glucose Lines */}
+                        {glucoseFillPath && <path className="fill-primary/5" d={glucoseFillPath} />}
+                        {glucosePath && <path d={glucosePath} fill="none" stroke="#4ade80" strokeWidth="3" className="drop-shadow-sm" />}
+                        
+                        {/* Dynamic BP Lines */}
+                        {bpPath && <path d={bpPath} fill="none" stroke="#ef4444" strokeDasharray="5,5" strokeWidth="2" />}
+                      </svg>
+                    )}
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] text-slate-400 font-extrabold tracking-wider pt-4 px-2">
+                      {timelineLabels.map((label, idx) => <span key={idx}>{label}</span>)}
                     </div>
                   </div>
                   <div className="flex gap-6 mt-8 pt-6 border-t border-slate-50 dark:border-slate-800">

@@ -9,6 +9,7 @@ import com.project.entity.Patient;
 import com.project.exception.ResourceNotFoundException;
 import com.project.repository.ConversationRepository;
 import com.project.repository.MessageRepository;
+import com.project.repository.PatientRepository;
 import com.project.service.DoctorMessageService;
 import com.project.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class DoctorMessageServiceImpl implements DoctorMessageService {
 
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
+    private final PatientRepository patientRepository;
 
     @Override
     public List<ConversationResponse> getConversations() {
@@ -71,9 +73,31 @@ public class DoctorMessageServiceImpl implements DoctorMessageService {
     @Transactional
     public MessageResponse sendMessage(SendMessageRequest request) {
         Long doctorId = SecurityUtils.getCurrentUserId().orElseThrow();
+        Conversation conversation = null;
 
-        Conversation conversation = conversationRepository.findById(request.getConversationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Conversation not found"));
+        if (request.getConversationId() != null) {
+            conversation = conversationRepository.findById(request.getConversationId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Conversation not found"));
+        } else if (request.getReceiverId() != null) {
+            // Try existing
+            conversation = conversationRepository.findByPatientIdAndDoctorId(request.getReceiverId(), doctorId)
+                    .orElse(null);
+            
+            if (conversation == null) {
+                // Create on demand
+                Patient p = patientRepository.findById(request.getReceiverId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+                conversation = Conversation.builder()
+                        .patient(p)
+                        .doctorId(doctorId)
+                        .lastMessageAt(LocalDateTime.now())
+                        .isActive(true)
+                        .build();
+                conversation = conversationRepository.save(conversation);
+            }
+        } else {
+            throw new IllegalArgumentException("Either Conversation ID or Receiver ID is required");
+        }
 
         if (!conversation.getDoctorId().equals(doctorId)) {
             throw new RuntimeException("Unauthorized to send message in this conversation");

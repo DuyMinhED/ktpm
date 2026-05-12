@@ -24,6 +24,8 @@ public class DoctorPatientResponse {
     // Latest metrics
     private String latestGlucose;
     private String latestBp;
+    private String latestHeartRate;
+    private String latestSpo2;
     private String avatarUrl;
     private String healthTrend; // e.g., "Worsening", "Improving", "Stable"
     private String trendColor; // e.g., "text-rose-500", "text-emerald-500", "text-slate-400"
@@ -35,4 +37,7 @@ public class DoctorPatientResponse {
     private String healthInsuranceNumber;
     private String profileStatus;
     private String clinicalNotes;
+    private java.math.BigDecimal heightCm;
+    private java.math.BigDecimal weightKg;
+    private String bloodType;
 }

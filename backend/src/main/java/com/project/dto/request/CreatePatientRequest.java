@@ -42,4 +42,9 @@ public class CreatePatientRequest {
     private java.math.BigDecimal initialGlucose;
     private java.math.BigDecimal initialBpSystolic;
     private java.math.BigDecimal initialBpDiastolic;
+
+    // Physiological details
+    private java.math.BigDecimal weightKg;
+    private java.math.BigDecimal heightCm;
+    private String bloodType;
 }

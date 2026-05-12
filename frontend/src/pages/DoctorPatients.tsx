@@ -446,7 +446,7 @@ export default function DoctorPatients() {
                         <td className="px-6 py-5">
                           <div className={`flex items-center gap-1 inline-flex px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/50 ${p.trendColor || 'text-slate-500'} font-bold text-[13px]`}>
                             <span className="material-symbols-outlined text-[18px]">
-                              {p.trendColor?.includes('emerald') ? 'trending_up' : p.trendColor?.includes('rose') ? 'trending_down' : 'trending_flat'}
+                              {p.trendColor?.includes('rose') ? 'trending_up' : p.trendColor?.includes('emerald') ? 'trending_down' : 'trending_flat'}
                             </span>
                             {p.healthTrend || 'Ổn định'}
                           </div>
