@@ -190,16 +190,16 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
             return AdminReportsResponse.builder()
                     .summary(AdminReportsResponse.ReportSummary.builder()
-                            .nps("82.4")
-                            .avgTime("26")
-                            .returnRate("88%")
-                            .retentionRate("91%")
+                            .nps("Chưa đánh giá")
+                            .avgTime("Chưa tính")
+                            .returnRate("...")
+                            .retentionRate("...")
                             .build())
                     .analytics(AdminReportsResponse.AnalyticsSummary.builder()
-                            .growthRate("+14.2%")
-                            .peakMonth("Tháng 12")
-                            .returnRate("88.5%")
-                            .forecast("+6.2%")
+                            .growthRate("...")
+                            .peakMonth("...")
+                            .returnRate("...")
+                            .forecast("...")
                             .build())
                     .clinicBreakdown(breakdowns)
                     .clinicPerformances(performances)
@@ -242,7 +242,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 .id(c.getId()).name(c.getName()).clinicCode(c.getClinicCode()).phone(c.getPhone())
                 .doctorCount(realDoctorCounts.getOrDefault(c.getId(), 0L))
                 .patientCount(realPatientCounts.getOrDefault(c.getId(), 0L))
-                .growth("+12%").status(c.getStatus()).build()).collect(Collectors.toList());
+                .growth("Mới").status(c.getStatus()).build()).collect(Collectors.toList());
     }
 
     private List<AdminDashboardResponse.SystemActivityDto> getRecentActivities() {
@@ -292,13 +292,6 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
             }
         }
 
-        // Fallback if data is too empty for visual
-        if (data.stream().allMatch(d -> d.getValue() == 0)) {
-            return data.stream().map(d -> {
-                d.setValue(10L + (long)(Math.random() * 40));
-                return d;
-            }).collect(Collectors.toList());
-        }
 
         return data;
     }

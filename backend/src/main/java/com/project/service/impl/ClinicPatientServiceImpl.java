@@ -252,6 +252,7 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
 
     private void updatePatientFields(Patient patient, CreatePatientRequest request) {
         if (request.getName() != null) patient.setFullName(request.getName());
+        if (request.getEmail() != null && !request.getEmail().isBlank()) patient.setEmail(request.getEmail());
         if (request.getPhone() != null) patient.setPhone(request.getPhone());
         if (request.getGender() != null) patient.setGender(request.getGender());
         if (request.getAddress() != null) patient.setAddress(request.getAddress());
@@ -279,9 +280,11 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
     }
 
     private void updateUserFields(User user, Patient patient, CreatePatientRequest request) {
-        if (request.getEmail() != null) user.setEmail(request.getEmail());
-        if (request.getPassword() != null) user.setPassword(passwordEncoder.encode(request.getPassword()));
-        if (request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
+        if (request.getEmail() != null && !request.getEmail().isBlank()) user.setEmail(request.getEmail());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getAvatarUrl() != null && !request.getAvatarUrl().isBlank()) user.setAvatarUrl(request.getAvatarUrl());
         user.setFullName(patient.getFullName());
         user.setPhone(patient.getPhone());
     }

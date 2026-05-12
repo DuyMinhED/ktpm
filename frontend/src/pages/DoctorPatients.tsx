@@ -551,6 +551,7 @@ export default function DoctorPatients() {
           isAddingNewMedicine={isAddingNewMedicine}
           setIsAddingNewMedicine={setIsAddingNewMedicine}
           medications={medications}
+          setMedications={setMedications}
           removeMedication={removeMedication}
           newMedForm={newMedForm}
           setNewMedForm={setNewMedForm}
@@ -601,7 +602,6 @@ export default function DoctorPatients() {
               setIsSaving(false);
             }
           }}
-          patientName={selectedPatient?.fullName || "Bệnh nhân"}
         />
 
         <RescheduleModal

@@ -204,8 +204,8 @@ export default function DoctorAnalytics() {
                                 </div>
                             </div>
                             <div className="mt-4 flex items-center text-[14px] text-blue-600 dark:text-blue-400 font-bold">
-                                <span className="material-symbols-outlined text-[14px] mr-1">trending_up</span>
-                                +12% so với tháng trước
+                                <span className="material-symbols-outlined text-[14px] mr-1">schedule</span>
+                                Theo dõi trực tiếp
                             </div>
                         </div>
                         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-primary/5">
@@ -231,7 +231,7 @@ export default function DoctorAnalytics() {
                                 </div>
                             </div>
                             <div className="mt-4 flex items-center text-[14px] text-orange-500 dark:text-orange-400 font-bold">
-                                Dự báo tăng 5% tới
+                                Dữ liệu thực tế
                             </div>
                         </div>
                         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-primary/5">
@@ -275,12 +275,18 @@ export default function DoctorAnalytics() {
                             </div>
                             {/* Chart Simulation */}
                             <div className="h-64 flex items-end justify-between gap-4 px-4 border-b border-slate-100 pb-2">
-                                {(chartType === 'bp' ? (stats?.chartDataBp || [120, 125, 118, 130, 128, 122, 115]) : (stats?.chartDataGlucose || [6.5, 6.8, 6.2, 7.1, 7.5, 6.9, 6.4])).map((val: number, i: number) => {
+                                {(chartType === 'bp' ? (stats?.chartDataBp || [0,0,0,0,0,0,0]) : (stats?.chartDataGlucose || [0,0,0,0,0,0,0])).map((val: number, i: number) => {
                                     const minVal = chartType === 'bp' ? 90 : 4;
                                     const maxVal = chartType === 'bp' ? 150 : 10;
                                     const heightPercent = Math.min(100, Math.max(10, ((val - minVal) / (maxVal - minVal)) * 100));
                                     const opacity = 0.2 + (i * 0.1);
-                                    const days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+                                    const dayLabels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                                    const dayIndices = Array.from({ length: 7 }, (_, index) => {
+                                        const d = new Date();
+                                        d.setDate(d.getDate() - (6 - index));
+                                        return dayLabels[d.getDay()];
+                                    });
+                                    const days = dayIndices;
                                     return (
                                         <div key={i} className="w-full flex flex-col items-center group">
                                             <div

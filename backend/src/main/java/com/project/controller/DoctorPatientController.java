@@ -55,8 +55,8 @@ public class DoctorPatientController {
                 "highRiskCount", highRisk,
                 "monitoringCount", monitoringCount,
                 "stableCount", stableCount,
-                "chartDataBp", java.util.List.of(120, 125, 118, 130, 128, 122, 115),
-                "chartDataGlucose", java.util.List.of(6.5, 6.8, 6.2, 7.1, 7.5, 6.9, 6.4)
+                "chartDataBp", doctorPatientService.getDailyMetricTrend(doctorId, com.project.entity.MetricType.BLOOD_PRESSURE, 7),
+                "chartDataGlucose", doctorPatientService.getDailyMetricTrend(doctorId, com.project.entity.MetricType.BLOOD_SUGAR, 7)
         ));
     }
 

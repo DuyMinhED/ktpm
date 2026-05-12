@@ -67,12 +67,24 @@ public class PatientProfileServiceImpl implements PatientProfileService {
         }
         if (request.getAvatarUrl() != null && !request.getAvatarUrl().isEmpty()) {
             patient.setAvatarUrl(request.getAvatarUrl());
-            // Sync with User table for consistency across app components (header, sidebar, etc)
-            userRepository.findById(patient.getUserId()).ifPresent(user -> {
-                user.setAvatarUrl(request.getAvatarUrl());
-                userRepository.save(user);
-            });
         }
+
+        // SYNC critical identity and contact info to the User table for continuous authentication consistency
+        userRepository.findById(patient.getUserId()).ifPresent(user -> {
+            if (patient.getEmail() != null && !patient.getEmail().isBlank()) {
+                user.setEmail(patient.getEmail()); // Allow login email to drift with profile edit
+            }
+            if (patient.getFullName() != null) {
+                user.setFullName(patient.getFullName());
+            }
+            if (patient.getPhone() != null) {
+                user.setPhone(patient.getPhone());
+            }
+            if (patient.getAvatarUrl() != null) {
+                user.setAvatarUrl(patient.getAvatarUrl());
+            }
+            userRepository.save(user);
+        });
 
         Patient saved = patientRepository.save(patient);
         log.info("Patient profile updated: id={}", saved.getId());

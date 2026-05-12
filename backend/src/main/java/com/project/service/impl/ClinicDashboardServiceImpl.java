@@ -140,24 +140,18 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .map((ClinicDashboardResponse.DiseaseRatioDto ratio) -> {
                     String assessment = "Ổn định";
                     String color = "bg-emerald-500";
-                    String riskVar = "-1.2%";
+                    String riskVar = "-";
                     if (ratio.getRiskRate() > 50) {
                         assessment = "Rủi ro cao";
                         color = "bg-rose-500";
-                        riskVar = "+5.8%";
+                        riskVar = "+";
                     } else if (ratio.getRiskRate() > 30) {
                         assessment = "Cần lưu ý";
                         color = "bg-amber-500";
-                        riskVar = "+2.4%";
+                        riskVar = "+";
                     }
 
-                    String index = "Không có DLTN";
-                    if (ratio.getLabel() != null) {
-                        if (ratio.getLabel().contains("Tiểu đường")) index = "126 mg/dL";
-                        else if (ratio.getLabel().contains("huyết áp")) index = "135/85 mmHg";
-                        else if (ratio.getLabel().contains("Hen suyễn")) index = "PEF 75%";
-                        else if (ratio.getLabel().contains("Tim mạch")) index = "Nhịp tim 82 bpm";
-                    }
+                    String index = "N/A";
 
                     return ClinicDashboardResponse.DiseaseAnalysisDto.builder()
                         .diseaseName(ratio.getLabel())
@@ -176,8 +170,8 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                         .name(doctor.getFullName())
                         .specialty(doctor.getSpecialization() != null ? doctor.getSpecialization() : "Nội khoa")
                         .load((int) appointmentRepository.countByDoctorIdAndStatus(doctor.getId(), AppointmentStatus.PENDING))
-                        .rating("4.8") 
-                        .reviews(24) 
+                        .rating("Chưa có") 
+                        .reviews(0) 
                         .color("blue")
                         .build())
                 .collect(Collectors.toList());

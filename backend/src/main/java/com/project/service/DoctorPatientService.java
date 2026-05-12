@@ -11,4 +11,5 @@ public interface DoctorPatientService {
     long getHighRiskCount(Long doctorUserId);
     long getMonitoringCount(Long doctorUserId);
     DoctorPatientDetailResponse getPatientDetail(Long patientId);
+    java.util.List<Double> getDailyMetricTrend(Long doctorUserId, com.project.entity.MetricType type, int days);
 }
