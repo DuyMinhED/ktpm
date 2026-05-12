@@ -18,8 +18,6 @@ const Toast: React.FC<ToastProps> = ({ show, title, type = 'success', onClose })
   useEffect(() => {
     if (show && title) {
       showToast(title, type);
-      // Immediately call onClose to reset the parent's 'show' state
-      // since the global system now manages the lifecycle.
       onClose();
     }
   }, [show, title, type, showToast, onClose]);
@@ -27,4 +25,6 @@ const Toast: React.FC<ToastProps> = ({ show, title, type = 'success', onClose })
   return null;
 };
 
+
 export default Toast;
+

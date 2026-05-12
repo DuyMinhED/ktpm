@@ -7,7 +7,7 @@ import java.util.List;
 public interface DoctorAppointmentService {
     List<DoctorAppointmentResponse> getUpcomingAppointments();
     List<DoctorAppointmentResponse> getAllAppointments();
-    DoctorAppointmentResponse updateStatus(Long appointmentId, String status);
+    DoctorAppointmentResponse updateStatus(Long appointmentId, String status, String meetingLink);
     DoctorAppointmentResponse createAppointment(DoctorCreateAppointmentRequest request);
     DoctorAppointmentResponse rescheduleAppointment(Long appointmentId, DoctorCreateAppointmentRequest request);
     int batchReschedule(java.time.LocalDate sourceDate, java.time.LocalDate targetDate);

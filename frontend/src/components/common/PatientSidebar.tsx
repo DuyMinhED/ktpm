@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth';
+import { patientApi } from '../../api/patient';
 
 interface PatientSidebarProps {
     isSidebarOpen: boolean;
@@ -13,6 +14,7 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
         name: localStorage.getItem('userName') || "Bệnh nhân",
         avatar: localStorage.getItem('userAvatar')
     });
+    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -31,7 +33,23 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
                 console.error("Error fetching patient user profile:", error);
             }
         };
+
+        const fetchUnreadCount = async () => {
+            try {
+                const res = await patientApi.getConversations();
+                if (res.data) {
+                    const total = res.data.reduce((acc: number, curr: any) => acc + (curr.unreadCount || 0), 0);
+                    setUnreadCount(total);
+                }
+            } catch (error) {
+                console.error("Error fetching unread conversations count:", error);
+            }
+        };
+
         fetchUserProfile();
+        fetchUnreadCount();
+        const interval = setInterval(fetchUnreadCount, 15000); // Refresh every 15s
+        return () => clearInterval(interval);
     }, []);
 
     const finalUserName = userInfo.name;
@@ -47,9 +65,10 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
         { path: '/patient/prescriptions', label: 'Đơn thuốc', icon: 'prescriptions' },
         { path: '/patient/metrics', label: 'Chỉ số sức khỏe', icon: 'monitoring' },
         { path: '/patient/appointments', label: 'Lịch hẹn', icon: 'calendar_today' },
-        { path: '/patient/messages', label: 'Tin nhắn bác sĩ', icon: 'chat' },
+        { path: '/patient/messages', label: 'Tin nhắn bác sĩ', icon: 'chat', badge: unreadCount > 0 ? `${unreadCount}` : undefined },
         { path: '/patient/profile', label: 'Hồ sơ cá nhân', icon: 'person' },
     ];
+
 
     return (
         <aside className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-900 border-r border-primary/10 flex flex-col z-[150] transition-transform duration-300 w-72 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl lg:shadow-none shadow-primary/10 font-display`}>
@@ -81,9 +100,15 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
                                     {item.icon}
                                 </span>
                                 <span>{item.label}</span>
+                                {item.badge && (
+                                    <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full ${(isActive as any) ? 'bg-white text-primary' : 'bg-red-500 text-white'}`}>
+                                        {item.badge}
+                                    </span>
+                                )}
                             </>
                         )}
                     </NavLink>
+
                 ))}
             </nav>
 

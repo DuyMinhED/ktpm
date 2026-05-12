@@ -22,4 +22,6 @@ public class DoctorCreateAppointmentRequest {
     private String type; // OFFLINE, ONLINE
 
     private String notes;
+    
+    private String meetingLink;
 }

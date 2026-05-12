@@ -78,7 +78,7 @@ const PatientAppointments: React.FC = () => {
             setIsModalOpen(false);
             setToast({
                 show: true,
-                title: 'Đặt lịch khám thành công! Vui lòng chờ bác sĩ xác nhận.',
+                title: 'Đặt lịch thành công!',
                 type: 'success'
             });
             loadData();
@@ -100,7 +100,7 @@ const PatientAppointments: React.FC = () => {
         setIsCancelling(true);
         try {
             await patientApi.cancelAppointment(selectedCancelId);
-            setToast({ show: true, title: 'Hủy lịch hẹn thành công', type: 'success' });
+            setToast({ show: true, title: 'Hủy lịch thành công!', type: 'success' });
             setIsCancelModalOpen(false);
             loadData();
         } catch (error) {
@@ -242,7 +242,10 @@ const PatientAppointments: React.FC = () => {
                                                 ? 'Đã thiết lập nhắc nhở' 
                                                 : 'Nhắc tôi'}
                                 </button>
-                                <button onClick={() => handleOpenCancelModal(appt.id)} className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-95">Hủy lịch</button>
+                                {appt.status === 'PENDING' && (
+                                    <button onClick={() => handleOpenCancelModal(appt.id)} className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-95">Hủy lịch</button>
+                                )}
+
                             </div>
                         </div>
                         ))}
@@ -409,7 +412,7 @@ const PatientAppointments: React.FC = () => {
                 onClose={() => setIsCancelModalOpen(false)}
                 onConfirm={confirmCancel}
                 title="Xác nhận hủy lịch"
-                description="Bạn có chắc chắn muốn hủy buổi khám này không? Thao tác này sẽ giải phóng khung giờ đã đặt và không thể phục hồi."
+                description="Xác nhận hủy lịch hẹn này?"
                 confirmText="Xác nhận hủy"
                 cancelText="Không, quay lại"
                 iconName="event_busy"

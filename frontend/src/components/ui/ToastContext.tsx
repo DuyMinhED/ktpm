@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // --- Types ---
@@ -120,8 +120,16 @@ const ToastContainer: React.FC<{
 // --- Provider & Hook ---
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastData[]>([]);
+  const lastToastRef = useRef<{ title: string, time: number } | null>(null);
 
   const showToast = useCallback((title: string, type: ToastType = 'success') => {
+    const now = Date.now();
+    // Prevent duplicates within 300ms
+    if (lastToastRef.current && lastToastRef.current.title === title && (now - lastToastRef.current.time < 300)) {
+      return;
+    }
+    lastToastRef.current = { title, time: now };
+
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, title, type }]);
   }, []);
@@ -137,6 +145,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     </ToastContext.Provider>
   );
 };
+
 
 export const useToast = () => {
   const context = useContext(ToastContext);

@@ -110,10 +110,14 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
                 throw new RuntimeException("Bạn không có quyền hủy lịch hẹn này.");
             }
 
-            // Safety Check: Do not cancel completed ones
+            // Safety Check: Do not cancel completed ones or scheduled ones
             if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
                 throw new RuntimeException("Không thể hủy lịch hẹn đã hoàn tất.");
             }
+            if (appointment.getStatus() == AppointmentStatus.SCHEDULED) {
+                throw new RuntimeException("Lịch hẹn đã được bác sĩ xác nhận, không thể tự hủy. Vui lòng liên hệ phòng khám.");
+            }
+
 
             appointment.setStatus(AppointmentStatus.CANCELLED);
             appointmentRepository.saveAndFlush(appointment); // Force flush

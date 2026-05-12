@@ -50,7 +50,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
     @Override
     @Transactional
     @CacheEvict(value = "clinic_dashboard", allEntries = true)
-    public DoctorAppointmentResponse updateStatus(Long appointmentId, String status) {
+    public DoctorAppointmentResponse updateStatus(Long appointmentId, String status, String meetingLink) {
         Long doctorId = SecurityUtils.getCurrentUserId().orElseThrow();
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lịch hẹn không tồn tại!"));
@@ -60,11 +60,19 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
         }
 
         appointment.setStatus(AppointmentStatus.valueOf(status.toUpperCase()));
+        
+        if (status.equalsIgnoreCase("SCHEDULED") && "ONLINE".equalsIgnoreCase(appointment.getType().toString())) {
+            if (meetingLink != null && !meetingLink.trim().isEmpty()) {
+                appointment.setMeetingLink(meetingLink);
+            } else if (appointment.getMeetingLink() == null || appointment.getMeetingLink().isEmpty()) {
+                appointment.setMeetingLink("https://meet.google.com/abc-xyz"); // Fallback default
+            }
+        }
         Appointment saved = appointmentRepository.save(appointment);
 
         // Notify Patient
         String title = "Cập nhật lịch hẹn";
-        String message = "Lịch hẹn của bạn đã được chuyển sang trạng thái: " + (status.equals("SCHEDULED") ? "Đã xác nhận" : status.equals("CANCELLED") ? "Đã hủy" : status);
+        String message = status.equals("SCHEDULED") ? "Lịch hẹn của bạn đã được xác nhận." : status.equals("CANCELLED") ? "Lịch hẹn của bạn đã bị hủy." : "Lịch hẹn có cập nhật mới.";
         
         notificationService.sendNotification(
             saved.getPatient().getUserId(),
@@ -113,6 +121,9 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
                 .status(AppointmentStatus.SCHEDULED)
                 .type(request.getType())
                 .reason(request.getNotes())
+                .meetingLink("ONLINE".equals(request.getType()) 
+                    ? (request.getMeetingLink() != null && !request.getMeetingLink().isEmpty() ? request.getMeetingLink() : "https://meet.google.com/abc-xyz") 
+                    : null)
                 .build();
 
         Appointment saved = appointmentRepository.save(appointment);
@@ -121,7 +132,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
         notificationService.sendNotification(
             patient.getUserId(),
             "Lịch hẹn mới",
-            "Bác sĩ đã đặt lịch hẹn mới cho bạn vào lúc " + request.getAppointmentTime() + " ngày " + request.getAppointmentDate(),
+            "Lịch hẹn mới: " + request.getAppointmentTime() + ", " + request.getAppointmentDate(),
             "info",
             "/patient/appointments"
         );
@@ -145,7 +156,11 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
         // Update location/meetingLink based on new type
         if ("ONLINE".equals(request.getType())) {
             appointment.setLocation(null);
-            appointment.setMeetingLink("https://meet.google.com/abc-xyz");
+            if (request.getMeetingLink() != null && !request.getMeetingLink().isEmpty()) {
+                appointment.setMeetingLink(request.getMeetingLink());
+            } else if (appointment.getMeetingLink() == null || appointment.getMeetingLink().isEmpty()) {
+                appointment.setMeetingLink("https://meet.google.com/abc-xyz");
+            }
         } else {
             appointment.setLocation("Phòng khám Đa khoa Hoàn Mỹ");
             appointment.setMeetingLink(null);
@@ -160,7 +175,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
         notificationService.sendNotification(
             updated.getPatient().getUserId(),
             "Thay đổi lịch hẹn",
-            "Bác sĩ đã dời lịch hẹn của bạn sang lúc " + request.getAppointmentTime() + " ngày " + request.getAppointmentDate(),
+            "Lịch hẹn dời sang: " + request.getAppointmentTime() + ", " + request.getAppointmentDate(),
             "warning",
             "/patient/appointments"
         );

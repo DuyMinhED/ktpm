@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import { authApi } from '../../api/auth';
+import { doctorApi } from '../../api/doctor';
 
 interface DoctorSidebarProps {
     isSidebarOpen: boolean;
@@ -17,6 +18,7 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
         name: localStorage.getItem('userName') || "Bác sĩ chuyên khoa",
         avatar: localStorage.getItem('userAvatar')
     });
+    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -36,7 +38,22 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
             }
         };
 
+        const fetchUnreadCount = async () => {
+            try {
+                const res = await doctorApi.getConversations();
+                if (res.data) {
+                    const total = res.data.reduce((acc: number, curr: any) => acc + (curr.unreadCount || 0), 0);
+                    setUnreadCount(total);
+                }
+            } catch (error) {
+                console.error("Error fetching unread conversations count:", error);
+            }
+        };
+
         fetchUserProfile();
+        fetchUnreadCount();
+        const interval = setInterval(fetchUnreadCount, 15000); // Refresh every 15s
+        return () => clearInterval(interval);
     }, []);
 
     const finalUserName = userInfo.name;
@@ -53,8 +70,9 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
         { path: ROUTES.DOCTOR.ANALYTICS, label: 'Phân tích nguy cơ', icon: 'analytics' },
         { path: ROUTES.DOCTOR.PRESCRIPTIONS, label: 'Đơn thuốc điện tử', icon: 'prescriptions' },
         { path: ROUTES.DOCTOR.APPOINTMENTS, label: 'Lịch hẹn khám', icon: 'calendar_today' },
-        { path: ROUTES.DOCTOR.MESSAGES, label: 'Tin nhắn', icon: 'chat', badge: '5' },
+        { path: ROUTES.DOCTOR.MESSAGES, label: 'Tin nhắn', icon: 'chat', badge: unreadCount > 0 ? `${unreadCount}` : undefined },
     ];
+
 
     return (
         <aside className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-900 border-r border-slate-200/60 dark:border-slate-800/50 flex flex-col z-[150] transition-transform duration-300 w-72 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl lg:shadow-none shadow-primary/10 font-display`}>

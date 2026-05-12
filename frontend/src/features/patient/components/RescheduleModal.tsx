@@ -17,6 +17,7 @@ interface RescheduleModalProps {
   patients?: any[];
   initialPatientId?: string;
   isRescheduling?: boolean;
+  initialMeetingLink?: string;
 }
 
 const RescheduleModal: React.FC<RescheduleModalProps> = ({
@@ -34,12 +35,20 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
   onSave,
   patients: _patients = [],
   initialPatientId,
-  isRescheduling
+  isRescheduling,
+  initialMeetingLink
 }) => {
   const patients = Array.isArray(_patients) ? _patients : [];
   const [selectedPatientId, setSelectedPatientId] = useState<string>(patients.length > 0 ? patients[0].id.toString() : '');
   const [appointmentType, setAppointmentType] = useState('IN_PERSON');
   const [notes, setNotes] = useState('');
+  const [meetingLink, setMeetingLink] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setMeetingLink(initialMeetingLink || '');
+    }
+  }, [isOpen, initialMeetingLink]);
 
   useEffect(() => {
     if (isOpen) {
@@ -193,6 +202,19 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                 </div>
               </div>
 
+              {appointmentType === 'ONLINE' && (
+                <div className="space-y-3 animate-in slide-in-from-top-1 duration-200">
+                  <label className="text-sm font-bold border-l-4 border-primary pl-2">Link họp Trực tuyến</label>
+                  <input 
+                    type="text"
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                    className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm font-medium transition-all shadow-sm outline-none"
+                    placeholder="Dán link Google Meet/Zoom (Ví dụ: https://meet.google.com/...)"
+                  />
+                </div>
+              )}
+
               <div className="space-y-3">
                 <label className="text-sm font-bold border-l-4 border-primary pl-2">Giờ khám ưu tiên</label>
                 <div className="grid grid-cols-4 gap-3">
@@ -239,7 +261,8 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
               appointmentDate: `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`,
               appointmentTime: selectedTime,
               type: appointmentType,
-              notes: notes
+              notes: notes,
+              meetingLink: appointmentType === 'ONLINE' ? meetingLink : undefined
             })}
             disabled={Boolean(isSaving || !selectedPatientId)}
             className="px-10 py-3 text-sm font-medium text-slate-900 bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-xl shadow-primary/20 flex items-center gap-3 active:scale-95 transform disabled:opacity-50 disabled:cursor-not-allowed"
