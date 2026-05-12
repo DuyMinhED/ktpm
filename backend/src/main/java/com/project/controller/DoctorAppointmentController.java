@@ -41,9 +41,10 @@ public class DoctorAppointmentController {
     public ResponseEntity<ApiResponse<DoctorAppointmentResponse>> updateStatus(
             @PathVariable Long id, 
             @RequestParam String status,
-            @RequestParam(required = false) String meetingLink) {
+            @RequestParam(required = false) String meetingLink,
+            @RequestParam(required = false) String diagnosisSummary) {
         return ResponseEntity.ok(ApiResponse.success(
-                "Status updated", service.updateStatus(id, status, meetingLink)));
+                "Status updated", service.updateStatus(id, status, meetingLink, diagnosisSummary)));
     }
 
     @PostMapping

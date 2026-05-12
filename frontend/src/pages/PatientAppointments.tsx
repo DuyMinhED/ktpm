@@ -3,6 +3,7 @@ import AddAppointmentModal from '../features/patient/components/AddAppointmentMo
 import Toast from '../components/ui/Toast';
 import ConfirmActionModal from '../components/ui/ConfirmActionModal';
 import { patientApi } from '../api/patient';
+import MedicalResultModal from '../components/ui/MedicalResultModal';
 
 const PatientAppointments: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,6 +18,7 @@ const PatientAppointments: React.FC = () => {
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [selectedCancelId, setSelectedCancelId] = useState<number | null>(null);
     const [isCancelling, setIsCancelling] = useState(false);
+    const [selectedResult, setSelectedResult] = useState<any>(null);
 
     const handleToggleReminder = async (id: number, currentStatus: boolean) => {
         try {
@@ -300,7 +302,14 @@ const PatientAppointments: React.FC = () => {
                                                 <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row.status === 'COMPLETED' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600'}`}>{row.status === 'COMPLETED' ? 'Hoàn tất' : 'Đã hủy'}</span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right">
-                                                <button className="text-primary hover:text-primary/80 text-sm font-bold transition-colors">Xem kết quả</button>
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedResult(row);
+                                                    }}
+                                                    className="text-primary hover:text-primary/80 text-sm font-bold transition-colors">
+                                                    Xem kết quả
+                                                 </button>
                                             </td>
                                         </tr>
                                     )))}
@@ -418,6 +427,11 @@ const PatientAppointments: React.FC = () => {
                 iconName="event_busy"
                 isLoading={isCancelling}
                 variant="warning"
+            />
+            <MedicalResultModal
+                isOpen={!!selectedResult}
+                onClose={() => setSelectedResult(null)}
+                appointment={selectedResult}
             />
             <Toast
                 show={toast.show}

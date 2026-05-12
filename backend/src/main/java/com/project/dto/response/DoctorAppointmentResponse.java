@@ -23,4 +23,5 @@ public class DoctorAppointmentResponse {
     private String location;
     private String meetingLink;
     private String reason;
+    private String diagnosisSummary;
 }

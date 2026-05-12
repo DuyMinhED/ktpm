@@ -28,6 +28,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final NotificationService notificationService;
     private final com.project.repository.PatientRepository patientRepository;
+    private final com.project.repository.UserRepository userRepository;
 
     @Override
     public List<DoctorAppointmentResponse> getUpcomingAppointments() {
@@ -50,13 +51,17 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
     @Override
     @Transactional
     @CacheEvict(value = "clinic_dashboard", allEntries = true)
-    public DoctorAppointmentResponse updateStatus(Long appointmentId, String status, String meetingLink) {
+    public DoctorAppointmentResponse updateStatus(Long appointmentId, String status, String meetingLink, String diagnosisSummary) {
         Long doctorId = SecurityUtils.getCurrentUserId().orElseThrow();
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lịch hẹn không tồn tại!"));
 
         if (!appointment.getDoctorId().equals(doctorId)) {
             throw new RuntimeException("Unauthorized to modify this appointment");
+        }
+
+        if (diagnosisSummary != null && !diagnosisSummary.trim().isEmpty()) {
+            appointment.setDiagnosisSummary(diagnosisSummary);
         }
 
         appointment.setStatus(AppointmentStatus.valueOf(status.toUpperCase()));
@@ -72,7 +77,14 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
 
         // Notify Patient
         String title = "Cập nhật lịch hẹn";
-        String message = status.equals("SCHEDULED") ? "Lịch hẹn của bạn đã được xác nhận." : status.equals("CANCELLED") ? "Lịch hẹn của bạn đã bị hủy." : "Lịch hẹn có cập nhật mới.";
+        String message = "Lịch hẹn có cập nhật mới.";
+        if ("SCHEDULED".equals(status)) {
+            message = "Lịch hẹn của bạn đã được xác nhận.";
+        } else if ("CANCELLED".equals(status)) {
+            message = "Lịch hẹn của bạn đã bị hủy.";
+        } else if ("COMPLETED".equals(status)) {
+            message = "Buổi khám bệnh của bạn đã hoàn tất.";
+        }
         
         notificationService.sendNotification(
             saved.getPatient().getUserId(),
@@ -99,6 +111,7 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
                 .location(a.getLocation())
                 .meetingLink(a.getMeetingLink())
                 .reason(a.getReason())
+                .diagnosisSummary(a.getDiagnosisSummary())
                 .build();
     }
 
@@ -114,6 +127,8 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
         // Format: yyyy-MM-dd HH:mm
         LocalDateTime appointmentTime = LocalDateTime.parse(request.getAppointmentDate() + "T" + request.getAppointmentTime());
 
+        com.project.entity.User doctor = userRepository.findById(doctorId).orElse(null);
+        
         Appointment appointment = Appointment.builder()
                 .doctorId(doctorId)
                 .patient(patient)
@@ -121,6 +136,10 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
                 .status(AppointmentStatus.SCHEDULED)
                 .type(request.getType())
                 .reason(request.getNotes())
+                .doctorName(doctor != null ? doctor.getFullName() : null)
+                .doctorSpecialty(doctor != null ? doctor.getSpecialization() : null)
+                .doctorAvatarUrl(doctor != null ? doctor.getAvatarUrl() : null)
+                .location("ONLINE".equals(request.getType()) ? "Trực tuyến" : "Phòng khám")
                 .meetingLink("ONLINE".equals(request.getType()) 
                     ? (request.getMeetingLink() != null && !request.getMeetingLink().isEmpty() ? request.getMeetingLink() : "https://meet.google.com/abc-xyz") 
                     : null)
@@ -162,8 +181,16 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
                 appointment.setMeetingLink("https://meet.google.com/abc-xyz");
             }
         } else {
-            appointment.setLocation("Phòng khám Đa khoa Hoàn Mỹ");
+            appointment.setLocation("Phòng khám");
             appointment.setMeetingLink(null);
+        }
+        
+        // Patch doctor info just in case it was missing
+        com.project.entity.User doctor = userRepository.findById(appointment.getDoctorId()).orElse(null);
+        if (doctor != null) {
+            appointment.setDoctorName(doctor.getFullName());
+            appointment.setDoctorSpecialty(doctor.getSpecialization());
+            appointment.setDoctorAvatarUrl(doctor.getAvatarUrl());
         }
         
         // Keep status as SCHEDULED (confirmed) when doctor reschedules

@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import TopBar from '../components/common/TopBar';
-import RescheduleModal from '../features/patient/components/RescheduleModal';
-import Toast from '../components/ui/Toast';
+import { useEffect, useState } from 'react';
 import { doctorApi } from '../api/doctor';
 import DoctorSidebar from '../components/common/DoctorSidebar';
+import TopBar from '../components/common/TopBar';
+import CompleteAppointmentModal from '../components/ui/CompleteAppointmentModal';
 import ConfirmActionModal from '../components/ui/ConfirmActionModal';
-import BatchRescheduleModal from '../features/patient/components/BatchRescheduleModal';
+import MeetingLinkPromptModal from '../components/ui/MeetingLinkPromptModal';
+import Toast from '../components/ui/Toast';
+import RescheduleModal from '../features/patient/components/RescheduleModal';
 
 export default function DoctorAppointments() {
     const [appointments, setAppointments] = useState<any[]>([]);
@@ -26,6 +27,8 @@ export default function DoctorAppointments() {
     const [prefilledMeetingLink, setPrefilledMeetingLink] = useState<string | undefined>(undefined);
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; appointmentId?: number }>({ show: false });
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+    const [linkPrompt, setLinkPrompt] = useState<{ show: boolean; apptId?: number; initialLink?: string }>({ show: false });
+    const [completePrompt, setCompletePrompt] = useState<{ show: boolean; apptId?: number; patientName?: string }>({ show: false });
 
     const handleSaveReschedule = async (appointmentData: any) => {
         setIsSaving(true);
@@ -74,11 +77,11 @@ export default function DoctorAppointments() {
 
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
-    const updateStatus = async (id: number, status: string, meetingLink?: string) => {
+    const updateStatus = async (id: number, status: string, meetingLink?: string, diagnosisSummary?: string) => {
         if (isUpdatingStatus) return; // Guard duplicate click
         setIsUpdatingStatus(true);
         try {
-            await doctorApi.updateAppointmentStatus(id, status, meetingLink);
+            await doctorApi.updateAppointmentStatus(id, status, meetingLink, diagnosisSummary);
             setToast({ show: true, title: 'Cập nhật thành công', type: 'success' });
             await loadAppointments();
         } catch (error) {
@@ -423,21 +426,23 @@ export default function DoctorAppointments() {
                                                                     {appt.appointmentType === 'ONLINE' ? 'Online' : 'Trực tiếp'}
                                                                 </div>
                                                                 <div className="flex gap-2">
-                                                                    <button 
-                                                                        onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })} 
+                                                                    <button
+                                                                        onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
                                                                         disabled={isUpdatingStatus}
                                                                         className="px-3 py-1.5 flex items-center gap-1 bg-red-50 dark:bg-red-900/20 text-red-600 text-[12px] font-bold rounded-lg hover:bg-red-500 hover:text-white transition-colors">
                                                                         Từ chối
                                                                     </button>
-                                                                    <button 
+                                                                    <button
                                                                         onClick={() => {
-                                                                            let link = undefined;
                                                                             if (appt.appointmentType === 'ONLINE') {
-                                                                                const inp = window.prompt("Nhập Link Google Meet/Zoom cho buổi khám này (Để trống nếu dùng link tự động):", appt.meetingLink || "");
-                                                                                if (inp === null) return; 
-                                                                                link = inp;
+                                                                                setLinkPrompt({
+                                                                                    show: true,
+                                                                                    apptId: appt.id,
+                                                                                    initialLink: appt.meetingLink || ""
+                                                                                });
+                                                                            } else {
+                                                                                updateStatus(appt.id, 'SCHEDULED');
                                                                             }
-                                                                            updateStatus(appt.id, 'SCHEDULED', link);
                                                                         }}
                                                                         disabled={isUpdatingStatus}
                                                                         className="px-3 py-1.5 flex items-center gap-1 bg-emerald-500 text-white text-[12px] font-bold rounded-lg hover:bg-emerald-600 shadow-md shadow-emerald-500/20 transition-all active:scale-95">
@@ -508,22 +513,24 @@ export default function DoctorAppointments() {
                                                                 <div className="flex gap-1.5">
                                                                     {isPending ? (
                                                                         <>
-                                                                            <button 
+                                                                            <button
                                                                                 onClick={() => {
-                                                                                    let link = undefined;
                                                                                     if (isOnline) {
-                                                                                        const inp = window.prompt("Nhập Link Google Meet/Zoom cho buổi khám này (Để trống nếu dùng link tự động):", appt.meetingLink || "");
-                                                                                        if (inp === null) return; 
-                                                                                        link = inp;
+                                                                                        setLinkPrompt({
+                                                                                            show: true,
+                                                                                            apptId: appt.id,
+                                                                                            initialLink: appt.meetingLink || ""
+                                                                                        });
+                                                                                    } else {
+                                                                                        updateStatus(appt.id, 'SCHEDULED');
                                                                                     }
-                                                                                    updateStatus(appt.id, 'SCHEDULED', link);
-                                                                                }} 
+                                                                                }}
                                                                                 disabled={isUpdatingStatus}
                                                                                 className="size-8 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full hover:bg-emerald-600 hover:text-white transition-all duration-300 active:scale-90 group/btn">
                                                                                 <span className="material-symbols-outlined text-[18px] font-bold">done</span>
                                                                             </button>
-                                                                            <button 
-                                                                                onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })} 
+                                                                            <button
+                                                                                onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
                                                                                 disabled={isUpdatingStatus}
                                                                                 className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
                                                                                 <span className="material-symbols-outlined text-[18px] font-bold">close</span>
@@ -531,48 +538,66 @@ export default function DoctorAppointments() {
                                                                         </>
                                                                     ) : isOnline ? (
                                                                         <div className="flex items-center gap-1.5">
-                                                                            <button 
+                                                                            <button
                                                                                 onClick={() => window.open(appt.meetingLink || 'https://meet.google.com/abc-xyz', '_blank')}
                                                                                 className="px-4 py-2 bg-primary text-slate-900 text-[12px] font-bold rounded-full shadow-md shadow-primary/20 transition-all active:scale-95 flex items-center gap-1">
                                                                                 <span className="material-symbols-outlined text-[16px]">videocam</span>
                                                                                 Vào phòng
                                                                             </button>
-                                                                            <button 
+                                                                            <button
+                                                                                onClick={() => setCompletePrompt({ show: true, apptId: appt.id, patientName: appt.patientName })}
+                                                                                disabled={isUpdatingStatus}
+                                                                                title="Hoàn tất khám"
+                                                                                className="size-8 flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400 rounded-full hover:bg-emerald-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                <span className="material-symbols-outlined text-[18px] font-bold">check_circle</span>
+                                                                            </button>
+                                                                            <button
                                                                                 onClick={() => {
                                                                                     setPrefilledPatientId(appt.patientId.toString());
                                                                                     setReschedulingAppointmentId(appt.id);
                                                                                     setPrefilledMeetingLink(appt.meetingLink);
                                                                                     setIsRescheduleModalOpen(true);
                                                                                 }}
+                                                                                title="Dời lịch"
                                                                                 className="size-8 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
                                                                                 <span className="material-symbols-outlined text-[18px] font-bold">edit_calendar</span>
                                                                             </button>
-                                                                            <button 
-                                                                                onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })} 
+                                                                            <button
+                                                                                onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
                                                                                 disabled={isUpdatingStatus}
+                                                                                title="Hủy lịch"
                                                                                 className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
                                                                                 <span className="material-symbols-outlined text-[18px] font-bold">close</span>
                                                                             </button>
                                                                         </div>
                                                                     ) : (
-                                                                        <>
-                                                                            <button 
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            <button
+                                                                                onClick={() => setCompletePrompt({ show: true, apptId: appt.id, patientName: appt.patientName })}
+                                                                                disabled={isUpdatingStatus}
+                                                                                title="Hoàn tất khám"
+                                                                                className="size-8 flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400 rounded-full hover:bg-emerald-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                <span className="material-symbols-outlined text-[18px] font-bold">check_circle</span>
+                                                                            </button>
+                                                                            <button
                                                                                 onClick={() => {
                                                                                     setPrefilledPatientId(appt.patientId.toString());
                                                                                     setReschedulingAppointmentId(appt.id);
                                                                                     setPrefilledMeetingLink(appt.meetingLink);
                                                                                     setIsRescheduleModalOpen(true);
                                                                                 }}
+                                                                                title="Dời lịch"
                                                                                 className="size-8 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
                                                                                 <span className="material-symbols-outlined text-[18px] font-bold">edit_calendar</span>
                                                                             </button>
-                                                                            <button 
-                                                                                onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })} 
+                                                                            <button
+                                                                                onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
                                                                                 disabled={isUpdatingStatus}
+                                                                                title="Hủy lịch"
                                                                                 className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
                                                                                 <span className="material-symbols-outlined text-[18px] font-bold">close</span>
                                                                             </button>
-                                                                        </>
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -615,10 +640,10 @@ export default function DoctorAppointments() {
 
             <RescheduleModal
                 isOpen={isRescheduleModalOpen}
-                onClose={() => { 
-                    setIsRescheduleModalOpen(false); 
-                    setReschedulingAppointmentId(null); 
-                    setPrefilledMeetingLink(undefined); 
+                onClose={() => {
+                    setIsRescheduleModalOpen(false);
+                    setReschedulingAppointmentId(null);
+                    setPrefilledMeetingLink(undefined);
                 }}
                 currentMonth={currentMonth}
                 setCurrentMonth={setCurrentMonth}
@@ -650,6 +675,32 @@ export default function DoctorAppointments() {
                         await updateStatus(confirmModal.appointmentId, 'CANCELLED');
                     }
                     setConfirmModal({ show: false });
+                }}
+            />
+
+            <MeetingLinkPromptModal
+                isOpen={linkPrompt.show}
+                initialLink={linkPrompt.initialLink}
+                isLoading={isUpdatingStatus}
+                onClose={() => setLinkPrompt({ show: false })}
+                onConfirm={async (link) => {
+                    if (linkPrompt.apptId) {
+                        await updateStatus(linkPrompt.apptId, 'SCHEDULED', link);
+                    }
+                    setLinkPrompt({ show: false });
+                }}
+            />
+
+            <CompleteAppointmentModal
+                isOpen={completePrompt.show}
+                patientName={completePrompt.patientName}
+                isLoading={isUpdatingStatus}
+                onClose={() => setCompletePrompt({ show: false })}
+                onConfirm={async (diagnosis) => {
+                    if (completePrompt.apptId) {
+                        await updateStatus(completePrompt.apptId, 'COMPLETED', undefined, diagnosis);
+                    }
+                    setCompletePrompt({ show: false });
                 }}
             />
 

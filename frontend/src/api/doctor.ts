@@ -67,9 +67,10 @@ export const doctorApi = {
     return response.data;
   },
 
-  updateAppointmentStatus: async (id: number, status: string, meetingLink?: string) => {
+  updateAppointmentStatus: async (id: number, status: string, meetingLink?: string, diagnosisSummary?: string) => {
     const params: any = { status };
     if (meetingLink) params.meetingLink = meetingLink;
+    if (diagnosisSummary) params.diagnosisSummary = diagnosisSummary;
     const response = await axiosInstance.put(`/v1/doctor/appointments/${id}/status`, null, { params });
     return response.data;
   },
