@@ -18,7 +18,7 @@ public class EmergencyContactRequest {
     private String relationship;
 
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number")
+    @Pattern(regexp = "^[+\\d\\s.-]{10,20}$", message = "Invalid phone number format")
     private String phone;
 
     private boolean isPrimary;

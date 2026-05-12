@@ -125,7 +125,7 @@ public class PatientHealthMetricServiceImpl implements PatientHealthMetricServic
                         .alertType("HEALTH_WARNING")
                         .severity("WARNING")
                         .title("Cảnh báo chỉ số " + DISPLAY_NAMES.get(metricType))
-                        .message("Chỉ số " + DISPLAY_NAMES.get(metricType) + " của bạn đang ở mức " + status + " (" + saved.getValue().toString() + (saved.getValueSecondary() != null ? "/" + saved.getValueSecondary().toString() : "") + " " + saved.getUnit() + "). Vui lòng chú ý sức khỏe và liên hệ bác sĩ nếu cần thiết.")
+                        .message("Chỉ số " + DISPLAY_NAMES.get(metricType) + " của bạn đang ở mức " + ("HIGH".equals(status) ? "CAO" : "THẤP") + " (" + saved.getValue().toString() + (saved.getValueSecondary() != null ? "/" + saved.getValueSecondary().toString() : "") + " " + saved.getUnit() + "). Vui lòng chú ý sức khỏe và liên hệ bác sĩ nếu cần thiết.")
                         .isRead(false)
                         .isDismissed(false)
                         .build();

@@ -1,19 +1,41 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import TopBar from '../components/common/TopBar';
+import { authApi } from '../api/auth';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const navigate = useNavigate();
+  const [userInfo, setUserInfo] = useState({
+    name: localStorage.getItem('userName') || "Admin",
+    avatar: localStorage.getItem('userAvatar')
+  });
+
   useEffect(() => {
     document.body.classList.add('admin-theme');
+    const fetchUserProfile = async () => {
+      try {
+        const response = await authApi.getMe();
+        if (response.success && response.data) {
+          const { fullName, avatarUrl } = response.data;
+          setUserInfo({ name: fullName || "Admin", avatar: avatarUrl });
+          if (fullName) localStorage.setItem('userName', fullName);
+          if (avatarUrl) localStorage.setItem('userAvatar', avatarUrl);
+        }
+      } catch (error) { console.error(error); }
+    };
+    fetchUserProfile();
     return () => {
       document.body.classList.remove('admin-theme');
     };
   }, []);
+
+  const finalUserName = userInfo.name;
+  const finalUserAvatar = userInfo.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=3b82f6&color=fff";
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState([
@@ -94,24 +116,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center gap-3 overflow-hidden">
               <div className="relative shrink-0">
                 <img
-                  alt="Admin Profile"
+                  alt={finalUserName}
                   className="w-10 h-10 rounded-full object-cover border-2 border-primary/20"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDp8eIVLC4BZ4z9CdFJzTcJs8De1DnLL5wo5VbLQy5NuDCANMh-0CKHKMwJoCbh5s0Slvw14EtIw0Tbm3MafzdbqttNLujt3iIQj5ApazKXBxRpR_rIvKxOcwXyJSMIn-RaUeXGFZ7Bu4QFE6TPBZpHz7fctMvbAPemEkIOBGp7xzThTxLGPyJNUFqQGz-RbA7WBgMmcAuJSVIhVlfU9qWUOhkwlKz9xhFJaRtxKItToKmF3E-0KwTs16Z7luAeFqGY21AY4QSEanA"
+                  src={finalUserAvatar}
+                  onError={(e) => {
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=3b82f6&color=fff`;
+                  }}
                 />
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
               </div>
               <div className="overflow-hidden text-left">
-                <p className="text-[14px] font-bold text-slate-900 dark:text-white truncate">Dr. Admin</p>
+                <p className="text-[14px] font-bold text-slate-900 dark:text-white truncate" title={finalUserName}>{finalUserName}</p>
                 <p className="text-[12px] text-slate-500 font-medium opacity-70 leading-tight">Quản trị viên</p>
               </div>
             </div>
             <button
               onClick={() => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('userRole');
-                localStorage.removeItem('userId');
-                localStorage.removeItem('clinicId');
-                window.location.href = '/?action=login';
+                localStorage.clear();
+                navigate('/?action=login');
               }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all shrink-0 active:scale-90"
               title="Đăng xuất"

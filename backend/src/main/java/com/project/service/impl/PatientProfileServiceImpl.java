@@ -31,6 +31,7 @@ public class PatientProfileServiceImpl implements PatientProfileService {
     private final PatientRepository patientRepository;
     private final EmergencyContactRepository emergencyContactRepository;
     private final UserRepository userRepository;
+    private final com.project.repository.PrescriptionRepository prescriptionRepository;
 
     @Override
     public PatientProfileResponse getCurrentPatientProfile() {
@@ -62,6 +63,8 @@ public class PatientProfileServiceImpl implements PatientProfileService {
         patient.setOccupation(request.getOccupation());
         patient.setEthnicity(request.getEthnicity());
         patient.setHealthInsuranceNumber(request.getHealthInsuranceNumber());
+        patient.setMedicalHistory(request.getMedicalHistory());
+        patient.setAllergies(request.getAllergies());
         if (request.getDateOfBirth() != null) {
             patient.setDateOfBirth(request.getDateOfBirth());
         }
@@ -165,12 +168,12 @@ public class PatientProfileServiceImpl implements PatientProfileService {
             age = Period.between(p.getDateOfBirth(), LocalDate.now()).getYears();
         }
 
-        // Get primary emergency contact
-        EmergencyContactResponse emergencyContact = emergencyContactRepository
-                .findByPatientId(p.getId())
-                .stream()
+        // Get primary emergency contact, fallback to first available
+        java.util.List<EmergencyContact> contacts = emergencyContactRepository.findByPatientId(p.getId());
+        EmergencyContactResponse emergencyContact = contacts.stream()
                 .filter(EmergencyContact::isPrimary)
                 .findFirst()
+                .or(() -> contacts.stream().findFirst())
                 .map(this::mapToEmergencyContactResponse)
                 .orElse(null);
 
@@ -195,9 +198,20 @@ public class PatientProfileServiceImpl implements PatientProfileService {
                 .healthInsuranceNumber(p.getHealthInsuranceNumber())
                 .joinedDate(p.getJoinedDate())
                 .chronicCondition(p.getChronicCondition())
-                .chronicDiseases(p.getMedicalHistory() != null ? java.util.Arrays.asList(p.getMedicalHistory().split(",")) : java.util.List.of())
-                .allergies(p.getAllergies() != null ? java.util.Arrays.asList(p.getAllergies().split(",")) : java.util.List.of())
-                .currentMedications(java.util.List.of())
+                .chronicDiseases(p.getMedicalHistory() != null && !p.getMedicalHistory().isBlank() 
+                    ? java.util.Arrays.asList(p.getMedicalHistory().split(",")) 
+                    : (p.getClinicalNotes() != null && !p.getClinicalNotes().isBlank() 
+                        ? java.util.List.of(p.getClinicalNotes()) 
+                        : java.util.List.of()))
+                .allergies(p.getAllergies() != null && !p.getAllergies().isBlank() 
+                    ? java.util.Arrays.asList(p.getAllergies().split(",")) 
+                    : java.util.List.of())
+                .currentMedications(prescriptionRepository.findByPatientIdAndStatus(p.getId(), com.project.entity.PrescriptionStatus.ACTIVE)
+                    .stream()
+                    .flatMap(pr -> pr.getItems().stream())
+                    .map(com.project.entity.PrescriptionItem::getMedicationName)
+                    .distinct()
+                    .collect(java.util.stream.Collectors.toList()))
                 .emergencyContact(emergencyContact)
                 .build();
     }

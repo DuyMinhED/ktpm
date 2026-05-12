@@ -36,4 +36,6 @@ public class UpdatePatientProfileRequest {
     private String healthInsuranceNumber;
     private java.time.LocalDate dateOfBirth;
     private String avatarUrl;
+    private String medicalHistory;
+    private String allergies;
 }

@@ -1,5 +1,6 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { authApi } from '../../api/auth';
 
 interface PatientSidebarProps {
     isSidebarOpen: boolean;
@@ -7,6 +8,40 @@ interface PatientSidebarProps {
 }
 
 const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) => {
+    const navigate = useNavigate();
+    const [userInfo, setUserInfo] = useState({
+        name: localStorage.getItem('userName') || "Bệnh nhân",
+        avatar: localStorage.getItem('userAvatar')
+    });
+
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const response = await authApi.getMe();
+                if (response.success && response.data) {
+                    const { fullName, avatarUrl } = response.data;
+                    setUserInfo({
+                        name: fullName || "Bệnh nhân",
+                        avatar: avatarUrl
+                    });
+                    if (fullName) localStorage.setItem('userName', fullName);
+                    if (avatarUrl) localStorage.setItem('userAvatar', avatarUrl);
+                }
+            } catch (error) {
+                console.error("Error fetching patient user profile:", error);
+            }
+        };
+        fetchUserProfile();
+    }, []);
+
+    const finalUserName = userInfo.name;
+    const finalUserAvatar = userInfo.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0ea5e9&color=fff";
+
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/?action=login');
+    };
+
     const navItems = [
         { path: '/patient', label: 'Bảng điều khiển', icon: 'dashboard' },
         { path: '/patient/prescriptions', label: 'Đơn thuốc', icon: 'prescriptions' },
@@ -55,17 +90,24 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
             <div className="p-4 mt-auto">
                 <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
                     <div className="flex items-center gap-3 mb-3">
-                        <div
-                            className="w-10 h-10 rounded-full bg-slate-200 bg-cover bg-center shadow-inner"
-                            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB0IL8Ha85DrLIQW4Y4bRik-fxoCNe-lh7EdSlQJtP3AvZlLOF-v_6fahyzIdteXZ8x4RqXt1QbBv_TFGFijuUfXcPxpBd2JXZ9iv6usWjVuOyKJq7g32UHMfCPIv-pvDzHq9EY4ucfOkJ9IsYKy8rySac2j2sg16xcAzR0XMIq65Y7ez5PPbRpiNPfHC5lP4kkzpn35gPZq_ub95d5J7Zww14hAZU00q5sZxBe7ER6IAorxZdPItiWzMqhKnk00X-9fyxWEpIb5r8')" }}>
-                        </div>
+                        <img
+                            src={finalUserAvatar}
+                            alt={finalUserName}
+                            onError={(e) => {
+                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=0ea5e9&color=fff`;
+                            }}
+                            className="w-10 h-10 rounded-full object-cover shadow-inner border-2 border-white dark:border-slate-800"
+                        />
                         <div className="overflow-hidden">
-                            <p className="text-sm font-bold truncate">Nguyễn Văn A</p>
-                            <p className="text-xs text-slate-500">Bệnh nhân</p>
+                            <p className="text-sm font-bold truncate text-slate-900 dark:text-white" title={finalUserName}>{finalUserName}</p>
+                            <p className="text-xs text-slate-500 font-medium">Bệnh nhân</p>
                         </div>
                     </div>
-                    <button className="w-full flex items-center justify-center gap-2 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <span className="material-symbols-outlined text-sm">logout</span>
+                    <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-2 py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors active:scale-95"
+                    >
+                        <span className="material-symbols-outlined text-sm font-bold">logout</span>
                         Đăng xuất
                     </button>
                 </div>

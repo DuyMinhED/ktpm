@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { patientApi } from '../api/patient';
 import EditProfileModal from './profile-modals/EditProfileModal';
 import EmergencyContactModal from './profile-modals/EmergencyContactModal';
+import Toast from '../components/ui/Toast';
 
 const PatientProfile: React.FC = () => {
     const [profile, setProfile] = useState<any>(null);
@@ -10,6 +11,7 @@ const PatientProfile: React.FC = () => {
     // Modal states
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
     const [isEmergencyContactOpen, setIsEmergencyContactOpen] = useState(false);
+    const [toast, setToast] = useState({ show: false, title: '', type: 'success' as 'success' | 'error' | 'warning' });
 
     const fetchProfile = async () => {
         try {
@@ -35,6 +37,7 @@ const PatientProfile: React.FC = () => {
                 setProfile(response.data);
                 // Trigger profile refresh event for other components if needed
                 window.dispatchEvent(new CustomEvent('profileUpdate', { detail: response.data }));
+                setToast({ show: true, title: 'Cập nhật hồ sơ cá nhân thành công!', type: 'success' });
             }
         } catch (error) {
             console.error("Failed to save profile:", error);
@@ -50,6 +53,7 @@ const PatientProfile: React.FC = () => {
                 await patientApi.addEmergencyContact(formData);
             }
             await fetchProfile();
+            setToast({ show: true, title: 'Đã lưu thông tin liên hệ khẩn cấp!', type: 'success' });
         } catch (error) {
             console.error("Failed to save emergency contact:", error);
             throw error;
@@ -332,6 +336,13 @@ const PatientProfile: React.FC = () => {
                 onClose={() => setIsEmergencyContactOpen(false)} 
                 onSave={handleSaveEmergencyContact} 
                 initialData={profile.emergencyContact}
+            />
+
+            <Toast 
+                show={toast.show} 
+                title={toast.title} 
+                type={toast.type} 
+                onClose={() => setToast({...toast, show: false})} 
             />
         </div>
     );

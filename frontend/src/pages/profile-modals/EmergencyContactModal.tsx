@@ -95,7 +95,7 @@ const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({ isOpen, o
                             className="size-5 rounded border-primary text-primary focus:ring-primary cursor-pointer"
                         />
                         <label htmlFor="isPrimary" className="text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                            Đây là liên hệ ưu tiên (Primary)
+                            Đây là liên hệ ưu tiên
                         </label>
                     </div>
                 </form>

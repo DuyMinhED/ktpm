@@ -29,6 +29,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, on
                 heightCm: initialData.heightCm || '',
                 weightKg: initialData.weightKg || '',
                 avatarUrl: initialData.avatarUrl || '',
+                medicalHistory: initialData.chronicDiseases ? initialData.chronicDiseases.join(', ') : '',
+                allergies: initialData.allergies ? initialData.allergies.join(', ') : '',
             });
         }
     }, [isOpen, initialData]);
@@ -211,6 +213,36 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, on
                             </div>
                         </div>
                     </div>
+                    
+                    {/* Section 3.5: Medical History & Allergies */}
+                    <div className="space-y-4">
+                        <h3 className="text-[14px] font-bold text-primary flex items-center gap-2">
+                            Thông tin y tế cá nhân
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-[13px] font-medium text-slate-600">Tiền sử bệnh lý (mãn tính)</label>
+                                <textarea
+                                    name="medicalHistory" value={formData.medicalHistory || ''} 
+                                    onChange={(e) => setFormData((prev: any) => ({ ...prev, medicalHistory: e.target.value }))}
+                                    placeholder="VD: Cao huyết áp, Tiểu đường..."
+                                    rows={2}
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium text-sm focus:border-primary outline-none transition-all resize-none custom-scrollbar"
+                                ></textarea>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[13px] font-medium text-slate-600">Thông tin dị ứng</label>
+                                <textarea
+                                    name="allergies" value={formData.allergies || ''} 
+                                    onChange={(e) => setFormData((prev: any) => ({ ...prev, allergies: e.target.value }))}
+                                    placeholder="VD: Dị ứng phấn hoa, Dị ứng Penicillin..."
+                                    rows={2}
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium text-sm focus:border-primary outline-none transition-all resize-none custom-scrollbar"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Section 4: Physical Metrics */}
                     <div className="space-y-4">
                         <h3 className="text-[14px] font-bold text-primary flex items-center gap-2">
@@ -222,10 +254,14 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, on
                                 <Dropdown
                                     options={[
                                         { label: 'Chưa rõ', value: '' },
-                                        { label: 'Nhóm O', value: 'O' },
-                                        { label: 'Nhóm A', value: 'A' },
-                                        { label: 'Nhóm B', value: 'B' },
-                                        { label: 'Nhóm AB', value: 'AB' }
+                                        { label: 'A+', value: 'A+' },
+                                        { label: 'A-', value: 'A-' },
+                                        { label: 'B+', value: 'B+' },
+                                        { label: 'B-', value: 'B-' },
+                                        { label: 'AB+', value: 'AB+' },
+                                        { label: 'AB-', value: 'AB-' },
+                                        { label: 'O+', value: 'O+' },
+                                        { label: 'O-', value: 'O-' }
                                     ]}
                                     value={formData.bloodType || ''}
                                     onChange={(val) => setFormData((prev: any) => ({ ...prev, bloodType: val }))}
