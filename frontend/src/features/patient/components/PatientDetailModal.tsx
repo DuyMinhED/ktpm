@@ -22,11 +22,14 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
   }, [detailData]);
 
   useEffect(() => {
-    if (isOpen && patient?.id) {
+    const targetId = patient?.dbId || patient?.id;
+    const isValidId = targetId && !isNaN(Number(targetId));
+
+    if (isOpen && isValidId) {
       document.body.style.overflow = 'hidden';
       const fetchDetail = async () => {
         try {
-          const res = await doctorApi.getPatientDetail(patient.id);
+          const res = await doctorApi.getPatientDetail(Number(targetId));
           if (res.success) {
             setDetailData(res.data);
           }
@@ -41,7 +44,7 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, patient?.id]);
+  }, [isOpen, patient?.dbId, patient?.id]);
 
   const renderModalContent = () => {
     const dataToRender = isOpen ? detailData : activeDetailData;
@@ -506,33 +509,46 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
                         </div>
                       </div>
                       <div className="flex flex-col gap-2 mt-4">
-                        <button
-                          onClick={() => {
-                              const role = localStorage.getItem('role');
-                              if (role === 'ROLE_CLINIC_MANAGER') {
-                                  window.location.href = '/clinic/assignment';
-                              } else {
-                                  window.location.href = '/doctor/appointments';
-                              }
-                          }}
-                          className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:shadow-md transition-all group"
-                        >
-                          <span className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">event_available</span>
-                            Đặt lịch khám mới
-                          </span>
-                          <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
-                        </button>
-                        <button
-                          onClick={() => window.location.href = '/doctor/messages'}
-                          className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:shadow-md transition-all group"
-                        >
-                          <span className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">forum</span>
-                            Gửi tin nhắn tư vấn
-                          </span>
-                          <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
-                        </button>
+                        {(() => {
+                          const rawRole = localStorage.getItem('userRole') || localStorage.getItem('role') || '';
+                          const role = rawRole.replace('ROLE_', '');
+                          const isClinicManager = role === 'CLINIC_MANAGER';
+                          const isDoctor = role === 'DOCTOR';
+
+                          return (
+                            <>
+                              <button
+                                onClick={() => {
+                                  if (isClinicManager) {
+                                    window.location.href = '/clinic/appointments';
+                                  } else {
+                                    window.location.href = '/doctor/appointments';
+                                  }
+                                }}
+                                className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:shadow-md transition-all group"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span className="material-symbols-outlined text-primary">event_available</span>
+                                  Đặt lịch khám mới
+                                </span>
+                                <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                              </button>
+
+                              {isDoctor && (
+                                <button
+                                  onClick={() => window.location.href = '/doctor/messages'}
+                                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:shadow-md transition-all group"
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-primary">forum</span>
+                                    Gửi tin nhắn tư vấn
+                                  </span>
+                                  <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                                </button>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>

@@ -28,7 +28,7 @@ export default function ClinicDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const clinicId = 1; // This should come from auth context
+      const clinicId = localStorage.getItem('clinicId') || '1';
       const res = await clinicApi.getDashboard(clinicId, selectedPeriod);
 
       if (res && res.data) {
@@ -96,19 +96,34 @@ export default function ClinicDashboard() {
               <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm group hover:shadow-md transition-all">
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-blue-600">
-                    <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>personal_injury</span>
+                    <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
                   </div>
                   <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-[11px] font-bold rounded-lg">{stats?.patientGrowth}</span>
                 </div>
                 <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{stats?.chronicPatients || 0}</h3>
-                <p className="text-slate-500 text-[14px] font-medium mt-1">Quản lý Bệnh lý Mãn tính</p>
+                <p className="text-slate-900 dark:text-white text-[14px] font-bold mt-1">Tổng Bệnh nhân</p>
                 <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center gap-2 text-[12px] text-slate-400">
-                  <span className="font-bold text-slate-600 dark:text-slate-300">{stats?.totalPatients}</span>
-                  <span>tổng số bệnh nhân</span>
+                  <span className="font-medium">Số hồ sơ bệnh án quản lý</span>
+
                 </div>
               </div>
 
               {/* High Risk Cases */}
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm group hover:shadow-md transition-all">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="w-12 h-12 bg-teal-50 dark:bg-teal-900/20 rounded-2xl flex items-center justify-center text-teal-600">
+                    <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>medical_services</span>
+                  </div>
+                  <span className="px-2 py-1 bg-blue-50 text-blue-600 text-[11px] font-bold rounded-lg">Đang trực</span>
+                </div>
+                <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{stats?.totalDoctors || 0}</h3>
+                <p className="text-slate-900 dark:text-white text-[14px] font-bold mt-1">Tổng Bác sĩ</p>
+                <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center gap-2">
+                  <span className="text-[12px] text-slate-400 font-medium">Nhân sự vận hành chuyên môn</span>
+                </div>
+              </div>
+
+              {/* Missed Follow-ups */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm group hover:shadow-md transition-all">
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center text-red-600">
@@ -117,25 +132,10 @@ export default function ClinicDashboard() {
                   <span className="px-2 py-1 bg-red-50 text-red-600 text-[11px] font-bold rounded-lg">{stats?.riskTrend}</span>
                 </div>
                 <h3 className="text-3xl font-black text-red-600 tracking-tight">{stats?.highRiskCount || 0}</h3>
-                <p className="text-slate-500 text-[14px] font-medium mt-1">Cảnh báo Nguy cơ Cao</p>
-                <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center gap-2">
-                  <span className="text-[12px] text-slate-400 font-medium">Báo cáo cập nhật theo thời gian thực</span>
-                </div>
-              </div>
-
-              {/* Missed Follow-ups */}
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm group hover:shadow-md transition-all">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center text-amber-600">
-                    <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>event_busy</span>
-                  </div>
-                  <span className="px-2 py-1 bg-amber-50 text-amber-600 text-[11px] font-bold rounded-lg">{stats?.followUpRate} tỷ lệ tái khám</span>
-                </div>
-                <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{stats?.missedFollowUps || 0}</h3>
-                <p className="text-slate-500 text-[14px] font-medium mt-1">Theo dõi Tái khám</p>
+                <p className="text-slate-900 dark:text-white text-[14px] font-bold mt-1">Nguy cơ Cao</p>
                 <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-[12px] text-slate-400 font-medium">(Mẫu)</span>
-                  <button className="text-[12px] font-bold text-primary hover:underline">Gửi nhắc nhở</button>
+                  <span className="text-[12px] text-slate-400 font-medium">Yêu cầu theo dõi khẩn cấp</span>
+
                 </div>
               </div>
 
@@ -147,7 +147,7 @@ export default function ClinicDashboard() {
                     <span className="material-symbols-outlined text-xl">analytics</span>
                   </div>
                   <h3 className="text-3xl font-black tracking-tight leading-none">{stats?.chronicRate}</h3>
-                  <p className="text-white/80 text-[14px] font-medium mt-1">Tỷ lệ bệnh mãn tính (Mẫu)</p>
+                  <p className="text-white text-[14px] font-bold mt-1">Hiệu suất Khám bệnh</p>
                 </div>
                 <div className="relative z-10 mt-4 h-12 flex items-end gap-1">
                   {chartData.slice(-7).map((d, i) => (

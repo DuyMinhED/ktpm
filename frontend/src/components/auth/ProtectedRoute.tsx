@@ -15,7 +15,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const location = useLocation();
   const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const role = localStorage.getItem('userRole') || localStorage.getItem('role');
 
   // Not authenticated → redirect to home/login
   if (!token) {

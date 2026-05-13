@@ -20,13 +20,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/doctor/patients")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('" + RoleUtils.DOCTOR + "')")
 @Tag(name = "Doctor Patients", description = "Doctor's patient management APIs")
 public class DoctorPatientController {
 
     private final DoctorPatientService doctorPatientService;
 
     @GetMapping
+    @PreAuthorize("hasRole('" + RoleUtils.DOCTOR + "')")
     @Operation(summary = "Get paginated list of patients assigned to the doctor")
     public ApiResponse<Page<DoctorPatientResponse>> getMyPatients(
             @RequestParam(required = false) String search,
@@ -42,6 +42,7 @@ public class DoctorPatientController {
     }
 
     @GetMapping("/stats")
+    @PreAuthorize("hasRole('" + RoleUtils.DOCTOR + "')")
     @Operation(summary = "Get patient count stats for doctor")
     public ApiResponse<Map<String, Object>> getStats(@RequestParam(defaultValue = "7") int days) {
         Long doctorId = SecurityUtils.getCurrentUserId().orElseThrow();
