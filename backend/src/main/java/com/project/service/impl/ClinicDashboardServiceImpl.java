@@ -210,7 +210,31 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
     @Override
     @Transactional(readOnly = true)
     public Page<ClinicAppointmentResponse> getAppointmentRecords(Long clinicId, Pageable pageable) {
-        return appointmentRepository.findByClinicId(clinicId, pageable).map(this::mapToAppointmentResponse);
+        Page<Appointment> appointments = appointmentRepository.findByClinicId(clinicId, pageable);
+        List<Long> doctorIds = appointments.stream()
+                .map(Appointment::getDoctorId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        Map<Long, String> doctorAvatarMap = new HashMap<>();
+        if (!doctorIds.isEmpty()) {
+            doctorAvatarMap = userRepository.findAllById(doctorIds).stream()
+                    .collect(Collectors.toMap(User::getId, u -> u.getAvatarUrl() != null ? u.getAvatarUrl() : "", (a, b) -> a));
+        }
+        
+        final Map<Long, String> finalAvatarMap = doctorAvatarMap;
+        return appointments.map(a -> ClinicAppointmentResponse.builder()
+                .id(a.getId())
+                .patientName(a.getPatient() != null ? a.getPatient().getFullName() : "N/A")
+                .doctorName(a.getDoctorName() != null ? a.getDoctorName() : "N/A")
+                .appointmentTime(a.getAppointmentTime())
+                .status(a.getStatus().name())
+                .appointmentType(a.getType())
+                .reason(a.getReason())
+                .doctorAvatarUrl(finalAvatarMap.getOrDefault(a.getDoctorId(), ""))
+                .patientAvatarUrl(a.getPatient() != null ? a.getPatient().getAvatarUrl() : "")
+                .build());
     }
 
     @Override
@@ -292,16 +316,7 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         }).collect(Collectors.toList());
     }
 
-    private ClinicAppointmentResponse mapToAppointmentResponse(Appointment a) {
-        return ClinicAppointmentResponse.builder()
-                .id(a.getId())
-                .patientName(a.getPatient().getFullName())
-                .doctorName(a.getDoctorName())
-                .appointmentTime(a.getAppointmentTime())
-                .status(a.getStatus().name())
-                .appointmentType(a.getType())
-                .build();
-    }
+
 
     private void sendAppointmentNotification(Appointment appointment, String status) {
         notificationRepository.save(com.project.entity.Notification.builder()

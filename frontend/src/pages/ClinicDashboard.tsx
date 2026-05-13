@@ -36,6 +36,7 @@ export default function ClinicDashboard() {
           ...res.data,
           // Mapping backend fields to frontend names if they differ
           chronicPatients: res.data.totalPatients,
+          totalDoctors: res.data.doctorPerformances ? res.data.doctorPerformances.length : 0,
           highRiskCount: res.data.highRiskAlerts,
           missedFollowUps: res.data.pendingFollowUps,
           chronicRate: res.data.adherenceRate ? `${(res.data.adherenceRate * 100).toFixed(1)}%` : '0%',

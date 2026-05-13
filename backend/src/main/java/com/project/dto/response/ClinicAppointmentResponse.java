@@ -18,5 +18,7 @@ public class ClinicAppointmentResponse {
     private LocalDateTime appointmentTime;
     private String appointmentType;
     private String status;
+    private String doctorAvatarUrl;
+    private String patientAvatarUrl;
     private String reason;
 }

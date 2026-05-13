@@ -22,9 +22,9 @@ public class DateTimeUtils {
         
         String dayPrefix;
         if (date.equals(today)) {
-            dayPrefix = "Today";
+            dayPrefix = "Hôm nay";
         } else if (date.equals(today.plusDays(1))) {
-            dayPrefix = "Tomorrow";
+            dayPrefix = "Ngày mai";
         } else {
             dayPrefix = date.format(DATE_FORMATTER);
         }

@@ -356,15 +356,16 @@ export default function ClinicAppointments() {
                                             <div key={appt.id} className={`group p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border-l-4 ${borderClass} transition-all hover:shadow-md`}>
                                                 <div className="flex items-start justify-between mb-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="size-10 rounded-full overflow-hidden bg-slate-200">
+                                                        <div className="size-10 rounded-full overflow-hidden bg-slate-200 shadow-sm shrink-0 border border-slate-100">
                                                             <img className="size-full object-cover"
-                                                                data-alt="Patient avatar"
-                                                                src={appt.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(appt.patientName)} />
+                                                                alt="Doctor avatar"
+                                                                src={appt.doctorAvatarUrl || "https://ui-avatars.com/api/?background=F1F5F9&color=64748B&bold=true&name=" + encodeURIComponent(appt.doctorName || 'BS')} />
                                                         </div>
                                                         <div>
                                                             <h4 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">
                                                                 {appt.patientName}</h4>
-                                                            <p className="text-[13px] text-slate-500 font-medium">{appt.reason || "Không có lý do"}</p>
+                                                            <p className="text-[12px] font-bold text-teal-600 dark:text-teal-400">BS. {appt.doctorName || "Chưa phân công"}</p>
+                                                            <p className="text-[12px] text-slate-500 font-medium truncate max-w-[150px]" title={appt.reason}>{appt.reason || "Không có lý do"}</p>
                                                         </div>
                                                     </div>
                                                     <span className={`text-sm font-bold px-3 py-1 rounded-lg ${timeClass}`}>{formatTime(appt.appointmentTime)}</span>

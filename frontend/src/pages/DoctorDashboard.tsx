@@ -19,6 +19,8 @@ export default function DoctorDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [dashData, setDashData] = useState<any>(null);
   const [myPatients, setMyPatients] = useState<any[]>([]);
+  const [patientStats, setPatientStats] = useState<any>(null);
+  const [isChartLoading, setIsChartLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -27,9 +29,10 @@ export default function DoctorDashboard() {
   const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const [dRes, pRes] = await Promise.all([
+      const [dRes, pRes, sRes] = await Promise.all([
         doctorApi.getDashboard(),
-        doctorApi.getMyPatients({ size: 100 })
+        doctorApi.getMyPatients({ size: 100 }),
+        doctorApi.getPatientStats({ days: 7 })
       ]);
       if (dRes.success) {
         setDashData(dRes.data);
@@ -37,10 +40,27 @@ export default function DoctorDashboard() {
       if (pRes.success) {
         setMyPatients(pRes.data.content || []);
       }
+      if (sRes.success) {
+        setPatientStats(sRes.data);
+      }
     } catch (e) {
       console.error('Failed to fetch dashboard data', e);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchChartStats = async (days: number) => {
+    setIsChartLoading(true);
+    try {
+      const sRes = await doctorApi.getPatientStats({ days });
+      if (sRes.success) {
+        setPatientStats(sRes.data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch chart stats', e);
+    } finally {
+      setIsChartLoading(false);
     }
   };
 
@@ -65,6 +85,13 @@ export default function DoctorDashboard() {
   const [toastTitle, setToastTitle] = useState('');
   const [dashboardTimeRange, setDashboardTimeRange] = useState('7 ngày qua');
   const [filterRisk, setFilterRisk] = useState<'ALL' | 'HIGH_RISK' | 'STABLE'>('ALL');
+
+  useEffect(() => {
+    if (!isLoading) {
+      const days = dashboardTimeRange === '30 ngày qua' ? 30 : 7;
+      fetchChartStats(days);
+    }
+  }, [dashboardTimeRange]);
 
   const filteredPatients = useMemo(() => {
     if (filterRisk === 'ALL') return myPatients;
@@ -428,27 +455,56 @@ export default function DoctorDashboard() {
                     />
                   )}
                 </div>
-                <div className="h-48 flex items-end justify-between gap-2 px-2">
-                  {isLoading ? (
-                    [...Array(7)].map((_, i) => (
-                      <Skeleton key={i} className="w-full" style={{ height: `${30 + Math.random() * 50}%` }} />
+                
+                <div className="h-48 flex items-end justify-between gap-1.5 sm:gap-2 px-2">
+                  {(isLoading || isChartLoading) ? (
+                    [...Array(dashboardTimeRange === '30 ngày qua' ? 30 : 7)].map((_, i) => (
+                      <Skeleton key={i} className="w-full flex-1" style={{ height: `${30 + Math.random() * 50}%` }} />
                     ))
                   ) : (
                     <>
-                      <div className="w-full bg-primary/20 rounded-t-lg relative group h-[40%]">
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">42</div>
-                      </div>
-                      <div className="w-full bg-primary/30 rounded-t-lg relative group h-[60%]"></div>
-                      <div className="w-full bg-primary/40 rounded-t-lg relative group h-[55%]"></div>
-                      <div className="w-full bg-primary/60 rounded-t-lg relative group h-[75%]"></div>
-                      <div className="w-full bg-primary rounded-t-lg relative group h-[90%]"></div>
-                      <div className="w-full bg-primary/80 rounded-t-lg relative group h-[85%]"></div>
-                      <div className="w-full bg-primary/70 rounded-t-lg relative group h-[70%]"></div>
+                      {(patientStats?.chartDataBp || [120, 122, 118, 125, 132, 130, 127]).map((val: number, i: number) => {
+                        const minVal = 95;
+                        const maxVal = 150;
+                        const heightPercent = Math.min(100, Math.max(15, ((val - minVal) / (maxVal - minVal)) * 100));
+                        // Soft fade opacity based on index count
+                        const currentCount = patientStats?.chartDataBp?.length || 7;
+                        const opacity = 0.2 + (i * (0.8 / currentCount));
+                        
+                        return (
+                          <div 
+                            key={i} 
+                            className="w-full rounded-t-lg relative group transition-all cursor-pointer flex-1"
+                            style={{ 
+                              height: `${heightPercent}%`, 
+                              backgroundColor: `rgba(45, 212, 191, ${Math.min(1, opacity)})` 
+                            }}
+                          >
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-slate-700 text-white text-[11px] px-2 py-1 rounded shadow-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                              {Math.round(val)} mmHg
+                            </div>
+                          </div>
+                        );
+                      })}
                     </>
                   )}
                 </div>
-                <div className="flex justify-between mt-4 px-2 text-[10px] font-bold text-slate-400 tracking-wide">
-                  <span>Th2</span><span>Th3</span><span>Th4</span><span>Th5</span><span>Th6</span><span>Th7</span><span>CN</span>
+
+                <div className="flex justify-between mt-4 px-4 text-[10px] font-bold text-slate-400 tracking-wide">
+                  {dashboardTimeRange === '30 ngày qua' ? (
+                    <>
+                      <span className="w-1/3 text-left">30 ngày trước</span>
+                      <span className="w-1/3 text-center">15 ngày trước</span>
+                      <span className="w-1/3 text-right">Hôm nay</span>
+                    </>
+                  ) : (
+                    Array.from({ length: 7 }, (_, index) => {
+                      const d = new Date();
+                      d.setDate(d.getDate() - (6 - index));
+                      const dayLabels = ['CN', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7'];
+                      return <span key={index} className="flex-1 text-center">{dayLabels[d.getDay()]}</span>;
+                    })
+                  )}
                 </div>
               </section>
 
@@ -517,13 +573,13 @@ export default function DoctorDashboard() {
                       <>
                         {dashData?.upcomingAppointments?.length > 0 ? (
                           dashData.upcomingAppointments.slice(0, 3).map((appt: any) => (
-                            <div key={appt.id} className="p-5 flex items-center gap-5 hover:bg-slate-50 transition-colors cursor-pointer group">
-                              <div className="flex-shrink-0 text-left min-w-[70px]">
+                            <div key={appt.id} className="p-5 flex items-center gap-5 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group">
+                              <div className="flex-shrink-0 text-left min-w-[100px]">
                                 <p className="text-[12px] font-bold text-slate-400 mb-1">
-                                  {new Date(appt.appointmentTime).toLocaleDateString('vi-VN') === new Date().toLocaleDateString('vi-VN') ? 'Hôm nay' : 'Sắp tới'}
+                                  {appt.isPast ? 'Đã diễn ra' : 'Sắp tới'}
                                 </p>
-                                <p className="text-xl font-black text-primary leading-tight">
-                                  {new Date(appt.appointmentTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                <p className="text-lg font-black text-primary leading-tight">
+                                  {appt.displayTime}
                                 </p>
                               </div>
                               <div className="flex-1 overflow-hidden">

@@ -43,7 +43,7 @@ public class DoctorPatientController {
 
     @GetMapping("/stats")
     @Operation(summary = "Get patient count stats for doctor")
-    public ApiResponse<Map<String, Object>> getStats() {
+    public ApiResponse<Map<String, Object>> getStats(@RequestParam(defaultValue = "7") int days) {
         Long doctorId = SecurityUtils.getCurrentUserId().orElseThrow();
         long total = doctorPatientService.getTotalPatientCount(doctorId);
         long highRisk = doctorPatientService.getHighRiskCount(doctorId);
@@ -55,8 +55,8 @@ public class DoctorPatientController {
                 "highRiskCount", highRisk,
                 "monitoringCount", monitoringCount,
                 "stableCount", stableCount,
-                "chartDataBp", doctorPatientService.getDailyMetricTrend(doctorId, com.project.entity.MetricType.BLOOD_PRESSURE, 7),
-                "chartDataGlucose", doctorPatientService.getDailyMetricTrend(doctorId, com.project.entity.MetricType.BLOOD_SUGAR, 7)
+                "chartDataBp", doctorPatientService.getDailyMetricTrend(doctorId, com.project.entity.MetricType.BLOOD_PRESSURE, days),
+                "chartDataGlucose", doctorPatientService.getDailyMetricTrend(doctorId, com.project.entity.MetricType.BLOOD_SUGAR, days)
         ));
     }
 

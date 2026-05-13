@@ -13,8 +13,8 @@ export const doctorApi = {
     return response.data;
   },
 
-  getPatientStats: async () => {
-    const response = await axiosInstance.get('/v1/doctor/patients/stats');
+  getPatientStats: async (params?: any) => {
+    const response = await axiosInstance.get('/v1/doctor/patients/stats', { params });
     return response.data;
   },
 
