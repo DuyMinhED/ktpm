@@ -110,6 +110,13 @@ export default function AdminUsers() {
           status: u.status,
           avatar: u.avatarUrl || `https://i.pravatar.cc/150?u=${u.email}`,
           rawRole: u.role,
+          avatarUrl: u.avatarUrl,
+          licenseNumber: u.licenseNumber,
+          degree: u.degree,
+          bio: u.bio,
+          licenseImageUrl: u.licenseImageUrl,
+          specialization: u.specialization,
+          experience: u.experience,
         }));
         return {
           list: mappedUsers,

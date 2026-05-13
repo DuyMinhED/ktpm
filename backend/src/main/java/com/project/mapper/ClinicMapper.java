@@ -48,7 +48,7 @@ public class ClinicMapper {
             }
         }
 
-        long realDoctorCount = userRepository.countByRoleAndClinicId(UserRole.DOCTOR, clinic.getId());
+        long realDoctorCount = userRepository.countByRoleAndClinicIdAndIsDeletedFalse(UserRole.DOCTOR, clinic.getId());
         long realPatientCount = patientRepository.countByClinicIdAndIsDeletedFalse(clinic.getId());
         long highRiskCount = patientRepository.countByClinicIdAndRiskLevelAndIsDeletedFalse(clinic.getId(), AppConstants.RISK_HIGH);
 

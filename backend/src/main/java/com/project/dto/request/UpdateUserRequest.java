@@ -25,4 +25,11 @@ public class UpdateUserRequest {
     private String status; // ACTIVE, INACTIVE
 
     private String password;
+
+    private String licenseNumber;
+    private String degree;
+    private String bio;
+    private String licenseImageUrl;
+    private String specialization;
+    private String experience;
 }

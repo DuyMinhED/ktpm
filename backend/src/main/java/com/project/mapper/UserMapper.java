@@ -53,6 +53,8 @@ public class UserMapper {
                 .degree(user.getDegree())
                 .bio(user.getBio())
                 .licenseImageUrl(user.getLicenseImageUrl())
+                .specialization(user.getSpecialization())
+                .experience(user.getExperience())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

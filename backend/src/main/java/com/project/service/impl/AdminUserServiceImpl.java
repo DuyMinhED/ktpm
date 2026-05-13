@@ -66,7 +66,15 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .fullName(request.getFullName()).email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(UserRole.valueOf(request.getRole().toUpperCase()))
-                .clinicId(request.getClinicId()).status("ACTIVE").build();
+                .clinicId(request.getClinicId()).status("ACTIVE")
+                .avatarUrl(request.getAvatarUrl())
+                .licenseNumber(request.getLicenseNumber())
+                .degree(request.getDegree())
+                .bio(request.getBio())
+                .licenseImageUrl(request.getLicenseImageUrl())
+                .specialization(request.getSpecialization())
+                .experience(request.getExperience())
+                .build();
         User saved = userRepository.save(user);
 
         if (UserRole.PATIENT.equals(saved.getRole())) {
@@ -93,6 +101,15 @@ public class AdminUserServiceImpl implements AdminUserService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         user.setClinicId(request.getClinicId());
+        
+        // Map Doctor specialization fields
+        if (request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
+        if (request.getLicenseNumber() != null) user.setLicenseNumber(request.getLicenseNumber());
+        if (request.getDegree() != null) user.setDegree(request.getDegree());
+        if (request.getBio() != null) user.setBio(request.getBio());
+        if (request.getLicenseImageUrl() != null) user.setLicenseImageUrl(request.getLicenseImageUrl());
+        if (request.getSpecialization() != null) user.setSpecialization(request.getSpecialization());
+        if (request.getExperience() != null) user.setExperience(request.getExperience());
         
         User saved = userRepository.save(user);
         auditService.recordActivity("Cập nhật", "Quản lý người dùng", "Cập nhật tài khoản: " + saved.getEmail(), "success");

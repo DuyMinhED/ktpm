@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Dropdown from '../../../components/ui/Dropdown';
+import { uploadToCloudinary } from '../../../utils/cloudinary';
 
 const autofillStyles = `
   input:-webkit-autofill,
@@ -38,11 +39,23 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     status: 'Hoạt động',
     password: '',
     confirmPassword: '',
+    // Doctor Specific
+    avatarUrl: '',
+    licenseNumber: '',
+    degree: 'Bác sĩ',
+    experience: '',
+    specialty: 'Nội khoa',
+    bio: '',
+    licenseImageUrl: '',
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isUploadingLicense, setIsUploadingLicense] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+  const [licenseError, setLicenseError] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -60,7 +73,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     };
   }, [isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
@@ -69,6 +82,40 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
         delete newErrors[name];
         return newErrors;
       });
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        setAvatarError(false);
+        setIsUploadingImage(true);
+        const imageUrl = await uploadToCloudinary(file);
+        setFormData(prev => ({ ...prev, avatarUrl: imageUrl }));
+      } catch (error) {
+        console.error("Lỗi upload ảnh:", error);
+        setAvatarError(true);
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
+  };
+
+  const handleLicenseUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        setLicenseError(false);
+        setIsUploadingLicense(true);
+        const imageUrl = await uploadToCloudinary(file);
+        setFormData(prev => ({ ...prev, licenseImageUrl: imageUrl }));
+      } catch (error) {
+        console.error("Lỗi upload CCHN:", error);
+        setLicenseError(true);
+      } finally {
+        setIsUploadingLicense(false);
+      }
     }
   };
 
@@ -92,6 +139,12 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       errors.confirmPassword = 'Mật khẩu xác nhận không khớp';
     }
 
+    const isDoctor = formData.role === 'Bác sĩ';
+    if (isDoctor) {
+      if (!formData.licenseNumber?.trim()) errors.licenseNumber = 'Vui lòng nhập số CCHN';
+      if (!formData.licenseImageUrl?.trim()) errors.licenseImageUrl = 'Vui lòng tải ảnh bằng chứng CCHN';
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -105,16 +158,27 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
         'Bệnh nhân': 'PATIENT'
       };
 
+      const mappedRole = roleMapping[formData.role] || formData.role;
       const selectedClinicObj = availableClinics.find(c => c.name === formData.clinic);
 
-      const apiData = {
+      const apiData: any = {
         fullName: formData.name,
         email: formData.email,
         phone: formData.phone,
-        role: roleMapping[formData.role] || formData.role,
+        role: mappedRole,
         clinicId: selectedClinicObj ? selectedClinicObj.id : null,
         password: formData.password
       };
+
+      if (mappedRole === 'DOCTOR') {
+        apiData.avatarUrl = formData.avatarUrl;
+        apiData.licenseNumber = formData.licenseNumber;
+        apiData.degree = formData.degree;
+        apiData.experience = formData.experience;
+        apiData.specialization = formData.specialty;
+        apiData.bio = formData.bio;
+        apiData.licenseImageUrl = formData.licenseImageUrl;
+      }
 
       onSave(apiData);
     }
@@ -305,6 +369,160 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </div>
                   </div>
                 </div>
+
+                {/* Doctor Specific Profile Details Section */}
+                {formData.role === 'Bác sĩ' && (
+                  <div className="space-y-3 pt-1 pb-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="flex items-center gap-2 pb-1 ml-1">
+                      <div className="text-slate-400 dark:text-slate-500 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[24px]">clinical_notes</span>
+                      </div>
+                      <h3 className="font-medium text-slate-500 dark:text-slate-100 text-[15px] ml-1">Hồ sơ chuyên môn bác sĩ</h3>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-900 p-4 lg:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm space-y-5">
+                      {/* Avatar Upload */}
+                      <div className="flex items-center gap-5 pb-2 border-b border-slate-50 dark:border-slate-800/50">
+                        <div
+                          onClick={() => !isUploadingImage && document.getElementById('avatar-input-admin-create')?.click()}
+                          className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center cursor-pointer overflow-hidden group relative transition-all hover:border-primary shrink-0"
+                        >
+                          {isUploadingImage ? (
+                            <div className="flex flex-col items-center gap-1">
+                              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                            </div>
+                          ) : formData.avatarUrl && !avatarError ? (
+                            <img
+                              src={formData.avatarUrl}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                              onError={() => setAvatarError(true)}
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center text-slate-400 group-hover:text-primary transition-colors">
+                              <span className="material-symbols-outlined text-[24px]">add_a_photo</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200">Ảnh chân dung bác sĩ</p>
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById('avatar-input-admin-create')?.click()}
+                            className="text-[12px] font-black text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">upload_file</span>
+                            Tải ảnh chân dung
+                          </button>
+                          <input
+                            id="avatar-input-admin-create"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleAvatarChange}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Degree */}
+                        <div className="space-y-1.5 text-left relative z-[30]">
+                          <label className="text-[14px] font-medium text-slate-500 ml-1">Học hàm / Học vị</label>
+                          <Dropdown
+                            options={['Bác sĩ', 'Bác sĩ CKI', 'Bác sĩ CKII', 'Thạc sĩ', 'Tiến sĩ', 'Phó Giáo sư', 'Giáo sư']}
+                            value={formData.degree}
+                            onChange={(degree) => setFormData(prev => ({ ...prev, degree }))}
+                          />
+                        </div>
+
+                        {/* Specialty */}
+                        <div className="space-y-1.5 text-left relative z-[25]">
+                          <label className="text-[14px] font-medium text-slate-500 ml-1">Chuyên khoa</label>
+                          <Dropdown
+                            options={['Nội khoa', 'Sản phụ khoa', 'Nhi khoa', 'Tim mạch', 'Thần kinh', 'Da liễu', 'Khác']}
+                            value={formData.specialty}
+                            onChange={(specialty) => setFormData(prev => ({ ...prev, specialty }))}
+                          />
+                        </div>
+
+                        {/* Experience */}
+                        <div className="space-y-1.5">
+                          <label className="text-[14px] font-medium text-slate-500 ml-1">Kinh nghiệm (năm)</label>
+                          <div className="relative group">
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">history_edu</span>
+                            <input
+                              name="experience"
+                              value={formData.experience}
+                              onChange={handleChange}
+                              placeholder="Nhập số năm"
+                              className="w-full pl-11 pr-4 h-[42px] rounded-lg border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        {/* License Number */}
+                        <div className="space-y-1.5">
+                          <label className="text-[14px] font-medium text-slate-500 ml-1">Số chứng chỉ hành nghề (CCHN) <span className="text-red-500">*</span></label>
+                          <div className="relative group">
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">badge</span>
+                            <input
+                              name="licenseNumber"
+                              value={formData.licenseNumber}
+                              onChange={handleChange}
+                              placeholder="Nhập số CCHN"
+                              className={`w-full pl-11 pr-4 h-[42px] rounded-lg border ${formErrors.licenseNumber ? 'border-red-500/50' : 'border-slate-400 dark:border-slate-700'} bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all`}
+                            />
+                          </div>
+                          {formErrors.licenseNumber && <p className="text-[11px] font-bold text-red-500 ml-1 mt-1">{formErrors.licenseNumber}</p>}
+                        </div>
+                      </div>
+
+                      {/* License Image */}
+                      <div className="space-y-1.5">
+                        <label className="text-[14px] font-medium text-slate-500 ml-1">Minh chứng chứng chỉ hành nghề <span className="text-red-500">*</span></label>
+                        <div className="flex items-center gap-3 mt-1">
+                          <div
+                            onClick={() => !isUploadingLicense && document.getElementById('license-input-admin-create')?.click()}
+                            className="w-[42px] h-[42px] bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center cursor-pointer overflow-hidden group transition-all hover:border-primary relative shrink-0"
+                          >
+                            {isUploadingLicense ? (
+                              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                            ) : formData.licenseImageUrl && !licenseError ? (
+                              <img src={formData.licenseImageUrl} alt="License" className="w-full h-full object-cover" onError={() => setLicenseError(true)} />
+                            ) : (
+                              <span className="material-symbols-outlined text-slate-400 text-[20px] group-hover:text-primary">add_photo_alternate</span>
+                            )}
+                          </div>
+                          <div className="flex-1 flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() => document.getElementById('license-input-admin-create')?.click()}
+                              className="text-[13px] font-bold text-primary hover:underline flex items-center gap-1"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">upload</span>
+                              Tải ảnh minh chứng
+                            </button>
+                            <input id="license-input-admin-create" type="file" accept="image/*" className="hidden" onChange={handleLicenseUpload} />
+                          </div>
+                        </div>
+                        {formErrors.licenseImageUrl && <p className="text-[11px] font-bold text-red-500 ml-1 mt-1">{formErrors.licenseImageUrl}</p>}
+                      </div>
+
+                      {/* Bio */}
+                      <div className="space-y-1.5">
+                        <label className="text-[14px] font-medium text-slate-500 ml-1">Giới thiệu tóm tắt (Bio)</label>
+                        <textarea
+                          name="bio"
+                          value={formData.bio}
+                          onChange={handleChange}
+                          placeholder="Kinh nghiệm làm việc, chuyên môn sâu..."
+                          rows={3}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-400 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 resize-none"
+                        ></textarea>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

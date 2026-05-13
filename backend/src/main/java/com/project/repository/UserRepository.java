@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
        long countByRoleAndIsDeletedFalse(UserRole role);
 
-       long countByRoleAndClinicId(UserRole role, Long clinicId);
+       long countByRoleAndClinicIdAndIsDeletedFalse(UserRole role, Long clinicId);
 
        @Query("SELECT u.clinicId, COUNT(u) FROM User u WHERE u.isDeleted = false AND u.role = :role GROUP BY u.clinicId")
        java.util.List<Object[]> countByRoleGroupedByClinic(@Param("role") UserRole role);

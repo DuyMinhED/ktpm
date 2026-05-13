@@ -29,4 +29,11 @@ public class CreateUserRequest {
     private Long clinicId;
 
     private String avatarUrl;
+
+    private String licenseNumber;
+    private String degree;
+    private String bio;
+    private String licenseImageUrl;
+    private String specialization;
+    private String experience;
 }

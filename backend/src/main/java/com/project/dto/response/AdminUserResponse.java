@@ -22,5 +22,7 @@ public class AdminUserResponse {
     private String degree;
     private String bio;
     private String licenseImageUrl;
+    private String specialization;
+    private String experience;
     private LocalDateTime createdAt;
 }
