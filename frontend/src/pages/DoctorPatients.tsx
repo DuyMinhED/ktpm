@@ -13,6 +13,7 @@ import { doctorApi } from '../api/doctor';
 import { clinicApi } from '../api/clinic';
 import TopBar from '../components/common/TopBar';
 import DoctorSidebar from '../components/common/DoctorSidebar';
+import Skeleton from '../components/ui/Skeleton';
 
 export default function DoctorPatients() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -379,15 +380,29 @@ export default function DoctorPatients() {
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {loadingPatients ? (
-                    [...Array(4)].map((_, i) => (
-                      <tr key={i} className="animate-pulse">
-                        <td className="px-6 py-5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-slate-100"></div><div className="space-y-2"><div className="h-4 bg-slate-200 rounded w-24"></div><div className="h-3 bg-slate-100 rounded w-32"></div></div></div></td>
-                        <td className="px-6 py-5"><div className="h-4 bg-slate-100 rounded w-16"></div></td>
-                        <td className="px-6 py-5"><div className="h-4 bg-slate-100 rounded w-8"></div></td>
-                        <td className="px-6 py-5"><div className="flex gap-2"><div className="h-8 bg-slate-50 rounded-lg w-20"></div><div className="h-8 bg-slate-50 rounded-lg w-20"></div></div></td>
-                        <td className="px-6 py-5"><div className="h-4 bg-slate-100 rounded w-24"></div></td>
-                        <td className="px-6 py-5"><div className="h-7 bg-slate-200 rounded-full w-20"></div></td>
-                        <td className="px-6 py-5"><div className="h-8 w-8 bg-slate-100 rounded-full ml-auto"></div></td>
+                    [...Array(5)].map((_, i) => (
+                      <tr key={i}>
+                        <td className="px-6 py-5 h-[80px]">
+                          <div className="flex items-center gap-3">
+                            <Skeleton variant="circular" className="w-10 h-10 shrink-0" />
+                            <div className="space-y-2 flex-1">
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-3 w-32" />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5"><Skeleton className="h-4 w-16" /></td>
+                        <td className="px-6 py-5"><Skeleton className="h-4 w-8" /></td>
+                        <td className="px-6 py-5">
+                          <div className="flex gap-2">
+                            <Skeleton className="h-8 rounded-lg w-20" />
+                            <Skeleton className="h-8 rounded-lg w-20" />
+                          </div>
+                        </td>
+                        <td className="px-6 py-5"><Skeleton className="h-4 w-24" /></td>
+                        <td className="px-6 py-5"><Skeleton className="h-7 rounded-lg w-24" /></td>
+                        <td className="px-6 py-5"><Skeleton className="h-7 rounded-full w-20" /></td>
+                        <td className="px-6 py-5 text-right relative"><Skeleton variant="circular" className="h-8 w-8 ml-auto" /></td>
                       </tr>
                     ))
                   ) : patients.length === 0 ? (

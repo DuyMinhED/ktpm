@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import { doctorApi } from '../api/doctor';
 import DoctorSidebar from '../components/common/DoctorSidebar';
+import Skeleton from '../components/ui/Skeleton';
 
 export default function DoctorDashboard() {
   const [isLoading, setIsLoading] = useState(true);
@@ -271,13 +272,13 @@ export default function DoctorDashboard() {
             <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {isLoading ? (
                 [...Array(4)].map((_, i) => (
-                  <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-primary/5 shadow-sm space-y-4">
+                  <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-primary/5 shadow-sm space-y-4 h-[130px]">
                     <div className="flex justify-between items-start">
-                      <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-lg"></div>
-                      <div className="h-4 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-12"></div>
+                      <Skeleton className="w-12 h-12" />
+                      <Skeleton className="h-4 w-12" />
                     </div>
-                    <div className="h-4 bg-slate-100 dark:bg-slate-800/50 animate-pulse rounded w-32"></div>
-                    <div className="h-8 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div>
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-8 w-1/3" />
                   </div>
                 ))
               ) : (
@@ -336,19 +337,19 @@ export default function DoctorDashboard() {
               <div className="space-y-4">
                 {isLoading ? (
                   [...Array(2)].map((_, i) => (
-                    <div key={i} className="bg-white dark:bg-slate-900 p-5 rounded-lg border-l-4 border-l-slate-200 dark:border-l-slate-800 border border-primary/5 flex items-center justify-between animate-pulse">
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800"></div>
-                        <div className="space-y-2">
-                          <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-40"></div>
-                          <div className="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-32"></div>
+                    <div key={i} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-primary/5 flex items-center justify-between h-[80px]">
+                      <div className="flex items-center gap-4 flex-1">
+                        <Skeleton variant="circular" className="w-14 h-14" />
+                        <div className="space-y-2 flex-1 max-w-xs">
+                          <Skeleton className="h-5 w-3/4" />
+                          <Skeleton className="h-3 w-1/2" />
                         </div>
                       </div>
-                      <div className="hidden sm:block space-y-2">
-                        <div className="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-16 mx-auto"></div>
-                        <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-24"></div>
+                      <div className="hidden sm:flex flex-col gap-2 flex-1 items-center">
+                        <Skeleton className="h-3 w-1/3" />
+                        <Skeleton className="h-5 w-1/4" />
                       </div>
-                      <div className="w-24 h-8 bg-slate-100 dark:bg-slate-800 rounded-full"></div>
+                      <Skeleton className="w-24 h-8 rounded-full" />
                     </div>
                   ))
                 ) : (
@@ -406,18 +407,18 @@ export default function DoctorDashboard() {
                 <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4 px-2">
                   <div className="space-y-1">
                     {isLoading ? (
-                      <div className="h-6 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-48 mb-2"></div>
+                      <Skeleton className="h-6 w-48 mb-2" />
                     ) : (
                       <h2 className="text-[19px] font-black tracking-tight text-slate-900 dark:text-white leading-tight">Biểu đồ rủi ro bệnh nhân</h2>
                     )}
                     {isLoading ? (
-                      <div className="h-4 bg-slate-100 dark:bg-slate-800/50 animate-pulse rounded w-64"></div>
+                      <Skeleton className="h-4 w-64" />
                     ) : (
                       <p className="text-[14px] text-slate-500 font-medium tracking-tight">Thống kê ca nguy cơ cao theo thời gian</p>
                     )}
                   </div>
                   {isLoading ? (
-                    <div className="w-40 h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl shadow-sm"></div>
+                    <Skeleton className="w-40 h-10 shadow-sm" />
                   ) : (
                     <Dropdown
                       options={['7 ngày qua', '30 ngày qua']}
@@ -430,7 +431,7 @@ export default function DoctorDashboard() {
                 <div className="h-48 flex items-end justify-between gap-2 px-2">
                   {isLoading ? (
                     [...Array(7)].map((_, i) => (
-                      <div key={i} className="w-full bg-slate-100 dark:bg-slate-800 animate-pulse rounded-t-lg" style={{ height: `${30 + Math.random() * 50}%` }}></div>
+                      <Skeleton key={i} className="w-full" style={{ height: `${30 + Math.random() * 50}%` }} />
                     ))
                   ) : (
                     <>
@@ -459,9 +460,9 @@ export default function DoctorDashboard() {
                   <div className="grid grid-cols-1 gap-3">
                     {isLoading ? (
                       [...Array(3)].map((_, i) => (
-                        <div key={i} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-lg border border-primary/10 shadow-sm animate-pulse">
-                          <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
-                          <div className="h-4 bg-slate-100 dark:bg-slate-800/50 rounded w-32"></div>
+                        <div key={i} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-primary/10 shadow-sm h-[75px]">
+                          <Skeleton className="w-10 h-10" />
+                          <Skeleton className="h-4 w-1/2" />
                         </div>
                       ))
                     ) : (
@@ -501,14 +502,14 @@ export default function DoctorDashboard() {
                   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-primary/5 shadow-sm divide-y divide-primary/5 overflow-hidden">
                     {isLoading ? (
                       [...Array(3)].map((_, i) => (
-                        <div key={i} className="p-5 flex items-center gap-5 animate-pulse">
+                        <div key={i} className="p-5 flex items-center gap-5 h-[85px]">
                           <div className="min-w-[70px] space-y-1">
-                            <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-10"></div>
-                            <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-14"></div>
+                            <Skeleton className="h-3 w-10" />
+                            <Skeleton className="h-5 w-14" />
                           </div>
                           <div className="flex-1 space-y-2">
-                            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-24"></div>
-                            <div className="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-full"></div>
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-full" />
                           </div>
                         </div>
                       ))
@@ -607,26 +608,26 @@ export default function DoctorDashboard() {
                     <tbody className="divide-y divide-primary/5">
                       {isLoading ? (
                         [...Array(5)].map((_, i) => (
-                          <tr key={i} className="animate-pulse">
-                            <td className="px-6 py-4">
+                          <tr key={i}>
+                            <td className="px-6 py-4 h-[72px]">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-slate-100/80 dark:bg-slate-800 shrink-0"></div>
-                                <div className="space-y-2">
-                                  <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-24"></div>
-                                  <div className="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-32"></div>
+                                <Skeleton variant="circular" className="w-10 h-10 shrink-0" />
+                                <div className="space-y-2 flex-1">
+                                  <Skeleton className="h-4 w-24" />
+                                  <Skeleton className="h-3 w-32" />
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex gap-4">
-                                <div className="h-10 bg-slate-50 dark:bg-slate-800/50 rounded-xl w-16"></div>
-                                <div className="h-10 bg-slate-50 dark:bg-slate-800/50 rounded-xl w-16"></div>
+                                <Skeleton className="h-10 rounded-xl w-16" />
+                                <Skeleton className="h-10 rounded-xl w-16" />
                               </div>
                             </td>
-                            <td className="px-6 py-4"><div className="h-7 bg-slate-200 dark:bg-slate-800 rounded-full w-20"></div></td>
-                            <td className="px-6 py-4"><div className="h-4 bg-slate-100 dark:bg-slate-800/50 rounded w-24"></div></td>
+                            <td className="px-6 py-4"><Skeleton className="h-7 rounded-full w-20" /></td>
+                            <td className="px-6 py-4"><Skeleton className="h-4 rounded w-24" /></td>
                             <td className="px-6 py-4 text-right relative">
-                              <div className="h-8 w-8 bg-slate-200 dark:bg-slate-800 rounded-full ml-auto"></div>
+                              <Skeleton variant="circular" className="h-8 w-8 ml-auto" />
                             </td>
                           </tr>
                         ))

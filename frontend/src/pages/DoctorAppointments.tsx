@@ -5,6 +5,7 @@ import TopBar from '../components/common/TopBar';
 import CompleteAppointmentModal from '../components/ui/CompleteAppointmentModal';
 import ConfirmActionModal from '../components/ui/ConfirmActionModal';
 import MeetingLinkPromptModal from '../components/ui/MeetingLinkPromptModal';
+import Skeleton from '../components/ui/Skeleton';
 import Toast from '../components/ui/Toast';
 import RescheduleModal from '../features/patient/components/RescheduleModal';
 import BatchRescheduleModal from '../components/ui/BatchRescheduleModal';
@@ -481,7 +482,17 @@ export default function DoctorAppointments() {
                                 </div>
                                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-5 max-h-[600px]">
                                     {loading ? (
-                                        <div className="text-center text-slate-500 text-sm py-8">Đang tải...</div>
+                                        <div className="space-y-4">
+                                            {[...Array(3)].map((_, i) => (
+                                                <div key={i} className="p-4 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center gap-4">
+                                                    <Skeleton variant="circular" className="size-10 flex-shrink-0" />
+                                                    <div className="flex-1 space-y-2">
+                                                        <Skeleton className="h-4 w-2/3" />
+                                                        <Skeleton className="h-3 w-1/2" />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     ) : (
                                         viewMode === 'active' ? (
                                             <>

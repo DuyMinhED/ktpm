@@ -4,6 +4,7 @@ import AdviceModal from '../features/patient/components/AdviceModal';
 import Toast from '../components/ui/Toast';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import MedicalHistoryModal from '../features/patient/components/MedicalHistoryModal';
+import Skeleton from '../components/ui/Skeleton';
 import { doctorApi } from '../api/doctor';
 import TopBar from '../components/common/TopBar';
 import DoctorSidebar from '../components/common/DoctorSidebar';
@@ -219,7 +220,19 @@ export default function DoctorMessages() {
 
                         <div className="flex-1 overflow-y-auto custom-scrollbar">
                             <div className="p-3 space-y-2">
-                                {loading && <div className="p-4 text-center text-sm text-slate-500">Đang tải...</div>}
+                                {loading && (
+                                    <div className="space-y-3 mt-2">
+                                        {[...Array(4)].map((_, i) => (
+                                            <div key={i} className="flex items-center gap-3 p-2">
+                                                <Skeleton variant="circular" className="size-12 flex-shrink-0" />
+                                                <div className="flex-1 space-y-2">
+                                                    <div className="flex justify-between"><Skeleton className="h-4 w-2/3"/><Skeleton className="h-3 w-8"/></div>
+                                                    <Skeleton className="h-3 w-3/4"/>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                                 {!loading && conversations.length === 0 && <div className="p-4 text-center text-sm text-slate-500">Chưa có cuộc trò chuyện</div>}
                                 {conversations.filter(c => activeTab === 'all' || c.unreadCount > 0).map(conv => (
                                     <div key={conv.id} onClick={() => setActiveConv(conv)} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${activeConv?.id === conv.id ? 'bg-primary/5 border border-primary/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}>

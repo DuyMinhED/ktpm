@@ -5,6 +5,7 @@ import DoctorSidebar from '../components/common/DoctorSidebar';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import AdviceModal from '../features/patient/components/AdviceModal';
 import Toast from '../components/ui/Toast';
+import Skeleton from '../components/ui/Skeleton';
 import { doctorApi } from '../api/doctor';
 
 export default function DoctorAnalytics() {
@@ -366,9 +367,30 @@ export default function DoctorAnalytics() {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {loading ? (
-                                        <tr>
-                                            <td colSpan={4} className="px-8 py-10 text-center text-slate-500">Đang tải bệnh nhân nguy cơ...</td>
-                                        </tr>
+                                        [...Array(5)].map((_, i) => (
+                                            <tr key={i}>
+                                                <td className="px-8 py-5 h-[80px]">
+                                                    <div className="flex items-center gap-3">
+                                                        <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
+                                                        <div className="space-y-2 flex-1">
+                                                            <Skeleton className="h-4 w-24" />
+                                                            <Skeleton className="h-3 w-32" />
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-5">
+                                                    <div className="flex items-center gap-2">
+                                                        <Skeleton className="h-5 w-16" />
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-5">
+                                                    <Skeleton className="h-7 rounded-full w-36" />
+                                                </td>
+                                                <td className="px-8 py-5 text-right">
+                                                    <Skeleton variant="circular" className="h-8 w-8 ml-auto" />
+                                                </td>
+                                            </tr>
+                                        ))
                                     ) : patients.length > 0 ? (
                                         patients.map((p, i) => (
                                             <tr key={i} className="hover:bg-slate-50/50 transition-colors group">

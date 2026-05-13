@@ -4,6 +4,7 @@ import Toast from '../components/ui/Toast';
 import { doctorApi } from '../api/doctor';
 import DoctorSidebar from '../components/common/DoctorSidebar';
 import TopBar from '../components/common/TopBar';
+import Skeleton from '../components/ui/Skeleton';
 
 export default function DoctorPrescriptions() {
     const [prescriptions, setPrescriptions] = useState<any[]>([]);
@@ -287,9 +288,20 @@ export default function DoctorPrescriptions() {
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
                                         {loading ? (
-                                            <tr>
-                                                <td colSpan={4} className="px-6 py-10 text-center text-slate-500">Đang tải đơn thuốc...</td>
-                                            </tr>
+                                            [...Array(5)].map((_, i) => (
+                                                <tr key={i}>
+                                                    <td className="px-6 py-5 h-[72px]"><Skeleton className="h-4 w-16" /></td>
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex items-center gap-3">
+                                                            <Skeleton variant="circular" className="w-9 h-9 shrink-0" />
+                                                            <Skeleton className="h-4 w-28" />
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-5"><Skeleton className="h-4 w-36" /></td>
+                                                    <td className="px-6 py-5"><Skeleton className="h-6 rounded-full w-20" /></td>
+                                                    <td className="px-6 py-5 text-right"><Skeleton className="h-8 w-16 ml-auto" /></td>
+                                                </tr>
+                                            ))
                                         ) : prescriptions.length > 0 ? (
                                             prescriptions.map((row, i) => (
                                                 <tr key={i} className="transition-colors group border-b border-slate-50/50 last:border-0">
