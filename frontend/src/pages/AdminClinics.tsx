@@ -8,6 +8,7 @@ import ClinicDetailsModal from '../features/admin/components/ClinicDetailsModal'
 import Dropdown from '../components/ui/Dropdown';
 import { clinicApi } from '../api/clinic';
 import { useToast } from '../components/ui/ToastContext';
+import { Pencil, Eye, CheckCircle2, XCircle } from 'lucide-react';
 
 interface ClinicStat {
   title: string;
@@ -276,7 +277,7 @@ export default function AdminClinics() {
                 </div>
               ) : (
                 <>
-                  <h2 className="text-lg md:text-2xl font-black tracking-tight text-slate-900 dark:text-white">Quản lý cơ sở y tế</h2>
+                  <h2 className="text-lg md:text-2xl font-black tracking-tight text-slate-900 dark:text-white">Quản lý phòng khám</h2>
                   <p className="text-[13px] md:text-[16px] text-slate-500 mt-1 font-medium italic-none">Vận hành và giám sát mạng lưới phòng khám toàn hệ thống</p>
                 </>
               )}
@@ -344,7 +345,7 @@ export default function AdminClinics() {
               {isLoading ? (
                 <div className="h-6 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-48"></div>
               ) : (
-                <h4 className="text-[14px] md:text-[19px] font-bold text-slate-900 dark:text-white">Danh sách chi tiết hệ thống</h4>
+                <h4 className="text-[14px] md:text-[19px] font-bold text-slate-900 dark:text-white">Danh sách phòng khám</h4>
               )}
               <div className="flex flex-row items-center gap-3 w-full sm:w-auto">
                 {isLoading ? (
@@ -444,26 +445,30 @@ export default function AdminClinics() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => { setSelectedClinic(clinic); setIsEditModalOpen(true); }}
-                          className="w-8 h-8 flex items-center justify-center rounded-xl bg-primary/5 text-primary hover:bg-primary/10 transition-all"
+                          className="w-8 h-8 flex items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-950/30 text-sky-600 hover:bg-sky-600 hover:text-white active:scale-95 transition-all duration-300"
                           title="Chỉnh sửa"
                         >
-                          <span className="material-symbols-outlined text-[16px]">edit</span>
+                          <Pencil className="w-4 h-4" strokeWidth={2.5} />
                         </button>
                         <button
                           onClick={() => handleLockClinic(clinic)}
-                          className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all ${clinic.status === 'Hoạt động'
-                            ? 'bg-blue-500/5 text-blue-500 hover:bg-blue-500/10'
-                            : 'bg-red-500/5 text-red-500 hover:bg-red-500/10'}`}
+                          className={`w-8 h-8 flex items-center justify-center rounded-xl active:scale-95 transition-all duration-300 ${clinic.status === 'Hoạt động'
+                            ? 'bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white'
+                            : 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 hover:bg-emerald-500 hover:text-white'}`}
                           title={clinic.status === 'Hoạt động' ? 'Ngưng hoạt động' : 'Kích hoạt'}
                         >
-                          <span className="material-symbols-outlined text-[16px]">{clinic.status === 'Hoạt động' ? 'block' : 'check_circle'}</span>
+                          {clinic.status === 'Hoạt động' ? (
+                            <XCircle className="w-4 h-4" strokeWidth={2.5} />
+                          ) : (
+                            <CheckCircle2 className="w-4 h-4" strokeWidth={2.5} />
+                          )}
                         </button>
                         <button
                           onClick={() => { setSelectedClinic(clinic); setIsDetailsModalOpen(true); }}
-                          className="w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-500/5 text-indigo-500 hover:bg-indigo-500/10 transition-all"
+                          className="w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 hover:bg-indigo-600 hover:text-white active:scale-95 transition-all duration-300"
                           title="Chi tiết"
                         >
-                          <span className="material-symbols-outlined text-[16px]">visibility</span>
+                          <Eye className="w-4 h-4" strokeWidth={2.5} />
                         </button>
                       </div>
                     </div>
@@ -583,29 +588,33 @@ export default function AdminClinics() {
                           </span>
                         </td>
                         <td className="px-8 py-5 text-right">
-                          <div className="flex justify-end gap-2 transition-all">
+                          <div className="flex justify-end gap-2.5 transition-all">
                             <button
                               onClick={() => { setSelectedClinic(clinic); setIsEditModalOpen(true); }}
-                              className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary/5 text-primary hover:bg-primary/10 transition-all duration-300"
+                              className="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-950/30 text-sky-600 hover:bg-sky-600 hover:text-white hover:shadow-lg hover:shadow-sky-500/20 dark:hover:shadow-none active:scale-90 transition-all duration-300"
                               title="Chỉnh sửa"
                             >
-                              <span className="material-symbols-outlined text-[18px]">edit</span>
+                              <Pencil className="w-4 h-4" strokeWidth={2.5} />
                             </button>
                             <button
                               onClick={() => handleLockClinic(clinic)}
-                              className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-300 ${clinic.status === 'Hoạt động'
-                                ? 'bg-blue-500/5 text-blue-500 hover:bg-blue-500/10'
-                                : 'bg-red-500/5 text-red-500 hover:bg-red-500/10'}`}
+                              className={`w-9 h-9 flex items-center justify-center rounded-xl active:scale-90 transition-all duration-300 ${clinic.status === 'Hoạt động'
+                                ? 'bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/20 dark:hover:shadow-none'
+                                : 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-500/20 dark:hover:shadow-none'}`}
                               title={clinic.status === 'Hoạt động' ? 'Ngưng hoạt động phòng khám' : 'Kích hoạt phòng khám'}
                             >
-                              <span className="material-symbols-outlined text-[18px]">{clinic.status === 'Hoạt động' ? 'block' : 'check_circle'}</span>
+                              {clinic.status === 'Hoạt động' ? (
+                                <XCircle className="w-4 h-4" strokeWidth={2.5} />
+                              ) : (
+                                <CheckCircle2 className="w-4 h-4" strokeWidth={2.5} />
+                              )}
                             </button>
                             <button
                               onClick={() => { setSelectedClinic(clinic); setIsDetailsModalOpen(true); }}
-                              className="w-9 h-9 flex items-center justify-center rounded-full bg-indigo-500/5 text-indigo-500 hover:bg-indigo-500/10 transition-all duration-300"
+                              className="w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 hover:bg-indigo-600 hover:text-white hover:shadow-lg hover:shadow-indigo-500/20 dark:hover:shadow-none active:scale-90 transition-all duration-300"
                               title="Chi tiết"
                             >
-                              <span className="material-symbols-outlined text-[18px]">visibility</span>
+                              <Eye className="w-4 h-4" strokeWidth={2.5} />
                             </button>
                           </div>
                         </td>
@@ -615,29 +624,25 @@ export default function AdminClinics() {
                 </tbody>
               </table>
             </div>
-            <div className="px-4 md:px-8 py-4 md:py-6 bg-slate-50/50 dark:bg-slate-800/30 border-t border-primary/10 flex flex-row justify-between items-center gap-3">
+            <div className="px-4 md:px-8 py-4 md:py-6 bg-slate-50/50 dark:bg-slate-800/30 border-t border-primary/10 flex flex-row justify-end items-center gap-3">
               {isLoading || isQuerying ? (
-                <>
-                  <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-32 md:w-48"></div>
-                  <div className="flex gap-1">
-                    <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
-                    <div className="w-8 h-8 rounded-lg bg-slate-300 dark:bg-slate-700 animate-pulse"></div>
-                    <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
-                  </div>
-                </>
+                <div className="flex gap-1">
+                  <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
+                  <div className="w-8 h-8 rounded-lg bg-slate-300 dark:bg-slate-700 animate-pulse"></div>
+                  <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
+                </div>
               ) : (
-                <>
-                  <span className="text-[12px] md:text-[14px] text-slate-500 font-medium">Hiển thị {filteredClinics.length}/{clinicList.length} phòng khám</span>
-                  <div className="flex gap-1">
-                    <button className="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors">
-                      <span className="material-symbols-outlined text-sm">chevron_left</span>
-                    </button>
-                    <button className="w-8 h-8 rounded-md flex items-center justify-center bg-[#3bb9f3] text-white font-bold text-xs ring-2 ring-[#3bb9f3]/20">1</button>
-                    <button className="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors">
-                      <span className="material-symbols-outlined text-sm">chevron_right</span>
-                    </button>
-                  </div>
-                </>
+                <div className="flex items-center gap-2">
+                  <button className="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors disabled:opacity-30" disabled>
+                    <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                  </button>
+                  <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
+                    Trang 1/1
+                  </span>
+                  <button className="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors disabled:opacity-30" disabled>
+                    <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>

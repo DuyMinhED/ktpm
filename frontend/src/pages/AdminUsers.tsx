@@ -128,6 +128,7 @@ export default function AdminUsers() {
 
   const userList = usersData?.list || [];
   const totalElements = usersData?.total || 0;
+  const totalPages = Math.ceil(totalElements / pagination.size) || 1;
 
   const clinicOptions = clinics.map((c: any) => c.name);
   const filterClinicOptions = ['Tất cả cơ sở', ...clinicOptions];
@@ -701,42 +702,33 @@ export default function AdminUsers() {
 
             {/* Pagination Box */}
             <div className="bg-slate-50 border-t border-slate-100 py-4">
-              <div className="px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="px-8 flex flex-col md:flex-row items-center justify-end gap-4">
                 {isLoading || isFetching ? (
-                  <>
-                    <div className="flex gap-1 order-2">
-                      <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse"></div>
-                      <div className="w-8 h-8 rounded-md bg-slate-100 animate-pulse"></div>
-                      <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse"></div>
-                    </div>
-                    <div className="h-4 bg-slate-200 animate-pulse rounded-md w-32 order-1"></div>
-                  </>
+                  <div className="flex gap-1">
+                    <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse"></div>
+                    <div className="w-8 h-8 rounded-md bg-slate-100 animate-pulse"></div>
+                    <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse"></div>
+                  </div>
                 ) : (
-                  <>
-                    <div className="flex items-center gap-1 order-2 md:order-2">
-                      <button
-                        disabled={pagination.page === 0}
-                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                        className="p-2 rounded-md text-slate-400 hover:bg-white hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent"
-                      >
-                        <span className="material-symbols-outlined">chevron_left</span>
-                      </button>
-                      <button className="w-8 h-8 rounded-md bg-primary text-white text-[13px] font-extrabold shadow-md">{pagination.page + 1}</button>
-                      <button
-                        disabled={(pagination.page + 1) * pagination.size >= totalElements}
-                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                        className="p-2 rounded-md text-slate-400 hover:bg-white hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent"
-                      >
-                        <span className="material-symbols-outlined">chevron_right</span>
-                      </button>
-                    </div>
-
-                    <div className="order-3 md:order-1">
-                      <p className="text-[14px] font-medium text-slate-500">
-                        Hiển thị <span className="text-slate-500 font-medium">{userList.length}</span>/<span className="text-slate-500 font-medium">{totalElements}</span> tài khoản
-                      </p>
-                    </div>
-                  </>
+                  <div className="flex items-center gap-2">
+                    <button
+                      disabled={pagination.page === 0}
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                      className="p-2 rounded-md text-slate-400 hover:bg-white hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      <span className="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
+                      Trang {pagination.page + 1}/{totalPages}
+                    </span>
+                    <button
+                      disabled={(pagination.page + 1) * pagination.size >= totalElements}
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                      className="p-2 rounded-md text-slate-400 hover:bg-white hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      <span className="material-symbols-outlined">chevron_right</span>
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

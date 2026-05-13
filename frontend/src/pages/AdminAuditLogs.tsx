@@ -13,6 +13,7 @@ export default function AdminAuditLogs() {
   const [logList, setLogList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 0, size: 10, total: 0 });
+  const totalPages = Math.ceil(pagination.total / pagination.size) || 1;
 
   const fetchLogs = useCallback(async () => {
     setIsLoading(true);
@@ -56,6 +57,50 @@ export default function AdminAuditLogs() {
   const handleIpClick = (ip: string) => {
     setSelectedIp(ip);
     setIsIpModalOpen(true);
+  };
+
+  const translateAuditLog = (text: string, type: 'action' | 'module' | 'details' = 'details'): string => {
+    if (!text) return '--';
+    
+    const mapping: Record<string, string> = {
+      // Actions
+      'UPDATE_PATIENT': 'Cập nhật Bệnh nhân',
+      'CREATE_PATIENT': 'Đăng ký Bệnh nhân mới',
+      'DELETE_PATIENT': 'Xóa hồ sơ Bệnh nhân',
+      'UPDATE_DOCTOR': 'Cập nhật Bác sĩ',
+      'CREATE_DOCTOR': 'Thêm Bác sĩ mới',
+      'DELETE_DOCTOR': 'Xóa tài khoản Bác sĩ',
+      'CREATE_CLINIC': 'Khởi tạo Phòng khám mới',
+      'UPDATE_CLINIC': 'Cập nhật Phòng khám',
+      'DELETE_CLINIC': 'Gỡ bỏ Phòng khám',
+      'CREATE_APPOINTMENT': 'Đăng ký Lịch hẹn mới',
+      'UPDATE_APPOINTMENT': 'Thay đổi trạng thái Lịch',
+      'LOGIN': 'Đăng nhập',
+      'LOGOUT': 'Đăng xuất',
+      
+      // Modules
+      'PATIENT_MANAGEMENT': 'Quản lý Bệnh nhân',
+      'DOCTOR_MANAGEMENT': 'Quản lý Bác sĩ',
+      'CLINIC_MANAGEMENT': 'Quản lý Phòng khám',
+      'USER_MANAGEMENT': 'Hồ sơ Người dùng',
+      'APPOINTMENT_MANAGEMENT': 'Quản lý Lịch hẹn',
+      'AUTH_MANAGEMENT': 'Bảo mật Hệ thống',
+      'SYSTEM_MANAGEMENT': 'Cấu hình Chung'
+    };
+    
+    if (type === 'action' || type === 'module') {
+      return mapping[text] || text;
+    }
+    
+    let result = text
+      .replace('Action completed successfully', 'Thao tác hoàn thành thành công')
+      .replace('successful', 'thành công');
+
+    return result
+      .replace(/DOCTOR/g, 'Bác sĩ')
+      .replace(/ADMIN/g, 'Quản trị viên')
+      .replace(/PATIENT/g, 'Bệnh nhân')
+      .replace(/CLINIC_MANAGER/g, 'Quản lý phòng khám');
   };
 
   const handleExport = async () => {
@@ -294,16 +339,15 @@ export default function AdminAuditLogs() {
                         {log.ip}
                       </code>
                     </div>
-                    <p className="text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">{log.action}</p>
+                    <p className="text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      {translateAuditLog(log.action, 'action')}
+                    </p>
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">{log.module}</span>
+                      <span className="text-[11px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                        {translateAuditLog(log.module, 'module')}
+                      </span>
                       <p className="text-[11px] text-slate-400 truncate flex-1">
-                        {log.details ? log.details
-                          .replace(/DOCTOR/g, 'Bác sĩ')
-                          .replace(/ADMIN/g, 'QTV')
-                          .replace(/PATIENT/g, 'BN')
-                          .replace(/CLINIC_MANAGER/g, 'QLPK')
-                          : '--'}
+                        {translateAuditLog(log.details, 'details')}
                       </p>
                     </div>
                   </div>
@@ -404,20 +448,17 @@ export default function AdminAuditLogs() {
                         </td>
                         <td className="px-6 py-5">
                           <span className="text-[14px] font-medium tracking-tight text-slate-600 dark:text-slate-300">
-                            {log.action}
+                            {translateAuditLog(log.action, 'action')}
                           </span>
                         </td>
                         <td className="px-6 py-5">
-                          <span className="text-[14px] font-medium text-slate-600 dark:text-slate-400 italic-none">{log.module}</span>
+                          <span className="text-[14px] font-medium text-slate-600 dark:text-slate-400 italic-none">
+                            {translateAuditLog(log.module, 'module')}
+                          </span>
                         </td>
                         <td className="px-6 py-5">
                           <p className="text-[14px] font-medium text-slate-600 dark:text-slate-400 line-clamp-1 max-w-sm italic-none">
-                            {log.details ? log.details
-                              .replace(/DOCTOR/g, 'Bác sĩ')
-                              .replace(/ADMIN/g, 'Quản trị viên')
-                              .replace(/PATIENT/g, 'Bệnh nhân')
-                              .replace(/CLINIC_MANAGER/g, 'Quản lý phòng khám')
-                              : '--'}
+                            {translateAuditLog(log.details, 'details')}
                           </p>
                         </td>
                         <td className="px-8 py-5 text-right flex justify-end">
@@ -448,42 +489,33 @@ export default function AdminAuditLogs() {
 
           {/* Pagination Box */}
           <div className="bg-slate-50 border-t border-slate-100 py-4">
-            <div className="px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="px-8 flex flex-col md:flex-row items-center justify-end gap-4">
               {isLoading ? (
-                <>
-                  <div className="flex gap-1 order-2">
-                    <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse"></div>
-                    <div className="w-8 h-8 rounded-md bg-slate-100 animate-pulse"></div>
-                    <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse"></div>
-                  </div>
-                  <div className="h-4 bg-slate-200 animate-pulse rounded-md w-32 order-1"></div>
-                </>
+                <div className="flex gap-1">
+                  <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse"></div>
+                  <div className="w-8 h-8 rounded-md bg-slate-100 animate-pulse"></div>
+                  <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse"></div>
+                </div>
               ) : (
-                <>
-                  <div className="flex items-center gap-1 order-2 md:order-2">
-                    <button
-                      disabled={pagination.page === 0}
-                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                      className="p-2 rounded-md text-slate-400 hover:bg-white hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent"
-                    >
-                      <span className="material-symbols-outlined">chevron_left</span>
-                    </button>
-                    <button className="w-8 h-8 rounded-md bg-primary text-white text-[13px] font-extrabold shadow-md">{pagination.page + 1}</button>
-                    <button
-                      disabled={(pagination.page + 1) * pagination.size >= pagination.total}
-                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                      className="p-2 rounded-md text-slate-400 hover:bg-white hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent"
-                    >
-                      <span className="material-symbols-outlined">chevron_right</span>
-                    </button>
-                  </div>
-
-                  <div className="order-3 md:order-1">
-                    <p className="text-[14px] font-medium text-slate-500">
-                      Hiển thị <span className="text-slate-500 font-medium">{logList.length}</span>/<span className="text-slate-500 font-medium">{pagination.total}</span> bản ghi
-                    </p>
-                  </div>
-                </>
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={pagination.page === 0}
+                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                    className="p-2 rounded-md text-slate-400 hover:bg-white hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                  >
+                    <span className="material-symbols-outlined">chevron_left</span>
+                  </button>
+                  <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
+                    Trang {pagination.page + 1}/{totalPages}
+                  </span>
+                  <button
+                    disabled={(pagination.page + 1) * pagination.size >= pagination.total}
+                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                    className="p-2 rounded-md text-slate-400 hover:bg-white hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                  >
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>

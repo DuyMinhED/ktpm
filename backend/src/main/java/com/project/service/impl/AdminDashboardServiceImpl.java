@@ -237,12 +237,40 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         Map<Long, Long> realPatientCounts = userRepository.countByRoleGroupedByClinic(UserRole.PATIENT).stream()
                 .filter(obj -> obj[0] != null)
                 .collect(Collectors.toMap(obj -> ((Number) obj[0]).longValue(), obj -> ((Number) obj[1]).longValue()));
+        
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        java.time.LocalDateTime thirtyDaysAgo = now.minusDays(30);
+        Map<Long, Long> recentPatientCounts = userRepository.countByRoleAndCreatedAtBetweenGroupedByClinic(UserRole.PATIENT, thirtyDaysAgo, now).stream()
+                .filter(obj -> obj[0] != null)
+                .collect(Collectors.toMap(obj -> ((Number) obj[0]).longValue(), obj -> ((Number) obj[1]).longValue()));
 
-        return topClinics.stream().map(c -> AdminDashboardResponse.ClinicPerformanceDto.builder()
-                .id(c.getId()).name(c.getName()).clinicCode(c.getClinicCode()).phone(c.getPhone())
-                .doctorCount(realDoctorCounts.getOrDefault(c.getId(), 0L))
-                .patientCount(realPatientCounts.getOrDefault(c.getId(), 0L))
-                .growth("Mới").status(c.getStatus()).build()).collect(Collectors.toList());
+        return topClinics.stream().map(c -> {
+            long total = realPatientCounts.getOrDefault(c.getId(), 0L);
+            long recent = recentPatientCounts.getOrDefault(c.getId(), 0L);
+            String growthStr;
+            
+            if (total == 0) {
+                growthStr = "0%";
+            } else if (recent == 0) {
+                growthStr = "Ổn định";
+            } else if (recent == total) {
+                growthStr = "Mới (" + total + " BN)";
+            } else {
+                long oldTotal = total - recent;
+                if (oldTotal <= 0) {
+                    growthStr = "+" + recent + " BN";
+                } else {
+                    double growthPct = ((double) recent / oldTotal) * 100.0;
+                    growthStr = String.format("+%.1f%%", growthPct);
+                }
+            }
+
+            return AdminDashboardResponse.ClinicPerformanceDto.builder()
+                    .id(c.getId()).name(c.getName()).clinicCode(c.getClinicCode()).phone(c.getPhone())
+                    .doctorCount(realDoctorCounts.getOrDefault(c.getId(), 0L))
+                    .patientCount(total)
+                    .growth(growthStr).status(c.getStatus()).build();
+        }).collect(Collectors.toList());
     }
 
     private List<AdminDashboardResponse.SystemActivityDto> getRecentActivities() {

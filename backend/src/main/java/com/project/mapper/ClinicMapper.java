@@ -4,7 +4,10 @@ import com.project.dto.response.AdminClinicResponse;
 import com.project.dto.response.ClinicDashboardResponse;
 import com.project.entity.Clinic;
 import com.project.entity.User;
+import com.project.entity.UserRole;
 import com.project.repository.UserRepository;
+import com.project.repository.PatientRepository;
+import com.project.util.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class ClinicMapper {
 
     private final UserRepository userRepository;
+    private final PatientRepository patientRepository;
 
     public ClinicDashboardResponse.GrowthStatsDto toGrowthStats() {
         return ClinicDashboardResponse.GrowthStatsDto.builder()
@@ -34,6 +38,20 @@ public class ClinicMapper {
             }
         }
 
+        // Self-healing fallback: If direct mapping fails, retrieve via reverse role query
+        if (managerEmail == null) {
+            java.util.List<User> managers = userRepository.findByClinicIdAndRoleAndIsDeletedFalse(clinic.getId(), UserRole.CLINIC_MANAGER);
+            if (managers != null && !managers.isEmpty()) {
+                User manager = managers.get(0);
+                managerName = manager.getFullName();
+                managerEmail = manager.getEmail();
+            }
+        }
+
+        long realDoctorCount = userRepository.countByRoleAndClinicId(UserRole.DOCTOR, clinic.getId());
+        long realPatientCount = patientRepository.countByClinicIdAndIsDeletedFalse(clinic.getId());
+        long highRiskCount = patientRepository.countByClinicIdAndRiskLevelAndIsDeletedFalse(clinic.getId(), AppConstants.RISK_HIGH);
+
         return AdminClinicResponse.builder()
                 .id(clinic.getId())
                 .clinicCode(clinic.getClinicCode())
@@ -43,9 +61,9 @@ public class ClinicMapper {
                 .imageUrl(clinic.getImageUrl())
                 .managerName(managerName)
                 .managerEmail(managerEmail)
-                .doctorCount(clinic.getDoctorCount() != null ? clinic.getDoctorCount() : 0)
-                .patientCount(clinic.getPatientCount() != null ? clinic.getPatientCount() : 0)
-                .highRiskPatientCount(clinic.getHighRiskPatientCount() != null ? clinic.getHighRiskPatientCount() : 0)
+                .doctorCount((int) realDoctorCount)
+                .patientCount((int) realPatientCount)
+                .highRiskPatientCount((int) highRiskCount)
                 .status(clinic.getStatus())
                 .createdAt(clinic.getCreatedAt())
                 .build();

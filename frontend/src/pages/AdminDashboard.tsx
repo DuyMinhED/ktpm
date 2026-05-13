@@ -54,18 +54,18 @@ export default function AdminDashboard() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md p-3 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl">
-          <p className="text-[12px] font-bold text-slate-700 mb-1">{label}</p>
+        <div className="bg-white dark:bg-slate-900 p-3 md:p-4 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 ring-1 ring-slate-900/5">
+          <p className="text-[13px] md:text-[14px] font-bold text-slate-800 dark:text-slate-200 mb-1">{label}</p>
           <div className="flex items-center gap-2">
-            <p className="text-[13px] font-medium text-slate-600 dark:text-white">
+            <p className="text-[13px] md:text-[14px] font-bold text-[#3bb9f3]">
               {selectedChartMetric === 'Doanh thu'
                 ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(payload[0].value)
                 : selectedChartMetric === 'Tỷ lệ hài lòng'
                   ? `${payload[0].value}%`
                   : payload[0].value}
-              <span className="text-slate-600 font-medium text-[11px] ml-1">
-                {selectedChartMetric === 'Lượng bệnh nhân' && 'bệnh nhân mới'}
-                {selectedChartMetric === 'Lượt đặt lịch' && 'lượt đặt'}
+              <span className="text-slate-500 dark:text-slate-400 font-bold text-[12.5px] md:text-[14px] ml-1.5">
+                {selectedChartMetric === 'Lượng bệnh nhân' && 'bệnh nhân'}
+                {selectedChartMetric === 'Lượt đặt lịch' && 'lịch hẹn'}
                 {selectedChartMetric === 'Tỷ lệ hài lòng' && 'hài lòng'}
               </span>
             </p>
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center text-emerald-600">
                     <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>groups</span>
                   </div>
-                  <span className="text-[10px] md:text-[11px] font-bold text-white bg-emerald-500 px-2 py-1 rounded-lg">{stats?.patientGrowth || '+0%'}</span>
+                  <span className="text-[12px] md:text-[13.5px] font-black text-white bg-emerald-500 px-2.5 py-1 rounded-lg">{stats?.patientGrowth || '+0%'}</span>
                 </div>
                 <div className="mt-2 md:mt-4">
                   <h3 className="text-xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">{stats?.totalPatients || 0}</h3>
@@ -301,7 +301,7 @@ export default function AdminDashboard() {
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center text-blue-600">
                     <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>apartment</span>
                   </div>
-                  <span className="text-[10px] md:text-[11px] font-bold text-white bg-blue-500 px-2 py-1 rounded-lg">{stats?.clinicTrend || 'Ổn định'}</span>
+                  <span className="text-[12px] md:text-[13.5px] font-black text-white bg-blue-500 px-2.5 py-1 rounded-lg">{stats?.clinicTrend || 'Ổn định'}</span>
                 </div>
                 <div className="mt-2 md:mt-4">
                   <h3 className="text-xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">{stats?.activeClinics || 0}</h3>
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl flex items-center justify-center text-indigo-600">
                     <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>stethoscope</span>
                   </div>
-                  <span className="text-[10px] md:text-[11px] font-bold text-white bg-indigo-500 px-2 py-1 rounded-lg">{stats?.doctorTrend || '+0 mới'}</span>
+                  <span className="text-[12px] md:text-[13.5px] font-black text-white bg-indigo-500 px-2.5 py-1 rounded-lg">{stats?.doctorTrend || '+0 mới'}</span>
                 </div>
                 <div className="mt-2 md:mt-4">
                   <h3 className="text-xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">{stats?.totalDoctors || 0}</h3>
@@ -329,7 +329,7 @@ export default function AdminDashboard() {
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-red-200 dark:bg-red-900/50 rounded-xl flex items-center justify-center text-red-600">
                     <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
                   </div>
-                  <span className="px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded-full">Theo dõi</span>
+                  <span className="px-2.5 py-1 bg-red-500 text-white text-[12px] md:text-[13.5px] font-black rounded-full">Theo dõi</span>
                 </div>
                 <div className="mt-2 md:mt-4">
                   <h3 className="text-xl md:text-4xl font-black text-red-600 tracking-tight leading-none">{stats?.highRiskAlerts || 0}</h3>
@@ -397,18 +397,18 @@ export default function AdminDashboard() {
                 {!stats ? (
                   <div className="w-48 h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl"></div>
                 ) : (
-                    <Dropdown
-                      options={[
-                        { label: 'Tổng bệnh nhân', value: 'Lượng bệnh nhân' },
-                        { label: 'Tổng lịch hẹn', value: 'Lượt đặt lịch' },
-                        { label: 'Doanh thu', value: 'Doanh thu' },
-                        { label: 'Tỷ lệ hài lòng', value: 'Tỷ lệ hài lòng' }
-                      ]}
-                      value={selectedChartMetric}
-                      onChange={setSelectedChartMetric}
-                      className="w-[140px] sm:w-[160px] sm:ml-auto"
-                      size="sm"
-                    />
+                  <Dropdown
+                    options={[
+                      { label: 'Tổng bệnh nhân', value: 'Lượng bệnh nhân' },
+                      { label: 'Tổng lịch hẹn', value: 'Lượt đặt lịch' },
+                      { label: 'Doanh thu', value: 'Doanh thu' },
+                      { label: 'Tỷ lệ hài lòng', value: 'Tỷ lệ hài lòng' }
+                    ]}
+                    value={selectedChartMetric}
+                    onChange={setSelectedChartMetric}
+                    className="w-[140px] sm:w-[160px] sm:ml-auto"
+                    size="sm"
+                  />
                 )}
               </div>
             </div>
@@ -533,18 +533,59 @@ export default function AdminDashboard() {
                   </div>
                 ))
               ) : activities.length > 0 ? (
-                activities.slice(0, 3).map((act, idx) => (
-                  <div key={idx} className="flex gap-4 group">
-                    <div className={`w-10 h-10 rounded-full bg-${act.color || 'blue'}-100 dark:bg-${act.color || 'blue'}-900/30 flex items-center justify-center text-${act.color || 'blue'}-600 dark:text-${act.color || 'blue'}-400 shrink-0`}>
-                      <span className="material-symbols-outlined text-lg">{act.icon || 'history'}</span>
+                activities.slice(0, 3).map((act, idx) => {
+                  const actionMap: Record<string, string> = {
+                    'UPDATE_PATIENT': 'Cập nhật Bệnh nhân',
+                    'CREATE_PATIENT': 'Tạo mới Bệnh nhân',
+                    'DELETE_PATIENT': 'Xóa Bệnh nhân',
+                    'UPDATE_DOCTOR': 'Cập nhật Bác sĩ',
+                    'CREATE_DOCTOR': 'Tạo mới Bác sĩ',
+                    'DELETE_DOCTOR': 'Xóa Bác sĩ',
+                    'CREATE_CLINIC': 'Thêm mới Phòng khám',
+                    'UPDATE_CLINIC': 'Cập nhật Phòng khám',
+                    'CREATE_APPOINTMENT': 'Tạo Lịch hẹn khám',
+                    'UPDATE_APPOINTMENT': 'Cập nhật Lịch hẹn',
+                    'LOGIN': 'Đăng nhập hệ thống',
+                    'LOGOUT': 'Đăng xuất'
+                  };
+
+                  const moduleMap: Record<string, string> = {
+                    'PATIENT_MANAGEMENT': 'Quản lý bệnh nhân',
+                    'DOCTOR_MANAGEMENT': 'Quản lý bác sĩ',
+                    'CLINIC_MANAGEMENT': 'Quản lý phòng khám',
+                    'USER_MANAGEMENT': 'Quản lý tài khoản',
+                    'APPOINTMENT_MANAGEMENT': 'Quản lý lịch hẹn',
+                    'AUTH_MANAGEMENT': 'Bảo mật hệ thống'
+                  };
+
+                  const translatedTitle = actionMap[act.title] || act.title;
+
+                  let translatedDesc = act.description || '';
+                  if (translatedDesc.includes(':')) {
+                    const parts = translatedDesc.split(':');
+                    const mod = parts[0].trim();
+                    const details = parts.slice(1).join(':').trim();
+
+                    const transMod = moduleMap[mod] || mod;
+                    const transDetails = details
+                      .replace('Action completed successfully', 'Thao tác hoàn thành thành công')
+                      .replace('successful', 'thành công');
+                    translatedDesc = `${transMod}: ${transDetails}`;
+                  }
+
+                  return (
+                    <div key={idx} className="flex gap-4 group">
+                      <div className={`w-10 h-10 rounded-full bg-${act.color || 'blue'}-100 dark:bg-${act.color || 'blue'}-900/30 flex items-center justify-center text-${act.color || 'blue'}-600 dark:text-${act.color || 'blue'}-400 shrink-0`}>
+                        <span className="material-symbols-outlined text-lg">{act.icon || 'history'}</span>
+                      </div>
+                      <div>
+                        <p className="text-[12px] md:text-[15px] font-bold text-slate-900 dark:text-white">{translatedTitle}</p>
+                        <p className="text-[11px] md:text-[14px] text-slate-500 font-medium mt-0.5 leading-relaxed">{translatedDesc}</p>
+                        <span className="text-[10px] md:text-[13px] font-medium text-slate-400 dark:text-slate-500 mt-2 inline-block italic-none tracking-tight">{act.timeAgo}</span>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[12px] md:text-[15px] font-bold text-slate-900 dark:text-white">{act.title}</p>
-                      <p className="text-[11px] md:text-[14px] text-slate-500 font-medium mt-0.5 leading-relaxed">{act.description}</p>
-                      <span className="text-[10px] md:text-[13px] font-medium text-slate-400 dark:text-slate-500 mt-2 inline-block italic-none tracking-tight">{act.timeAgo}</span>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-slate-400 py-10 opacity-50">
                   <span className="material-symbols-outlined text-4xl mb-2">inbox</span>

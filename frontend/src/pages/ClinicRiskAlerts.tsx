@@ -307,55 +307,32 @@ export default function ClinicRiskAlerts() {
                                     </table>
                                 </div>
                                 {/* Pagination Footer - Redesigned */}
-                                <div className="px-8 py-6 bg-slate-50/50 dark:bg-slate-800/20 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
+                                <div className="px-8 py-6 bg-slate-50/50 dark:bg-slate-800/20 flex items-center justify-end border-t border-slate-100 dark:border-slate-800">
                                     {isLoading ? (
-                                        <>
-                                            <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-48"></div>
-                                            <div className="flex gap-2">
-                                                <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse"></div>
-                                                <div className="w-20 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse"></div>
-                                            </div>
-                                        </>
+                                        <div className="flex gap-2">
+                                            <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse"></div>
+                                            <div className="w-20 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse"></div>
+                                        </div>
                                     ) : (
-                                        <>
-                                            <p className="text-[14px] font-medium text-slate-500">
-                                                Hiển thị <span className="font-bold text-slate-900 dark:text-white">{totalElements === 0 ? 0 : (page * 5) + 1}</span> đến <span className="font-bold text-slate-900 dark:text-white">{Math.min((page + 1) * 5, totalElements)}</span> trong số <span className="font-bold text-slate-900 dark:text-white">{totalElements}</span> ca
-                                            </p>
-                                            <div className="flex items-center gap-3">
-                                                <button 
-                                                    onClick={() => setPage(Math.max(0, page - 1))}
-                                                    disabled={page === 0}
-                                                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30"
-                                                >
-                                                    <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-                                                </button>
-                                                <div className="flex items-center gap-1.5">
-                                                    {[...Array(Math.min(5, totalPages))].map((_, idx) => {
-                                                        // Show at most 5 pages around the current page
-                                                        let pageNum = idx;
-                                                        if (totalPages > 5 && page > 2) {
-                                                            pageNum = Math.min(page - 2 + idx, totalPages - 5 + idx);
-                                                        }
-                                                        return (
-                                                            <button 
-                                                                key={pageNum}
-                                                                onClick={() => setPage(pageNum)}
-                                                                className={`w-10 h-10 rounded-xl text-sm font-black transition-all ${page === pageNum ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'}`}
-                                                            >
-                                                                {pageNum + 1}
-                                                            </button>
-                                                        )
-                                                    })}
-                                                </div>
-                                                <button 
-                                                    onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-                                                    disabled={page >= totalPages - 1 || totalPages === 0}
-                                                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30"
-                                                >
-                                                    <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-                                                </button>
-                                            </div>
-                                        </>
+                                        <div className="flex items-center gap-2">
+                                            <button 
+                                                onClick={() => setPage(Math.max(0, page - 1))}
+                                                disabled={page === 0}
+                                                className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30"
+                                            >
+                                                <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                                            </button>
+                                            <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
+                                                Trang {page + 1}/{totalPages || 1}
+                                            </span>
+                                            <button 
+                                                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                                                disabled={page >= totalPages - 1 || totalPages === 0}
+                                                className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30"
+                                            >
+                                                <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>

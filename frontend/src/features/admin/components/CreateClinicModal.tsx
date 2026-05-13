@@ -268,7 +268,7 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                       <div className="lg:col-span-2 space-y-1.5 flex-1">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Tên phòng khám <span className="text-red-500">*</span></label>
                         <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">apartment</span>
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10">apartment</span>
                           <input
                             name="name"
                             value={formData.name}
@@ -284,7 +284,7 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                       <div className="space-y-1.5 flex-1">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Mã định danh <span className="text-red-500">*</span></label>
                         <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">qr_code</span>
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10">qr_code</span>
                           <input
                             name="clinicCode"
                             value={formData.clinicCode}
@@ -300,7 +300,7 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                       <div className="space-y-1.5 flex-1">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Số điện thoại <span className="text-red-500">*</span></label>
                         <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">call</span>
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10">call</span>
                           <input
                             name="phone"
                             value={formData.phone}
@@ -316,7 +316,7 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                       <div className="lg:col-span-2 space-y-1.5">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Địa chỉ chi tiết <span className="text-red-500">*</span></label>
                         <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">location_on</span>
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10">location_on</span>
                           <input
                             name="address"
                             value={formData.address}
@@ -340,12 +340,12 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                     <h3 className="font-medium text-slate-500 dark:text-slate-100 text-[15px] italic-none ml-1">Tài khoản quản trị phòng khám</h3>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-900 p-4 lg:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  <div className="bg-white dark:bg-slate-900 p-4 lg:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm grid grid-cols-1 lg:grid-cols-2 gap-5">
                     {/* Admin Name */}
-                    <div className="space-y-1.5 flex-1 lg:col-span-2">
+                    <div className="space-y-1.5 flex-1">
                       <label className="text-[14px] font-medium text-slate-500 ml-1">Họ và tên người quản lý <span className="text-red-500">*</span></label>
                       <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">person_add</span>
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10">person_add</span>
                         <input
                           name="adminFullName"
                           value={formData.adminFullName}
@@ -361,7 +361,7 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                     <div className="space-y-1.5">
                       <label className="text-[14px] font-medium text-slate-500 ml-1">Email đăng nhập <span className="text-red-500">*</span></label>
                       <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">mail</span>
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10">mail</span>
                         <input
                           name="adminEmail"
                           value={formData.adminEmail}
@@ -374,11 +374,11 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                     </div>
 
                     {/* Password Fields */}
-                    <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
+                    <div className="md:col-span-2 lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
                       <div className="space-y-1.5">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Mật khẩu <span className="text-red-500">*</span></label>
                         <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400">lock</span>
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400 z-10">lock</span>
                           <input
                             type={showPassword ? "text" : "password"}
                             name="adminPassword"
@@ -403,7 +403,7 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                       <div className="space-y-1.5">
                         <label className="text-[14px] font-medium text-slate-500 ml-1">Xác nhận mật khẩu <span className="text-red-500">*</span></label>
                         <div className="relative">
-                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400">lock</span>
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400 z-10">lock</span>
                           <input
                             type={showConfirmPassword ? "text" : "password"}
                             name="confirmPassword"

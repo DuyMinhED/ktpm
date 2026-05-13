@@ -405,28 +405,17 @@ export default function AdminSupport() {
           </div>
 
           {/* Pagination Footer */}
-          <div className="px-8 py-5 bg-slate-50/50 dark:bg-slate-800/50 border-t border-primary/10 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-[14px] font-medium text-slate-500">
-              Hiển thị <span className="text-slate-900 dark:text-white font-extrabold"> {paginatedTickets.length}</span>/<span className="text-slate-900 dark:text-white font-extrabold">{filteredTickets.length}</span> yêu cầu
-            </p>
-            <div className="flex items-center gap-1">
+          <div className="px-8 py-5 bg-slate-50/50 dark:bg-slate-800/50 border-t border-primary/10 flex flex-col md:flex-row items-center justify-end gap-4">
+            <div className="flex items-center gap-2">
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                 <span className="material-symbols-outlined">chevron_left</span>
               </button>
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`w-8 h-8 rounded-md text-[13px] font-extrabold transition-all ${currentPage === i + 1
-                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800'
-                    }`}>
-                  {i + 1}
-                </button>
-              ))}
+              <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
+                Trang {currentPage}/{totalPages || 1}
+              </span>
               <button
                 disabled={currentPage === totalPages || totalPages === 0}
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}

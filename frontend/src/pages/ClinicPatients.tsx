@@ -494,44 +494,33 @@ export default function ClinicPatients() {
                                 </table>
                             </div>
 
-                            <div className="px-8 py-6 bg-slate-50/30 dark:bg-slate-800/30 flex items-center justify-between border-t border-slate-200 dark:border-slate-700">
+                            <div className="px-8 py-6 bg-slate-50/30 dark:bg-slate-800/30 flex items-center justify-end border-t border-slate-200 dark:border-slate-700">
                                 {isLoading ? (
-                                    <>
-                                        <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-48"></div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
-                                            <div className="w-16 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
-                                            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
-                                        </div>
-                                    </>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
+                                        <div className="w-16 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
+                                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
+                                    </div>
                                 ) : (
-                                    <>
-                                        <p className="text-[14px] font-medium text-slate-500">
-                                            Hiển thị <span className="font-medium text-slate-500 dark:text-white">{patients.length}</span> trên <span className="font-medium text-slate-500 dark:text-white">{totalElements}</span> hồ sơ
-                                        </p>
-                                        <div className="flex items-center gap-3">
-                                            <button
-                                                onClick={() => fetchPatients(currentPage - 1)}
-                                                disabled={currentPage === 0}
-                                                className="p-2 rounded-xl bg-white dark:bg-slate-100 border border-slate-200 text-slate-400 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                                            >
-                                                <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-                                            </button>
-                                            <div className="flex items-center gap-1.5">
-                                                <button className="w-10 h-10 rounded-xl bg-primary text-white text-sm font-black shadow-lg shadow-primary/20 transition-all">
-                                                    {currentPage + 1}
-                                                </button>
-                                                <span className="text-sm font-medium text-slate-400 mx-1">/ {totalPages || 1}</span>
-                                            </div>
-                                            <button
-                                                onClick={() => fetchPatients(currentPage + 1)}
-                                                disabled={currentPage >= totalPages - 1}
-                                                className="p-2 rounded-xl bg-white dark:bg-slate-100 border border-slate-200 text-slate-400 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                                            >
-                                                <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-                                            </button>
-                                        </div>
-                                    </>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => fetchPatients(currentPage - 1)}
+                                            disabled={currentPage === 0}
+                                            className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                                        </button>
+                                        <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
+                                            Trang {currentPage + 1}/{totalPages || 1}
+                                        </span>
+                                        <button
+                                            onClick={() => fetchPatients(currentPage + 1)}
+                                            disabled={currentPage >= totalPages - 1}
+                                            className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         </div>

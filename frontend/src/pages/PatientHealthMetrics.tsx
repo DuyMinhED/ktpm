@@ -524,20 +524,22 @@ const PatientHealthMetrics: React.FC = () => {
                 </div>
 
                 {/* Pagination Controls */}
-                <div className="px-6 py-4 border-t border-primary/5 flex items-center justify-between bg-white dark:bg-slate-900/50">
-                    <p className="text-[13px] text-slate-500 font-medium font-display">Trang {currentPage + 1} của {totalPages || 1}</p>
+                <div className="px-6 py-4 border-t border-primary/5 flex items-center justify-end bg-white dark:bg-slate-900/50">
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
                             disabled={currentPage === 0}
-                            className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-100 dark:border-slate-800 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95"
+                            className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                             <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                         </button>
+                        <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
+                            Trang {currentPage + 1}/{totalPages || 1}
+                        </span>
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
                             disabled={currentPage >= totalPages - 1}
-                            className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-100 dark:border-slate-800 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95"
+                            className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                             <span className="material-symbols-outlined text-[20px]">chevron_right</span>
                         </button>

@@ -369,28 +369,22 @@ export default function DoctorPrescriptions() {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="p-6 flex items-center justify-between border-t border-slate-50 bg-slate-50/30">
-                                <p className="text-[13px] font-medium text-slate-400">
-                                    Hiển thị {prescriptions.length}/{totalElements} kết quả
-                                </p>
-                                <div className="flex gap-2.5">
+                            <div className="p-6 flex items-center justify-end border-t border-slate-50 bg-slate-50/30">
+                                <div className="flex items-center gap-2">
                                     <button 
                                         onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
                                         disabled={currentPage === 0}
-                                        className="p-2.5 rounded-xl bg-white border border-slate-100 shadow-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
+                                        className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                     >
                                         <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                                     </button>
-                                    <div className="flex items-center gap-1.5">
-                                        <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-white text-[14px] font-bold shadow-md shadow-primary/20">
-                                            {currentPage + 1}
-                                        </button>
-                                        <span className="text-sm font-medium text-slate-400 mx-1">/ {totalPages || 1}</span>
-                                    </div>
+                                    <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
+                                        Trang {currentPage + 1}/{totalPages || 1}
+                                    </span>
                                     <button 
                                         onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
                                         disabled={currentPage >= totalPages - 1}
-                                        className="p-2.5 rounded-xl bg-white border border-slate-100 shadow-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
+                                        className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                     >
                                         <span className="material-symbols-outlined text-[18px]">chevron_right</span>
                                     </button>
