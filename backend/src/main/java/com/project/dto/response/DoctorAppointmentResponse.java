@@ -24,4 +24,7 @@ public class DoctorAppointmentResponse {
     private String meetingLink;
     private String reason;
     private String diagnosisSummary;
+    private String doctorName;
+    private String doctorSpecialty;
+    private String doctorAvatarUrl;
 }

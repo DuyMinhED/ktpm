@@ -112,6 +112,9 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
                 .meetingLink(a.getMeetingLink())
                 .reason(a.getReason())
                 .diagnosisSummary(a.getDiagnosisSummary())
+                .doctorName(a.getDoctorName())
+                .doctorSpecialty(a.getDoctorSpecialty())
+                .doctorAvatarUrl(a.getDoctorAvatarUrl())
                 .build();
     }
 

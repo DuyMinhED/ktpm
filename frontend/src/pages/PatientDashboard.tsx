@@ -154,80 +154,94 @@ const PatientDashboard: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Metric 1: Blood Sugar */}
-                        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                            <div className="flex justify-between mb-4">
-                                <p className="text-sm font-medium text-slate-500">Đường huyết ({bloodSugar?.unit || 'mmol/L'})</p>
-                                <span className={`px-2 py-0.5 text-xs font-bold rounded ${bloodSugar?.status === 'NORMAL' ? 'bg-green-100 text-green-700' : bloodSugar?.status === 'HIGH' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-                                    }`}>
-                                    {bloodSugar ? getStatusVn(bloodSugar.status) : 'Chưa có'}
-                                </span>
+                        {isLoading ? (
+                            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm animate-pulse">
+                                <div className="flex justify-between mb-4">
+                                    <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-32"></div>
+                                    <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-16"></div>
+                                </div>
+                                <div className="flex items-baseline gap-2 mb-6">
+                                    <div className="h-9 bg-slate-200 dark:bg-slate-700 rounded w-20"></div>
+                                </div>
+                                <div className="h-44 w-full bg-slate-50 dark:bg-slate-800/50 rounded-lg"></div>
                             </div>
-                            <div className="flex items-baseline gap-2 mb-6">
-                                <p className="text-3xl font-bold">{bloodSugar?.latestValue || '--'}</p>
-                                {bloodSugar?.changePercentage && (
-                                <p className={`text-sm font-bold flex items-center ${bloodSugar?.trend === 'UP' ? 'text-red-500' : 'text-green-500'
-                                    }`}>
-                                    <span className="material-symbols-outlined text-sm">
-                                        {bloodSugar?.trend === 'UP' ? 'trending_up' : 'trending_down'}
+                        ) : (
+                            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                <div className="flex justify-between mb-4">
+                                    <p className="text-sm font-medium text-slate-500">Đường huyết ({bloodSugar?.unit || 'mmol/L'})</p>
+                                    <span className={`px-2 py-0.5 text-xs font-bold rounded ${bloodSugar?.status === 'NORMAL' ? 'bg-green-100 text-green-700' : bloodSugar?.status === 'HIGH' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                                        }`}>
+                                        {bloodSugar ? getStatusVn(bloodSugar.status) : 'Chưa có'}
                                     </span>
-                                    {bloodSugar.changePercentage}
-                                </p>
-                                )}
-                            </div>
-                            <div className="h-44 w-full mt-4">
-                                {bloodSugar?.chartData && bloodSugar.chartData.length > 0 ? (
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <AreaChart
-                                            data={bloodSugar.chartData.map((d: any) => ({
-                                                name: getDayVn(d.measuredAt),
-                                                value: Number(d.value)
-                                            }))}
-                                            margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
-                                        >
-                                            <defs>
-                                                <linearGradient id="gradSugar" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="0%" stopColor="#3bb9f3" stopOpacity={0.2} />
-                                                    <stop offset="100%" stopColor="#3bb9f3" stopOpacity={0} />
-                                                </linearGradient>
-                                            </defs>
-                                            <XAxis
-                                                dataKey="name"
-                                                axisLine={false}
-                                                tickLine={false}
-                                                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }}
-                                                interval="preserveStartEnd"
-                                                minTickGap={30}
-                                                height={30}
-                                            />
-                                            <Tooltip
-                                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                                labelStyle={{ fontWeight: 'bold', color: '#3bb9f3' }}
-                                            />
-                                            <Area type="monotone" dataKey="value" stroke="#3bb9f3" strokeWidth={4} fill="url(#gradSugar)" />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                ) : (
-                                    <div className="space-y-4">
-                                        <svg className="h-32 w-full" viewBox="0 0 400 100">
-                                            <path d="M0,80 Q50,60 100,70 T200,40 T300,50 T400,30" fill="none" stroke="#3bb9f3" strokeLinecap="round" strokeWidth="4"></path>
-                                            <path d="M0,80 Q50,60 100,70 T200,40 T300,50 T400,30 V100 H0 Z" fill="url(#grad1)"></path>
-                                            <defs>
-                                                <linearGradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
-                                                    <stop offset="0%" style={{ stopColor: '#3bb9f3', stopOpacity: 0.2 }}></stop>
-                                                    <stop offset="100%" style={{ stopColor: '#3bb9f3', stopOpacity: 0 }}></stop>
-                                                </linearGradient>
-                                            </defs>
-                                        </svg>
-                                        <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-                                            <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                                </div>
+                                <div className="flex items-baseline gap-2 mb-6">
+                                    <p className="text-3xl font-bold">{bloodSugar?.latestValue || '--'}</p>
+                                    {bloodSugar?.changePercentage && (
+                                    <p className={`text-sm font-bold flex items-center ${bloodSugar?.trend === 'UP' ? 'text-red-500' : 'text-green-500'
+                                        }`}>
+                                        <span className="material-symbols-outlined text-sm">
+                                            {bloodSugar?.trend === 'UP' ? 'trending_up' : 'trending_down'}
+                                        </span>
+                                        {bloodSugar.changePercentage}
+                                    </p>
+                                    )}
+                                </div>
+                                <div className="h-44 w-full mt-4">
+                                    {bloodSugar?.chartData && bloodSugar.chartData.length > 0 ? (
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <AreaChart
+                                                data={bloodSugar.chartData.map((d: any) => ({
+                                                    name: getDayVn(d.measuredAt),
+                                                    value: Number(d.value)
+                                                }))}
+                                                margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
+                                            >
+                                                <defs>
+                                                    <linearGradient id="gradSugar" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="0%" stopColor="#3bb9f3" stopOpacity={0.2} />
+                                                        <stop offset="100%" stopColor="#3bb9f3" stopOpacity={0} />
+                                                    </linearGradient>
+                                                </defs>
+                                                <XAxis
+                                                    dataKey="name"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }}
+                                                    interval="preserveStartEnd"
+                                                    minTickGap={30}
+                                                    height={30}
+                                                />
+                                                <Tooltip
+                                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                                    labelStyle={{ fontWeight: 'bold', color: '#3bb9f3' }}
+                                                />
+                                                <Area type="monotone" dataKey="value" stroke="#3bb9f3" strokeWidth={4} fill="url(#gradSugar)" />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        <div className="h-full w-full flex flex-col items-center justify-center text-slate-400 pb-6">
+                                            <span className="material-symbols-outlined text-3xl text-slate-300 dark:text-slate-700 mb-1">analytics</span>
+                                            <p className="text-xs font-medium">Chưa có dữ liệu đồ thị</p>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Metric 2: Blood Pressure */}
-                        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        {isLoading ? (
+                            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm animate-pulse">
+                                <div className="flex justify-between mb-4">
+                                    <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-32"></div>
+                                    <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-16"></div>
+                                </div>
+                                <div className="flex items-baseline gap-2 mb-6">
+                                    <div className="h-9 bg-slate-200 dark:bg-slate-700 rounded w-20"></div>
+                                </div>
+                                <div className="h-44 w-full bg-slate-50 dark:bg-slate-800/50 rounded-lg"></div>
+                            </div>
+                        ) : (
+                            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                             <div className="flex justify-between mb-4">
                                 <p className="text-sm font-medium text-slate-500">Huyết áp ({bloodPressure?.unit || 'mmHg'})</p>
                                 <span className={`px-2 py-0.5 text-xs font-bold rounded ${bloodPressure?.status === 'NORMAL' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
@@ -278,60 +292,65 @@ const PatientDashboard: React.FC = () => {
                                         </BarChart>
                                     </ResponsiveContainer>
                                 ) : (
-                                    <div className="space-y-4">
-                                        <div className="h-32 w-full flex items-end gap-2 px-2">
-                                            <div className="flex-1 bg-primary/20 rounded-t h-1/2"></div>
-                                            <div className="flex-1 bg-primary/40 rounded-t h-3/4"></div>
-                                            <div className="flex-1 bg-primary/60 rounded-t h-2/3"></div>
-                                            <div className="flex-1 bg-primary rounded-t h-full"></div>
-                                            <div className="flex-1 bg-primary/80 rounded-t h-3/4"></div>
-                                            <div className="flex-1 bg-primary/50 rounded-t h-2/3"></div>
-                                            <div className="flex-1 bg-primary/30 rounded-t h-1/2"></div>
-                                        </div>
-                                        <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-                                            <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
-                                        </div>
+                                    <div className="h-full w-full flex flex-col items-center justify-center text-slate-400 pb-6">
+                                        <span className="material-symbols-outlined text-3xl text-slate-300 dark:text-slate-700 mb-1">analytics</span>
+                                        <p className="text-xs font-medium">Chưa có dữ liệu đồ thị</p>
                                     </div>
                                 )}
                             </div>
                         </div>
+                        )}
                     </div>
 
                     {/* Secondary Metrics Row */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4 shadow-sm">
-                            <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl text-red-500">
-                                <span className="material-symbols-outlined filled">favorite</span>
-                            </div>
-                            <div>
-                                <p className="text-[14px] text-slate-500">Nhịp tim</p>
-                                <p className="text-lg font-bold">
-                                    {heartRate?.latestValue || '--'} <span className="text-xs font-normal text-slate-400">{heartRate?.unit || 'bpm'}</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4 shadow-sm">
-                            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-500">
-                                <span className="material-symbols-outlined filled">air</span>
-                            </div>
-                            <div>
-                                <p className="text-[14px] text-slate-500">SpO2</p>
-                                <p className="text-lg font-bold">
-                                    {spO2?.latestValue || '--'}<span className="text-xs font-normal text-slate-400">{spO2?.unit || '%'}</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4 shadow-sm">
-                            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-500">
-                                <span className="material-symbols-outlined filled">science</span>
-                            </div>
-                            <div>
-                                <p className="text-[14px] text-slate-500">HbA1c</p>
-                                <p className="text-lg font-bold">
-                                    {hbA1c?.latestValue || '--'}<span className="text-xs font-normal text-slate-400">{hbA1c?.unit || '%'}</span>
-                                </p>
-                            </div>
-                        </div>
+                        {isLoading ? (
+                            [...Array(3)].map((_, i) => (
+                                <div key={i} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4 shadow-sm animate-pulse">
+                                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+                                    <div className="space-y-2 flex-1">
+                                        <div className="h-3 bg-slate-50 dark:bg-slate-800/50 rounded w-12"></div>
+                                        <div className="h-5 bg-slate-100 dark:bg-slate-800 rounded w-20"></div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                                <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4 shadow-sm">
+                                    <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl text-red-500">
+                                        <span className="material-symbols-outlined filled">favorite</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-[14px] text-slate-500">Nhịp tim</p>
+                                        <p className="text-lg font-bold">
+                                            {heartRate?.latestValue || '--'} <span className="text-xs font-normal text-slate-400">{heartRate?.unit || 'bpm'}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4 shadow-sm">
+                                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-500">
+                                        <span className="material-symbols-outlined filled">air</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-[14px] text-slate-500">SpO2</p>
+                                        <p className="text-lg font-bold">
+                                            {spO2?.latestValue || '--'}<span className="text-xs font-normal text-slate-400">{spO2?.unit || '%'}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4 shadow-sm">
+                                    <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-500">
+                                        <span className="material-symbols-outlined filled">science</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-[14px] text-slate-500">HbA1c</p>
+                                        <p className="text-lg font-bold">
+                                            {hbA1c?.latestValue || '--'}<span className="text-xs font-normal text-slate-400">{hbA1c?.unit || '%'}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 

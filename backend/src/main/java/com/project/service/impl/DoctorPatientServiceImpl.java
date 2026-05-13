@@ -357,6 +357,11 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
                 .status(a.getStatus().name())
                 .location(a.getLocation())
                 .reason(a.getReason())
+                .meetingLink(a.getMeetingLink())
+                .diagnosisSummary(a.getDiagnosisSummary())
+                .doctorName(a.getDoctorName())
+                .doctorSpecialty(a.getDoctorSpecialty())
+                .doctorAvatarUrl(a.getDoctorAvatarUrl())
                 .build();
     }
 }

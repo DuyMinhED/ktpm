@@ -460,6 +460,7 @@ export default function DoctorMessages() {
                 onClose={() => setIsHistoryModalOpen(false)}
                 patientName={activeConv?.patientName || "Bệnh nhân"}
                 patientAvatar={activeConv?.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(activeConv?.patientName || "P")}
+                patientId={activeConv?.patientId}
             />
 
             <PrescriptionModal

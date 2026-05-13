@@ -44,26 +44,26 @@ export default function RecordMetricModal({
 
             if (patientData?.latestGlucose && patientData.latestGlucose !== 'N/A') {
                 // Extracts the first floating point number
-                const match = patientData.latestGlucose.match(/^([0-9.]+)/);
+                const match = String(patientData.latestGlucose).match(/^([0-9.]+)/);
                 if (match) currentG = match[1];
             }
 
             if (patientData?.latestBp && patientData.latestBp !== 'N/A') {
                 // Extracts numbers split by '/'
-                const parts = patientData.latestBp.split(' ')[0].split('/');
+                const parts = String(patientData.latestBp).split(' ')[0].split('/');
                 if (parts.length >= 1 && !isNaN(parseInt(parts[0]))) currentSys = parts[0];
                 if (parts.length >= 2 && !isNaN(parseInt(parts[1]))) currentDia = parts[1];
             }
 
             let currentHR = '';
             if (patientData?.latestHeartRate && patientData.latestHeartRate !== 'N/A') {
-                const match = patientData.latestHeartRate.match(/^(\d+)/);
+                const match = String(patientData.latestHeartRate).match(/^(\d+)/);
                 if (match) currentHR = match[1];
             }
 
             let currentSpo2 = '';
             if (patientData?.latestSpo2 && patientData.latestSpo2 !== 'N/A') {
-                const match = patientData.latestSpo2.match(/^(\d+)/);
+                const match = String(patientData.latestSpo2).match(/^(\d+)/);
                 if (match) currentSpo2 = match[1];
             }
 

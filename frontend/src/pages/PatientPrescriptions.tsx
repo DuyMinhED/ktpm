@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { patientApi } from '../api/patient';
 import Toast from '../components/ui/Toast';
+import PrescriptionDetailModal from '../components/ui/PrescriptionDetailModal';
 
 const PatientPrescriptions: React.FC = () => {
     const [activePrescriptions, setActivePrescriptions] = useState<any[]>([]);
@@ -8,6 +9,7 @@ const PatientPrescriptions: React.FC = () => {
     const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState({ show: false, title: '', type: 'success' as 'success' | 'warning' | 'error' });
+    const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -55,7 +57,10 @@ const PatientPrescriptions: React.FC = () => {
                     <p className="text-slate-500 dark:text-slate-400 mt-1">Quản lý và theo dõi các loại thuốc đang sử dụng cho bệnh mãn tính</p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors shadow-sm">
+                    <button 
+                        onClick={() => document.getElementById('prescription-history')?.scrollIntoView({ behavior: 'smooth' })}
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors shadow-sm"
+                    >
                         <span className="material-symbols-outlined text-lg">history</span>
                         Lịch sử
                     </button>
@@ -140,7 +145,7 @@ const PatientPrescriptions: React.FC = () => {
                     </section>
 
                     {/* Prescription History Table */}
-                    <section className="mt-10">
+                    <section className="mt-10" id="prescription-history">
                         <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">Lịch sử đơn thuốc</h2>
                         <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50 overflow-hidden shadow-sm">
                             <div className="overflow-x-auto">
@@ -168,7 +173,7 @@ const PatientPrescriptions: React.FC = () => {
                                         ) : historyPrescriptions.length === 0 ? (
                                             <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400 text-sm">Chưa có lịch sử đơn thuốc</td></tr>
                                         ) : historyPrescriptions.map((row: any) => (
-                                            <tr key={row.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer">
+                                            <tr key={row.id} onClick={() => setSelectedDetail(row)} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer">
                                                 <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">{row.createdDate || 'N/A'}</td>
                                                 <td className="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">{row.prescriptionCode}</td>
                                                 <td className="px-6 py-4 text-slate-500 dark:text-slate-400 font-medium">{row.diagnosis || 'N/A'}</td>
@@ -188,7 +193,7 @@ const PatientPrescriptions: React.FC = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <button className="text-primary material-symbols-outlined font-bold transition-transform">visibility</button>
+                                                    <button onClick={(e) => { e.stopPropagation(); setSelectedDetail(row); }} className="text-primary material-symbols-outlined font-bold transition-transform hover:scale-110">visibility</button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -266,6 +271,11 @@ const PatientPrescriptions: React.FC = () => {
                 </div>
             </div>
             <Toast show={toast.show} title={toast.title} onClose={() => setToast({ ...toast, show: false })} />
+            <PrescriptionDetailModal 
+                isOpen={!!selectedDetail} 
+                onClose={() => setSelectedDetail(null)} 
+                prescription={selectedDetail} 
+            />
         </div>
     );
 };

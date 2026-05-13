@@ -7,6 +7,7 @@ import ConfirmActionModal from '../components/ui/ConfirmActionModal';
 import MeetingLinkPromptModal from '../components/ui/MeetingLinkPromptModal';
 import Toast from '../components/ui/Toast';
 import RescheduleModal from '../features/patient/components/RescheduleModal';
+import BatchRescheduleModal from '../components/ui/BatchRescheduleModal';
 
 export default function DoctorAppointments() {
     const [appointments, setAppointments] = useState<any[]>([]);
@@ -29,6 +30,70 @@ export default function DoctorAppointments() {
     const [linkPrompt, setLinkPrompt] = useState<{ show: boolean; apptId?: number; initialLink?: string }>({ show: false });
     const [completePrompt, setCompletePrompt] = useState<{ show: boolean; apptId?: number; patientName?: string }>({ show: false });
     const [viewMode, setViewMode] = useState<'active' | 'history'>('active');
+    const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+    const [isBatchSaving, setIsBatchSaving] = useState(false);
+
+    const handleExportCSV = () => {
+        if (appointments.length === 0) {
+            setToast({ show: true, title: 'Không có lịch hẹn nào để xuất!', type: 'warning' });
+            return;
+        }
+        // BOM for UTF-8 in Excel
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        csvContent += "Mã Hẹn,Bệnh Nhân,Thời Gian,Hình Thức,Trạng Thái,Lý Do,Link Cuộc Gọi\n";
+        
+        appointments.forEach(appt => {
+            const time = new Date(appt.appointmentTime).toLocaleString('vi-VN');
+            const type = appt.appointmentType === 'ONLINE' ? 'Trực tuyến' : 'Tại phòng khám';
+            const statusStr = appt.status === 'PENDING' ? 'Chờ duyệt' : 
+                           appt.status === 'SCHEDULED' ? 'Đã xác nhận' : 
+                           appt.status === 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy';
+            
+            const row = [
+                appt.id,
+                `"${appt.patientName || ''}"`,
+                `"${time}"`,
+                `"${type}"`,
+                `"${statusStr}"`,
+                `"${(appt.reason || '').replace(/"/g, '""')}"`,
+                `"${appt.meetingLink || appt.location || ''}"`
+            ].join(",");
+            csvContent += row + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const downloadLink = document.createElement("a");
+        downloadLink.setAttribute("href", encodedUri);
+        downloadLink.setAttribute("download", `Lịch_hẹn_Khám_${formattedName.replace(/\s+/g, '_')}.csv`);
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        setToast({ show: true, title: 'Đã xuất file CSV thành công!', type: 'success' });
+    };
+
+    const handleConfirmBatchReschedule = async (sourceDate: string, targetDate: string) => {
+        setIsBatchSaving(true);
+        try {
+            const res = await doctorApi.batchReschedule(sourceDate, targetDate);
+            if (res.success) {
+                const count = res.data?.movedCount || 0;
+                setToast({ 
+                    show: true, 
+                    title: `Đã dời ${count} ca hẹn thành công!`, 
+                    type: 'success' 
+                });
+                setIsBatchModalOpen(false);
+                await loadAppointments();
+            } else {
+                setToast({ show: true, title: 'Dời lịch thất bại!', type: 'error' });
+            }
+        } catch (error) {
+            console.error(error);
+            setToast({ show: true, title: 'Có lỗi xảy ra trong quá trình dời lịch.', type: 'error' });
+        } finally {
+            setIsBatchSaving(false);
+        }
+    };
 
     const handleSaveReschedule = async (appointmentData: any) => {
         setIsSaving(true);
@@ -699,10 +764,32 @@ export default function DoctorAppointments() {
                                 <div
                                     className="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-b-2xl border-t border-slate-100 dark:border-slate-700">
                                     <div className="flex gap-2">
-                                        <button className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[12px] rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
+                                        <button 
+                                            onClick={() => {
+                                                if (agendaAppointments.length === 0) {
+                                                    setToast({ show: true, title: 'Ngày được chọn không có ca khám nào để dời!', type: 'warning' });
+                                                    return;
+                                                }
+                                                setIsBatchModalOpen(true);
+                                            }}
+                                            disabled={agendaAppointments.length === 0}
+                                            className={`flex-1 px-4 py-2 font-bold text-[12px] rounded-full transition-all duration-200 ${
+                                                agendaAppointments.length === 0 
+                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-60' 
+                                                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95'
+                                            }`}
+                                        >
                                             Dời lịch hàng loạt
                                         </button>
-                                        <button className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[12px] rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
+                                        <button 
+                                            onClick={handleExportCSV}
+                                            disabled={appointments.length === 0}
+                                            className={`flex-1 px-4 py-2 font-bold text-[12px] rounded-full transition-all duration-200 ${
+                                                appointments.length === 0 
+                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-60' 
+                                                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95'
+                                            }`}
+                                        >
                                             Xuất file CSV
                                         </button>
                                     </div>
@@ -778,6 +865,14 @@ export default function DoctorAppointments() {
                     }
                     setCompletePrompt({ show: false });
                 }}
+            />
+
+            <BatchRescheduleModal
+                isOpen={isBatchModalOpen}
+                isLoading={isBatchSaving}
+                initialSourceDate={`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`}
+                onClose={() => setIsBatchModalOpen(false)}
+                onConfirm={handleConfirmBatchReschedule}
             />
 
             {toast.show && (
