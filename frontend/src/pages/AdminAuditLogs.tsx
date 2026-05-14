@@ -100,7 +100,9 @@ export default function AdminAuditLogs() {
       .replace(/DOCTOR/g, 'Bác sĩ')
       .replace(/ADMIN/g, 'Quản trị viên')
       .replace(/PATIENT/g, 'Bệnh nhân')
-      .replace(/CLINIC_MANAGER/g, 'Quản lý phòng khám');
+      .replace(/CLINIC_MANAGER/g, 'Quản lý phòng khám')
+      .replace(/\bINACTIVE\b/g, 'NGƯNG HOẠT ĐỘNG')
+      .replace(/\bACTIVE\b/g, 'HOẠT ĐỘNG');
   };
 
   const handleExport = async () => {
@@ -154,7 +156,9 @@ export default function AdminAuditLogs() {
         .replace(/DOCTOR/g, 'Bác sĩ')
         .replace(/ADMIN/g, 'Quản trị viên')
         .replace(/PATIENT/g, 'Bệnh nhân')
-        .replace(/CLINIC_MANAGER/g, 'Quản lý phòng khám') : '--';
+        .replace(/CLINIC_MANAGER/g, 'Quản lý phòng khám')
+        .replace(/\bINACTIVE\b/g, 'NGƯNG HOẠT ĐỘNG')
+        .replace(/\bACTIVE\b/g, 'HOẠT ĐỘNG') : '--';
 
       const row = worksheet.addRow([
         displayDateTime,

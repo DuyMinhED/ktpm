@@ -117,4 +117,17 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                 @org.springframework.data.repository.query.Param("start") LocalDateTime start,
                 @org.springframework.data.repository.query.Param("end") LocalDateTime end,
                 @org.springframework.data.repository.query.Param("statuses") List<AppointmentStatus> statuses);
+
+        @Query(value = "SELECT COUNT(DISTINCT a.patient_id) FROM appointments a WHERE a.status = 'COMPLETED' AND a.is_deleted = false", nativeQuery = true)
+        long countPatientsWithAnyCompletedAppointments();
+
+        @Query(value = "SELECT COUNT(*) FROM (SELECT patient_id FROM appointments WHERE status = 'COMPLETED' AND is_deleted = false GROUP BY patient_id HAVING COUNT(id) >= 2) AS sub", nativeQuery = true)
+        long countPatientsWithMultipleCompletedAppointments();
+
+        @Query(value = "SELECT COUNT(DISTINCT a.patient_id) FROM appointments a WHERE a.status = 'COMPLETED' AND a.is_deleted = false AND a.appointment_time >= :since", nativeQuery = true)
+        long countPatientsWithRecentCompletedAppointments(@org.springframework.data.repository.query.Param("since") LocalDateTime since);
+
+        @Query(value = "SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (a.end_time - a.appointment_time)) / 60), 0.0) " +
+                       "FROM appointments a WHERE a.status = 'COMPLETED' AND a.end_time IS NOT NULL AND a.is_deleted = false", nativeQuery = true)
+        double calculateAverageConsultationTime();
 }

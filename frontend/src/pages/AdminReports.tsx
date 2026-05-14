@@ -4,12 +4,28 @@ import { Link } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import Dropdown from '../components/ui/Dropdown';
 import { adminApi } from '../api/admin';
+import { ResponsiveContainer, AreaChart, Area, Tooltip, XAxis } from 'recharts';
 
 export default function AdminReports() {
   const [reportType, setReportType] = useState('Tháng');
   const [performanceFilter, setPerformanceFilter] = useState('Tất cả kết quả');
   const [reportsData, setReportsData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Custom Chart Tooltip
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-slate-900 p-3 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-black/30">
+          <p className="text-[12.5px] font-black text-slate-900 dark:text-slate-100 mb-0.5">{label}</p>
+          <p className="text-[13px] font-bold text-[#3bb9f3]">
+            {payload[0].value} <span className="text-slate-500 dark:text-slate-400 font-medium text-[12px] ml-1">bệnh nhân</span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   useEffect(() => {
     fetchReports();
@@ -150,30 +166,46 @@ export default function AdminReports() {
                 </div>
               ) : (
                 <>
-                  <svg className="w-full h-full relative z-10" preserveAspectRatio="none" viewBox="0 0 800 240">
-                    <defs>
-                      <linearGradient id="reportsChartGradient" x1="0%" x2="0%" y1="0%" y2="100%">
-                        <stop offset="0%" style={{ stopColor: '#3bb9f3', stopOpacity: 0.15 }}></stop>
-                        <stop offset="100%" style={{ stopColor: '#3bb9f3', stopOpacity: 0 }}></stop>
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M0,180 Q60,165 120,195 T240,150 T360,165 T480,120 T600,135 T720,105 T800,85 L800,240 L0,240 Z"
-                      fill="url(#reportsChartGradient)"
-                    />
-                    <path
-                      d="M0,180 Q60,165 120,195 T240,150 T360,165 T480,120 T600,135 T720,105 T800,85"
-                      fill="none"
-                      stroke="#3bb9f3"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute bottom-0 w-full flex justify-between px-2 text-[10px] font-extrabold text-slate-300 dark:text-slate-600 pt-6 uppercase tracking-widest pointer-events-none">
-                    {reportsData?.growthTrend?.map((pt: any, i: number) => (
-                      <span key={i}>{pt.label}</span>
-                    ))}
-                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={reportsData?.growthTrend || []} margin={{ top: 20, right: 15, left: 15, bottom: 25 }}>
+                      <defs>
+                        <linearGradient id="reportsChartGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3bb9f3" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="#3bb9f3" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis
+                        dataKey="label"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{
+                          fill: '#94a3b8',
+                          fontSize: 10,
+                          fontWeight: 800,
+                          letterSpacing: '0.05em'
+                        }}
+                        dy={15}
+                        tickFormatter={(tick) => tick ? tick.toUpperCase() : ''}
+                      />
+                      <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3bb9f3', strokeWidth: 1.5, strokeDasharray: '4 4' }} />
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#3bb9f3"
+                        strokeWidth={4}
+                        fillOpacity={1}
+                        fill="url(#reportsChartGradient)"
+                        animationDuration={1500}
+                        activeDot={{
+                          r: 7,
+                          fill: '#3bb9f3',
+                          stroke: '#fff',
+                          strokeWidth: 2.5,
+                          className: 'drop-shadow-md'
+                        }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </>
               )}
             </div>

@@ -569,7 +569,9 @@ export default function AdminDashboard() {
                     const transMod = moduleMap[mod] || mod;
                     const transDetails = details
                       .replace('Action completed successfully', 'Thao tác hoàn thành thành công')
-                      .replace('successful', 'thành công');
+                      .replace('successful', 'thành công')
+                      .replace(/\bINACTIVE\b/g, 'NGƯNG HOẠT ĐỘNG')
+                      .replace(/\bACTIVE\b/g, 'HOẠT ĐỘNG');
                     translatedDesc = `${transMod}: ${transDetails}`;
                   }
 
