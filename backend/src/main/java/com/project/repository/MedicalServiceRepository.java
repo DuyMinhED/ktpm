@@ -9,4 +9,8 @@ import java.util.List;
 public interface MedicalServiceRepository extends JpaRepository<MedicalService, Long> {
     List<MedicalService> findByStatus(String status);
     List<MedicalService> findByCategory(String category);
+    List<MedicalService> findByClinicId(Long clinicId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT ms FROM MedicalService ms WHERE ms.clinicId IS NULL OR ms.clinicId = :clinicId")
+    List<MedicalService> findAllGlobalAndByClinicId(@org.springframework.data.repository.query.Param("clinicId") Long clinicId);
 }

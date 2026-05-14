@@ -23,6 +23,7 @@ import ClinicDoctors from '../pages/ClinicDoctors';
 import ClinicAssignment from '../pages/ClinicAssignment';
 import ClinicSettings from '../pages/ClinicSettings';
 import ClinicAppointments from '../pages/ClinicAppointments';
+import ClinicServices from '../pages/ClinicServices';
 
 import LandingPage from '../pages/VelorahLandingPage';
 import PatientLayout from '../layouts/PatientLayout';
@@ -32,6 +33,7 @@ import PatientHealthMetrics from '../pages/PatientHealthMetrics';
 import PatientMessages from '../pages/PatientMessages';
 import PatientPrescriptions from '../pages/PatientPrescriptions';
 import PatientProfile from '../pages/PatientProfile';
+import PatientServices from '../pages/PatientServices';
 
 
 const AppRoutes = () => {
@@ -51,6 +53,7 @@ const AppRoutes = () => {
         <Route path="prescriptions" element={<PatientPrescriptions />} />
         <Route path="messages" element={<PatientMessages />} />
         <Route path="profile" element={<PatientProfile />} />
+        <Route path="services" element={<PatientServices />} />
       </Route>
 
       {/* Doctor Routes — Only DOCTOR role */}
@@ -69,6 +72,7 @@ const AppRoutes = () => {
       <Route path={ROUTES.CLINIC.DOCTORS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicDoctors /></ProtectedRoute>} />
       <Route path={ROUTES.CLINIC.ASSIGNMENT} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicAssignment /></ProtectedRoute>} />
       <Route path={ROUTES.CLINIC.APPOINTMENTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicAppointments /></ProtectedRoute>} />
+      <Route path={ROUTES.CLINIC.SERVICES} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicServices /></ProtectedRoute>} />
       <Route path={ROUTES.CLINIC.SETTINGS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicSettings /></ProtectedRoute>} />
 
       {/* Admin Routes — Only ADMIN */}

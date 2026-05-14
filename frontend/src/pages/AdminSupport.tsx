@@ -50,7 +50,7 @@ export default function AdminSupport() {
         category: t.category,
         priority: t.priority,
         status: t.status,
-        date: new Date(t.createdAt).toLocaleDateString('vi-VN') + ' ' + new Date(t.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        date: t.createdAt ? (new Date(t.createdAt).toLocaleDateString('vi-VN') + ' ' + new Date(t.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })) : '--',
         avatar: t.creator?.avatar || `https://i.pravatar.cc/150?u=${t.id}`
       }));
 
@@ -87,14 +87,15 @@ export default function AdminSupport() {
 
 
 
-  const handleStatusUpdate = async (id: string | number, newStatus: string) => {
+  const handleStatusUpdate = async (id: string | number, newStatus: string, adminNote?: string) => {
     try {
       const ticket = tickets.find(t => t.id === id);
       if (!ticket) return;
-      await supportApi.updateTicketStatus(ticket.dbId, newStatus);
-      fetchTickets();
-      fetchStats();
-      setToastTitle(`Yêu cầu ${id} đã được chuyển sang trạng thái ${newStatus}`);
+      await supportApi.updateTicketStatus(ticket.dbId, newStatus, adminNote);
+      await fetchTickets();
+      await fetchStats();
+      setIsTicketModalOpen(false);
+      setToastTitle(adminNote ? "Đã gửi phản hồi thành công!" : "Đã cập nhật trạng thái yêu cầu");
       setShowToast(true);
     } catch (error) {
       console.error("Failed to update status:", error);
@@ -116,7 +117,7 @@ export default function AdminSupport() {
         priority: data.priority,
         status: 'Mới'
       });
-      setToastTitle(`Yêu cầu #${response.data.ticketCode} đã được gửi thành công!`);
+      setToastTitle("Gửi yêu cầu thành công!");
       setShowToast(true);
       fetchTickets();
       fetchStats();
@@ -129,9 +130,10 @@ export default function AdminSupport() {
   };
 
   const filteredTickets = tickets.filter(t => {
-    return t.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.user.toLowerCase().includes(searchTerm.toLowerCase());
+    const search = searchTerm.toLowerCase();
+    return (t.subject || '').toLowerCase().includes(search) ||
+      (t.id || '').toString().toLowerCase().includes(search) ||
+      (t.user || '').toLowerCase().includes(search);
   });
 
   const totalPages = Math.ceil(totalElements / itemsPerPage);

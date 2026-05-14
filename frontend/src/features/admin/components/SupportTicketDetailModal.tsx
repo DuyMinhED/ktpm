@@ -6,7 +6,7 @@ interface SupportTicketDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   ticket: any;
-  onUpdateStatus: (id: string, status: string) => void;
+  onUpdateStatus: (id: string, status: string, adminNote?: string) => void;
 }
 
 const SupportTicketDetailModal: React.FC<SupportTicketDetailModalProps> = ({
@@ -16,6 +16,23 @@ const SupportTicketDetailModal: React.FC<SupportTicketDetailModalProps> = ({
   onUpdateStatus,
 }) => {
   const [replyMessage, setReplyMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSendReply = async () => {
+    if (!replyMessage.trim() || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      // Move status to "Chờ phản hồi" unless already completed
+      let nextStatus = 'Chờ phản hồi';
+      if (ticket.status === 'Đã giải quyết' || ticket.status === 'Đã đóng') {
+        nextStatus = ticket.status;
+      }
+      await onUpdateStatus(ticket.id, nextStatus, replyMessage);
+      setReplyMessage('');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -140,10 +157,11 @@ const SupportTicketDetailModal: React.FC<SupportTicketDetailModalProps> = ({
               </div>
 
               <button
-                disabled={!replyMessage.trim()}
+                onClick={handleSendReply}
+                disabled={!replyMessage.trim() || isSubmitting}
                 className="h-10 bg-primary text-white px-8 rounded-xl font-medium flex items-center justify-center shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all disabled:opacity-50 text-[13px]"
               >
-                Gửi phản hồi
+                {isSubmitting ? 'Đang gửi...' : 'Gửi phản hồi'}
               </button>
             </div>
           </motion.div>

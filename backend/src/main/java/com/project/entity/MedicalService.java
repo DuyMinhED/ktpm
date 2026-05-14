@@ -41,6 +41,9 @@ public class MedicalService extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String status; // e.g., "Đang kinh doanh", "Ngừng kinh doanh"
 
+    @Column(name = "clinic_id")
+    private Long clinicId; // NULL for global services, otherwise tied to specific clinic
+
     @ElementCollection
     @CollectionTable(name = "medical_service_features", joinColumns = @JoinColumn(name = "service_id"))
     @Column(name = "feature")

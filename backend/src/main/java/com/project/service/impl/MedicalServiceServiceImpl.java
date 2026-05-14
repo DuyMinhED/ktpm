@@ -28,7 +28,10 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     private final AuditService auditService;
 
     @Override
-    public List<MedicalService> getAllServices() {
+    public List<MedicalService> getAllServices(Long clinicId) {
+        if (clinicId != null) {
+            return medicalServiceRepository.findAllGlobalAndByClinicId(clinicId);
+        }
         return medicalServiceRepository.findAll();
     }
 
@@ -41,6 +44,16 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     @Override
     @Transactional
     public MedicalService createService(MedicalService service) {
+        CustomUserDetails user = getCurrentUser();
+        if ("ROLE_CLINIC_MANAGER".equals(user.getRole())) {
+            // Automatically assign service to the current Clinic Manager's clinic
+            service.setClinicId(user.getClinicId());
+        } else if ("ROLE_ADMIN".equals(user.getRole())) {
+            // Admins keep clinicId as provided or null for global
+        } else {
+            throw new org.springframework.security.access.AccessDeniedException("Chỉ Admin hoặc Quản lý phòng khám mới có quyền tạo dịch vụ");
+        }
+
         MedicalService saved = medicalServiceRepository.save(Objects.requireNonNull(service));
         recordActivity("Thêm", "Dịch vụ", "Đã khởi tạo dịch vụ: " + saved.getName(), "success");
         return saved;
@@ -50,6 +63,8 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     @Transactional
     public MedicalService updateService(Long id, MedicalService service) {
         MedicalService existing = getServiceById(id);
+        validateWriteAccess(existing);
+
         existing.setName(service.getName());
         existing.setCategory(service.getCategory());
         existing.setPrice(service.getPrice());
@@ -57,6 +72,7 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
         existing.setDescription(service.getDescription());
         existing.setStatus(service.getStatus());
         existing.setFeatures(service.getFeatures());
+        // Note: We do not allow shifting clinicId once established to maintain integrity
         
         MedicalService updated = medicalServiceRepository.save(existing);
         recordActivity("Cập nhật", "Dịch vụ", "Đã cập nhật dịch vụ: " + updated.getName(), "info");
@@ -67,6 +83,7 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     @Transactional
     public void deleteService(Long id) {
         MedicalService service = getServiceById(id);
+        validateWriteAccess(service);
         medicalServiceRepository.delete(Objects.requireNonNull(service));
         recordActivity("Xóa", "Dịch vụ", "Đã xóa dịch vụ: " + service.getName(), "danger");
     }
@@ -75,6 +92,7 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     @Transactional
     public MedicalService toggleStatus(Long id) {
         MedicalService service = getServiceById(id);
+        validateWriteAccess(service);
         String newStatus = "Đang kinh doanh".equals(service.getStatus()) ? "Ngừng kinh doanh" : "Đang kinh doanh";
         service.setStatus(newStatus);
         MedicalService updated = medicalServiceRepository.save(service);
@@ -124,16 +142,37 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
         }
     }
 
+    private CustomUserDetails getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
+            return (CustomUserDetails) auth.getPrincipal();
+        }
+        throw new RuntimeException("Người dùng chưa được xác thực");
+    }
+
+    private void validateWriteAccess(MedicalService service) {
+        CustomUserDetails user = getCurrentUser();
+        if ("ROLE_ADMIN".equals(user.getRole())) {
+            return; // System Admins bypass
+        }
+        
+        if ("ROLE_CLINIC_MANAGER".equals(user.getRole())) {
+            if (service.getClinicId() == null || !service.getClinicId().equals(user.getClinicId())) {
+                throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền quản lý dịch vụ của hệ thống hoặc phòng khám khác!");
+            }
+            return;
+        }
+        
+        throw new org.springframework.security.access.AccessDeniedException("Chỉ Quản lý phòng khám mới có quyền truy cập tính năng này!");
+    }
+
     private void recordActivity(String action, String module, String details, String status) {
         Long userId = 1L;
         String userName = "Hệ thống";
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
-                CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-                userId = user.getId();
-                userName = user.getFullName();
-            }
+            CustomUserDetails user = getCurrentUser();
+            userId = user.getId();
+            userName = user.getFullName();
         } catch (Exception ignored) {}
         auditService.recordActivity(userId, userName, action, module, details, status);
     }

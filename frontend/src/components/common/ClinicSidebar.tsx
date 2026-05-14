@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import { clinicApi } from '../../api/clinic';
+import { supportApi } from '../../api/support';
+import { useToast } from '../ui/ToastContext';
+import CreateTicketModal from '../../features/admin/components/CreateTicketModal';
 
 interface ClinicSidebarProps {
     isSidebarOpen: boolean;
@@ -16,6 +19,9 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
     const currentClinicId = localStorage.getItem('clinicId') || '1';
     const [clinicName, setClinicName] = useState("Đang tải...");
     const [clinicLogo, setClinicLogo] = useState("");
+    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    const [isSavingSupport, setIsSavingSupport] = useState(false);
+    const { showToast } = useToast();
 
     useEffect(() => {
         clinicApi.getProfile(currentClinicId).then(res => {
@@ -35,6 +41,26 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
         localStorage.clear();
         navigate('/?action=login');
     };
+
+    const handleSaveSupport = async (data: any) => {
+        setIsSavingSupport(true);
+        try {
+            const response = await supportApi.createTicket({
+                subject: data.subject,
+                message: data.message,
+                category: data.category,
+                priority: data.priority,
+                status: 'Mới'
+            });
+            showToast("Gửi yêu cầu thành công!", 'success');
+            setIsSupportModalOpen(false);
+        } catch (error) {
+            console.error("Failed to create support ticket:", error);
+            showToast("Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại sau.", "error");
+        } finally {
+            setIsSavingSupport(false);
+        }
+    };
     const navItems = [
         { path: ROUTES.CLINIC.DASHBOARD, label: 'Tổng quan phòng khám', icon: 'dashboard' },
         { path: ROUTES.CLINIC.PATIENTS, label: 'Quản lý Bệnh nhân', icon: 'group' },
@@ -43,6 +69,7 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
         { path: ROUTES.CLINIC.ALERTS, label: 'Cảnh báo nguy cơ', icon: 'warning' },
         { path: ROUTES.CLINIC.ASSIGNMENT, label: 'Điều phối bệnh nhân', icon: 'assignment_ind' },
         { path: ROUTES.CLINIC.APPOINTMENTS, label: 'Lịch hẹn khám', icon: 'calendar_today' },
+        { path: ROUTES.CLINIC.SERVICES, label: 'Quản lý Dịch vụ', icon: 'medical_information' },
         { path: ROUTES.CLINIC.SETTINGS, label: 'Cấu hình phòng khám', icon: 'settings' },
     ];
 
@@ -80,6 +107,15 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
                         )}
                     </NavLink>
                 ))}
+
+                <button
+                    type="button"
+                    onClick={() => setIsSupportModalOpen(true)}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-amber-500/10 hover:text-amber-600 text-left mt-2 border border-dashed border-slate-200 dark:border-slate-800"
+                >
+                    <span className="material-symbols-outlined text-amber-500">support_agent</span>
+                    <span>Hỗ trợ kỹ thuật</span>
+                </button>
             </nav>
 
             {/* Profile Footnote */}
@@ -118,6 +154,13 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
                     </button>
                 </div>
             </div>
+
+            <CreateTicketModal
+                isOpen={isSupportModalOpen}
+                onClose={() => setIsSupportModalOpen(false)}
+                onSave={handleSaveSupport}
+                isSaving={isSavingSupport}
+            />
 
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

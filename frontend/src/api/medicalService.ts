@@ -1,7 +1,7 @@
 import axiosInstance from './axios';
 
 export const medicalServiceApi = {
-  getAll: () => axiosInstance.get('/v1/medical-services'),
+  getAll: (clinicId?: number) => axiosInstance.get('/v1/medical-services', { params: { clinicId } }),
   getById: (id: number) => axiosInstance.get(`/v1/medical-services/${id}`),
   create: (data: any) => axiosInstance.post('/v1/medical-services', data),
   update: (id: number, data: any) => axiosInstance.put(`/v1/medical-services/${id}`, data),

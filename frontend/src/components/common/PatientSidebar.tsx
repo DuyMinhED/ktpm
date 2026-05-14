@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import { patientApi } from '../../api/patient';
+import { supportApi } from '../../api/support';
+import { useToast } from '../ui/ToastContext';
+import CreateTicketModal from '../../features/admin/components/CreateTicketModal';
 
 interface PatientSidebarProps {
     isSidebarOpen: boolean;
@@ -15,6 +18,9 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
         avatar: localStorage.getItem('userAvatar')
     });
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    const [isSavingSupport, setIsSavingSupport] = useState(false);
+    const { showToast } = useToast();
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -60,12 +66,33 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
         navigate('/?action=login');
     };
 
+    const handleSaveSupport = async (data: any) => {
+        setIsSavingSupport(true);
+        try {
+            const response = await supportApi.createTicket({
+                subject: data.subject,
+                message: data.message,
+                category: data.category,
+                priority: data.priority,
+                status: 'Mới'
+            });
+            showToast("Gửi yêu cầu thành công!", 'success');
+            setIsSupportModalOpen(false);
+        } catch (error) {
+            console.error("Failed to create support ticket:", error);
+            showToast("Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại sau.", "error");
+        } finally {
+            setIsSavingSupport(false);
+        }
+    };
+
     const navItems = [
         { path: '/patient', label: 'Bảng điều khiển', icon: 'dashboard' },
         { path: '/patient/prescriptions', label: 'Đơn thuốc', icon: 'prescriptions' },
         { path: '/patient/metrics', label: 'Chỉ số sức khỏe', icon: 'monitoring' },
         { path: '/patient/appointments', label: 'Lịch hẹn', icon: 'calendar_today' },
         { path: '/patient/messages', label: 'Tin nhắn bác sĩ', icon: 'chat', badge: unreadCount > 0 ? `${unreadCount}` : undefined },
+        { path: '/patient/services', label: 'Gói dịch vụ', icon: 'medical_services' },
         { path: '/patient/profile', label: 'Hồ sơ cá nhân', icon: 'person' },
     ];
 
@@ -110,6 +137,15 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
                     </NavLink>
 
                 ))}
+
+                <button
+                    type="button"
+                    onClick={() => setIsSupportModalOpen(true)}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-amber-500/10 hover:text-amber-600 text-left mt-2 border border-dashed border-slate-200 dark:border-slate-800"
+                >
+                    <span className="material-symbols-outlined text-amber-500">support_agent</span>
+                    <span>Hỗ trợ kỹ thuật</span>
+                </button>
             </nav>
 
             <div className="p-4 mt-auto">
@@ -137,6 +173,13 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
                     </button>
                 </div>
             </div>
+
+            <CreateTicketModal
+                isOpen={isSupportModalOpen}
+                onClose={() => setIsSupportModalOpen(false)}
+                onSave={handleSaveSupport}
+                isSaving={isSavingSupport}
+            />
 
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

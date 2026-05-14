@@ -3,6 +3,9 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import { authApi } from '../../api/auth';
 import { doctorApi } from '../../api/doctor';
+import { supportApi } from '../../api/support';
+import { useToast } from '../ui/ToastContext';
+import CreateTicketModal from '../../features/admin/components/CreateTicketModal';
 
 interface DoctorSidebarProps {
     isSidebarOpen: boolean;
@@ -19,6 +22,9 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
         avatar: localStorage.getItem('userAvatar')
     });
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    const [isSavingSupport, setIsSavingSupport] = useState(false);
+    const { showToast } = useToast();
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -64,6 +70,27 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
         localStorage.clear();
         navigate('/?action=login');
     };
+
+    const handleSaveSupport = async (data: any) => {
+        setIsSavingSupport(true);
+        try {
+            await supportApi.createTicket({
+                subject: data.subject,
+                message: data.message,
+                category: data.category,
+                priority: data.priority,
+                status: 'Mới'
+            });
+            showToast("Gửi yêu cầu thành công!", 'success');
+            setIsSupportModalOpen(false);
+        } catch (error) {
+            console.error("Failed to create support ticket:", error);
+            showToast("Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại sau.", "error");
+        } finally {
+            setIsSavingSupport(false);
+        }
+    };
+
     const navItems = [
         { path: ROUTES.DOCTOR.DASHBOARD, label: 'Bảng điều khiển', icon: 'dashboard' },
         { path: ROUTES.DOCTOR.PATIENTS, label: 'Danh sách bệnh nhân', icon: 'groups' },
@@ -113,6 +140,15 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
                         )}
                     </NavLink>
                 ))}
+
+                <button
+                    type="button"
+                    onClick={() => setIsSupportModalOpen(true)}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-amber-500/10 hover:text-amber-600 text-left mt-2 border border-dashed border-slate-200 dark:border-slate-800"
+                >
+                    <span className="material-symbols-outlined text-amber-500">support_agent</span>
+                    <span>Hỗ trợ kỹ thuật</span>
+                </button>
             </nav>
 
             <div className="p-4 mt-auto">
@@ -150,6 +186,13 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
                     </button>
                 </div>
             </div>
+
+            <CreateTicketModal
+                isOpen={isSupportModalOpen}
+                onClose={() => setIsSupportModalOpen(false)}
+                onSave={handleSaveSupport}
+                isSaving={isSavingSupport}
+            />
 
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

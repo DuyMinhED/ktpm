@@ -12,17 +12,36 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import com.project.repository.UserRepository;
+import com.project.repository.ClinicRepository;
+import com.project.security.CustomUserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class SupportTicketServiceImpl implements SupportTicketService {
 
     private final SupportTicketRepository ticketRepository;
     private final AuditService auditService;
+    private final UserRepository userRepository;
+    private final ClinicRepository clinicRepository;
 
     @Override
     @Transactional
     public SupportTicket createTicket(SupportTicket ticket) {
+        try {
+            Object rawPrincipal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (rawPrincipal instanceof CustomUserDetails currentUser) {
+                userRepository.findById(currentUser.getId()).ifPresent(ticket::setCreator);
+                if (currentUser.getClinicId() != null) {
+                    clinicRepository.findById(currentUser.getClinicId()).ifPresent(ticket::setClinic);
+                }
+            }
+        } catch (Exception e) {
+            // Fallback for test contexts
+        }
+
         SupportTicket savedTicket = ticketRepository.save(Objects.requireNonNull(ticket));
         
         auditService.recordActivity(

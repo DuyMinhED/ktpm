@@ -130,4 +130,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         @Query(value = "SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (a.end_time - a.appointment_time)) / 60), 0.0) " +
                        "FROM appointments a WHERE a.status = 'COMPLETED' AND a.end_time IS NOT NULL AND a.is_deleted = false", nativeQuery = true)
         double calculateAverageConsultationTime();
+
+        @Query(value = "SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (a.end_time - a.appointment_time)) / 60), 0.0) " +
+                       "FROM appointments a JOIN users u ON a.doctor_id = u.id " +
+                       "WHERE u.clinic_id = :clinicId AND a.status = 'COMPLETED' AND a.end_time IS NOT NULL AND a.is_deleted = false", nativeQuery = true)
+        double calculateAverageConsultationTimeByClinic(@org.springframework.data.repository.query.Param("clinicId") Long clinicId);
+
+        @Query(value = "SELECT COALESCE(CAST(SUM(CASE WHEN a.status = 'COMPLETED' THEN 1 ELSE 0 END) AS DOUBLE PRECISION) / NULLIF(COUNT(a.id), 0), 0.0) " +
+                       "FROM appointments a JOIN users u ON a.doctor_id = u.id " +
+                       "WHERE u.clinic_id = :clinicId AND a.is_deleted = false", nativeQuery = true)
+        double calculateAdherenceRateByClinic(@org.springframework.data.repository.query.Param("clinicId") Long clinicId);
 }

@@ -51,6 +51,8 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         var monitoringCountFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> patientRepository.countByClinicIdAndRiskLevelAndIsDeletedFalse(clinicId, AppConstants.RISK_MONITORING));
         var pathologyFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> patientRepository.countPatientsByChronicCondition(clinicId));
         var insightsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> clinicalAnalyticsService.getClinicInsights(clinicId));
+        var avgConsultTimeFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> appointmentRepository.calculateAverageConsultationTimeByClinic(clinicId));
+        var adherenceRateFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> appointmentRepository.calculateAdherenceRateByClinic(clinicId));
 
         // Period logic
         LocalDateTime now = LocalDateTime.now();
@@ -64,7 +66,7 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         var riskPatientsListFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> 
             patientRepository.findByClinicIdAndFilters(clinicId, null, null, AppConstants.RISK_HIGH, null, null, PageRequest.of(0, 5)).getContent());
 
-        java.util.concurrent.CompletableFuture.allOf(totalPatientsFuture, highRiskCountFuture, monitoringCountFuture, pathologyFuture, insightsFuture, patientStatsFuture, riskStatsFuture, riskPatientsListFuture).join();
+        java.util.concurrent.CompletableFuture.allOf(totalPatientsFuture, highRiskCountFuture, monitoringCountFuture, pathologyFuture, insightsFuture, patientStatsFuture, riskStatsFuture, riskPatientsListFuture, avgConsultTimeFuture, adherenceRateFuture).join();
 
         // Mapping and calculation logic
         long totalPatients = totalPatientsFuture.join();
@@ -118,23 +120,12 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .collect(Collectors.toList());
 
         // Calculate additional clinical stats
-        double adherenceRate = calculateAdherenceRate(clinicId);
+        double adherenceRate = adherenceRateFuture.join();
         
         long improvedPatients = patientRepository.countByClinicIdAndTreatmentStatusAndIsDeletedFalse(clinicId, "Cải thiện");
         double improvementRate = totalPatients > 0 ? ((double) improvedPatients / totalPatients) * 100 : 0.0;
 
-        List<Object[]> times = appointmentRepository.findCompletedAppointmentTimesByClinic(clinicId);
-        double totalMinutes = 0;
-        int countValid = 0;
-        for (Object[] t : times) {
-            java.time.LocalDateTime start = (java.time.LocalDateTime) t[0];
-            java.time.LocalDateTime end = (java.time.LocalDateTime) t[1];
-            if (start != null && end != null) {
-                totalMinutes += java.time.Duration.between(start, end).toMinutes();
-                countValid++;
-            }
-        }
-        double avgConsultationTime = countValid == 0 ? 0.0 : totalMinutes / countValid;
+        double avgConsultationTime = avgConsultTimeFuture.join();
         
         List<ClinicDashboardResponse.DiseaseAnalysisDto> diseaseAnalytics = diseaseRatios.stream()
                 .map((ClinicDashboardResponse.DiseaseRatioDto ratio) -> {
@@ -193,13 +184,6 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .diseaseAnalytics(diseaseAnalytics)
                 .doctorPerformances(doctorPerformances)
                 .build();
-    }
-
-    private double calculateAdherenceRate(Long clinicId) {
-        long totalAppointments = appointmentRepository.countByClinicId(clinicId);
-        if (totalAppointments == 0) return 0.0;
-        long completed = appointmentRepository.countByClinicIdAndStatus(clinicId, AppointmentStatus.COMPLETED);
-        return (double) completed / totalAppointments;
     }
 
     @Override

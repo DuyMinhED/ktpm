@@ -18,9 +18,14 @@ export default function AdminAuditLogs() {
   const fetchLogs = useCallback(async () => {
     setIsLoading(true);
     try {
+      const moduleMap: Record<string, string> = {
+        'Trung tâm hỗ trợ': 'SUPPORT',
+      };
+      const queryModule = selectedModule !== 'Tất cả mô-đun' ? (moduleMap[selectedModule] || selectedModule) : null;
+
       const params = {
         userName: selectedUser || null,
-        module: selectedModule !== 'Tất cả mô-đun' ? selectedModule : null,
+        module: queryModule,
         keyword: searchTerm || null,
         page: pagination.page,
         size: pagination.size
@@ -77,6 +82,8 @@ export default function AdminAuditLogs() {
       'UPDATE_APPOINTMENT': 'Thay đổi trạng thái Lịch',
       'LOGIN': 'Đăng nhập',
       'LOGOUT': 'Đăng xuất',
+      'CREATE_TICKET': 'Gửi yêu cầu hỗ trợ',
+      'UPDATE_TICKET_STATUS': 'Cập nhật trạng thái yêu cầu',
       
       // Modules
       'PATIENT_MANAGEMENT': 'Quản lý Bệnh nhân',
@@ -85,7 +92,8 @@ export default function AdminAuditLogs() {
       'USER_MANAGEMENT': 'Hồ sơ Người dùng',
       'APPOINTMENT_MANAGEMENT': 'Quản lý Lịch hẹn',
       'AUTH_MANAGEMENT': 'Bảo mật Hệ thống',
-      'SYSTEM_MANAGEMENT': 'Cấu hình Chung'
+      'SYSTEM_MANAGEMENT': 'Cấu hình Chung',
+      'SUPPORT': 'Trung tâm hỗ trợ'
     };
     
     if (type === 'action' || type === 'module') {
@@ -163,8 +171,8 @@ export default function AdminAuditLogs() {
       const row = worksheet.addRow([
         displayDateTime,
         log.user?.name || '--',
-        log.action,
-        log.module,
+        translateAuditLog(log.action, 'action'),
+        translateAuditLog(log.module, 'module'),
         detailsCleaned,
         log.ip
       ]);
@@ -288,7 +296,7 @@ export default function AdminAuditLogs() {
                 <div className="h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl w-full"></div>
               ) : (
                 <Dropdown
-                  options={['Tất cả mô-đun', 'Quản lý người dùng', 'Quản lý phòng khám', 'Hồ sơ phòng khám', 'Báo cáo', 'Hệ thống', 'Auth']}
+                  options={['Tất cả mô-đun', 'Quản lý người dùng', 'Quản lý phòng khám', 'Hồ sơ phòng khám', 'Báo cáo', 'Hệ thống', 'Auth', 'Trung tâm hỗ trợ']}
                   value={selectedModule}
                   onChange={setSelectedModule}
                   className="max-md:[&_button]:min-h-[38px] max-md:[&_span]:text-[12.5px]"
@@ -350,7 +358,10 @@ export default function AdminAuditLogs() {
                       <span className="text-[11px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                         {translateAuditLog(log.module, 'module')}
                       </span>
-                      <p className="text-[11px] text-slate-400 truncate flex-1">
+                      <p 
+                        title={translateAuditLog(log.details, 'details')}
+                        className="text-[11px] text-slate-400 truncate flex-1 cursor-help"
+                      >
                         {translateAuditLog(log.details, 'details')}
                       </p>
                     </div>
@@ -367,7 +378,7 @@ export default function AdminAuditLogs() {
             )}
           </div>
           {/* Desktop Table View */}
-          <div className="overflow-x-auto hidden md:block">
+          <div className="overflow-x-auto overflow-y-hidden hidden md:block">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50 dark:bg-slate-800/50">
@@ -460,10 +471,16 @@ export default function AdminAuditLogs() {
                             {translateAuditLog(log.module, 'module')}
                           </span>
                         </td>
-                        <td className="px-6 py-5">
-                          <p className="text-[14px] font-medium text-slate-600 dark:text-slate-400 line-clamp-1 max-w-sm italic-none">
+                        <td className="px-6 py-5 relative group/detail">
+                          <p className="text-[14px] font-medium text-slate-600 dark:text-slate-400 line-clamp-1 max-w-sm italic-none cursor-help hover:text-primary transition-colors">
                             {translateAuditLog(log.details, 'details')}
                           </p>
+                          <div className="absolute left-6 bottom-[80%] hidden group-hover/detail:block z-50 animate-in fade-in zoom-in duration-200 pointer-events-none">
+                            <div className="bg-slate-900/95 dark:bg-slate-800/95 text-white text-[13px] font-medium px-4 py-2.5 rounded-xl shadow-2xl border border-white/10 backdrop-blur-md w-max max-w-[320px] leading-relaxed text-left">
+                              {translateAuditLog(log.details, 'details')}
+                              <div className="absolute top-full left-4 border-8 border-transparent border-t-slate-900/95 dark:border-t-slate-800/95"></div>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-8 py-5 text-right flex justify-end">
                           <code

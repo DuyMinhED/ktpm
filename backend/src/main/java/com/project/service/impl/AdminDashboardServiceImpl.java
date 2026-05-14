@@ -172,8 +172,8 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                     if ("ALL".equalsIgnoreCase(performanceFilter)) return true;
                     double rate = complianceRates.getOrDefault(c.getId(), 0.0);
                     if ("TỐT".equalsIgnoreCase(performanceFilter)) return rate >= 90;
-                    if ("ỔN ĐỊNH".equalsIgnoreCase(performanceFilter)) return rate >= 70 && rate < 90;
-                    if ("CẦN LƯU Ý".equalsIgnoreCase(performanceFilter)) return rate < 70;
+                    if ("ỔN ĐỊNH".equalsIgnoreCase(performanceFilter)) return rate >= 75 && rate < 90;
+                    if ("CẦN LƯU Ý".equalsIgnoreCase(performanceFilter)) return rate < 75;
                     return true;
                 })
                 .map(c -> {
@@ -189,7 +189,15 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
             // Growth Trend
             String metric = "Lượng bệnh nhân";
-            String timeRange = reportType.toUpperCase();
+            String rawRange = reportType.toUpperCase();
+            String timeRange = "MONTH"; // Default
+            if (rawRange.contains("THÁNG") || "MONTH".equals(rawRange)) {
+                timeRange = "MONTH";
+            } else if (rawRange.contains("NGÀY") || "DAY".equals(rawRange)) {
+                timeRange = "DAY";
+            } else if (rawRange.contains("QUÝ") || "YEAR".equals(rawRange)) {
+                timeRange = "YEAR";
+            }
             List<AdminDashboardResponse.ChartDataDto> trendRaw = generateChartData(timeRange, metric);
             List<AdminReportsResponse.ChartPoint> trend = trendRaw.stream()
                     .map(d -> AdminReportsResponse.ChartPoint.builder().label(d.getLabel()).value((int)d.getValue()).build())

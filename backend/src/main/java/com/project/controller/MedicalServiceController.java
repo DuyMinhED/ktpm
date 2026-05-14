@@ -18,8 +18,8 @@ public class MedicalServiceController {
     private final MedicalServiceService medicalServiceService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<MedicalService>>> getAllServices() {
-        return ResponseEntity.ok(ApiResponse.success(medicalServiceService.getAllServices()));
+    public ResponseEntity<ApiResponse<List<MedicalService>>> getAllServices(@RequestParam(required = false) Long clinicId) {
+        return ResponseEntity.ok(ApiResponse.success(medicalServiceService.getAllServices(clinicId)));
     }
 
     @GetMapping("/{id}")
@@ -28,26 +28,26 @@ public class MedicalServiceController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLINIC_MANAGER')")
     public ResponseEntity<ApiResponse<MedicalService>> createService(@RequestBody MedicalService service) {
         return ResponseEntity.ok(ApiResponse.success(medicalServiceService.createService(service)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLINIC_MANAGER')")
     public ResponseEntity<ApiResponse<MedicalService>> updateService(@PathVariable Long id, @RequestBody MedicalService service) {
         return ResponseEntity.ok(ApiResponse.success(medicalServiceService.updateService(id, service)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLINIC_MANAGER')")
     public ResponseEntity<ApiResponse<String>> deleteService(@PathVariable Long id) {
         medicalServiceService.deleteService(id);
         return ResponseEntity.ok(ApiResponse.success("Đã xóa dịch vụ thành công"));
     }
 
     @PatchMapping("/{id}/toggle-status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLINIC_MANAGER')")
     public ResponseEntity<ApiResponse<MedicalService>> toggleStatus(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(medicalServiceService.toggleStatus(id)));
     }

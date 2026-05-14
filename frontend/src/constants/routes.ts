@@ -7,6 +7,7 @@ export const ROUTES = {
     PRESCRIPTIONS: '/patient/prescriptions',
     MESSAGES: '/patient/messages',
     PROFILE: '/patient/profile',
+    SERVICES: '/patient/services',
   },
   DOCTOR: {
     DASHBOARD: '/doctor',
@@ -25,6 +26,7 @@ export const ROUTES = {
     ASSIGNMENT: '/clinic/assignment',
     SETTINGS: '/clinic/settings',
     APPOINTMENTS: '/clinic/appointments',
+    SERVICES: '/clinic/services',
   },
   ADMIN: {
     DASHBOARD: '/admin',
