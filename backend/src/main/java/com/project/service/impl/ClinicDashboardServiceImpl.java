@@ -250,6 +250,7 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                         .email(c.getEmail())
                         .description(c.getDescription())
                         .logoUrl(c.getImageUrl())
+                        .imageUrl(c.getImageUrl())
                         .build())
                 .orElseThrow(() -> new RuntimeException("Clinic not found"));
     }

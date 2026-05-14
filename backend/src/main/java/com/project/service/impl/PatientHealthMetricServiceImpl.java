@@ -45,9 +45,9 @@ public class PatientHealthMetricServiceImpl implements PatientHealthMetricServic
     private final com.project.repository.ClinicRepository clinicRepository;
 
     private static final Map<MetricType, String> DISPLAY_NAMES = Map.of(
-            MetricType.BLOOD_SUGAR, "Blood Sugar",
-            MetricType.BLOOD_PRESSURE, "Blood Pressure",
-            MetricType.HEART_RATE, "Heart Rate",
+            MetricType.BLOOD_SUGAR, "Đường huyết",
+            MetricType.BLOOD_PRESSURE, "Huyết áp",
+            MetricType.HEART_RATE, "Nhịp tim",
             MetricType.HBA1C, "HbA1c",
             MetricType.SPO2, "SpO2");
 
@@ -115,7 +115,7 @@ public class PatientHealthMetricServiceImpl implements PatientHealthMetricServic
                 // Notify Clinic Manager
                 clinicRepository.findById(patient.getClinicId()).ifPresent(clinic -> {
                     if (clinic.getManagerId() != null) {
-                        notificationService.sendNotification(clinic.getManagerId(), "[Clinic Alert] " + title, "Bệnh nhân của phòng khám: " + message, "warning", "/clinic/risk-alerts");
+                        notificationService.sendNotification(clinic.getManagerId(), "[Cảnh báo] " + title, "Bệnh nhân của phòng khám: " + message, "warning", "/clinic/risk-alerts");
                     }
                 });
 

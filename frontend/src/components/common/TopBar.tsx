@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NotificationDropdown from './NotificationDropdown';
 import { notificationApi } from '../../api/notification';
+import { clinicApi } from '../../api/clinic';
 
 interface TopBarProps {
   setIsSidebarOpen: (isOpen: boolean) => void;
@@ -15,7 +17,32 @@ const TopBar: React.FC<TopBarProps> = ({
   setNotifications,
   actionButton
 }) => {
+  const navigate = useNavigate();
+  const currentClinicId = localStorage.getItem('clinicId');
+  const userRole = localStorage.getItem('userRole');
+
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [clinicName, setClinicName] = useState("");
+  const [clinicLogo, setClinicLogo] = useState("");
+
+  useEffect(() => {
+    if (currentClinicId && (userRole?.includes('CLINIC_MANAGER') || userRole?.includes('ADMIN'))) {
+      clinicApi.getProfile(currentClinicId).then(res => {
+        if (res.data) {
+          setClinicName(res.data.name || "Phòng khám");
+          setClinicLogo(res.data.logoUrl || res.data.imageUrl || "");
+        }
+      }).catch(() => {});
+    }
+  }, [currentClinicId, userRole]);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/?action=login');
+  };
+
+  const displayName = clinicName || localStorage.getItem('userName') || "Người dùng";
+  const displayAvatar = clinicLogo || localStorage.getItem('userAvatar') || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff`;
   const fetchNotifications = async () => {
     try {
       const res = await notificationApi.getNotifications();
@@ -96,6 +123,36 @@ const TopBar: React.FC<TopBarProps> = ({
 
 
         {actionButton}
+
+        {/* Professional User Identity Header Card */}
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-1.5 pl-3 border border-slate-100 dark:border-slate-800/50 shadow-sm ml-2 group hover:border-primary/20 hover:shadow-md transition-all duration-300">
+          <div className="min-w-0 text-left hidden md:block">
+            <p className="text-[13px] font-bold text-slate-900 dark:text-white leading-tight whitespace-nowrap pr-1" title={displayName}>
+              {displayName}
+            </p>
+            <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              {userRole?.includes('CLINIC_MANAGER') ? 'Phòng khám' : userRole?.includes('DOCTOR') ? 'Bác sĩ' : 'Hệ thống'}
+            </p>
+          </div>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-blue-400 p-0.5 shadow-md shrink-0 group-hover:scale-105 transition-transform">
+            <img
+              src={displayAvatar}
+              alt="Avatar"
+              onError={(e) => {
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
+              }}
+              className="w-full h-full object-cover rounded-[8px] border border-white bg-white"
+            />
+          </div>
+          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-0.5"></div>
+          <button
+            onClick={handleLogout}
+            className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-500 hover:text-white transition-all active:scale-95 group/btn"
+            title="Đăng xuất"
+          >
+            <span className="material-symbols-outlined text-[18px] font-bold group-hover/btn:scale-110 transition-transform">logout</span>
+          </button>
+        </div>
       </div>
       <style>{`
         @keyframes flag-wave {

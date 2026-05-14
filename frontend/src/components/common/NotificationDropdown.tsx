@@ -37,7 +37,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               onClick={() => onClearAll?.()} 
               className="text-[13px] font-extrabold text-primary hover:underline tracking-tight"
             >
-              Xóa tất cả
+              Đọc tất cả
             </button>
           )}
         </div>

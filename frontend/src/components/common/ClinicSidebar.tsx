@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
-import { clinicApi } from '../../api/clinic';
 import { supportApi } from '../../api/support';
 import { useToast } from '../ui/ToastContext';
 import CreateTicketModal from '../../features/admin/components/CreateTicketModal';
@@ -15,32 +14,9 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
     isSidebarOpen,
     isLoading = false
 }) => {
-    const navigate = useNavigate();
-    const currentClinicId = localStorage.getItem('clinicId') || '1';
-    const [clinicName, setClinicName] = useState("Đang tải...");
-    const [clinicLogo, setClinicLogo] = useState("");
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isSavingSupport, setIsSavingSupport] = useState(false);
     const { showToast } = useToast();
-
-    useEffect(() => {
-        clinicApi.getProfile(currentClinicId).then(res => {
-            if (res.data) {
-                setClinicName(res.data.name || "Phòng khám");
-                setClinicLogo(res.data.logoUrl || "");
-            }
-        }).catch(() => {
-            setClinicName("Phòng khám");
-        });
-    }, [currentClinicId]);
-
-    const finalUserName = clinicName;
-    const finalUserAvatar = clinicLogo || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0D8ABC&color=fff";
-    
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate('/?action=login');
-    };
 
     const handleSaveSupport = async (data: any) => {
         setIsSavingSupport(true);
@@ -118,42 +94,7 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
                 </button>
             </nav>
 
-            {/* Profile Footnote */}
-            <div className="p-4 mt-auto">
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-4 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-blue-400 p-0.5 shadow-lg shadow-primary/20 shrink-0">
-                            <img
-                                src={finalUserAvatar}
-                                alt={finalUserName}
-                                onError={(e) => {
-                                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=random`;
-                                }}
-                                className="w-full h-full object-cover rounded-[14px] border-2 border-white dark:border-slate-900 bg-white"
-                            />
-                        </div>
-                        <div className="min-w-0">
-                            {isLoading ? (
-                                <div className="space-y-2 animate-pulse pr-2">
-                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-24"></div>
-                                </div>
-                            ) : (
-                                <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight tracking-tight pr-2" title={finalUserName}>
-                                    {finalUserName}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                    
-                    <button 
-                        onClick={handleLogout}
-                        title="Đăng xuất"
-                        className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-500 hover:text-white transition-all shadow-sm group"
-                    >
-                        <span className="material-symbols-outlined text-[20px] font-bold group-hover:scale-110 transition-transform">logout</span>
-                    </button>
-                </div>
-            </div>
+
 
             <CreateTicketModal
                 isOpen={isSupportModalOpen}
