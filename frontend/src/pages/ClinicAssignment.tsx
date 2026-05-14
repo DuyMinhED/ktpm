@@ -212,8 +212,14 @@ export default function ClinicAssignment() {
 
                                 <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
                                     {isLoading ? (
-                                        [...Array(5)].map((_, i) => (
-                                            <div key={i} className="h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl animate-pulse"></div>
+                                        [...Array(6)].map((_, i) => (
+                                            <div key={i} className="w-full flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl animate-pulse">
+                                                <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-800 shrink-0"></div>
+                                                <div className="flex-1 min-w-0 space-y-2">
+                                                    <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4 animate-pulse"></div>
+                                                    <div className="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-1/2 animate-pulse"></div>
+                                                </div>
+                                            </div>
                                         ))
                                     ) : filteredPatients.length > 0 ? (
                                         filteredPatients.map((p) => (
@@ -246,7 +252,7 @@ export default function ClinicAssignment() {
                                             <label className="text-[14px] font-medium text-slate-500 ml-1">Họ và tên Bệnh nhân</label>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="relative">
-                                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">person</span>
+                                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">person</span>
                                                     <input
                                                         type="text"
                                                         placeholder="Họ"
@@ -270,7 +276,7 @@ export default function ClinicAssignment() {
                                         <div className="space-y-1.5 flex-1">
                                             <label className="text-[14px] font-medium text-slate-500 ml-1">Số điện thoại liên hệ</label>
                                             <div className="relative">
-                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">call</span>
+                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">call</span>
                                                 <input
                                                     type="text"
                                                     placeholder="Số điện thoại bệnh nhân hoặc người thân"
@@ -284,7 +290,7 @@ export default function ClinicAssignment() {
                                         <div className="space-y-1.5 flex-1">
                                             <label className="text-[14px] font-medium text-slate-500 ml-1">Địa chỉ Email</label>
                                             <div className="relative">
-                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">mail</span>
+                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">mail</span>
                                                 <input
                                                     type="email"
                                                     placeholder="Nhập địa chỉ email"
@@ -298,7 +304,7 @@ export default function ClinicAssignment() {
                                         <div className="space-y-1.5 flex-1">
                                             <label className="text-[14px] font-medium text-slate-500 ml-1">Địa chỉ cư trú</label>
                                             <div className="relative">
-                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">location_on</span>
+                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">location_on</span>
                                                 <input
                                                     type="text"
                                                     placeholder="Nhập địa chỉ chi tiết"
@@ -386,7 +392,7 @@ export default function ClinicAssignment() {
                                             <div className="col-span-2 space-y-1.5 animate-in slide-in-from-top-2 duration-300">
                                                 <label className="text-[14px] font-medium text-slate-500 ml-1">Link Google Meet / Hội chẩn trực tuyến</label>
                                                 <div className="relative">
-                                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">link</span>
+                                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">link</span>
                                                     <input
                                                         type="text"
                                                         placeholder="https://meet.google.com/xxx-xxxx-xxx"

@@ -247,7 +247,7 @@ export default function EditDoctorModal({
                                     <div className="space-y-1.5 flex-1">
                                         <label className="text-[14px] font-medium text-slate-500 ml-1">Họ và tên bác sĩ <span className="text-red-500">*</span></label>
                                         <div className="relative">
-                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">person</span>
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">person</span>
                                             <input
                                                 name="name"
                                                 value={formData.name}
@@ -263,7 +263,7 @@ export default function EditDoctorModal({
                                     <div className="space-y-1.5 flex-1">
                                         <label className="text-[14px] font-medium text-slate-500 ml-1">Số điện thoại <span className="text-red-500">*</span></label>
                                         <div className="relative">
-                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">call</span>
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">call</span>
                                             <input
                                                 name="phone"
                                                 value={formData.phone}
@@ -279,7 +279,7 @@ export default function EditDoctorModal({
                                     <div className="space-y-1.5 flex-1">
                                         <label className="text-[14px] font-medium text-slate-500 ml-1">Email đăng nhập <span className="text-red-500">*</span></label>
                                         <div className="relative">
-                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">mail</span>
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">mail</span>
                                             <input
                                                 name="email"
                                                 type="email"
@@ -296,7 +296,7 @@ export default function EditDoctorModal({
                                     <div className="space-y-1.5 min-w-0">
                                         <label className="text-[14px] font-medium text-slate-500 ml-1">Đổi mật khẩu</label>
                                         <div className="relative">
-                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400">lock</span>
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400 z-10 pointer-events-none">lock</span>
                                             <input
                                                 type={showPassword ? "text" : "password"}
                                                 name="password"
@@ -310,7 +310,7 @@ export default function EditDoctorModal({
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-1"
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-1 z-10"
                                             >
                                                 <span className="material-symbols-outlined text-[20px]">
                                                     {showPassword ? 'visibility' : 'visibility_off'}
@@ -324,7 +324,7 @@ export default function EditDoctorModal({
                                     <div className="space-y-1.5 min-w-0">
                                         <label className="text-[14px] font-medium text-slate-500 ml-1">Xác nhận mật khẩu mới</label>
                                         <div className="relative">
-                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400">lock</span>
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[19px] text-slate-400 z-10 pointer-events-none">lock</span>
                                             <input
                                                 type={showConfirmPassword ? "text" : "password"}
                                                 name="confirmPassword"
@@ -338,7 +338,7 @@ export default function EditDoctorModal({
                                             <button
                                                 type="button"
                                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-1"
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-1 z-10"
                                             >
                                                 <span className="material-symbols-outlined text-[20px]">
                                                     {showConfirmPassword ? 'visibility' : 'visibility_off'}
@@ -398,7 +398,7 @@ export default function EditDoctorModal({
                                 <div className="space-y-1.5">
                                     <label className="text-[14px] font-medium text-slate-500 ml-1">Kinh nghiệm (năm)</label>
                                     <div className="relative">
-                                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">history_edu</span>
+                                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">history_edu</span>
                                         <input
                                             name="experience"
                                             value={formData.experience}
@@ -413,7 +413,7 @@ export default function EditDoctorModal({
                                 <div className="space-y-1.5 min-w-0">
                                     <label className="text-[14px] font-medium text-slate-500 ml-1">Số chứng chỉ hành nghề <span className="text-red-500">*</span></label>
                                     <div className="relative">
-                                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">badge</span>
+                                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">badge</span>
                                         <input
                                             name="licenseNumber"
                                             value={formData.licenseNumber}

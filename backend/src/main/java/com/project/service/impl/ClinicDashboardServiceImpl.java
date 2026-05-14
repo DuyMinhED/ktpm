@@ -58,11 +58,18 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDate = "7d".equals(period) ? now.minusDays(6) : "30d".equals(period) ? now.minusDays(29) : "1y".equals(period) ? now.minusMonths(11) : now.minusMonths(5);
 
+        boolean isDaily = "7d".equals(period) || "30d".equals(period);
+
         var patientStatsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> {
             List<Long> doctorIds = userRepository.findByClinicIdAndRoleAndIsDeletedFalse(clinicId, UserRole.DOCTOR).stream().map(User::getId).collect(Collectors.toList());
-            return doctorIds.isEmpty() ? List.<Object[]>of() : appointmentRepository.countMonthlyAppointmentsByDoctorIds(doctorIds, startDate);
+            if (doctorIds.isEmpty()) return List.<Object[]>of();
+            return isDaily ? appointmentRepository.countDailyAppointmentsByDoctorIds(doctorIds, startDate)
+                            : appointmentRepository.countMonthlyAppointmentsByDoctorIds(doctorIds, startDate);
         });
-        var riskStatsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> patientRepository.countMonthlyHighRiskPatients(clinicId, AppConstants.RISK_HIGH, startDate));
+        var riskStatsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> 
+            isDaily ? patientRepository.countDailyHighRiskPatients(clinicId, AppConstants.RISK_HIGH, startDate)
+                    : patientRepository.countMonthlyHighRiskPatients(clinicId, AppConstants.RISK_HIGH, startDate)
+        );
         var riskPatientsListFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> 
             patientRepository.findByClinicIdAndFilters(clinicId, null, null, AppConstants.RISK_HIGH, null, null, PageRequest.of(0, 5)).getContent());
 
@@ -96,15 +103,15 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
 
         List<ClinicDashboardResponse.PatientGrowthChartDto> growthChart = patientStatsFuture.join().stream()
                 .map(row -> ClinicDashboardResponse.PatientGrowthChartDto.builder()
-                        .month(row[0] + "/" + row[1])
-                        .value(((Number) row[2]).intValue())
+                        .month(isDaily ? row[0].toString() : (row[0] + "/" + row[1]))
+                        .value(isDaily ? ((Number) row[1]).intValue() : ((Number) row[2]).intValue())
                         .build())
                 .collect(Collectors.toList());
 
         List<ClinicDashboardResponse.PatientGrowthChartDto> riskChart = riskStatsFuture.join().stream()
                 .map(row -> ClinicDashboardResponse.PatientGrowthChartDto.builder()
-                        .month(row[0] + "/" + row[1])
-                        .value(((Number) row[2]).intValue())
+                        .month(isDaily ? row[0].toString() : (row[0] + "/" + row[1]))
+                        .value(isDaily ? ((Number) row[1]).intValue() : ((Number) row[2]).intValue())
                         .build())
                 .collect(Collectors.toList());
 

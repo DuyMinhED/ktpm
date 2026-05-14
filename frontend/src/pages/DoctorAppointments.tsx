@@ -271,8 +271,11 @@ export default function DoctorAppointments() {
                         <div>
                             <h1 className="text-[22px] font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Lịch
                                 hẹn khám</h1>
-                            <p className="text-slate-500 dark:text-slate-400 mt-1">{getGreeting()}, {formattedName}. Bạn có {todayActiveCount} lịch hẹn trong hôm nay.</p>
-
+                            {loading ? (
+                                <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-80 mt-2"></div>
+                            ) : (
+                                <p className="text-slate-500 dark:text-slate-400 mt-1">{getGreeting()}, {formattedName}. Bạn có {todayActiveCount} lịch hẹn trong hôm nay.</p>
+                            )}
                         </div>
                         <div className="flex items-center gap-3">
                             <button
@@ -296,7 +299,11 @@ export default function DoctorAppointments() {
                                 </div>
                             </div>
                             <div className="flex items-end justify-between">
-                                <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">{todayActiveCount}</span>
+                                {loading ? (
+                                    <Skeleton className="h-9 w-12" />
+                                ) : (
+                                    <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">{todayActiveCount}</span>
+                                )}
                                 <span className="text-xs font-bold text-primary flex items-center gap-0.5">
                                     <span className="material-symbols-outlined text-xs">trending_up</span>
                                     +5%
@@ -313,9 +320,13 @@ export default function DoctorAppointments() {
                                 </div>
                             </div>
                             <div className="flex items-end justify-between">
-                                <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                                    {activeAppointments.filter(a => a.appointmentType === 'ONSITE').length}
-                                </span>
+                                {loading ? (
+                                    <Skeleton className="h-9 w-12" />
+                                ) : (
+                                    <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                                        {activeAppointments.filter(a => a.appointmentType === 'ONSITE').length}
+                                    </span>
+                                )}
                                 <span className="text-xs font-bold text-primary flex items-center gap-0.5">
                                     <span className="material-symbols-outlined text-xs">trending_up</span>
                                     +2%
@@ -332,9 +343,13 @@ export default function DoctorAppointments() {
                                 </div>
                             </div>
                             <div className="flex items-end justify-between">
-                                <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                                    {activeAppointments.filter(a => a.appointmentType === 'ONLINE').length}
-                                </span>
+                                {loading ? (
+                                    <Skeleton className="h-9 w-12" />
+                                ) : (
+                                    <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                                        {activeAppointments.filter(a => a.appointmentType === 'ONLINE').length}
+                                    </span>
+                                )}
                                 <span className="text-xs font-bold text-red-500 flex items-center gap-0.5">
                                     <span className="material-symbols-outlined text-xs">trending_down</span>
                                     -1%
@@ -351,9 +366,13 @@ export default function DoctorAppointments() {
                                 </div>
                             </div>
                             <div className="flex items-end justify-between">
-                                <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                                    {activeAppointments.filter(a => a.status === 'PENDING').length}
-                                </span>
+                                {loading ? (
+                                    <Skeleton className="h-9 w-12" />
+                                ) : (
+                                    <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                                        {activeAppointments.filter(a => a.status === 'PENDING').length}
+                                    </span>
+                                )}
                                 <span className="text-xs font-bold text-slate-400 flex items-center gap-0.5">
                                     <span className="material-symbols-outlined text-xs">horizontal_rule</span>
                                     0%
@@ -445,7 +464,21 @@ export default function DoctorAppointments() {
                                             className="bg-slate-50 dark:bg-slate-800 p-2 text-center text-xs font-bold text-slate-400">
                                             T7</div>
                                         {/* Calendar Days (Dynamic render) */}
-                                        {renderCalendar()}
+                                        {loading ? (
+                                            [...Array(35)].map((_, i) => (
+                                                <div key={i} className="bg-white dark:bg-slate-800 min-h-[100px] p-2 space-y-2 animate-pulse">
+                                                    <div className="h-4 w-6 bg-slate-100 dark:bg-slate-700/50 rounded animate-pulse"></div>
+                                                    {i % 5 === 0 && (
+                                                        <div className="h-4 w-full bg-primary/10 rounded animate-pulse border-l-2 border-primary/30"></div>
+                                                    )}
+                                                    {i % 7 === 2 && (
+                                                        <div className="h-4 w-full bg-blue-50 dark:bg-blue-900/20 rounded animate-pulse border-l-2 border-blue-500/30"></div>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            renderCalendar()
+                                        )}
                                     </div>
                                 </div>
                             </div>

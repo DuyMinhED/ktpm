@@ -391,7 +391,7 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-1"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-1 z-10"
                           >
                             <span className="material-symbols-outlined text-[20px]">
                               {showPassword ? 'visibility' : 'visibility_off'}
@@ -416,7 +416,7 @@ const CreateClinicModal: React.FC<CreateClinicModalProps> = ({
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-1"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-1 z-10"
                           >
                             <span className="material-symbols-outlined text-[20px]">
                               {showConfirmPassword ? 'visibility' : 'visibility_off'}

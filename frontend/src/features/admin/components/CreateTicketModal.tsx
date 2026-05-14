@@ -125,7 +125,7 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
                     <div className="space-y-1.5 italic-none">
                       <label className="text-[14px] font-medium text-slate-500 ml-1 italic-none">Tiêu đề yêu cầu <span className="text-red-500">*</span></label>
                       <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">subject</span>
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">subject</span>
                         <input
                           name="subject"
                           value={formData.subject}

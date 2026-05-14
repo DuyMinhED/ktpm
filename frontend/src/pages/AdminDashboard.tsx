@@ -440,12 +440,12 @@ export default function AdminDashboard() {
                       tickLine={false}
                       padding={{ left: 10, right: 0 }}
                       tick={<CustomXAxisTick />}
-                      ticks={[
+                      ticks={Array.from(new Set([
                         chartData[0]?.label,
                         chartData[Math.floor(chartData.length * 0.33)]?.label,
                         chartData[Math.floor(chartData.length * 0.66)]?.label,
                         chartData[chartData.length - 1]?.label
-                      ].filter(Boolean)}
+                      ].filter(Boolean)))}
                       interval={0}
                     />
                     <YAxis

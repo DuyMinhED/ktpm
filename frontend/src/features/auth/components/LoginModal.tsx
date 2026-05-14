@@ -50,16 +50,16 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, initialRole = 
     return (
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
             {/* Backdrop */}
-            <div 
+            <div
                 className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300"
                 onClick={onClose}
             ></div>
 
             {/* Modal */}
             <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden animate-in zoom-in-95 duration-300">
-                
+
                 {/* Close Button */}
-                <button 
+                <button
                     onClick={onClose}
                     className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors z-10"
                 >
@@ -91,7 +91,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, initialRole = 
                             <label className="text-sm font-black text-slate-700 dark:text-slate-300 ml-1">Email / Tên đăng nhập</label>
                             <div className="relative group">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
-                                <input 
+                                <input
                                     type="text"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -108,7 +108,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, initialRole = 
                             </div>
                             <div className="relative group">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
-                                <input 
+                                <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -119,7 +119,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, initialRole = 
                         </div>
 
                         <div className="pt-2">
-                            <button 
+                            <button
                                 type="submit"
                                 disabled={isLoading}
                                 className="w-full bg-primary text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-3 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed group"

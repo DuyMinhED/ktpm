@@ -403,7 +403,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                         <div className="space-y-1.5">
                           <label className="text-[14px] font-medium text-slate-500 ml-1">Kinh nghiệm (năm)</label>
                           <div className="relative group">
-                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">history_edu</span>
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">history_edu</span>
                             <input
                               name="experience"
                               value={formData.experience}
@@ -418,7 +418,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                         <div className="space-y-1.5">
                           <label className="text-[14px] font-medium text-slate-500 ml-1">Số chứng chỉ hành nghề (CCHN) <span className="text-red-500">*</span></label>
                           <div className="relative group">
-                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">badge</span>
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">badge</span>
                             <input
                               name="licenseNumber"
                               value={formData.licenseNumber}
