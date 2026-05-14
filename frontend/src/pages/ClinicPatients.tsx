@@ -227,7 +227,7 @@ export default function ClinicPatients() {
                                 </div>
                             ) : (
                                 <div className="space-y-1 text-left">
-                                    <h3 className="text-lg md:text-xl font-bold italic-none text-slate-900 dark:text-white tracking-tight">Hồ sơ bệnh nhân mãn tính</h3>
+                                    <h3 className="text-lg md:text-xl font-semibold italic-none text-slate-900 dark:text-white">Hồ sơ bệnh nhân mãn tính</h3>
                                     <p className="text-[13px] md:text-base text-slate-500 font-medium">Theo dõi và quản lý dữ liệu lâm sàng diện rộng</p>
                                 </div>
                             )}
@@ -361,28 +361,28 @@ export default function ClinicPatients() {
                                     <thead>
                                         <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                                             <th className="px-8 py-4">
-                                                {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-24"></div> : <span className="text-[15px] font-medium text-slate-700">Người bệnh</span>}
+                                                <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Người bệnh</span>
                                             </th>
                                             <th className="px-6 py-4">
-                                                {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16"></div> : <span className="text-[15px] font-medium text-slate-700">Liên hệ</span>}
+                                                <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Liên hệ</span>
                                             </th>
                                             <th className="px-6 py-4">
-                                                {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[15px] font-medium text-slate-700">Bệnh lý</span>}
+                                                <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Bệnh lý</span>
                                             </th>
                                             <th className="px-6 py-4">
-                                                {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16"></div> : <span className="text-[15px] font-medium text-slate-700">Tình trạng</span>}
+                                                <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Tình trạng</span>
                                             </th>
                                             <th className="px-6 py-4">
-                                                {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-24"></div> : <span className="text-[15px] font-medium text-slate-700">Phụ trách</span>}
+                                                <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Phụ trách</span>
                                             </th>
                                             <th className="px-6 py-4">
-                                                {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16"></div> : <span className="text-[15px] font-medium text-slate-700">Rủi ro</span>}
+                                                <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Rủi ro</span>
                                             </th>
                                             <th className="px-6 py-4">
-                                                {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[15px] font-medium text-slate-700">Trạng thái hồ sơ</span>}
+                                                <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Trạng thái hồ sơ</span>
                                             </th>
                                             <th className="px-8 py-4 text-right">
-                                                {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16 ml-auto"></div> : <span className="text-[15px] font-medium text-slate-700">Thao tác</span>}
+                                                <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Thao tác</span>
                                             </th>
                                         </tr>
                                     </thead>
@@ -456,9 +456,9 @@ export default function ClinicPatients() {
                                                 </td>
                                                 <td className="px-8 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-2 transition-all">
-                                                        <button 
+                                                        <button
                                                             onClick={() => { setSelectedPatient(p); setIsDetailModalOpen(true); }}
-                                                            className="p-2 text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors" 
+                                                            className="p-2 text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors"
                                                             title="Xem hồ sơ"
                                                         >
                                                             <span className="material-symbols-outlined text-[20px]">visibility</span>

@@ -26,8 +26,8 @@ const TopBar: React.FC<TopBarProps> = ({
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isAllNotificationsOpen, setIsAllNotificationsOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [clinicName, setClinicName] = useState("");
-  const [clinicLogo, setClinicLogo] = useState("");
+  const [clinicName, setClinicName] = useState(() => localStorage.getItem('cachedClinicName') || "");
+  const [clinicLogo, setClinicLogo] = useState(() => localStorage.getItem('cachedClinicLogo') || "");
 
   const notificationRef = useRef<HTMLDivElement>(null);
 
@@ -50,8 +50,12 @@ const TopBar: React.FC<TopBarProps> = ({
     if (currentClinicId && (userRole?.includes('CLINIC_MANAGER') || userRole?.includes('ADMIN'))) {
       clinicApi.getProfile(currentClinicId).then(res => {
         if (res.data) {
-          setClinicName(res.data.name || "Phòng khám");
-          setClinicLogo(res.data.logoUrl || res.data.imageUrl || "");
+          const name = res.data.name || "Phòng khám";
+          const logo = res.data.logoUrl || res.data.imageUrl || "";
+          setClinicName(name);
+          setClinicLogo(logo);
+          localStorage.setItem('cachedClinicName', name);
+          localStorage.setItem('cachedClinicLogo', logo);
         }
       }).catch(() => {});
     }

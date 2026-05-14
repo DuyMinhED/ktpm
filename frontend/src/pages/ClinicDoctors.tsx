@@ -366,28 +366,28 @@ export default function ClinicDoctors() {
                                 <thead>
                                     <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                                         <th className="px-8 py-4">
-                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-32"></div> : <span className="text-[15px] font-medium text-slate-700">Thông tin bác sĩ</span>}
+                                            <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Thông tin bác sĩ</span>
                                         </th>
                                         <th className="px-6 py-4">
-                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-24"></div> : <span className="text-[15px] font-medium text-slate-700">Chuyên khoa</span>}
+                                            <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Chuyên khoa</span>
                                         </th>
                                         <th className="px-6 py-4">
-                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[15px] font-medium text-slate-700">Liên hệ</span>}
+                                            <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Liên hệ</span>
                                         </th>
                                         <th className="px-6 py-4 text-center">
-                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16 mx-auto"></div> : <span className="text-[15px] font-medium text-slate-700">Lượng bệnh nhân</span>}
+                                            <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Lượng bệnh nhân</span>
                                         </th>
                                         <th className="px-6 py-4">
-                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-24"></div> : <span className="text-[15px] font-medium text-slate-700">CC hành nghề</span>}
+                                            <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">CC hành nghề</span>
                                         </th>
                                         <th className="px-6 py-4">
-                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-24"></div> : <span className="text-[15px] font-medium text-slate-700">Kinh nghiệm</span>}
+                                            <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Kinh nghiệm</span>
                                         </th>
                                         <th className="px-6 py-4">
-                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[15px] font-medium text-slate-700">Trạng thái</span>}
+                                            <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Trạng thái</span>
                                         </th>
                                         <th className="px-8 py-4 text-right">
-                                            {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16 ml-auto"></div> : <span className="text-[15px] font-medium text-slate-700">Thao tác</span>}
+                                            <span className="text-[15px] font-medium text-slate-700 dark:text-slate-300">Thao tác</span>
                                         </th>
                                     </tr>
                                 </thead>
