@@ -296,8 +296,9 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         String search = (keyword != null && !keyword.isBlank()) ? "%" + keyword.toLowerCase() + "%" : null;
         return auditLogRepository.findByFilters(null, null, search, pageable).map(logEntry -> AuditLogResponse.builder()
                 .id(logEntry.getId()).time(logEntry.getCreatedAt().toString())
-                .user(AuditLogResponse.UserDto.builder().name(logEntry.getUserName()).build())
+                .user(AuditLogResponse.UserDto.builder().name(logEntry.getUserName()).avatar(logEntry.getUserAvatar()).build())
                 .action(logEntry.getAction()).module(logEntry.getModule()).details(logEntry.getDetails())
+                .ip(logEntry.getIpAddress())
                 .status(logEntry.getStatus()).build());
     }
 

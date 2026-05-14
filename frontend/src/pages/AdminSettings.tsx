@@ -264,7 +264,7 @@ export default function AdminSettings() {
                         {isLoadingPage ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-24"></div> : <span className="text-[15px] font-bold text-slate-800 dark:text-slate-200 italic-none">Sự kiện</span>}
                       </th>
                       <th className="px-6 py-4 text-center">
-                        {isLoadingPage ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-32 mx-auto"></div> : <span className="text-[15px] font-bold text-slate-800 dark:text-slate-200 italic-none">Gửi qua Email</span>}
+                        {isLoadingPage ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-32 mx-auto"></div> : <span className="text-[15px] font-bold text-slate-800 dark:text-slate-200 italic-none">Gửi qua Zalo</span>}
                       </th>
                     </tr>
                   </thead>

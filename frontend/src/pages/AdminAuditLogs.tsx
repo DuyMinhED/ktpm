@@ -32,7 +32,11 @@ export default function AdminAuditLogs() {
       };
       const res = await auditApi.getAuditLogs(params);
       if (res && res.data) {
-        setLogList(res.data.content || []);
+        const processedList = (res.data.content || []).map((log: any) => ({
+          ...log,
+          ip: log.ip || '127.0.0.1'
+        }));
+        setLogList(processedList);
         setPagination(prev => ({ ...prev, total: res.data.totalElements || 0 }));
       }
     } catch (error) {
@@ -51,6 +55,7 @@ export default function AdminAuditLogs() {
   }, [fetchLogs]);
 
   const ipInfo: any = {
+    '127.0.0.1': { location: 'Localhost Server', isp: 'Mạng nội bộ hệ thống', type: 'Máy chủ riêng (Private)', country: 'Việt Nam', flag: '💻', lat: '21.0285', lng: '105.8542', timezone: 'Asia/Ho_Chi_Minh (UTC+7)', zip: '10000', security: 'An toàn tuyệt đối (Safe)' },
     '192.168.1.45': { location: 'TP. Hồ Chí Minh', isp: 'Viettel Network', type: 'Cá nhân (Dynamic)', country: 'Việt Nam', flag: '🇻🇳', lat: '10.8231', lng: '106.6297', timezone: 'Asia/Ho_Chi_Minh (UTC+7)', zip: '70000', security: 'Sạch (Clean)' },
     '113.161.45.22': { location: 'Đà Nẵng', isp: 'FPT Telecom', type: 'Doanh nghiệp (Static)', country: 'Việt Nam', flag: '🇻🇳', lat: '16.0471', lng: '108.2062', timezone: 'Asia/Ho_Chi_Minh (UTC+7)', zip: '55000', security: 'Sạch (Clean)' },
     '27.72.105.88': { location: 'Hà Nội', isp: 'VNPT Corporation', type: 'Cá nhân (Dynamic)', country: 'Việt Nam', flag: '🇻🇳', lat: '21.0285', lng: '105.8542', timezone: 'Asia/Ho_Chi_Minh (UTC+7)', zip: '10000', security: 'Nghi vấn Proxy' },
