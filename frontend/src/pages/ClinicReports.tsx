@@ -16,6 +16,15 @@ export default function ClinicReports() {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [activeFilter, setActiveFilter] = useState('Tất cả nhóm bệnh');
 
+    const formatDateLabel = (val: any) => {
+        if (!val || typeof val !== 'string') return val;
+        const match = val.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (match) {
+            return `${match[3]}/${match[2]}/${match[1]}`;
+        }
+        return val;
+    };
+
     // Custom Tooltip for Recharts
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
@@ -31,7 +40,7 @@ export default function ClinicReports() {
             };
             return (
                 <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-3 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl">
-                    <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200 mb-1">{label}</p>
+                    <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200 mb-1">{formatDateLabel(label)}</p>
                     <div className="flex items-center gap-2">
                         <p className={`text-[14px] font-black ${getColor()}`}>
                             {payload[0].value} <span className="text-slate-500 font-medium text-[12px]">{getSuffix()}</span>
@@ -118,7 +127,7 @@ export default function ClinicReports() {
                     fontSize={window.innerWidth > 1024 ? 14 : 11}
                     fontWeight={500}
                 >
-                    {payload.value}
+                    {formatDateLabel(payload.value)}
                 </text>
             </g>
         );
