@@ -208,24 +208,34 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .distinct()
                 .collect(Collectors.toList());
         
-        Map<Long, String> doctorAvatarMap = new HashMap<>();
+        Map<Long, User> doctorMap = new HashMap<>();
         if (!doctorIds.isEmpty()) {
-            doctorAvatarMap = userRepository.findAllById(doctorIds).stream()
-                    .collect(Collectors.toMap(User::getId, u -> u.getAvatarUrl() != null ? u.getAvatarUrl() : "", (a, b) -> a));
+            doctorMap = userRepository.findAllById(doctorIds).stream()
+                    .collect(Collectors.toMap(User::getId, u -> u, (a, b) -> a));
         }
         
-        final Map<Long, String> finalAvatarMap = doctorAvatarMap;
-        return appointments.map(a -> ClinicAppointmentResponse.builder()
+        final Map<Long, User> finalDocMap = doctorMap;
+        return appointments.map(a -> {
+            User doc = finalDocMap.get(a.getDoctorId());
+            String doctorName = a.getDoctorName();
+            if (doctorName == null || doctorName.isEmpty() || "N/A".equalsIgnoreCase(doctorName)) {
+                doctorName = (doc != null) ? doc.getFullName() : "N/A";
+            }
+            String doctorAvatarUrl = (doc != null && doc.getAvatarUrl() != null) ? doc.getAvatarUrl() : "";
+
+            return ClinicAppointmentResponse.builder()
                 .id(a.getId())
                 .patientName(a.getPatient() != null ? a.getPatient().getFullName() : "N/A")
-                .doctorName(a.getDoctorName() != null ? a.getDoctorName() : "N/A")
+                .doctorName(doctorName)
                 .appointmentTime(a.getAppointmentTime())
                 .status(a.getStatus().name())
                 .appointmentType(a.getType())
                 .reason(a.getReason())
-                .doctorAvatarUrl(finalAvatarMap.getOrDefault(a.getDoctorId(), ""))
+                .doctorAvatarUrl(doctorAvatarUrl)
                 .patientAvatarUrl(a.getPatient() != null ? a.getPatient().getAvatarUrl() : "")
-                .build());
+                .patientId(a.getPatient() != null ? a.getPatient().getId() : null)
+                .build();
+        });
     }
 
     @Override
@@ -263,14 +273,31 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
     @org.springframework.cache.annotation.CacheEvict(value = "clinic_dashboard", allEntries = true)
     @Audit(action = "UPDATE_APPOINTMENT_STATUS", module = "CLINIC_MANAGEMENT")
     public void updateAppointmentStatus(Long clinicId, Long appointmentId, String status) {
-        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow();
-        User doctor = userRepository.findById(appointment.getDoctorId()).orElseThrow();
-        if (!doctor.getClinicId().equals(clinicId)) throw new AccessDeniedException("Unauthorized");
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new com.project.exception.ResourceNotFoundException("Lịch hẹn không tồn tại"));
+        
+        boolean authorized = false;
+        if (appointment.getDoctorId() != null) {
+            User doctor = userRepository.findById(appointment.getDoctorId()).orElse(null);
+            if (doctor != null && clinicId.equals(doctor.getClinicId())) {
+                authorized = true;
+            }
+        }
+        if (!authorized && appointment.getPatient() != null && clinicId.equals(appointment.getPatient().getClinicId())) {
+            authorized = true;
+        }
+        
+        if (!authorized) throw new AccessDeniedException("Unauthorized");
 
         AppointmentStatus enumStatus = AppointmentStatus.valueOf(status.toUpperCase());
         appointment.setStatus(enumStatus);
         appointmentRepository.save(appointment);
-        sendAppointmentNotification(appointment, status);
+        
+        try {
+            sendAppointmentNotification(appointment, status);
+        } catch (Exception e) {
+            log.warn("Failed to send notification for appointment update: {}", e.getMessage());
+        }
     }
 
     private List<ClinicDashboardResponse.DiseaseRatioDto> calculateDiseaseRatios(Long clinicId, long totalPatients) {
@@ -310,10 +337,13 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
 
 
     private void sendAppointmentNotification(Appointment appointment, String status) {
+        String doctorDisplayName = appointment.getDoctorName() != null ? appointment.getDoctorName() : "Bác sĩ";
+        
         notificationRepository.save(com.project.entity.Notification.builder()
                 .userId(appointment.getPatient().getUserId())
                 .title("Cập nhật lịch hẹn")
-                .message("Lịch hẹn với BS. " + appointment.getDoctorName() + " chuyển sang: " + status)
+                .message("Lịch hẹn với BS. " + doctorDisplayName + " chuyển sang: " + status)
+                .type("info")
                 .read(false)
                 .build());
     }
@@ -365,6 +395,49 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .userId(patient.getUserId())
                 .title("Lịch hẹn mới")
                 .message("Phòng khám đã đặt lịch hẹn mới cho bạn vào lúc " + request.getAppointmentTime() + " ngày " + request.getAppointmentDate())
+                .type("APPOINTMENT")
+                .read(false)
+                .build());
+    }
+
+    @Override
+    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "clinic_dashboard", allEntries = true)
+    @Audit(action = "UPDATE_APPOINTMENT", module = "CLINIC_MANAGEMENT")
+    public void updateAppointment(Long clinicId, Long appointmentId, com.project.dto.request.DoctorCreateAppointmentRequest request) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new com.project.exception.ResourceNotFoundException("Lịch hẹn không tồn tại"));
+
+        // Verify patient/appointment belongs to clinic
+        if (appointment.getPatient() == null || !clinicId.equals(appointment.getPatient().getClinicId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Unauthorized");
+        }
+
+        java.time.LocalDateTime appointmentTime = java.time.LocalDateTime.parse(request.getAppointmentDate() + "T" + request.getAppointmentTime());
+        
+        appointment.setAppointmentTime(appointmentTime);
+        appointment.setType(request.getType());
+        appointment.setReason(request.getNotes());
+        
+        if ("ONLINE".equals(request.getType())) {
+            appointment.setLocation("Trực tuyến");
+            if (request.getMeetingLink() != null && !request.getMeetingLink().isEmpty()) {
+                appointment.setMeetingLink(request.getMeetingLink());
+            } else if (appointment.getMeetingLink() == null || appointment.getMeetingLink().isEmpty()) {
+                appointment.setMeetingLink("https://meet.google.com/abc-xyz");
+            }
+        } else {
+            appointment.setLocation("Phòng khám");
+            appointment.setMeetingLink(null);
+        }
+
+        appointmentRepository.save(appointment);
+
+        // Notify patient
+        notificationRepository.save(com.project.entity.Notification.builder()
+                .userId(appointment.getPatient().getUserId())
+                .title("Thay đổi lịch hẹn")
+                .message("Phòng khám đã dời lịch hẹn của bạn sang lúc " + request.getAppointmentTime() + " ngày " + request.getAppointmentDate())
                 .type("APPOINTMENT")
                 .read(false)
                 .build());

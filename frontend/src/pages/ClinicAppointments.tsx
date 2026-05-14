@@ -20,22 +20,44 @@ export default function ClinicAppointments() {
     const [isSaving, setIsSaving] = useState(false);
     const [toast, setToast] = useState({ show: false, title: '', type: 'success' as 'success' | 'warning' | 'error' });
     const [activeView, setActiveView] = useState<'month' | 'week' | 'day'>('month');
+    const [editingAppointment, setEditingAppointment] = useState<any>(null);
 
     const handleSaveReschedule = async (appointmentData: any) => {
         setIsSaving(true);
         try {
-            const res = await clinicApi.createAppointment(currentClinicId, appointmentData);
+            let res;
+            if (editingAppointment) {
+                res = await clinicApi.updateAppointment(currentClinicId, editingAppointment.id, appointmentData);
+            } else {
+                res = await clinicApi.createAppointment(currentClinicId, appointmentData);
+            }
             if (res.success) {
                 setIsRescheduleModalOpen(false);
-                setToast({ show: true, title: 'Đặt lịch thành công!', type: 'success' });
+                setEditingAppointment(null);
+                setToast({ show: true, title: editingAppointment ? 'Cập nhật lịch hẹn thành công!' : 'Đặt lịch thành công!', type: 'success' });
                 loadAppointments();
             }
         } catch (e: any) {
-            const errorMsg = e.response?.data?.message || 'Có lỗi khi đặt lịch. Vui lòng thử lại!';
+            const errorMsg = e.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại!';
             setToast({ show: true, title: errorMsg, type: 'error' });
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const handleOpenEdit = (appt: any) => {
+        const dateObj = new Date(appt.appointmentTime);
+        setCurrentMonth(dateObj.getMonth());
+        setCurrentYear(dateObj.getFullYear());
+        setSelectedDay(dateObj.getDate());
+        
+        // Format hours and minutes nicely
+        const hh = String(dateObj.getHours()).padStart(2, '0');
+        const mm = String(dateObj.getMinutes()).padStart(2, '0');
+        setSelectedTime(`${hh}:${mm}`);
+        
+        setEditingAppointment(appt);
+        setIsRescheduleModalOpen(true);
     };
 
     useEffect(() => {
@@ -85,6 +107,53 @@ export default function ClinicAppointments() {
         return new Date(dateStr).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     };
 
+    const handleExportCSV = () => {
+        if (agendaAppointments.length === 0) return;
+
+        // Define CSV Headers in Vietnamese
+        const headers = ["Thời gian", "Tên bệnh nhân", "Bác sĩ đảm nhiệm", "Hình thức khám", "Lý do khám bệnh", "Trạng thái hiện tại"];
+        
+        // Convert row data, quoting fields that may contain commas, and converting status keys
+        const rows = agendaAppointments.map(appt => {
+            const timeVal = formatTime(appt.appointmentTime);
+            const patientName = appt.patientName;
+            const doctorName = appt.doctorName || "Chưa phân công";
+            const typeStr = appt.appointmentType === 'ONLINE' ? 'Trực tuyến' : 'Tại phòng khám';
+            
+            // Sanitize reason text by replacing interior double quotes and wrapping in quotes
+            const rawReason = appt.reason || "Không có lý do";
+            const sanitizedReason = `"${rawReason.replace(/"/g, '""')}"`;
+            
+            const statusStr = appt.status === 'COMPLETED' ? 'Đã hoàn thành' :
+                              appt.status === 'CANCELLED' ? 'Đã hủy' :
+                              appt.status === 'PENDING' ? 'Chờ xác nhận' : 'Đã lên lịch';
+            
+            return [timeVal, patientName, doctorName, typeStr, sanitizedReason, statusStr];
+        });
+
+        // Combine with a UTF-8 BOM character prefix (\uFEFF) so MS Excel opens Vietnamese characters natively!
+        const csvString = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+        
+        // Execute automatic link injection to download
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const downloadUrl = URL.createObjectURL(blob);
+        const downloadAnchor = document.createElement("a");
+        const formattedFileDate = `${String(selectedDay).padStart(2, '0')}-${String(currentMonth + 1).padStart(2, '0')}-${currentYear}`;
+        
+        downloadAnchor.setAttribute("href", downloadUrl);
+        downloadAnchor.setAttribute("download", `Lich_trinh_kham_${formattedFileDate}.csv`);
+        downloadAnchor.style.visibility = 'hidden';
+        
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+
+        // Revoke to free system memory
+        URL.revokeObjectURL(downloadUrl);
+
+        setToast({ show: true, title: 'Đã xuất lịch khám của ngày thành file CSV thành công!', type: 'success' });
+    };
+
 
 
     // Filter for current selected day visually
@@ -124,9 +193,12 @@ export default function ClinicAppointments() {
                         </div>
                         <div className="flex items-center gap-3">
                             <button
-                                onClick={() => setIsRescheduleModalOpen(true)}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-slate-900 font-bold text-sm rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-                                <span className="material-symbols-outlined text-lg">add_circle</span>
+                                onClick={() => {
+                                    setEditingAppointment(null);
+                                    setIsRescheduleModalOpen(true);
+                                }}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-bold text-sm rounded-full hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                                <span className="material-symbols-outlined text-lg">calendar_add_on</span>
                                 <span>Thêm lịch hẹn mới</span>
                             </button>
                         </div>
@@ -136,7 +208,7 @@ export default function ClinicAppointments() {
                         <div
                             className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
                             <div className="flex items-center justify-between mb-2">
-                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng lịch hẹn hôm nay
+                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng lịch hẹn
                                 </p>
                                 <div
                                     className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -313,11 +385,22 @@ export default function ClinicAppointments() {
                                                 >
                                                     <span className={`text-sm font-medium ${isSelected ? 'text-primary font-bold underline decoration-2 underline-offset-4' : ''}`}>{day}</span>
                                                     <div className="mt-2 space-y-1 overflow-hidden">
-                                                        {dayAppointments.slice(0, 2).map((appt, idx) => (
-                                                            <div key={idx} className={`text-[10px] p-1 rounded border-l-2 truncate ${appt.appointmentType === 'ONLINE' ? 'bg-primary/20 text-primary-dark border-primary' : 'bg-blue-100 text-blue-600 border-blue-500'}`}>
-                                                                {formatTime(appt.appointmentTime)} - {appt.patientName.split(' ').pop()}
-                                                            </div>
-                                                        ))}
+                                                        {dayAppointments.slice(0, 2).map((appt, idx) => {
+                                                            const isCalCompleted = appt.status === 'COMPLETED';
+                                                            const isCalCancelled = appt.status === 'CANCELLED';
+                                                            const cellStyle = isCalCompleted
+                                                                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-500 font-semibold'
+                                                                : isCalCancelled
+                                                                ? 'bg-red-50 dark:bg-red-900/30 text-red-500 border-red-300 opacity-60 line-through'
+                                                                : appt.appointmentType === 'ONLINE'
+                                                                ? 'bg-primary/20 text-primary-dark border-primary'
+                                                                : 'bg-blue-100 text-blue-600 border-blue-500';
+                                                            return (
+                                                                <div key={idx} className={`text-[10px] p-1 rounded border-l-2 truncate ${cellStyle}`}>
+                                                                    {isCalCompleted && '✓ '}{formatTime(appt.appointmentTime)} - {appt.patientName.split(' ').pop()}
+                                                                </div>
+                                                            );
+                                                        })}
                                                         {dayAppointments.length > 2 && (
                                                             <div className="text-[10px] p-1 bg-slate-100 text-slate-600 rounded border-l-2 border-slate-400 truncate">
                                                                 +{dayAppointments.length - 2} khác
@@ -349,8 +432,20 @@ export default function ClinicAppointments() {
                                     ) : agendaAppointments.map(appt => {
                                         const isOnline = appt.appointmentType === 'ONLINE';
                                         const isPending = appt.status === 'PENDING';
-                                        const borderClass = isPending ? 'border-slate-300 dark:border-slate-600 opacity-70' : (isOnline ? 'border-primary' : 'border-blue-500');
-                                        const timeClass = isPending ? 'text-slate-400' : (isOnline ? 'bg-primary/20 text-slate-900 dark:text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-slate-900 dark:text-white');
+                                        const isCompleted = appt.status === 'COMPLETED';
+                                        const isCancelled = appt.status === 'CANCELLED';
+
+                                        const borderClass = 
+                                            isCancelled ? 'border-red-300 dark:border-red-800 opacity-50' :
+                                            isCompleted ? 'border-emerald-500 dark:border-emerald-700' :
+                                            isPending ? 'border-slate-300 dark:border-slate-600 opacity-70' : 
+                                            (isOnline ? 'border-primary' : 'border-blue-500');
+
+                                        const timeClass = 
+                                            isCancelled ? 'text-red-500 bg-red-50 dark:bg-red-950/30 line-through' :
+                                            isCompleted ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 font-bold' :
+                                            isPending ? 'text-slate-400' : 
+                                            (isOnline ? 'bg-primary/20 text-slate-900 dark:text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-slate-900 dark:text-white');
 
                                         return (
                                             <div key={appt.id} className={`group p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border-l-4 ${borderClass} transition-all hover:shadow-md`}>
@@ -362,7 +457,7 @@ export default function ClinicAppointments() {
                                                                 src={appt.doctorAvatarUrl || "https://ui-avatars.com/api/?background=F1F5F9&color=64748B&bold=true&name=" + encodeURIComponent(appt.doctorName || 'BS')} />
                                                         </div>
                                                         <div>
-                                                            <h4 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">
+                                                            <h4 className={`text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors ${isCancelled ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
                                                                 {appt.patientName}</h4>
                                                             <p className="text-[12px] font-bold text-teal-600 dark:text-teal-400">BS. {appt.doctorName || "Chưa phân công"}</p>
                                                             <p className="text-[12px] text-slate-500 font-medium truncate max-w-[150px]" title={appt.reason}>{appt.reason || "Không có lý do"}</p>
@@ -372,7 +467,17 @@ export default function ClinicAppointments() {
                                                 </div>
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-2">
-                                                        {isPending ? (
+                                                        {isCompleted ? (
+                                                            <>
+                                                                <span className="material-symbols-outlined text-[18px] text-emerald-500">check_circle</span>
+                                                                <span className="text-[13px] font-bold text-emerald-600">Đã hoàn thành</span>
+                                                            </>
+                                                        ) : isCancelled ? (
+                                                            <>
+                                                                <span className="material-symbols-outlined text-[18px] text-red-500">cancel</span>
+                                                                <span className="text-[13px] font-bold text-red-500">Đã hủy</span>
+                                                            </>
+                                                        ) : isPending ? (
                                                             <>
                                                                 <span className="material-symbols-outlined text-[18px] text-slate-400">hourglass_top</span>
                                                                 <span className="text-[13px] font-medium text-slate-400">Đang chờ xác nhận</span>
@@ -390,7 +495,15 @@ export default function ClinicAppointments() {
                                                         )}
                                                     </div>
                                                     <div className="flex gap-2">
-                                                        {isPending ? (
+                                                        {isCompleted ? (
+                                                            <span className="text-[12px] px-3.5 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800 rounded-full font-bold flex items-center gap-1">
+                                                                <span className="material-symbols-outlined text-sm">done_all</span> Xong
+                                                            </span>
+                                                        ) : isCancelled ? (
+                                                            <span className="text-[12px] px-3.5 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 border border-red-100 dark:border-red-800 rounded-full font-bold flex items-center gap-1">
+                                                                <span className="material-symbols-outlined text-sm">block</span> Đã hủy
+                                                            </span>
+                                                        ) : isPending ? (
                                                             <>
                                                                 <button onClick={() => updateStatus(appt.id, 'SCHEDULED')} className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[13px] font-medium rounded-full transition-all outline-none">
                                                                     Xác nhận
@@ -399,16 +512,17 @@ export default function ClinicAppointments() {
                                                                     <span className="material-symbols-outlined text-lg">cancel</span>
                                                                 </button>
                                                             </>
-                                                        ) : isOnline ? (
-                                                            <button className="px-5 py-2 bg-primary text-slate-900 text-[15px] font-medium rounded-full shadow-lg shadow-primary/20 transition-all">
-                                                                Bắt đầu cuộc gọi
-                                                            </button>
                                                         ) : (
                                                             <>
-                                                                <button className="p-1.5 text-slate-400 hover:text-primary transition-colors">
+                                                                {isOnline && (
+                                                                    <button className="px-5 py-2 bg-primary text-slate-900 text-[15px] font-medium rounded-full shadow-lg shadow-primary/20 transition-all">
+                                                                        Bắt đầu cuộc gọi
+                                                                    </button>
+                                                                )}
+                                                                <button onClick={() => handleOpenEdit(appt)} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="Sửa lịch hẹn">
                                                                     <span className="material-symbols-outlined text-lg">edit_calendar</span>
                                                                 </button>
-                                                                <button onClick={() => updateStatus(appt.id, 'CANCELLED')} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors">
+                                                                <button onClick={() => updateStatus(appt.id, 'CANCELLED')} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors" title="Hủy lịch hẹn">
                                                                     <span className="material-symbols-outlined text-lg">cancel</span>
                                                                 </button>
                                                             </>
@@ -420,7 +534,10 @@ export default function ClinicAppointments() {
                                     })}
                                     {/* Empty/Add slot */}
                                     <button
-                                        onClick={() => setIsRescheduleModalOpen(true)}
+                                        onClick={() => {
+                                            setEditingAppointment(null);
+                                            setIsRescheduleModalOpen(true);
+                                        }}
                                         className="w-full p-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:text-primary hover:border-primary transition-all">
                                         <span className="material-symbols-outlined">add_circle</span>
                                         <span className="text-sm font-medium">Đặt lịch cho giờ trống tiếp theo</span>
@@ -432,7 +549,11 @@ export default function ClinicAppointments() {
                                         <button className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[12px] rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
                                             Dời lịch hàng loạt
                                         </button>
-                                        <button className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[12px] rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
+                                        <button 
+                                            onClick={handleExportCSV}
+                                            disabled={agendaAppointments.length === 0}
+                                            className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[12px] rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
                                             Xuất file CSV
                                         </button>
                                     </div>
@@ -445,20 +566,25 @@ export default function ClinicAppointments() {
             </main>
 
             <RescheduleModal
-                isOpen={isRescheduleModalOpen}
-                onClose={() => setIsRescheduleModalOpen(false)}
-                currentMonth={currentMonth}
-                setCurrentMonth={setCurrentMonth}
-                currentYear={currentYear}
-                setCurrentYear={setCurrentYear}
-                selectedDay={selectedDay}
-                setSelectedDay={setSelectedDay}
-                selectedTime={selectedTime}
-                setSelectedTime={setSelectedTime}
-                isSaving={isSaving}
-                onSave={handleSaveReschedule}
-                patients={patients}
-            />
+                                                isOpen={isRescheduleModalOpen}
+                                                onClose={() => {
+                                                    setIsRescheduleModalOpen(false);
+                                                    setEditingAppointment(null);
+                                                }}
+                                                currentMonth={currentMonth}
+                                                setCurrentMonth={setCurrentMonth}
+                                                currentYear={currentYear}
+                                                setCurrentYear={setCurrentYear}
+                                                selectedDay={selectedDay}
+                                                setSelectedDay={setSelectedDay}
+                                                selectedTime={selectedTime}
+                                                setSelectedTime={setSelectedTime}
+                                                isSaving={isSaving}
+                                                onSave={handleSaveReschedule}
+                                                patients={patients}
+                                                isRescheduling={Boolean(editingAppointment)}
+                                                initialPatientId={editingAppointment?.patientId?.toString()}
+                                            />
 
             {toast.show && (
                 <Toast

@@ -190,6 +190,18 @@ public class ClinicDashboardController {
         return ApiResponse.success("Appointment created successfully", null);
     }
 
+    @PutMapping("/appointments/{appointmentId}")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN
+            + "') and @securityService.isClinicManagerOf(#clinicId)")
+    public ApiResponse<Void> updateAppointment(
+            @PathVariable Long clinicId,
+            @PathVariable Long appointmentId,
+            @RequestBody com.project.dto.request.DoctorCreateAppointmentRequest request) {
+
+        clinicDashboardService.updateAppointment(clinicId, appointmentId, request);
+        return ApiResponse.success("Appointment updated successfully", null);
+    }
+
     @PostMapping("/patients/{patientId}/notify")
     @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN
             + "') and @securityService.isClinicManagerOf(#clinicId)")

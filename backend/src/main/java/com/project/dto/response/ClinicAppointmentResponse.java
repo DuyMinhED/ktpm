@@ -21,4 +21,5 @@ public class ClinicAppointmentResponse {
     private String doctorAvatarUrl;
     private String patientAvatarUrl;
     private String reason;
+    private Long patientId;
 }

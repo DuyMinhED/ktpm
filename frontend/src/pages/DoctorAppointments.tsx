@@ -280,8 +280,8 @@ export default function DoctorAppointments() {
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => setIsRescheduleModalOpen(true)}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-slate-900 font-bold text-sm rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-                                <span className="material-symbols-outlined text-lg">add_circle</span>
+                                className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-bold text-sm rounded-full hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                                <span className="material-symbols-outlined text-lg">calendar_add_on</span>
                                 <span>Thêm lịch hẹn mới</span>
                             </button>
                         </div>
@@ -291,7 +291,7 @@ export default function DoctorAppointments() {
                         <div
                             className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
                             <div className="flex items-center justify-between mb-2">
-                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng lịch hẹn hôm nay
+                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng lịch hẹn
                                 </p>
                                 <div
                                     className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">

@@ -14,6 +14,7 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
   const [timeRange, setTimeRange] = useState('30 ngày qua');
   const [detailData, setDetailData] = useState<any>(null);
   const [activeDetailData, setActiveDetailData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (detailData) {
@@ -29,12 +30,15 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
       document.body.style.overflow = 'hidden';
       const fetchDetail = async () => {
         try {
+          setIsLoading(true);
           const res = await doctorApi.getPatientDetail(Number(targetId));
           if (res.success) {
             setDetailData(res.data);
           }
         } catch (e) {
           console.error("Failed to fetch patient detail", e);
+        } finally {
+          setIsLoading(false);
         }
       };
       fetchDetail();
@@ -437,320 +441,484 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
 
               {/* Scrollable Content */}
               <div className="flex-1 overflow-y-auto p-8 custom-scrollbar modal-scroll-area">
-                <div className="space-y-8">
-                  {/* Header */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pr-8">
-                    <div className="flex items-center gap-4">
-                      <h2 className="text-[20px] font-medium text-slate-900 dark:text-white">Chi tiết hồ sơ bệnh án</h2>
-                    </div>
-                    <div className="flex flex-wrap gap-2 no-print">
-                      <button
-                        onClick={handlePrint}
-                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl hover:bg-slate-50 text-sm font-semibold transition-all"
-                      >
-                        <span className="material-symbols-outlined text-lg">print</span>
-                        Xuất PDF / In báo cáo
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Patient Summary Card */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-6">
-                      <div className="relative shrink-0">
-                        <img
-                          className="size-32 rounded-2xl object-cover"
-                          src={profile?.avatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(profile?.fullName || 'P') + "&background=random"}
-                          alt={profile?.fullName}
-                        />
+                {isLoading ? (
+                    <div className="space-y-8 animate-pulse">
+                      {/* Header */}
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pr-8">
+                        <div className="flex items-center gap-4">
+                          <div className="h-7 bg-slate-200 dark:bg-slate-800 rounded-lg w-48"></div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <div className="h-10 bg-slate-200 dark:bg-slate-800 rounded-xl w-44"></div>
+                        </div>
                       </div>
-                      <div className="flex-1 space-y-4">
-                        <div>
-                          <div className="flex items-center gap-3 flex-wrap">
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{profile?.fullName || 'Nguyễn Văn A'}</h2>
-                            <span
-                              className={`px-3 py-1 text-[13px] font-bold rounded-full tracking-wide border ${String(currentRisk).includes('Nguy cơ cao') ? 'bg-red-50 text-red-500 border-red-100' :
-                                String(currentRisk).includes('Theo dõi') ? 'bg-orange-50 text-orange-500 border-orange-100' :
-                                  'bg-green-50 text-green-500 border-green-100'
-                                }`}>
-                              {currentRisk}
-                            </span>
-                          </div>
-                          <div className="flex flex-col gap-0.5 mt-1">
-                            <p className="text-slate-500 text-sm">Giới tính: {profile?.gender === 'MALE' ? 'Nam' : profile?.gender === 'FEMALE' ? 'Nữ' : (profile?.gender || 'Khác')}</p>
-                            <p className="text-slate-500 text-sm">Tuổi: {profile?.age || '65'}</p>
-                            <p className="text-slate-500 text-sm">Mã bệnh nhân: {profile?.patientCode || 'BN0892'}</p>
+
+                      {/* Patient Summary Card */}
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-6">
+                          <div className="size-32 rounded-2xl bg-slate-200 dark:bg-slate-800 shrink-0"></div>
+                          <div className="flex-1 space-y-4">
+                            <div>
+                              <div className="flex items-center gap-3 flex-wrap">
+                                <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded w-48"></div>
+                                <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded-full w-20"></div>
+                              </div>
+                              <div className="space-y-2 mt-3">
+                                <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-32"></div>
+                                <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-24"></div>
+                                <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-40"></div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
+                              <div className="space-y-2">
+                                <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-16"></div>
+                                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-24"></div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-12"></div>
+                                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-20"></div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-16"></div>
+                                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-10"></div>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                          <div className="space-y-1">
-                            <p className="text-xs text-slate-400 uppercase font-bold">Bệnh lý nền</p>
-                            <p className="text-sm font-semibold">{profile?.chronicCondition || 'Cao huyết áp'}</p>
+                        <div className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 border border-primary/20 flex flex-col justify-between">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-2">
+                              <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-32"></div>
+                              <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-48"></div>
+                            </div>
+                            <div className="size-10 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
                           </div>
-                          <div className="space-y-1">
-                            <p className="text-xs text-slate-400 uppercase font-bold">Dị ứng</p>
-                            <p className="text-sm font-semibold text-red-500">{(Array.isArray(profile?.allergies) ? profile.allergies.join(', ') : profile?.allergies) || 'Không'}</p>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-xs text-slate-400 uppercase font-bold">Nhóm máu</p>
-                            <p className="text-sm font-semibold">{profile?.bloodType || 'N/A'}</p>
+                          <div className="flex flex-col gap-2 mt-6">
+                            <div className="h-11 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700"></div>
+                            <div className="h-11 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700"></div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 border border-primary/20 flex flex-col justify-between">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <h3 className="font-bold text-slate-900 dark:text-white">Thao tác nhanh</h3>
-                          <p className="text-[13px] text-slate-500 leading-relaxed">Kết nối trực tiếp với bệnh nhân</p>
-                        </div>
-                        <div className="size-10 bg-primary/20 text-primary rounded-lg flex items-center justify-center">
-                          <span className="material-symbols-outlined">auto_awesome</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2 mt-4">
-                        {(() => {
-                          const rawRole = localStorage.getItem('userRole') || localStorage.getItem('role') || '';
-                          const role = rawRole.replace('ROLE_', '');
-                          const isClinicManager = role === 'CLINIC_MANAGER';
-                          const isDoctor = role === 'DOCTOR';
 
-                          return (
-                            <>
-                              <button
-                                onClick={() => {
-                                  if (isClinicManager) {
-                                    window.location.href = '/clinic/appointments';
-                                  } else {
-                                    window.location.href = '/doctor/appointments';
-                                  }
-                                }}
-                                className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:shadow-md transition-all group"
-                              >
-                                <span className="flex items-center gap-2">
-                                  <span className="material-symbols-outlined text-primary">event_available</span>
-                                  Đặt lịch khám mới
-                                </span>
-                                <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
-                              </button>
-
-                              {isDoctor && (
-                                <button
-                                  onClick={() => window.location.href = '/doctor/messages'}
-                                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:shadow-md transition-all group"
-                                >
-                                  <span className="flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-primary">forum</span>
-                                    Gửi tin nhắn tư vấn
-                                  </span>
-                                  <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
-                                </button>
-                              )}
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Vitals Dashboard */}
-                  <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="material-symbols-outlined text-red-500">blood_pressure</span>
-                        {renderStatusBadge(metrics.find((i: any) => i.metricType === 'BLOOD_PRESSURE')?.status)}
-                      </div>
-                      <p className="text-slate-400 text-[13px] font-medium">Huyết áp</p>
-                      <div className="flex items-baseline gap-1 mt-1">
-                        <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">
-                          {(() => {
-                            const m = metrics.find((i: any) => i.metricType === 'BLOOD_PRESSURE');
-                            return m ? `${m.value}/${m.valueSecondary || '?'}` : 'N/A';
-                          })()}
-                        </h4>
-                        <span className="text-[12px] text-slate-400 font-medium ml-1">mmHg</span>
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="material-symbols-outlined text-amber-500">bloodtype</span>
-                        {renderStatusBadge(metrics.find((i: any) => i.metricType === 'BLOOD_SUGAR')?.status)}
-                      </div>
-                      <p className="text-slate-400 text-[13px] font-medium">Đường huyết</p>
-                      <div className="flex items-baseline gap-1 mt-1">
-                        <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">
-                          {metrics.find((i: any) => i.metricType === 'BLOOD_SUGAR')?.value || 'N/A'}
-                        </h4>
-                        <span className="text-[12px] text-slate-400 font-medium ml-1">mmol/L</span>
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="material-symbols-outlined text-primary">favorite</span>
-                        {renderStatusBadge(metrics.find((m: any) => m.metricType === 'HEART_RATE')?.status)}
-                      </div>
-                      <p className="text-slate-400 text-[13px] font-medium">Nhịp tim</p>
-                      <div className="flex items-baseline gap-1 mt-1">
-                        <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{metrics.find((m: any) => m.metricType === 'HEART_RATE')?.value || 'N/A'}</h4>
-                        <span className="text-[12px] text-slate-400 font-medium ml-1">bpm</span>
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="material-symbols-outlined text-blue-500">air</span>
-                        {renderStatusBadge(metrics.find((m: any) => m.metricType === 'SPO2')?.status)}
-                      </div>
-                      <p className="text-slate-400 text-[13px] font-medium">SpO2</p>
-                      <div className="flex items-baseline gap-1 mt-1">
-                        <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{metrics.find((m: any) => m.metricType === 'SPO2')?.value || 'N/A'}</h4>
-                        <span className="text-[12px] text-slate-400 font-medium ml-1">%</span>
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="material-symbols-outlined text-purple-500">body_fat</span>
-                        <span className="text-[13px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">BMI</span>
-                      </div>
-                      <p className="text-slate-400 text-[13px] font-medium">BMI</p>
-                      <div className="flex items-baseline gap-1 mt-1">
-                        <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">
-                          {profile?.weightKg && profile?.heightCm 
-                            ? (profile.weightKg / ((profile.heightCm/100)**2)).toFixed(1) 
-                            : 'N/A'}
-                        </h4>
-                        <span className="text-[12px] text-slate-400 font-medium ml-1">kg/m²</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Main Grid */}
-                  <div className="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-8 pb-12">
-                    {/* Left: Charts & History */}
-                    <div className="xl:col-span-2 space-y-8">
-                      {/* Chart Section */}
-                      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center justify-between mb-8">
-                          <div>
-                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Xu hướng chỉ số (30 ngày)</h3>
-                            <p className="text-sm text-slate-500">Biểu đồ so sánh Huyết áp & Đường huyết</p>
+                      {/* Vitals Dashboard */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        {[...Array(5)].map((_, i) => (
+                          <div key={i} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-3">
+                            <div className="flex justify-between items-center">
+                              <div className="size-6 bg-slate-200 dark:bg-slate-800 rounded-md"></div>
+                              <div className="w-12 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                            </div>
+                            <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-16"></div>
+                            <div className="flex items-baseline gap-2">
+                              <div className="h-7 bg-slate-200 dark:bg-slate-800 rounded w-20"></div>
+                              <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-8"></div>
+                            </div>
                           </div>
-                          <div className="relative">
-                            <Dropdown
-                              options={['30 ngày qua', '90 ngày qua']}
-                              value={timeRange}
-                              onChange={setTimeRange}
-                              className="w-44"
+                        ))}
+                      </div>
+
+                      {/* Main Grid */}
+                      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 pb-12">
+                        {/* Left */}
+                        <div className="xl:col-span-2 space-y-8">
+                          {/* Chart */}
+                          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
+                            <div className="flex justify-between items-center">
+                              <div className="space-y-2">
+                                <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-48"></div>
+                                <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-64"></div>
+                              </div>
+                              <div className="h-10 bg-slate-200 dark:bg-slate-800 rounded w-36"></div>
+                            </div>
+                            <div className="h-64 bg-slate-50 dark:bg-slate-800/50 rounded-xl"></div>
+                            <div className="flex gap-4 pt-2">
+                              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-24"></div>
+                              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-24"></div>
+                            </div>
+                          </div>
+
+                          {/* History Timeline */}
+                          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
+                            <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-40"></div>
+                            <div className="space-y-6">
+                              {[...Array(3)].map((_, i) => (
+                                <div key={i} className="flex gap-4">
+                                  <div className="size-6 bg-slate-200 dark:bg-slate-800 rounded-full shrink-0"></div>
+                                  <div className="flex-1 space-y-2">
+                                    <div className="flex justify-between">
+                                      <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-24"></div>
+                                      <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-20"></div>
+                                    </div>
+                                    <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+                                    <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-1/2"></div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right */}
+                        <div className="space-y-8">
+                          {/* Current Medications */}
+                          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
+                            <div className="flex justify-between items-center">
+                              <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-36"></div>
+                              <div className="size-8 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+                            </div>
+                            <div className="space-y-4">
+                              {[...Array(2)].map((_, i) => (
+                                <div key={i} className="p-5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-2">
+                                  <div className="flex justify-between">
+                                    <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-32"></div>
+                                    <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-16"></div>
+                                  </div>
+                                  <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-48"></div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Notes */}
+                          <div className="bg-red-50/30 dark:bg-red-900/10 rounded-2xl p-6 border border-red-100/50 dark:border-red-900/20 space-y-4">
+                            <div className="flex items-center gap-3">
+                              <div className="size-5 bg-red-200/50 dark:bg-red-900/30 rounded-full"></div>
+                              <div className="h-5 bg-red-200/50 dark:bg-red-900/30 rounded w-36"></div>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="h-4 bg-red-100/50 dark:bg-red-900/20 rounded w-full"></div>
+                              <div className="h-4 bg-red-100/50 dark:bg-red-900/20 rounded w-5/6"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-8">
+                      {/* Header */}
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pr-8">
+                        <div className="flex items-center gap-4">
+                          <h2 className="text-[20px] font-medium text-slate-900 dark:text-white">Chi tiết hồ sơ bệnh án</h2>
+                        </div>
+                        <div className="flex flex-wrap gap-2 no-print">
+                          <button
+                            onClick={handlePrint}
+                            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl hover:bg-slate-50 text-sm font-semibold transition-all"
+                          >
+                            <span className="material-symbols-outlined text-lg">print</span>
+                            Xuất PDF / In báo cáo
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Patient Summary Card */}
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-6">
+                          <div className="relative shrink-0">
+                            <img
+                              className="size-32 rounded-2xl object-cover"
+                              src={profile?.avatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(profile?.fullName || 'P') + "&background=random"}
+                              alt={profile?.fullName}
                             />
                           </div>
-                        </div>
-                        <div className="h-64 relative w-full overflow-hidden border-b border-slate-100 dark:border-slate-800">
-                          {(!metrics || metrics.length === 0) ? (
-                            <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">Chưa đủ dữ liệu để vẽ biểu đồ</div>
-                          ) : (
-                            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 200">
-                              <line x1="0" y1="20" x2="800" y2="20" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />
-                              <line x1="0" y1="90" x2="800" y2="90" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />
-                              <line x1="0" y1="160" x2="800" y2="160" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />
-                              
-                              {glucoseFillPath && <path className="fill-primary/5" d={glucoseFillPath} />}
-                              {glucosePath && <path d={glucosePath} fill="none" stroke="#4ade80" strokeWidth="3" className="drop-shadow-sm" />}
-                              {bpPath && <path d={bpPath} fill="none" stroke="#ef4444" strokeDasharray="5,5" strokeWidth="2" />}
-                            </svg>
-                          )}
-                          <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] text-slate-400 font-extrabold tracking-wider pt-4 px-2">
-                            {timelineLabels.map((label, idx) => <span key={idx}>{label}</span>)}
-                          </div>
-                        </div>
-                        <div className="flex gap-6 mt-8 pt-6 border-t border-slate-50 dark:border-slate-800">
-                          <div className="flex items-center gap-2">
-                            <span className="size-3 rounded-full bg-red-500"></span>
-                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Huyết áp tâm thu</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="size-3 rounded-full bg-primary"></span>
-                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Đường huyết</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Medical History Timeline */}
-                      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                        <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">Lịch sử khám bệnh</h3>
-                        <div className="space-y-8 relative before:absolute before:inset-y-0 before:left-[11px] before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
-                          {appointments.length > 0 ? (
-                            appointments.slice(0, 5).map((app: any, idx: number) => (
-                              <div key={idx} className="relative pl-10">
-                                <div className={`absolute left-0 top-1 size-6 ${app.status === 'COMPLETED' ? 'bg-primary/20' : 'bg-slate-200'} rounded-full flex items-center justify-center`}>
-                                  <div className={`size-2.5 ${app.status === 'COMPLETED' ? 'bg-primary' : 'bg-slate-400'} rounded-full`}></div>
-                                </div>
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                  <p className="text-xs font-bold text-slate-400 uppercase">{new Date(app.appointmentTime).toLocaleDateString('vi-VN')}</p>
-                                  <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] rounded uppercase font-bold">{app.appointmentType}</span>
-                                </div>
-                                <h4 className="font-bold text-slate-900 dark:text-white mt-1">{app.reason}</h4>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">Trạng thái: {app.status}</p>
+                          <div className="flex-1 space-y-4">
+                            <div>
+                              <div className="flex items-center gap-3 flex-wrap">
+                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{profile?.fullName || 'Nguyễn Văn A'}</h2>
+                                <span
+                                  className={`px-3 py-1 text-[13px] font-bold rounded-full tracking-wide border ${String(currentRisk).includes('Nguy cơ cao') ? 'bg-red-50 text-red-500 border-red-100' :
+                                    String(currentRisk).includes('Theo dõi') ? 'bg-orange-50 text-orange-500 border-orange-100' :
+                                      'bg-green-50 text-green-500 border-green-100'
+                                    }`}>
+                                  {currentRisk}
+                                </span>
                               </div>
-                            ))
-                          ) : (
-                            <p className="text-sm text-slate-400 pl-10">Không có lịch sử khám bệnh</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right: Medications & Notes */}
-                    <div className="space-y-8">
-                      {/* Current Medications */}
-                      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center justify-between mb-6">
-                          <h3 className="font-bold text-lg text-slate-900 dark:text-white">Đơn thuốc hiện tại</h3>
-                          <span className="size-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-slate-400">
-                            <span className="material-symbols-outlined text-xl">pill</span>
-                          </span>
-                        </div>
-                        <div className="space-y-4">
-                          {prescriptions.filter((p: any) => p.status === 'ACTIVE').length > 0 ? (
-                            prescriptions.filter((p: any) => p.status === 'ACTIVE')[0].items.map((item: any, idx: number) => (
-                              <div key={idx} className="p-5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
-                                <div className="flex justify-between items-start">
-                                  <h4 className="font-bold text-[17px] text-slate-900 dark:text-white leading-tight">{item.medicationName}</h4>
-                                  <span className="text-[11px] font-bold text-sky-500 uppercase">ĐANG DÙNG</span>
-                                </div>
-                                <p className="text-[14px] text-slate-500 mt-2 font-medium">{item.dosage} - {item.usageInstructions}</p>
+                              <div className="flex flex-col gap-0.5 mt-1">
+                                <p className="text-slate-500 text-sm">Giới tính: {profile?.gender === 'MALE' ? 'Nam' : profile?.gender === 'FEMALE' ? 'Nữ' : (profile?.gender || 'Khác')}</p>
+                                <p className="text-slate-500 text-sm">Tuổi: {profile?.age || '65'}</p>
+                                <p className="text-slate-500 text-sm">Mã bệnh nhân: {profile?.patientCode || 'BN0892'}</p>
                               </div>
-                            ))
-                          ) : (
-                            <p className="text-sm text-slate-400 italic">Không có đơn thuốc đang hoạt động</p>
-                          )}
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                              <div className="space-y-1">
+                                <p className="text-xs text-slate-400 uppercase font-bold">Bệnh lý nền</p>
+                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile?.chronicCondition || 'Cao huyết áp'}</p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-xs text-slate-400 uppercase font-bold">Dị ứng</p>
+                                <p className="text-sm font-semibold text-red-500">{(Array.isArray(profile?.allergies) ? profile.allergies.join(', ') : profile?.allergies) || 'Không'}</p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-xs text-slate-400 uppercase font-bold">Nhóm máu</p>
+                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile?.bloodType || 'N/A'}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 border border-primary/20 flex flex-col justify-between">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-1">
+                              <h3 className="font-bold text-slate-900 dark:text-white">Thao tác nhanh</h3>
+                              <p className="text-[13px] text-slate-500 leading-relaxed">Kết nối trực tiếp với bệnh nhân</p>
+                            </div>
+                            <div className="size-10 bg-primary/20 text-primary rounded-lg flex items-center justify-center">
+                              <span className="material-symbols-outlined">auto_awesome</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2 mt-4">
+                            {(() => {
+                              const rawRole = localStorage.getItem('userRole') || localStorage.getItem('role') || '';
+                              const role = rawRole.replace('ROLE_', '');
+                              const isClinicManager = role === 'CLINIC_MANAGER';
+                              const isDoctor = role === 'DOCTOR';
+
+                              return (
+                                <>
+                                  <button
+                                    onClick={() => {
+                                      if (isClinicManager) {
+                                        window.location.href = '/clinic/appointments';
+                                      } else {
+                                        window.location.href = '/doctor/appointments';
+                                      }
+                                    }}
+                                    className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:shadow-md transition-all group"
+                                  >
+                                    <span className="flex items-center gap-2">
+                                      <span className="material-symbols-outlined text-primary">event_available</span>
+                                      Đặt lịch khám mới
+                                    </span>
+                                    <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                                  </button>
+
+                                  {isDoctor && (
+                                    <button
+                                      onClick={() => window.location.href = '/doctor/messages'}
+                                      className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:shadow-md transition-all group"
+                                    >
+                                      <span className="flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary">forum</span>
+                                        Gửi tin nhắn tư vấn
+                                      </span>
+                                      <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                                    </button>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
                         </div>
                       </div>
 
-                      {/* Notes/Alerts Section */}
-                      <div className="bg-red-50 dark:bg-red-900/10 rounded-2xl p-6 border border-red-100 dark:border-red-900/30">
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className="material-symbols-outlined text-red-500">warning</span>
-                          <h3 className="font-bold text-red-900 dark:text-red-400">Ghi chú quan trọng</h3>
+                      {/* Vitals Dashboard */}
+                      <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="material-symbols-outlined text-red-500">blood_pressure</span>
+                            {renderStatusBadge(metrics.find((i: any) => i.metricType === 'BLOOD_PRESSURE')?.status)}
+                          </div>
+                          <p className="text-slate-400 text-[13px] font-medium">Huyết áp</p>
+                          <div className="flex items-baseline gap-1 mt-1">
+                            <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">
+                              {(() => {
+                                const m = metrics.find((i: any) => i.metricType === 'BLOOD_PRESSURE');
+                                return m ? `${m.value}/${m.valueSecondary || '?'}` : 'N/A';
+                              })()}
+                            </h4>
+                            <span className="text-[12px] text-slate-400 font-medium ml-1">mmHg</span>
+                          </div>
                         </div>
-                        <ul className="space-y-3">
-                          {profile?.clinicalNotes ? (
-                              String(profile.clinicalNotes).split('\n').map((note: string, idx: number) => note.trim() && (
-                                  <li key={idx} className="flex gap-3 text-sm text-red-700 dark:text-red-300">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="material-symbols-outlined text-amber-500">bloodtype</span>
+                            {renderStatusBadge(metrics.find((i: any) => i.metricType === 'BLOOD_SUGAR')?.status)}
+                          </div>
+                          <p className="text-slate-400 text-[13px] font-medium">Đường huyết</p>
+                          <div className="flex items-baseline gap-1 mt-1">
+                            <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">
+                              {metrics.find((i: any) => i.metricType === 'BLOOD_SUGAR')?.value || 'N/A'}
+                            </h4>
+                            <span className="text-[12px] text-slate-400 font-medium ml-1">mmol/L</span>
+                          </div>
+                        </div>
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="material-symbols-outlined text-primary">favorite</span>
+                            {renderStatusBadge(metrics.find((m: any) => m.metricType === 'HEART_RATE')?.status)}
+                          </div>
+                          <p className="text-slate-400 text-[13px] font-medium">Nhịp tim</p>
+                          <div className="flex items-baseline gap-1 mt-1">
+                            <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{metrics.find((m: any) => m.metricType === 'HEART_RATE')?.value || 'N/A'}</h4>
+                            <span className="text-[12px] text-slate-400 font-medium ml-1">bpm</span>
+                          </div>
+                        </div>
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="material-symbols-outlined text-blue-500">air</span>
+                            {renderStatusBadge(metrics.find((m: any) => m.metricType === 'SPO2')?.status)}
+                          </div>
+                          <p className="text-slate-400 text-[13px] font-medium">SpO2</p>
+                          <div className="flex items-baseline gap-1 mt-1">
+                            <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">{metrics.find((m: any) => m.metricType === 'SPO2')?.value || 'N/A'}</h4>
+                            <span className="text-[12px] text-slate-400 font-medium ml-1">%</span>
+                          </div>
+                        </div>
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="material-symbols-outlined text-purple-500">body_fat</span>
+                            <span className="text-[13px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">BMI</span>
+                          </div>
+                          <p className="text-slate-400 text-[13px] font-medium">BMI</p>
+                          <div className="flex items-baseline gap-1 mt-1">
+                            <h4 className="text-[22px] font-bold text-slate-900 dark:text-white">
+                              {profile?.weightKg && profile?.heightCm 
+                                ? (profile.weightKg / ((profile.heightCm/100)**2)).toFixed(1) 
+                                : 'N/A'}
+                            </h4>
+                            <span className="text-[12px] text-slate-400 font-medium ml-1">kg/m²</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Main Grid */}
+                      <div className="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-8 pb-12">
+                        {/* Left: Charts & History */}
+                        <div className="xl:col-span-2 space-y-8">
+                          {/* Chart Section */}
+                          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center justify-between mb-8">
+                              <div>
+                                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Xu hướng chỉ số (30 ngày)</h3>
+                                <p className="text-sm text-slate-500">Biểu đồ so sánh Huyết áp & Đường huyết</p>
+                              </div>
+                              <div className="relative">
+                                <Dropdown
+                                  options={['30 ngày qua', '90 ngày qua']}
+                                  value={timeRange}
+                                  onChange={setTimeRange}
+                                  className="w-44"
+                                />
+                              </div>
+                            </div>
+                            <div className="h-64 relative w-full overflow-hidden border-b border-slate-100 dark:border-slate-800">
+                              {(!metrics || metrics.length === 0) ? (
+                                <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">Chưa đủ dữ liệu để vẽ biểu đồ</div>
+                              ) : (
+                                <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 200">
+                                  <line x1="0" y1="20" x2="800" y2="20" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />
+                                  <line x1="0" y1="90" x2="800" y2="90" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />
+                                  <line x1="0" y1="160" x2="800" y2="160" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />
+                                  
+                                  {glucoseFillPath && <path className="fill-primary/5" d={glucoseFillPath} />}
+                                  {glucosePath && <path d={glucosePath} fill="none" stroke="#4ade80" strokeWidth="3" className="drop-shadow-sm" />}
+                                  {bpPath && <path d={bpPath} fill="none" stroke="#ef4444" strokeDasharray="5,5" strokeWidth="2" />}
+                                </svg>
+                              )}
+                              <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] text-slate-400 font-extrabold tracking-wider pt-4 px-2">
+                                {timelineLabels.map((label, idx) => <span key={idx}>{label}</span>)}
+                              </div>
+                            </div>
+                            <div className="flex gap-6 mt-8 pt-6 border-t border-slate-50 dark:border-slate-800">
+                              <div className="flex items-center gap-2">
+                                <span className="size-3 rounded-full bg-red-500"></span>
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Huyết áp tâm thu</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="size-3 rounded-full bg-primary"></span>
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Đường huyết</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Medical History Timeline */}
+                          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">Lịch sử khám bệnh</h3>
+                            <div className="space-y-8 relative before:absolute before:inset-y-0 before:left-[11px] before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
+                              {appointments.length > 0 ? (
+                                appointments.slice(0, 5).map((app: any, idx: number) => (
+                                  <div key={idx} className="relative pl-10">
+                                    <div className={`absolute left-0 top-1 size-6 ${app.status === 'COMPLETED' ? 'bg-primary/20' : 'bg-slate-200'} rounded-full flex items-center justify-center`}>
+                                      <div className={`size-2.5 ${app.status === 'COMPLETED' ? 'bg-primary' : 'bg-slate-400'} rounded-full`}></div>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                      <p className="text-xs font-bold text-slate-400 uppercase">{new Date(app.appointmentTime).toLocaleDateString('vi-VN')}</p>
+                                      <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] rounded uppercase font-bold">
+                                        {app.appointmentType === 'ONLINE' ? 'Online' : app.appointmentType === 'IN_PERSON' ? 'Trực tiếp' : app.appointmentType}
+                                      </span>
+                                    </div>
+                                    <h4 className="font-bold text-slate-900 dark:text-white mt-1">{app.reason}</h4>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                                      Trạng thái: {
+                                        app.status === 'COMPLETED' ? 'Đã hoàn thành' :
+                                        app.status === 'CANCELLED' ? 'Đã hủy' :
+                                        app.status === 'SCHEDULED' ? 'Đã lên lịch' :
+                                        app.status === 'PENDING' ? 'Chờ xác nhận' :
+                                        app.status
+                                      }
+                                    </p>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-sm text-slate-400 pl-10">Không có lịch sử khám bệnh</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right: Medications & Notes */}
+                        <div className="space-y-8">
+                          {/* Current Medications */}
+                          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center justify-between mb-6">
+                              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Đơn thuốc hiện tại</h3>
+                              <span className="size-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-slate-400">
+                                <span className="material-symbols-outlined text-xl">pill</span>
+                              </span>
+                            </div>
+                            <div className="space-y-4">
+                              {prescriptions.filter((p: any) => p.status === 'ACTIVE').length > 0 ? (
+                                prescriptions.filter((p: any) => p.status === 'ACTIVE')[0].items.map((item: any, idx: number) => (
+                                  <div key={idx} className="p-5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                                    <div className="flex justify-between items-start">
+                                      <h4 className="font-bold text-[17px] text-slate-900 dark:text-white leading-tight">{item.medicationName}</h4>
+                                      <span className="text-[11px] font-bold text-sky-500 uppercase">ĐANG DÙNG</span>
+                                    </div>
+                                    <p className="text-[14px] text-slate-500 mt-2 font-medium">{item.dosage} - {item.usageInstructions}</p>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-sm text-slate-400 italic">Không có đơn thuốc đang hoạt động</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Notes/Alerts Section */}
+                          <div className="bg-red-50 dark:bg-red-900/10 rounded-2xl p-6 border border-red-100 dark:border-red-900/30">
+                            <div className="flex items-center gap-3 mb-4">
+                              <span className="material-symbols-outlined text-red-500">warning</span>
+                              <h3 className="font-bold text-red-900 dark:text-red-400">Ghi chú quan trọng</h3>
+                            </div>
+                            <ul className="space-y-3">
+                              {profile?.clinicalNotes ? (
+                                  String(profile.clinicalNotes).split('\n').map((note: string, idx: number) => note.trim() && (
+                                      <li key={idx} className="flex gap-3 text-sm text-red-700 dark:text-red-300">
+                                        <span className="material-symbols-outlined text-sm mt-1">circle</span>
+                                        {note}
+                                      </li>
+                                  ))
+                              ) : (
+                                  <li className="flex gap-3 text-sm text-red-700 dark:text-red-300">
                                     <span className="material-symbols-outlined text-sm mt-1">circle</span>
-                                    {note}
+                                    Chưa có ghi chú đặc biệt nào.
                                   </li>
-                              ))
-                          ) : (
-                              <li className="flex gap-3 text-sm text-red-700 dark:text-red-300">
-                                <span className="material-symbols-outlined text-sm mt-1">circle</span>
-                                Chưa có ghi chú đặc biệt nào.
-                              </li>
-                          )}
-                        </ul>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
-              </div>
             </motion.div>
           </div>
         )}

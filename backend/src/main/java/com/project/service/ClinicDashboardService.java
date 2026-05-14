@@ -18,4 +18,6 @@ public interface ClinicDashboardService {
         void updateAppointmentStatus(Long clinicId, Long appointmentId, String status);
 
         void createAppointment(Long clinicId, com.project.dto.request.DoctorCreateAppointmentRequest request);
+
+        void updateAppointment(Long clinicId, Long appointmentId, com.project.dto.request.DoctorCreateAppointmentRequest request);
 }
