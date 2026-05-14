@@ -214,7 +214,7 @@ export default function EditPatientModal({
                 <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-20">
                     <div className="flex items-center gap-4 text-left">
                         <div>
-                            <h2 className="text-[20px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">Cập nhật hồ sơ bệnh nhân</h2>
+                            <h2 className="text-[20px] font-semibold text-slate-800 dark:text-white tracking-tight leading-tight">Cập nhật hồ sơ bệnh nhân</h2>
                         </div>
                     </div>
                 </div>
@@ -237,9 +237,9 @@ export default function EditPatientModal({
                             </div>
 
                             <div className="bg-white dark:bg-slate-900 p-4 lg:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-5 gap-y-3">
                                     {/* Avatar Upload */}
-                                    <div className="md:col-span-2 lg:col-span-3 flex items-center gap-5 pb-2 mb-1 border-b border-slate-50 dark:border-slate-800/50">
+                                    <div className="md:col-span-2 lg:col-span-2 flex items-center gap-5 pb-2 mb-1 border-b border-slate-50 dark:border-slate-800/50">
                                         <div
                                             onClick={() => !isUploadingImage && document.getElementById('avatar-input-edit-patient')?.click()}
                                             className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center cursor-pointer overflow-hidden group relative transition-all hover:border-primary shrink-0"
@@ -545,7 +545,7 @@ export default function EditPatientModal({
                                 <h3 className="font-bold text-slate-500 dark:text-slate-100 text-[15px] italic-none ml-1">Hồ sơ bệnh lý & Phân công</h3>
                             </div>
 
-                            <div className="bg-white dark:bg-slate-900 p-4 lg:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            <div className="bg-white dark:bg-slate-900 p-4 lg:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
                                 <div className="space-y-1.5">
                                     <label className="text-[14px] font-medium text-slate-500 ml-1">Nhóm bệnh chính</label>
                                     <Dropdown
@@ -580,15 +580,18 @@ export default function EditPatientModal({
                                         onChange={(treatmentStatus: string) => setFormData(prev => ({ ...prev, treatmentStatus }))}
                                     />
                                 </div>
-                                <div className="lg:col-span-3 space-y-1.5">
+                                <div className="lg:col-span-2 space-y-1.5">
                                     <label className="text-[14px] font-medium text-slate-500 ml-1">Ghi chú lâm sàng</label>
-                                    <textarea
-                                        name="notes"
-                                        value={formData.notes}
-                                        onChange={handleChange}
-                                        rows={3}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium outline-none text-slate-700 focus:border-primary resize-none custom-scrollbar"
-                                    ></textarea>
+                                    <div className="relative">
+                                        <span className="material-symbols-outlined absolute left-4 top-3 text-[20px] text-slate-400 z-10 pointer-events-none">description</span>
+                                        <textarea
+                                            name="notes"
+                                            value={formData.notes}
+                                            onChange={handleChange}
+                                            rows={3}
+                                            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium outline-none text-slate-700 focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 resize-none custom-scrollbar transition-all"
+                                        ></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>

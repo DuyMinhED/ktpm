@@ -237,9 +237,9 @@ export default function ClinicPatients() {
                             ) : (
                                 <button
                                     onClick={() => setIsCreateModalOpen(true)}
-                                    className="bg-primary text-white px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all font-display whitespace-nowrap group shadow-sm"
+                                    className="bg-primary text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all font-display whitespace-nowrap group shadow-sm"
                                 >
-                                    <span className="material-symbols-outlined text-[20px]">add</span>
+                                    <span className="material-symbols-outlined text-[20px]">person_add</span>
                                     Thêm bệnh nhân mới
                                 </button>
                             )}
@@ -247,7 +247,7 @@ export default function ClinicPatients() {
 
                         {/* Stats Summary - Separated Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 italic-none mb-6">
-                            {isLoading || !stats ? (
+                            {!stats ? (
                                 [...Array(3)].map((_, i) => (
                                     <div key={i} className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-primary/5 shadow-sm space-y-4 animate-pulse">
                                         <div className="flex items-center justify-between">
@@ -273,8 +273,8 @@ export default function ClinicPatients() {
                                             </span>
                                         </div>
                                         <div className="text-left">
-                                            <p className="text-[12px] md:text-[14px] font-medium text-slate-500 mb-0.5">Hiệu suất khám bệnh</p>
-                                            <h4 className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white leading-tight">{stats?.totalPatients || '0'} <span className="text-xs md:text-sm font-medium text-slate-600">ca</span></h4>
+                                            <p className="text-[13.5px] md:text-[16px] font-semibold text-slate-500 mb-1">Hiệu suất khám bệnh</p>
+                                            <h4 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">{stats?.totalPatients || '0'} <span className="text-[13px] md:text-[15.5px] font-bold text-slate-500 ml-0.5">ca</span></h4>
                                         </div>
                                     </div>
 
@@ -287,8 +287,8 @@ export default function ClinicPatients() {
                                             <span className="px-3 py-1 bg-slate-50 text-slate-500 text-[10px] font-bold rounded-full uppercase tracking-wider border border-slate-200/50">Thời gian thực</span>
                                         </div>
                                         <div className="text-left">
-                                            <p className="text-[12px] md:text-[14px] font-medium text-slate-600 mb-0.5">Ca nguy cơ cao</p>
-                                            <h4 className="text-lg md:text-2xl font-bold text-red-500 leading-tight">{stats?.highRiskAlerts || '0'} <span className="text-xs md:text-sm font-medium text-red-300">cảnh báo</span></h4>
+                                            <p className="text-[13.5px] md:text-[16px] font-semibold text-slate-500 mb-1">Ca nguy cơ cao</p>
+                                            <h4 className="text-xl md:text-3xl font-black text-red-500 leading-tight tracking-tight">{stats?.highRiskAlerts || '0'} <span className="text-[13px] md:text-[15.5px] font-bold text-red-400/90 ml-0.5">cảnh báo</span></h4>
                                         </div>
                                     </div>
 
@@ -301,8 +301,8 @@ export default function ClinicPatients() {
                                             <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-full uppercase tracking-wider border border-emerald-100/50">{stats?.highRiskGrowth || '+0 ca'} mới</span>
                                         </div>
                                         <div className="text-left">
-                                            <p className="text-[12px] md:text-[14px] font-medium text-slate-600 mb-0.5">Chờ tái khám</p>
-                                            <h4 className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white leading-tight">{stats?.pendingFollowUps || '0'} <span className="text-xs md:text-sm font-medium text-slate-600">lịch hẹn</span></h4>
+                                            <p className="text-[13.5px] md:text-[16px] font-semibold text-slate-500 mb-1">Chờ tái khám</p>
+                                            <h4 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">{stats?.pendingFollowUps || '0'} <span className="text-[13px] md:text-[15.5px] font-bold text-slate-500 ml-0.5">lịch hẹn</span></h4>
                                         </div>
                                     </div>
                                 </>

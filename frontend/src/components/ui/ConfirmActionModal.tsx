@@ -74,7 +74,7 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[3px]"
+            className="absolute inset-0 bg-white/20 dark:bg-slate-900/40 backdrop-blur-[2px]"
             onClick={onClose}
           />
 
@@ -89,7 +89,7 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
             {/* Modal Header */}
             <div className="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-20">
               <div>
-                <h2 className="text-[20px] font-bold text-slate-900 dark:text-white tracking-tight">{title}</h2>
+                <h2 className="text-[20px] font-medium text-slate-900 dark:text-white tracking-tight">{title}</h2>
               </div>
             </div>
 
@@ -97,7 +97,7 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
             <div className="px-8 py-6">
               <div className={`p-5 ${styles.bg} rounded-2xl flex gap-4 items-start`}>
                 <span className={`material-symbols-outlined text-2xl mt-0.5 ${styles.iconColor}`}>{iconName}</span>
-                <p className="text-[15px] text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-[15px] text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
                   {description}
                 </p>
               </div>

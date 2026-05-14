@@ -15,6 +15,7 @@ interface NotificationDropdownProps {
   notifications: Notification[];
   onMarkRead?: (id: number) => void;
   onClearAll?: () => void;
+  onViewAll?: () => void;
 }
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
@@ -22,14 +23,22 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   onClose,
   notifications,
   onMarkRead,
-  onClearAll
+  onClearAll,
+  onViewAll
 }) => {
+  const translateText = (txt: string) => {
+    if (!txt) return txt;
+    return txt
+      .replace(/\[Clinic Alert\]/g, "[Cảnh báo]")
+      .replace(/Blood Sugar/g, "Đường huyết")
+      .replace(/Blood Pressure/g, "Huyết áp")
+      .replace(/Heart Rate/g, "Nhịp tim");
+  };
+
   if (!isOpen) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 z-[110]" onClick={onClose}></div>
-      <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-[120] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 transform-gpu">
+    <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-[120] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 transform-gpu">
         <div className="p-4 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
           <h3 className="font-extrabold text-sm text-slate-900 dark:text-white text-left">Thông báo</h3>
           {notifications.length > 0 && (
@@ -55,8 +64,8 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                       <span className="material-symbols-outlined text-lg">{notif.type === 'warning' ? 'error' : 'info'}</span>
                     </div>
                     <div className="space-y-1 text-left">
-                      <p className={`text-sm font-bold leading-tight group-hover:text-primary transition-colors ${!notif.read ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>{notif.title}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{notif.message}</p>
+                      <p className={`text-sm font-bold leading-tight group-hover:text-primary transition-colors ${!notif.read ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>{translateText(notif.title)}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{translateText(notif.message)}</p>
                       <p className="text-[10px] font-medium text-slate-400 mt-1">{notif.time}</p>
                     </div>
                   </div>
@@ -77,11 +86,15 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         </div>
         {notifications.length > 0 && (
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
-            <button className="w-full py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-all shadow-sm">Xem tất cả thông báo</button>
+            <button 
+              onClick={() => onViewAll?.()} 
+              className="w-full py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-all shadow-sm"
+            >
+              Xem tất cả thông báo
+            </button>
           </div>
         )}
       </div>
-    </>
   );
 };
 

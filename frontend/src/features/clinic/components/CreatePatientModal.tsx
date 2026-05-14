@@ -178,7 +178,7 @@ export default function CreatePatientModal({
             <div className="relative bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300 max-h-[95vh] border border-slate-200 dark:border-slate-800">
                 {/* Modal Header */}
                 <div className="px-6 md:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-20">
-                    <h2 className="text-[20px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">Thêm hồ sơ bệnh nhân mới</h2>
+                    <h2 className="text-[20px] font-semibold text-slate-800 dark:text-white tracking-tight leading-tight">Thêm hồ sơ bệnh nhân mới</h2>
                 </div>
 
                 {/* Form Body */}
@@ -198,9 +198,9 @@ export default function CreatePatientModal({
                             </div>
 
                             <div className="bg-white dark:bg-slate-900 p-4 lg:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-5 gap-y-3">
                                     {/* Avatar Upload */}
-                                    <div className="md:col-span-2 lg:col-span-3 flex items-center gap-5 pb-2 mb-1 border-b border-slate-50 dark:border-slate-800/50">
+                                    <div className="md:col-span-2 lg:col-span-2 flex items-center gap-5 pb-2 mb-1 border-b border-slate-50 dark:border-slate-800/50">
                                         <div
                                             onClick={() => !isUploadingImage && document.getElementById('avatar-input-patient')?.click()}
                                             className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center cursor-pointer overflow-hidden group relative transition-all hover:border-primary shrink-0"
@@ -468,7 +468,7 @@ export default function CreatePatientModal({
                                 <h3 className="font-bold text-slate-500 dark:text-slate-100 text-[15px] italic-none ml-1">Hồ sơ bệnh lý & Phân công</h3>
                             </div>
 
-                            <div className="bg-white dark:bg-slate-900 p-4 lg:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            <div className="bg-white dark:bg-slate-900 p-4 lg:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
                                 {/* Condition */}
                                 <div className="space-y-1.5">
                                     <label className="text-[14px] font-medium text-slate-500 ml-1">Nhóm bệnh chính <span className="text-red-500">*</span></label>
@@ -517,59 +517,71 @@ export default function CreatePatientModal({
                                 {/* Status was here - moved to administrative section */}
 
                                 {/* Baseline Vital Signs */}
-                                <div className="lg:col-span-3 border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
-                                    <h4 className="text-[13px] font-bold text-slate-400 dark:text-slate-500 flex items-center gap-2 mb-4 uppercase tracking-wide">
+                                <div className="lg:col-span-2 border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
+                                    <h4 className="text-[14px] font-medium text-slate-500 dark:text-slate-100 flex items-center gap-2 mb-4">
                                         <span className="material-symbols-outlined text-[18px]">vital_signs</span>
-                                        Chỉ số sinh tồn khởi điểm (Baseline - Không bắt buộc)
+                                        Chỉ số sinh tồn
                                     </h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                         <div className="space-y-1.5">
-                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Đường huyết (mmol/L)</label>
-                                            <input
-                                                type="text"
-                                                name="initialGlucose"
-                                                value={formData.initialGlucose}
-                                                onChange={handleChange}
-                                                placeholder="VD: 6.5"
-                                                className="w-full h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 text-[15px] font-bold text-slate-900 dark:text-white transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                                            />
+                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Đường huyết (mg/dL)</label>
+                                            <div className="relative">
+                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">glucose</span>
+                                                <input
+                                                    type="text"
+                                                    name="initialGlucose"
+                                                    value={formData.initialGlucose}
+                                                    onChange={handleChange}
+                                                    placeholder="Nhập đường huyết"
+                                                    className="w-full pl-11 pr-4 h-[42px] rounded-lg border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 transition-all"
+                                                />
+                                            </div>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Huyết áp Tâm thu (Systolic)</label>
-                                            <input
-                                                type="text"
-                                                name="initialBpSystolic"
-                                                value={formData.initialBpSystolic}
-                                                onChange={handleChange}
-                                                placeholder="VD: 120"
-                                                className="w-full h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 text-[15px] font-bold text-slate-900 dark:text-white transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                                            />
+                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Huyết áp Tâm thu</label>
+                                            <div className="relative">
+                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">blood_pressure</span>
+                                                <input
+                                                    type="text"
+                                                    name="initialBpSystolic"
+                                                    value={formData.initialBpSystolic}
+                                                    onChange={handleChange}
+                                                    placeholder="Nhập tâm thu"
+                                                    className="w-full pl-11 pr-4 h-[42px] rounded-lg border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 transition-all"
+                                                />
+                                            </div>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Huyết áp Tâm trương (Diastolic)</label>
-                                            <input
-                                                type="text"
-                                                name="initialBpDiastolic"
-                                                value={formData.initialBpDiastolic}
-                                                onChange={handleChange}
-                                                placeholder="VD: 80"
-                                                className="w-full h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 text-[15px] font-bold text-slate-900 dark:text-white transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                                            />
+                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Huyết áp Tâm trương</label>
+                                            <div className="relative">
+                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">blood_pressure</span>
+                                                <input
+                                                    type="text"
+                                                    name="initialBpDiastolic"
+                                                    value={formData.initialBpDiastolic}
+                                                    onChange={handleChange}
+                                                    placeholder="Nhập tâm trương"
+                                                    className="w-full pl-11 pr-4 h-[42px] rounded-lg border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 transition-all"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Clinical Notes */}
-                                <div className="lg:col-span-3 space-y-1.5 mt-2">
+                                <div className="lg:col-span-2 space-y-1.5 mt-2">
                                     <label className="text-[14px] font-medium text-slate-500 ml-1">Ghi chú lâm sàng ban đầu</label>
-                                    <textarea
-                                        name="notes"
-                                        value={formData.notes}
-                                        onChange={handleChange}
-                                        placeholder="Tiền sử bệnh, dị ứng..."
-                                        rows={3}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-400 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium outline-none focus:border-primary resize-none custom-scrollbar"
-                                    ></textarea>
+                                    <div className="relative">
+                                        <span className="material-symbols-outlined absolute left-4 top-3 text-[20px] text-slate-400 z-10 pointer-events-none">description</span>
+                                        <textarea
+                                            name="notes"
+                                            value={formData.notes}
+                                            onChange={handleChange}
+                                            placeholder="Tiền sử bệnh, dị ứng..."
+                                            rows={3}
+                                            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-400 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium outline-none focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 resize-none custom-scrollbar transition-all"
+                                        ></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>

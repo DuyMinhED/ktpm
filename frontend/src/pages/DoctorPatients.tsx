@@ -306,8 +306,8 @@ export default function DoctorPatients() {
               </button>
               <button
                 onClick={() => setIsAddPatientModalOpen(true)}
-                className="bg-primary text-slate-900 px-5 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 shadow-lg shadow-primary/10 transition-all">
-                <span className="material-symbols-outlined">person_add</span>
+                className="bg-primary text-slate-900 px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shadow-lg shadow-primary/10 transition-all">
+                <span className="material-symbols-outlined text-[20px]">person_add</span>
                 Thêm bệnh nhân mới
               </button>
             </div>

@@ -77,7 +77,7 @@ export default function Dropdown({
             : size === 'lg' 
               ? 'text-[16px]' 
               : 'text-[14px] md:text-[15px]'
-        } font-bold font-display whitespace-nowrap ${variant === 'badge' ? 'text-slate-600 dark:text-slate-300' : 'text-slate-700 dark:text-slate-200'}`}>
+        } font-medium font-display whitespace-nowrap ${variant === 'badge' ? 'text-slate-600 dark:text-slate-300' : 'text-slate-700 dark:text-slate-200'}`}>
           {selectedOption?.label}
         </span>
         <ChevronDown
@@ -116,9 +116,9 @@ export default function Dropdown({
                 }}
                 className={`
                   w-full flex items-center justify-between px-4 py-2.5 
-                  text-${size === 'sm' ? '[13.5px]' : size === 'lg' ? 'base' : '[14.5px]'} font-bold transition-colors
+                  text-${size === 'sm' ? '[13.5px]' : size === 'lg' ? 'base' : '[14.5px]'} font-medium transition-colors
                   ${isSelected
-                    ? 'bg-primary/10 text-primary font-bold'
+                    ? 'bg-primary/10 text-primary font-semibold'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }
                 `}

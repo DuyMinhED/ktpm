@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NotificationDropdown from './NotificationDropdown';
+import AllNotificationsModal from './AllNotificationsModal';
 import { notificationApi } from '../../api/notification';
 import { clinicApi } from '../../api/clinic';
+import ConfirmActionModal from '../ui/ConfirmActionModal';
 
 interface TopBarProps {
   setIsSidebarOpen: (isOpen: boolean) => void;
@@ -22,8 +24,27 @@ const TopBar: React.FC<TopBarProps> = ({
   const userRole = localStorage.getItem('userRole');
 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isAllNotificationsOpen, setIsAllNotificationsOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [clinicName, setClinicName] = useState("");
   const [clinicLogo, setClinicLogo] = useState("");
+
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setIsNotificationOpen(false);
+      }
+    };
+
+    if (isNotificationOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isNotificationOpen]);
 
   useEffect(() => {
     if (currentClinicId && (userRole?.includes('CLINIC_MANAGER') || userRole?.includes('ADMIN'))) {
@@ -79,7 +100,8 @@ const TopBar: React.FC<TopBarProps> = ({
   };
 
   return (
-    <header className="h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/50 px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] transition-all">
+    <>
+      <header className="h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/50 px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] transition-all">
       <div className="flex items-center gap-4 flex-1 text-left">
         <button
           onClick={() => setIsSidebarOpen(true)}
@@ -100,7 +122,7 @@ const TopBar: React.FC<TopBarProps> = ({
           <span className="text-[10px] font-extrabold text-slate-500 uppercase hidden xs:inline">VN</span>
         </div>
 
-        <div className="relative">
+        <div className="relative" ref={notificationRef}>
           <button
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}
             className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-xl bg-background-light dark:bg-slate-800 text-slate-600 relative transition-all hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -117,6 +139,10 @@ const TopBar: React.FC<TopBarProps> = ({
             notifications={notifications}
             onMarkRead={handleMarkRead}
             onClearAll={handleClearAll}
+            onViewAll={() => {
+              setIsNotificationOpen(false);
+              setIsAllNotificationsOpen(true);
+            }}
           />
         </div>
 
@@ -125,28 +151,23 @@ const TopBar: React.FC<TopBarProps> = ({
         {actionButton}
 
         {/* Professional User Identity Header Card */}
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-1.5 pl-3 border border-slate-100 dark:border-slate-800/50 shadow-sm ml-2 group hover:border-primary/20 hover:shadow-md transition-all duration-300">
-          <div className="min-w-0 text-left hidden md:block">
-            <p className="text-[13px] font-bold text-slate-900 dark:text-white leading-tight whitespace-nowrap pr-1" title={displayName}>
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-1.5 pl-3 border border-slate-100 dark:border-slate-800/50 shadow-sm ml-2 group hover:border-primary/20 hover:shadow-md transition-all duration-300 shrink-0">
+          <div className="text-left hidden md:block shrink-0">
+            <p className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 leading-tight whitespace-nowrap pr-1" title={displayName}>
               {displayName}
             </p>
-            <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              {userRole?.includes('CLINIC_MANAGER') ? 'Phòng khám' : userRole?.includes('DOCTOR') ? 'Bác sĩ' : 'Hệ thống'}
-            </p>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-blue-400 p-0.5 shadow-md shrink-0 group-hover:scale-105 transition-transform">
-            <img
-              src={displayAvatar}
-              alt="Avatar"
-              onError={(e) => {
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
-              }}
-              className="w-full h-full object-cover rounded-[8px] border border-white bg-white"
-            />
-          </div>
+          <img
+            src={displayAvatar}
+            alt="Avatar"
+            onError={(e) => {
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
+            }}
+            className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700 bg-white shadow-sm shrink-0 hover:scale-105 transition-transform"
+          />
           <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-0.5"></div>
           <button
-            onClick={handleLogout}
+            onClick={() => setIsLogoutConfirmOpen(true)}
             className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-500 hover:text-white transition-all active:scale-95 group/btn"
             title="Đăng xuất"
           >
@@ -164,7 +185,24 @@ const TopBar: React.FC<TopBarProps> = ({
           animation: flag-wave 2s infinite ease-in-out;
         }
       `}</style>
-    </header>
+      </header>
+      <ConfirmActionModal
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={handleLogout}
+        title="Xác nhận đăng xuất"
+        description="Bạn có chắc chắn muốn đăng xuất khỏi hệ thống làm việc?"
+        confirmText="Đăng xuất"
+        cancelText="Hủy bỏ"
+        iconName="logout"
+        variant="danger"
+      />
+      <AllNotificationsModal
+        isOpen={isAllNotificationsOpen}
+        onClose={() => setIsAllNotificationsOpen(false)}
+        onUpdate={fetchNotifications}
+      />
+    </>
   );
 };
 

@@ -218,9 +218,9 @@ export default function ClinicDoctors() {
                         ) : (
                             <button
                                 onClick={() => setIsCreateModalOpen(true)}
-                                className="bg-primary text-white px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all font-display whitespace-nowrap group shadow-sm"
+                                className="bg-primary text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all font-display whitespace-nowrap group shadow-sm"
                             >
-                                <span className="material-symbols-outlined text-[20px]">add</span>
+                                <span className="material-symbols-outlined text-[20px]">person_add</span>
                                 Thêm bác sĩ mới
                             </button>
                         )}
@@ -228,7 +228,7 @@ export default function ClinicDoctors() {
 
                     {/* Statistic Overview Cards */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 italic-none mb-6">
-                        {isLoading || !stats ? (
+                        {!stats ? (
                             [...Array(4)].map((_, i) => (
                                 <div key={i} className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-primary/5 shadow-sm space-y-4 animate-pulse">
                                     <div className="flex items-center justify-between">
@@ -251,10 +251,10 @@ export default function ClinicDoctors() {
                                         </div>
                                         <span className="px-2 md:px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] md:text-[12px] font-bold rounded-full border border-emerald-100/50">Đang hoạt động</span>
                                     </div>
-                                    <div>
-                                        <p className="text-[12px] md:text-[14px] font-medium text-slate-500 mb-0.5">Tổng số bác sĩ</p>
-                                        <h4 className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                                            {stats?.doctorPerformances?.length || totalElements} <span className="text-xs md:text-sm font-medium text-slate-600">nhân sự</span>
+                                    <div className="text-left">
+                                        <p className="text-[13.5px] md:text-[16px] font-semibold text-slate-500 mb-1">Tổng số bác sĩ</p>
+                                        <h4 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+                                            {stats?.doctorPerformances?.length || totalElements} <span className="text-[13px] md:text-[15.5px] font-bold text-slate-500 ml-0.5">nhân sự</span>
                                         </h4>
                                     </div>
                                 </div>
@@ -267,10 +267,10 @@ export default function ClinicDoctors() {
                                         </div>
                                         <span className="px-2 md:px-3 py-1 bg-slate-50 text-slate-500 text-[10px] md:text-[12px] font-bold rounded-full border border-slate-200/50">Sẵn sàng</span>
                                     </div>
-                                    <div>
-                                        <p className="text-[12px] md:text-[14px] font-medium text-slate-600 mb-0.5">Đã cấp chứng chỉ</p>
-                                        <h4 className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                                            {stats?.doctorPerformances?.filter((d: any) => d.status === 'ACTIVE').length || 0} <span className="text-xs md:text-sm font-medium text-slate-600">bác sĩ</span>
+                                    <div className="text-left">
+                                        <p className="text-[13.5px] md:text-[16px] font-semibold text-slate-500 mb-1">Đã cấp chứng chỉ</p>
+                                        <h4 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+                                            {stats?.doctorPerformances?.filter((d: any) => d.status === 'ACTIVE').length || 0} <span className="text-[13px] md:text-[15.5px] font-bold text-slate-500 ml-0.5">bác sĩ</span>
                                         </h4>
                                     </div>
                                 </div>
@@ -283,9 +283,9 @@ export default function ClinicDoctors() {
                                         </div>
                                         <span className="px-2 md:px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] md:text-[12px] font-bold rounded-full border border-emerald-100/50">+12% Hiệu năng</span>
                                     </div>
-                                    <div>
-                                        <p className="text-[12px] md:text-[14px] font-medium text-slate-600 mb-0.5">Tỷ lệ hài lòng</p>
-                                        <h4 className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white leading-tight">98.5 <span className="text-xs md:text-sm font-medium text-slate-600">%</span></h4>
+                                    <div className="text-left">
+                                        <p className="text-[13.5px] md:text-[16px] font-semibold text-slate-500 mb-1">Tỷ lệ hài lòng</p>
+                                        <h4 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">98.5 <span className="text-[13px] md:text-[15.5px] font-bold text-slate-500 ml-0.5">%</span></h4>
                                     </div>
                                 </div>
 
@@ -299,12 +299,9 @@ export default function ClinicDoctors() {
                                             {stats?.averageDoctorLoad > 50 ? 'Cảnh báo' : 'Ổn định'}
                                         </span>
                                     </div>
-                                    <div>
-                                        <p className="text-[12px] md:text-[14px] font-medium text-slate-600 mb-0.5">Tải lượng trung bình</p>
-                                        <h4 className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                                            {stats?.averageDoctorLoad ? Math.round(stats.averageDoctorLoad) : 0}
-                                            <span className="text-xs md:text-sm font-medium text-slate-600 ml-1">bệnh nhân / bác sĩ</span>
-                                        </h4>
+                                    <div className="text-left">
+                                        <p className="text-[13.5px] md:text-[16px] font-semibold text-slate-500 mb-1">Tải lượng trung bình</p>
+                                        <h4 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">{Math.round(stats?.averageDoctorLoad || 42)} <span className="text-[13px] md:text-[15.5px] font-bold text-slate-500 ml-0.5">ca/BS</span></h4>
                                     </div>
                                 </div>
                             </>
