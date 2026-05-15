@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
-import { supportApi } from '../../api/support';
-import { useToast } from '../ui/ToastContext';
-import CreateTicketModal from '../../features/admin/components/CreateTicketModal';
 
 interface ClinicSidebarProps {
     isSidebarOpen: boolean;
@@ -14,29 +11,6 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
     isSidebarOpen,
     isLoading = false
 }) => {
-    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
-    const [isSavingSupport, setIsSavingSupport] = useState(false);
-    const { showToast } = useToast();
-
-    const handleSaveSupport = async (data: any) => {
-        setIsSavingSupport(true);
-        try {
-            const response = await supportApi.createTicket({
-                subject: data.subject,
-                message: data.message,
-                category: data.category,
-                priority: data.priority,
-                status: 'Mới'
-            });
-            showToast("Gửi yêu cầu thành công!", 'success');
-            setIsSupportModalOpen(false);
-        } catch (error) {
-            console.error("Failed to create support ticket:", error);
-            showToast("Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại sau.", "error");
-        } finally {
-            setIsSavingSupport(false);
-        }
-    };
     const navItems = [
         { path: ROUTES.CLINIC.DASHBOARD, label: 'Tổng quan phòng khám', icon: 'dashboard' },
         { path: ROUTES.CLINIC.PATIENTS, label: 'Quản lý Bệnh nhân', icon: 'group' },
@@ -84,24 +58,20 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
                     </NavLink>
                 ))}
 
-                <button
-                    type="button"
-                    onClick={() => setIsSupportModalOpen(true)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-amber-500/10 hover:text-amber-600 text-left mt-2 border border-dashed border-slate-200 dark:border-slate-800"
+                <NavLink
+                    to={ROUTES.CLINIC.SUPPORT}
+                    className={({ isActive }) =>
+                        `w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-amber-500/10 hover:text-amber-600 text-left mt-2 border border-dashed ${
+                            isActive
+                            ? 'border-amber-500 bg-amber-500/5 text-amber-600 dark:text-amber-400'
+                            : 'border-slate-200 dark:border-slate-800'
+                        }`
+                    }
                 >
                     <span className="material-symbols-outlined text-amber-500">support_agent</span>
                     <span>Hỗ trợ kỹ thuật</span>
-                </button>
+                </NavLink>
             </nav>
-
-
-
-            <CreateTicketModal
-                isOpen={isSupportModalOpen}
-                onClose={() => setIsSupportModalOpen(false)}
-                onSave={handleSaveSupport}
-                isSaving={isSavingSupport}
-            />
 
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

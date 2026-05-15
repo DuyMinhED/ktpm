@@ -22,6 +22,8 @@ public interface SupportTicketRepository extends JpaRepository<SupportTicket, Lo
     
     Page<SupportTicket> findByClinicId(Long clinicId, Pageable pageable);
     
+    Page<SupportTicket> findByClinicIdAndStatus(Long clinicId, String status, Pageable pageable);
+    
     long countByStatus(String status);
     
     long countByPriority(String priority);

@@ -93,6 +93,14 @@ public class SupportTicketServiceImpl implements SupportTicketService {
     }
 
     @Override
+    public Page<SupportTicket> getTicketsByClinic(Long clinicId, String status, Pageable pageable) {
+        if (status != null && !status.isEmpty() && !"Tất cả trạng thái".equals(status)) {
+            return ticketRepository.findByClinicIdAndStatus(clinicId, status, pageable);
+        }
+        return ticketRepository.findByClinicId(clinicId, pageable);
+    }
+
+    @Override
     public Page<SupportTicket> getAllTickets(String status, String priority, Pageable pageable) {
         // Simple filtering logic for demonstration
         if (status != null && !status.isEmpty() && !"Tất cả trạng thái".equals(status)) {

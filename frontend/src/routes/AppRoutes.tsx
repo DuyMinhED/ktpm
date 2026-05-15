@@ -24,6 +24,7 @@ import ClinicAssignment from '../pages/ClinicAssignment';
 import ClinicSettings from '../pages/ClinicSettings';
 import ClinicAppointments from '../pages/ClinicAppointments';
 import ClinicServices from '../pages/ClinicServices';
+import ClinicSupport from '../pages/ClinicSupport';
 
 import LandingPage from '../pages/VelorahLandingPage';
 import PatientLayout from '../layouts/PatientLayout';
@@ -74,6 +75,7 @@ const AppRoutes = () => {
       <Route path={ROUTES.CLINIC.APPOINTMENTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicAppointments /></ProtectedRoute>} />
       <Route path={ROUTES.CLINIC.SERVICES} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicServices /></ProtectedRoute>} />
       <Route path={ROUTES.CLINIC.SETTINGS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicSettings /></ProtectedRoute>} />
+      <Route path={ROUTES.CLINIC.SUPPORT} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicSupport /></ProtectedRoute>} />
 
       {/* Admin Routes — Only ADMIN */}
       <Route path={ROUTES.ADMIN.DASHBOARD} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />

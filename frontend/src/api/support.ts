@@ -5,6 +5,10 @@ export const supportApi = {
         return axiosInstance.get('/v1/support-tickets', { params });
     },
 
+    getClinicTickets: (clinicId: string | number, params?: { status?: string; page?: number; size?: number }) => {
+        return axiosInstance.get(`/v1/support-tickets/clinic/${clinicId}`, { params });
+    },
+
     getTicketById: (id: string | number) => {
         return axiosInstance.get(`/v1/support-tickets/${id}`);
     },
