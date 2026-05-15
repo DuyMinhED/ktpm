@@ -87,6 +87,13 @@ export const clinicApi = {
     return response.data;
   },
 
+  batchReschedule: async (clinicId: string | number, sourceDate: string, targetDate: string) => {
+    const response = await axiosInstance.put(`/v1/clinics/${clinicId}/appointments/batch-reschedule`, null, {
+      params: { sourceDate, targetDate }
+    });
+    return response.data;
+  },
+
   recordHealthMetric: async (clinicId: string | number, patientId: string | number, data: any) => {
     const response = await axiosInstance.post(`/v1/clinics/${clinicId}/patients/${patientId}/health-metrics`, data);
     return response.data;

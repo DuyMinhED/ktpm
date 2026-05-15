@@ -132,6 +132,16 @@ const VelorahLandingPage = () => {
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
+        /* Override autofill for dark theme to keep background dark and text readable */
+        .velorah-theme input:-webkit-autofill,
+        .velorah-theme input:-webkit-autofill:hover, 
+        .velorah-theme input:-webkit-autofill:focus, 
+        .velorah-theme input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 30px #162536 inset !important;
+          -webkit-text-fill-color: #ffffff !important;
+          caret-color: white;
+        }
+
         @keyframes fade-rise {
           from { opacity: 0; transform: translateY(24px); }
           to { opacity: 1; transform: translateY(0); }
@@ -224,8 +234,8 @@ const VelorahLandingPage = () => {
             </button>
 
             <div className="text-center mb-8 mt-2">
-              <h2 className="text-3xl md:text-4xl font-display text-white mb-2 tracking-tight m-0">Welcome Back</h2>
-              <p className="text-sm text-white/50 m-0">Enter your credentials to continue</p>
+              <h2 className="text-3xl md:text-4xl font-display text-white mb-2 tracking-tight m-0">Chào Mừng Trở Lại</h2>
+              <p className="text-sm text-white/50 m-0">Nhập thông tin đăng nhập của bạn để tiếp tục</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
@@ -236,9 +246,9 @@ const VelorahLandingPage = () => {
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-white/60 ml-2 uppercase tracking-wider">Identifier</label>
+                <label className="text-xs font-medium text-white/60 ml-2 uppercase tracking-wider">Tài khoản</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40 z-10">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
                   </div>
                   <input
@@ -246,16 +256,16 @@ const VelorahLandingPage = () => {
                     value={identifier}
                     onChange={e => setIdentifier(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-white/30 focus:bg-white/10 transition-all text-[15px]"
-                    placeholder="Email or Phone"
+                    placeholder="Email hoặc Số điện thoại"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-white/60 ml-2 uppercase tracking-wider">Password</label>
+                <label className="text-xs font-medium text-white/60 ml-2 uppercase tracking-wider">Mật khẩu</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40 z-10">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                   </div>
                   <input
@@ -269,7 +279,7 @@ const VelorahLandingPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/40 hover:text-white/80 transition-colors cursor-pointer focus:outline-none"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/40 hover:text-white/80 transition-colors cursor-pointer focus:outline-none z-10"
                   >
                     {showPassword ? (
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
@@ -291,9 +301,9 @@ const VelorahLandingPage = () => {
                     />
                     <svg className="w-3 h-3 text-black absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                   </div>
-                  <span className="text-[13px] text-white/50 group-hover:text-white/80 transition-colors pointer-events-none">Remember me</span>
+                  <span className="text-[13px] text-white/50 group-hover:text-white/80 transition-colors pointer-events-none">Ghi nhớ đăng nhập</span>
                 </label>
-                <button type="button" onClick={(e) => { e.preventDefault(); }} className="text-[13px] text-white/50 hover:text-white transition-colors cursor-pointer focus:outline-none">Forgot password?</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); }} className="text-[13px] text-white/50 hover:text-white transition-colors cursor-pointer focus:outline-none">Quên mật khẩu?</button>
               </div>
 
               <button
@@ -305,7 +315,7 @@ const VelorahLandingPage = () => {
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 ) : (
                   <>
-                    Sign In
+                    Đăng Nhập
                     <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                   </>
                 )}
@@ -316,7 +326,7 @@ const VelorahLandingPage = () => {
             <div className="mt-8">
               <div className="relative flex items-center mb-6">
                 <div className="flex-grow border-t border-white/10"></div>
-                <span className="flex-shrink mx-4 text-[10px] text-white/30 font-bold uppercase tracking-[0.2em]">Or continue with</span>
+                <span className="flex-shrink mx-4 text-[10px] text-white/30 font-bold uppercase tracking-[0.2em]">Hoặc tiếp tục với</span>
                 <div className="flex-grow border-t border-white/10"></div>
               </div>
 
@@ -341,7 +351,7 @@ const VelorahLandingPage = () => {
 
             <div className="mt-8 text-center">
               <p className="text-[13px] text-white/40">
-                Don't have an account? <button type="button" onClick={() => setShowLoginModal(false)} className="text-white hover:text-white/80 ml-1 font-medium transition-colors cursor-pointer focus:outline-none">Request Access</button>
+                Chưa có tài khoản? <button type="button" onClick={() => setShowLoginModal(false)} className="text-white hover:text-white/80 ml-1 font-medium transition-colors cursor-pointer focus:outline-none">Yêu cầu quyền truy cập</button>
               </p>
             </div>
           </div>

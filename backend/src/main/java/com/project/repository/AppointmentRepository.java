@@ -118,6 +118,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                 @org.springframework.data.repository.query.Param("end") LocalDateTime end,
                 @org.springframework.data.repository.query.Param("statuses") List<AppointmentStatus> statuses);
 
+        @Query("SELECT a FROM Appointment a JOIN User u ON a.doctorId = u.id WHERE u.clinicId = :clinicId AND a.appointmentTime >= :start AND a.appointmentTime < :end AND a.status IN :statuses AND a.isDeleted = false ORDER BY a.appointmentTime ASC")
+        List<Appointment> findByClinicIdAndDateRangeAndStatuses(
+                @org.springframework.data.repository.query.Param("clinicId") Long clinicId,
+                @org.springframework.data.repository.query.Param("start") LocalDateTime start,
+                @org.springframework.data.repository.query.Param("end") LocalDateTime end,
+                @org.springframework.data.repository.query.Param("statuses") List<AppointmentStatus> statuses);
+
         @Query(value = "SELECT COUNT(DISTINCT a.patient_id) FROM appointments a WHERE a.status = 'COMPLETED' AND a.is_deleted = false", nativeQuery = true)
         long countPatientsWithAnyCompletedAppointments();
 

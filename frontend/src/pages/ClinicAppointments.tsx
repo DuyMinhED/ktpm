@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import TopBar from '../components/common/TopBar';
+import BatchRescheduleModal from '../components/ui/BatchRescheduleModal';
 import RescheduleModal from '../features/patient/components/RescheduleModal';
 import Toast from '../components/ui/Toast';
 import { clinicApi } from '../api/clinic';
@@ -21,6 +22,32 @@ export default function ClinicAppointments() {
     const [toast, setToast] = useState({ show: false, title: '', type: 'success' as 'success' | 'warning' | 'error' });
     const [activeView, setActiveView] = useState<'month' | 'week' | 'day'>('month');
     const [editingAppointment, setEditingAppointment] = useState<any>(null);
+    const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+    const [isBatchSaving, setIsBatchSaving] = useState(false);
+
+    const handleConfirmBatchReschedule = async (sourceDate: string, targetDate: string) => {
+        setIsBatchSaving(true);
+        try {
+            const res = await clinicApi.batchReschedule(currentClinicId, sourceDate, targetDate);
+            if (res.success) {
+                const count = res.data?.movedCount || 0;
+                setToast({ 
+                    show: true, 
+                    title: `Đã dời ${count} ca hẹn thành công!`, 
+                    type: 'success' 
+                });
+                setIsBatchModalOpen(false);
+                await loadAppointments();
+            } else {
+                setToast({ show: true, title: 'Dời lịch thất bại!', type: 'error' });
+            }
+        } catch (error) {
+            console.error(error);
+            setToast({ show: true, title: 'Có lỗi xảy ra trong quá trình dời lịch.', type: 'error' });
+        } finally {
+            setIsBatchSaving(false);
+        }
+    };
 
     const handleSaveReschedule = async (appointmentData: any) => {
         setIsSaving(true);
@@ -467,17 +494,7 @@ export default function ClinicAppointments() {
                                                 </div>
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-2">
-                                                        {isCompleted ? (
-                                                            <>
-                                                                <span className="material-symbols-outlined text-[18px] text-emerald-500">check_circle</span>
-                                                                <span className="text-[13px] font-bold text-emerald-600">Đã hoàn thành</span>
-                                                            </>
-                                                        ) : isCancelled ? (
-                                                            <>
-                                                                <span className="material-symbols-outlined text-[18px] text-red-500">cancel</span>
-                                                                <span className="text-[13px] font-bold text-red-500">Đã hủy</span>
-                                                            </>
-                                                        ) : isPending ? (
+                                                        {isPending ? (
                                                             <>
                                                                 <span className="material-symbols-outlined text-[18px] text-slate-400">hourglass_top</span>
                                                                 <span className="text-[13px] font-medium text-slate-400">Đang chờ xác nhận</span>
@@ -508,21 +525,31 @@ export default function ClinicAppointments() {
                                                                 <button onClick={() => updateStatus(appt.id, 'SCHEDULED')} className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[13px] font-medium rounded-full transition-all outline-none">
                                                                     Xác nhận
                                                                 </button>
-                                                                <button onClick={() => updateStatus(appt.id, 'CANCELLED')} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors">
+                                                                <button 
+                                                                    onClick={() => { if (window.confirm("Bạn có chắc muốn hủy yêu cầu đặt lịch này không?")) updateStatus(appt.id, 'CANCELLED'); }} 
+                                                                    className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                                                                >
                                                                     <span className="material-symbols-outlined text-lg">cancel</span>
                                                                 </button>
                                                             </>
                                                         ) : (
                                                             <>
                                                                 {isOnline && (
-                                                                    <button className="px-5 py-2 bg-primary text-slate-900 text-[15px] font-medium rounded-full shadow-lg shadow-primary/20 transition-all">
+                                                                    <button 
+                                                                        onClick={() => window.open(appt.meetingLink || 'https://meet.google.com/abc-xyz', '_blank')}
+                                                                        className="px-5 py-2 bg-primary text-slate-900 text-[15px] font-medium rounded-full shadow-lg shadow-primary/20 transition-all hover:scale-105"
+                                                                    >
                                                                         Bắt đầu cuộc gọi
                                                                     </button>
                                                                 )}
                                                                 <button onClick={() => handleOpenEdit(appt)} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="Sửa lịch hẹn">
                                                                     <span className="material-symbols-outlined text-lg">edit_calendar</span>
                                                                 </button>
-                                                                <button onClick={() => updateStatus(appt.id, 'CANCELLED')} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors" title="Hủy lịch hẹn">
+                                                                <button 
+                                                                    onClick={() => { if (window.confirm("Bạn có chắc chắn muốn hủy lịch hẹn này không?")) updateStatus(appt.id, 'CANCELLED'); }} 
+                                                                    className="p-1.5 text-slate-400 hover:text-red-500 transition-colors" 
+                                                                    title="Hủy lịch hẹn"
+                                                                >
                                                                     <span className="material-symbols-outlined text-lg">cancel</span>
                                                                 </button>
                                                             </>
@@ -546,7 +573,17 @@ export default function ClinicAppointments() {
                                 <div
                                     className="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-b-2xl border-t border-slate-100 dark:border-slate-700">
                                     <div className="flex gap-2">
-                                        <button className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[12px] rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
+                                        <button 
+                                            onClick={() => {
+                                                if (agendaAppointments.length === 0) {
+                                                    setToast({ show: true, title: 'Ngày được chọn không có ca khám nào để dời!', type: 'warning' });
+                                                    return;
+                                                }
+                                                setIsBatchModalOpen(true);
+                                            }}
+                                            disabled={agendaAppointments.length === 0}
+                                            className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[12px] rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
                                             Dời lịch hàng loạt
                                         </button>
                                         <button 
@@ -585,6 +622,14 @@ export default function ClinicAppointments() {
                                                 isRescheduling={Boolean(editingAppointment)}
                                                 initialPatientId={editingAppointment?.patientId?.toString()}
                                             />
+
+            <BatchRescheduleModal
+                isOpen={isBatchModalOpen}
+                isLoading={isBatchSaving}
+                initialSourceDate={`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`}
+                onClose={() => setIsBatchModalOpen(false)}
+                onConfirm={handleConfirmBatchReschedule}
+            />
 
             {toast.show && (
                 <Toast

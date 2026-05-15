@@ -382,6 +382,17 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .reason(request.getNotes())
                 .build();
 
+        if ("ONLINE".equals(request.getType())) {
+            appointment.setLocation("Trực tuyến");
+            if (request.getMeetingLink() != null && !request.getMeetingLink().isEmpty()) {
+                appointment.setMeetingLink(request.getMeetingLink());
+            } else {
+                appointment.setMeetingLink("https://meet.google.com/abc-xyz");
+            }
+        } else {
+            appointment.setLocation("Phòng khám");
+        }
+
         if (patient.getDoctorId() != null) {
             com.project.entity.User doctor = userRepository.findById(patient.getDoctorId()).orElse(null);
             if (doctor != null) {
@@ -414,6 +425,10 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
             throw new org.springframework.security.access.AccessDeniedException("Unauthorized");
         }
 
+        if (appointment.getStatus() == com.project.entity.AppointmentStatus.COMPLETED || appointment.getStatus() == com.project.entity.AppointmentStatus.CANCELLED) {
+            throw new IllegalStateException("Không thể cập nhật thông tin lịch hẹn đã hoàn thành hoặc đã hủy!");
+        }
+
         java.time.LocalDateTime appointmentTime = java.time.LocalDateTime.parse(request.getAppointmentDate() + "T" + request.getAppointmentTime());
         
         appointment.setAppointmentTime(appointmentTime);
@@ -432,6 +447,8 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
             appointment.setMeetingLink(null);
         }
 
+        appointment.setStatus(AppointmentStatus.SCHEDULED);
+
         appointmentRepository.save(appointment);
 
         // Notify patient
@@ -442,5 +459,48 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .type("APPOINTMENT")
                 .read(false)
                 .build());
+    }
+
+    @Override
+    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "clinic_dashboard", allEntries = true)
+    public int batchReschedule(Long clinicId, java.time.LocalDate sourceDate, java.time.LocalDate targetDate) {
+        LocalDateTime dayStart = sourceDate.atStartOfDay();
+        LocalDateTime dayEnd = sourceDate.plusDays(1).atStartOfDay();
+
+        List<Appointment> appointments = appointmentRepository.findByClinicIdAndDateRangeAndStatuses(
+                clinicId, dayStart, dayEnd,
+                List.of(AppointmentStatus.PENDING, AppointmentStatus.SCHEDULED));
+
+        if (appointments.isEmpty()) {
+            return 0;
+        }
+
+        long daysDiff = java.time.temporal.ChronoUnit.DAYS.between(sourceDate, targetDate);
+
+        for (Appointment a : appointments) {
+            LocalDateTime newTime = a.getAppointmentTime().plusDays(daysDiff);
+            a.setAppointmentTime(newTime);
+            if (a.getEndTime() != null) {
+                a.setEndTime(a.getEndTime().plusDays(daysDiff));
+            }
+            a.setStatus(AppointmentStatus.SCHEDULED); // ensure active
+            appointmentRepository.save(a);
+
+            // Notify each patient
+            try {
+                notificationRepository.save(com.project.entity.Notification.builder()
+                        .userId(a.getPatient().getUserId())
+                        .title("Thay đổi lịch hẹn")
+                        .message("Phòng khám đã dời lịch hẹn của bạn sang ngày " + targetDate.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+                        .type("APPOINTMENT")
+                        .read(false)
+                        .build());
+            } catch (Exception e) {
+                log.warn("Failed to notify patient {} about batch reschedule", a.getPatient().getId(), e);
+            }
+        }
+
+        return appointments.size();
     }
 }

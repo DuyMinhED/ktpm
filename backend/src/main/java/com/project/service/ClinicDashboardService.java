@@ -20,4 +20,6 @@ public interface ClinicDashboardService {
         void createAppointment(Long clinicId, com.project.dto.request.DoctorCreateAppointmentRequest request);
 
         void updateAppointment(Long clinicId, Long appointmentId, com.project.dto.request.DoctorCreateAppointmentRequest request);
+
+        int batchReschedule(Long clinicId, java.time.LocalDate sourceDate, java.time.LocalDate targetDate);
 }

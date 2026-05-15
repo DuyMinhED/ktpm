@@ -256,4 +256,18 @@ public class ClinicDashboardController {
         com.project.dto.response.HealthMetricResponse response = patientHealthMetricService.recordMetricForPatient(patientId, request);
         return ApiResponse.success("Health metric recorded successfully", response);
     }
+
+    @PutMapping("/appointments/batch-reschedule")
+    @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN
+            + "') and @securityService.isClinicManagerOf(#clinicId)")
+    @Operation(summary = "Batch reschedule appointments", description = "Reschedule all pending/scheduled appointments from one day to another for the clinic")
+    public ApiResponse<Map<String, Object>> batchReschedule(
+            @PathVariable Long clinicId,
+            @RequestParam String sourceDate,
+            @RequestParam String targetDate) {
+        java.time.LocalDate source = java.time.LocalDate.parse(sourceDate);
+        java.time.LocalDate target = java.time.LocalDate.parse(targetDate);
+        int count = clinicDashboardService.batchReschedule(clinicId, source, target);
+        return ApiResponse.success("Đã dời " + count + " ca hẹn thành công!", Map.of("movedCount", count));
+    }
 }
