@@ -56,9 +56,9 @@ export default function ClinicDashboard() {
           riskTrend: res.data.highRiskGrowth,
           insight: res.data.insights && res.data.insights.length > 0 ? res.data.insights[0] : null
         });
-        
+
         setRiskPatients(res.data.riskPatients || []);
-        
+
         // Add colors to disease distribution
         const baseColors = ['#3bb9f3', '#f59e0b', '#ef4444', '#10b981', '#6366f1', '#ec4899'];
         const distribution = (res.data.diseaseRatios || []).map((item: any, index: number) => ({
@@ -69,13 +69,13 @@ export default function ClinicDashboard() {
 
         // Process and map chart data (mapping month to label)
         let growthData = [...(res.data.patientGrowthChart || [])];
-        
+
         // Sort chronologically by Year/Month/Day before rendering
         growthData.sort((a: any, b: any) => {
           if (!a.month || !b.month) return 0;
           const partsA = a.month.toString().split(/[-/]/).map(Number);
           const partsB = b.month.toString().split(/[-/]/).map(Number);
-          
+
           for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
             const valA = partsA[i] || 0;
             const valB = partsB[i] || 0;
@@ -208,7 +208,7 @@ export default function ClinicDashboard() {
                       to={ROUTES.CLINIC.PATIENTS}
                       className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-primary text-white rounded-xl font-bold transition-all text-[12px] md:text-[13px] shadow-lg shadow-primary/20 hover:shadow-primary/30 whitespace-nowrap"
                     >
-                      <span className="material-symbols-outlined text-[16px] md:text-[18px]">add</span>
+                      <span className="material-symbols-outlined text-[16px] md:text-[18px]">group</span>
                       Quản lý bệnh nhân
                     </Link>
                     <button className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl font-bold transition-all text-[12px] md:text-[13px] border border-primary/10 shadow-sm whitespace-nowrap">
@@ -569,7 +569,7 @@ export default function ClinicDashboard() {
                       </ResponsiveContainer>
                       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <span className="text-3xl font-black text-slate-900 dark:text-white">{stats?.chronicPatients || 0}</span>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Tổng bệnh nhân</span>
+                        <span className="text-[15px] text-slate-600 font-semibold mt-1">Tổng bệnh nhân</span>
                       </div>
                     </>
                   )}
@@ -588,8 +588,8 @@ export default function ClinicDashboard() {
                           <span className="text-[13.5px] md:text-[15px] font-bold text-slate-700 dark:text-slate-300 truncate">{item.label || item.name}</span>
                         </div>
                         <div className="text-right shrink-0 ml-2">
-                          <span className="text-[14px] font-black text-slate-900 dark:text-white">{item.percentage || `${item.value}%`}</span>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">{item.value} ca bệnh</p>
+                          <span className="text-[15px] font-black text-slate-900 dark:text-white">{item.percentage || `${item.value}%`}</span>
+                          <p className="text-[12px] text-slate-600 font-bold mt-0.5">{item.value} ca bệnh</p>
                         </div>
                       </div>
                     ))
