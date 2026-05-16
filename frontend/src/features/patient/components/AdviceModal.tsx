@@ -11,6 +11,7 @@ interface AdviceModalProps {
   onSave: () => Promise<void>;
   patientName: string;
   patientAvatar?: string;
+  patientData?: any;
 }
 
 const AdviceModal: React.FC<AdviceModalProps> = ({
@@ -23,7 +24,8 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
   isSaving,
   onSave,
   patientName,
-  patientAvatar
+  patientAvatar,
+  patientData
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -41,7 +43,7 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] transition-all duration-300"
         onClick={onClose}
       ></div>
 
@@ -61,16 +63,33 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
             <div className="relative z-10 flex-1 text-center sm:text-left">
               <div className="flex flex-col sm:flex-row items-center gap-2">
                 <p className="font-extrabold text-slate-900 dark:text-white text-lg">{patientName}</p>
-                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-md">65 tuổi</span>
+                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-md">{patientData?.age || '--'} tuổi</span>
+                {patientData?.gender && (
+                  <>
+                    <span className="w-1 h-1 bg-slate-300 rounded-full hidden sm:block"></span>
+                    <span className="text-slate-500 font-medium text-xs hidden sm:block">{patientData.gender}</span>
+                  </>
+                )}
+                {patientData?.chronicCondition && (
+                  <>
+                    <span className="w-1 h-1 bg-slate-300 rounded-full hidden sm:block"></span>
+                    <span className="text-primary font-medium text-xs hidden sm:block truncate max-w-[150px]">{patientData.chronicCondition}</span>
+                  </>
+                )}
+                {patientData?.riskLevel && (
+                  <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full text-white shadow-sm sm:ml-auto ${patientData.riskLevel.includes('HIGH_RISK') || patientData.riskLevel.includes('cao') ? 'bg-red-500 shadow-red-500/20' : patientData.riskLevel.includes('MONITORING') || patientData.riskLevel.includes('dõi') ? 'bg-orange-500 shadow-orange-500/20' : 'bg-emerald-500 shadow-emerald-500/20'}`}>
+                    {patientData.riskLevel === 'HIGH_RISK' ? 'Nguy cơ cao' : patientData.riskLevel === 'MONITORING' ? 'Theo dõi' : patientData.riskLevel === 'STABLE' ? 'Ổn định' : patientData.riskLevel.replace(/\([^)]*\)/g, '').trim()}
+                  </span>
+                )}
               </div>
-              <p className="text-[10px] md:text-xs text-slate-500 font-bold tracking-wide opacity-70">BN quản lý thường trực • ID: BN-123456</p>
+              <p className="text-[10px] md:text-xs text-slate-500 font-bold tracking-wide opacity-70 mt-1">BN quản lý thường trực • ID: {patientData?.patientCode || 'BN-123456'}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
             {/* Left side: Category Selection */}
             <div className="space-y-4">
-              <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-100 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-lg">category</span>
                 Chọn nhóm tư vấn
               </label>
@@ -131,7 +150,7 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => setAdviceContent(prev => prev ? prev + ', ' + template.text : template.text)}
-                  className="px-5 py-2.5 bg-white dark:bg-slate-800 hover:bg-primary text-slate-600 dark:text-slate-400 hover:text-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[13px] font-bold transition-all shadow-sm active:scale-95 flex items-center gap-2"
+                  className="px-5 py-2.5 bg-white dark:bg-slate-800 hover:bg-primary text-slate-600 dark:text-slate-400 hover:text-white border border-slate-200 dark:border-slate-700 rounded-lg text-[13px] font-bold transition-all shadow-sm active:scale-95 flex items-center gap-2"
                 >
                   <span className="material-symbols-outlined text-sm opacity-70">{template.icon}</span>
                   {template.text}
@@ -153,12 +172,12 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
           <button
             onClick={onSave}
             disabled={isSaving}
-            className="flex-[1.8] py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-slate-900 font-extrabold text-sm shadow-xl shadow-primary/25 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-wait"
+            className="flex-[1.8] py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white font-extrabold text-sm shadow-xl shadow-primary/25 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-wait"
             type="button"
           >
             {isSaving ? (
               <>
-                <div className="w-5 h-5 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Đang gửi...
               </>
             ) : (

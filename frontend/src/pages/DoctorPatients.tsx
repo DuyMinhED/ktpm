@@ -308,55 +308,77 @@ export default function DoctorPatients() {
               )}
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={handleExportExcel}
-                className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50">
-                <span className="material-symbols-outlined text-[20px]">ios_share</span>
-                Xuất danh sách
-              </button>
-              <button
-                onClick={() => setIsAddPatientModalOpen(true)}
-                className="bg-primary text-white px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg shadow-primary/10 transition-all hover:bg-primary/90">
-                <span className="material-symbols-outlined text-[20px]">person_add</span>
-                Thêm bệnh nhân mới
-              </button>
+              {loadingPatients ? (
+                <>
+                  <Skeleton className="h-[44px] w-[150px] rounded-full" />
+                  <Skeleton className="h-[44px] w-[180px] rounded-full" />
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleExportExcel}
+                    className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50">
+                    <span className="material-symbols-outlined text-[20px]">ios_share</span>
+                    Xuất danh sách
+                  </button>
+                  <button
+                    onClick={() => setIsAddPatientModalOpen(true)}
+                    className="bg-primary text-white px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg shadow-primary/10 transition-all hover:bg-primary/90">
+                    <span className="material-symbols-outlined text-[20px]">person_add</span>
+                    Thêm bệnh nhân mới
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
           {/* Filters & Stats */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="flex flex-wrap items-center gap-3">
-              <div className="w-[240px]">
-                <Dropdown
-                  options={['Tất cả bệnh lý', 'Tiểu đường Type 2', 'Tăng huyết áp', 'Tim mạch']}
-                  value={diseaseFilter}
-                  onChange={setDiseaseFilter}
-                  size="lg"
-                  icon={<span className="material-symbols-outlined text-[20px] text-primary">vaccines</span>}
-                />
-              </div>
-              <div className="w-[220px]">
-                <Dropdown
-                  options={['Mọi mức độ', 'Nguy cơ cao', 'Đang theo dõi', 'Bình thường']}
-                  value={riskFilter}
-                  onChange={setRiskFilter}
-                  size="lg"
-                  icon={<span className="material-symbols-outlined text-[20px] text-orange-500">error</span>}
-                />
-              </div>
+              {loadingPatients ? (
+                <>
+                  <Skeleton className="h-[44px] w-[240px] rounded-xl" />
+                  <Skeleton className="h-[44px] w-[220px] rounded-xl" />
+                </>
+              ) : (
+                <>
+                  <div className="w-[240px]">
+                    <Dropdown
+                      options={['Tất cả bệnh lý', 'Tiểu đường Type 2', 'Tăng huyết áp', 'Tim mạch']}
+                      value={diseaseFilter}
+                      onChange={setDiseaseFilter}
+                      size="lg"
+                      icon={<span className="material-symbols-outlined text-[20px] text-primary">vaccines</span>}
+                    />
+                  </div>
+                  <div className="w-[220px]">
+                    <Dropdown
+                      options={['Mọi mức độ', 'Nguy cơ cao', 'Đang theo dõi', 'Bình thường']}
+                      value={riskFilter}
+                      onChange={setRiskFilter}
+                      size="lg"
+                      icon={<span className="material-symbols-outlined text-[20px] text-orange-500">error</span>}
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
-            <div className="flex items-center gap-6 bg-white px-6 py-3 rounded-full border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
-                {loadingPatients ? <Skeleton className="w-20 h-5" /> : <span className="text-[15px] font-medium text-slate-600">Tổng: <span className="text-[17px] font-black text-slate-900">{totalPatients}</span></span>}
+            {loadingPatients ? (
+              <Skeleton className="h-[44px] w-[300px] rounded-full" />
+            ) : (
+              <div className="flex items-center gap-6 bg-white px-6 py-3 rounded-full border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
+                  <span className="text-[15px] font-medium text-slate-600">Tổng: <span className="text-[17px] font-black text-slate-900">{totalPatients}</span></span>
+                </div>
+                <div className="w-px h-5 bg-slate-200"></div>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></div>
+                  <span className="text-[15px] font-medium text-slate-600">Cần can thiệp: <span className="text-[17px] font-black text-red-500">{highRiskCount}</span></span>
+                </div>
               </div>
-              <div className="w-px h-5 bg-slate-200"></div>
-              <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></div>
-                {loadingPatients ? <Skeleton className="w-28 h-5" /> : <span className="text-[15px] font-medium text-slate-600">Cần can thiệp: <span className="text-[17px] font-black text-red-500">{highRiskCount}</span></span>}
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Table */}
@@ -365,16 +387,16 @@ export default function DoctorPatients() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50">
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Bệnh nhân</th>
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Số điện thoại</th>
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Mã Bệnh Nhân</th>
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Tuổi</th>
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Giới tính</th>
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Chỉ số</th>
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Cập nhật</th>
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Xu hướng</th>
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Nguy cơ</th>
-                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Thao tác</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-20 h-4" /> : 'Bệnh nhân'}</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-24 h-4" /> : 'Số điện thoại'}</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-28 h-4" /> : 'Mã Bệnh Nhân'}</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-10 h-4" /> : 'Tuổi'}</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-16 h-4" /> : 'Giới tính'}</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-12 h-4" /> : 'Chỉ số'}</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-20 h-4" /> : 'Cập nhật'}</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-20 h-4" /> : 'Xu hướng'}</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-16 h-4" /> : 'Nguy cơ'}</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">{loadingPatients ? <Skeleton className="w-16 h-4 ml-auto" /> : 'Thao tác'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -594,9 +616,13 @@ export default function DoctorPatients() {
                 <button onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0} className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30">
                   <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                 </button>
-                <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
-                  Trang {currentPage + 1}/{totalPages || 1}
-                </span>
+                {loadingPatients ? (
+                  <Skeleton className="h-8 w-20 rounded-full" />
+                ) : (
+                  <span className="px-3 py-1.5 min-w-[90px] text-center rounded-full bg-primary text-white text-[13px] font-bold shadow-md tracking-tight whitespace-nowrap">
+                    Trang {currentPage + 1}/{totalPages || 1}
+                  </span>
+                )}
                 <button onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage >= totalPages - 1} className="p-2 rounded-md text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-primary transition-all disabled:opacity-30">
                   <span className="material-symbols-outlined text-[20px]">chevron_right</span>
                 </button>
@@ -644,6 +670,7 @@ export default function DoctorPatients() {
           onClose={() => setIsAdviceModalOpen(false)}
           patientName={selectedPatient?.fullName || ''}
           patientAvatar={selectedPatient?.avatarUrl}
+          patientData={selectedPatient}
           adviceCategory={adviceCategory}
           setAdviceCategory={setAdviceCategory}
           adviceContent={adviceContent}

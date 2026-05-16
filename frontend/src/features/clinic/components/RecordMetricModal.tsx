@@ -36,7 +36,7 @@ export default function RecordMetricModal({
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            
+
             // Parse existing values for easier incremental update
             let currentG = '';
             let currentSys = '';
@@ -100,7 +100,7 @@ export default function RecordMetricModal({
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
-        
+
         const hasAnyValue = formData.glucose || formData.bpSystolic || formData.heartRate || formData.spo2;
         if (!hasAnyValue) {
             newErrors.general = "Vui lòng điền ít nhất một chỉ số đo lường.";
@@ -120,43 +120,29 @@ export default function RecordMetricModal({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateForm()) return;
-        
+
         await onSave(formData);
     };
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             {/* Backdrop */}
-            <div 
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+            <div
+                className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] transition-all duration-300"
                 onClick={onClose}
             ></div>
 
             {/* Modal Container */}
             <div className="relative w-full max-w-[550px] bg-white dark:bg-slate-900 rounded-[24px] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border border-primary/10">
-                
+
                 {/* Header */}
-                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-primary/[0.02]">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                            <span className="material-symbols-outlined font-bold">monitor_heart</span>
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Ghi nhận chỉ số mới</h3>
-                            <p className="text-sm font-medium text-slate-500">Bệnh nhân: <span className="text-slate-900 dark:text-white font-bold">{patientData?.fullName || 'N/A'}</span></p>
-                        </div>
-                    </div>
-                    <button 
-                        onClick={onClose}
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                    >
-                        <span className="material-symbols-outlined">close</span>
-                    </button>
+                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-center items-center bg-white dark:bg-slate-900 z-10 sticky top-0">
+                    <h3 className="text-[20px] font-semibold text-slate-800 dark:text-white tracking-tight leading-tight">Ghi nhận chỉ số mới</h3>
                 </div>
 
                 {/* Form Content */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[70vh]">
-                    
+
                     {errors.general && (
                         <div className="p-3 bg-red-50 text-red-600 rounded-xl text-[13px] font-bold border border-red-100 flex items-center gap-2">
                             <span className="material-symbols-outlined text-lg">error</span>
@@ -164,10 +150,38 @@ export default function RecordMetricModal({
                         </div>
                     )}
 
+                    {/* Patient Profile Summary */}
+                    <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden shadow-sm shrink-0 border border-primary/20">
+                            {patientData?.avatarUrl ? (
+                                <img src={patientData.avatarUrl} alt={patientData.fullName} className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-xl font-black">{patientData?.fullName?.charAt(0) || 'N'}</span>
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-[17px] font-bold text-slate-800 dark:text-white leading-tight">{patientData?.fullName || 'Bệnh nhân'}</h4>
+                            <div className="flex flex-wrap items-center gap-2 mt-1 text-[13px] font-medium text-slate-500">
+                                <span>{patientData?.age || '--'} tuổi</span>
+                                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                <span>{patientData?.gender || 'Chưa XĐ'}</span>
+                                <span className="w-1 h-1 bg-slate-300 rounded-full hidden sm:block"></span>
+                                <span className="text-primary truncate max-w-[150px] hidden sm:block">{patientData?.chronicCondition || 'Chưa xác định bệnh lý'}</span>
+                            </div>
+                        </div>
+                        {patientData?.riskLevel && (
+                            <div className="hidden sm:block">
+                                <span className={`px-3 py-1.5 text-[12px] font-bold rounded-full text-white shadow-sm ${patientData.riskLevel.includes('HIGH_RISK') || patientData.riskLevel.includes('cao') ? 'bg-red-500 shadow-red-500/20' : patientData.riskLevel.includes('MONITORING') || patientData.riskLevel.includes('dõi') ? 'bg-orange-500 shadow-orange-500/20' : 'bg-emerald-500 shadow-emerald-500/20'}`}>
+                                    {patientData.riskLevel === 'HIGH_RISK' ? 'Nguy cơ cao' : patientData.riskLevel === 'MONITORING' ? 'Theo dõi' : patientData.riskLevel === 'STABLE' ? 'Ổn định' : patientData.riskLevel.replace(/\([^)]*\)/g, '').trim()}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Glucose Section */}
-                    <div className="p-4 bg-amber-50/30 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-2xl">
+                    <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/80 dark:border-amber-800/50 rounded-2xl">
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="material-symbols-outlined text-amber-600 text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>glucose</span>
+                            <span className="material-symbols-outlined text-amber-600 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>glucose</span>
                             <h4 className="text-[14px] font-bold text-amber-700 dark:text-amber-400">Đường huyết (Blood Sugar)</h4>
                         </div>
                         <div className="flex items-center gap-3">
@@ -181,13 +195,13 @@ export default function RecordMetricModal({
                                     placeholder="Nhập chỉ số..."
                                     className="w-full h-[46px] pl-4 pr-16 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white transition-all focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none"
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">mmol/L</span>
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-medium text-slate-400">mmol/L</span>
                             </div>
                         </div>
                     </div>
 
                     {/* BP Section */}
-                    <div className="p-4 bg-red-50/30 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl">
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200/80 dark:border-red-800/50 rounded-2xl">
                         <div className="flex items-center gap-2 mb-3">
                             <span className="material-symbols-outlined text-red-600 text-[20px]">blood_pressure</span>
                             <h4 className="text-[14px] font-bold text-red-700 dark:text-red-400">Huyết áp (Blood Pressure)</h4>
@@ -204,7 +218,7 @@ export default function RecordMetricModal({
                                         placeholder="120"
                                         className={`w-full h-[46px] pl-4 pr-12 bg-white dark:bg-slate-800 border ${errors.bpSystolic ? 'border-red-500' : 'border-slate-200'} dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white outline-none`}
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">mmHg</span>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-medium text-slate-400">mmHg</span>
                                 </div>
                             </div>
                             <div className="space-y-1.5">
@@ -218,7 +232,7 @@ export default function RecordMetricModal({
                                         placeholder="80"
                                         className={`w-full h-[46px] pl-4 pr-12 bg-white dark:bg-slate-800 border ${errors.bpDiastolic ? 'border-red-500' : 'border-slate-200'} dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white outline-none`}
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">mmHg</span>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-medium text-slate-400">mmHg</span>
                                 </div>
                             </div>
                         </div>
@@ -239,7 +253,7 @@ export default function RecordMetricModal({
                                     placeholder="75"
                                     className="w-full h-[46px] pl-4 pr-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white outline-none"
                                 />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">bpm</span>
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-medium text-slate-400">bpm</span>
                             </div>
                         </div>
                         <div className="space-y-1.5">
@@ -255,7 +269,7 @@ export default function RecordMetricModal({
                                     placeholder="98"
                                     className="w-full h-[46px] pl-4 pr-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white outline-none"
                                 />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">%</span>
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-medium text-slate-400">%</span>
                             </div>
                         </div>
                     </div>
@@ -268,7 +282,7 @@ export default function RecordMetricModal({
                             rows={3}
                             value={formData.notes}
                             onChange={handleChange}
-                            placeholder="Ví dụ: Bệnh nhân vừa ăn cơm xong, Đo sau vận động..."
+                            placeholder="Nhập ghi chú..."
                             className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
                         ></textarea>
                     </div>

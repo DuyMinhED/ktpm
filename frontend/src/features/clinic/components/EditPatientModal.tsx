@@ -453,7 +453,7 @@ export default function EditPatientModal({
                                             />
                                         </div>
                                     </div>
-                                    <div className="space-y-1.5">
+                                     <div className="space-y-1.5">
                                         <label className="text-[14px] font-medium text-slate-500 ml-1">Nhóm máu</label>
                                         <Dropdown
                                             options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Chưa xác định']}
@@ -461,26 +461,27 @@ export default function EditPatientModal({
                                             onChange={(bloodType: string) => setFormData(prev => ({ ...prev, bloodType }))}
                                         />
                                     </div>
-                                </div>
-                                
-                                {calculatedBmi && (
-                                    <div className="mt-3 mb-1 px-4 py-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 flex items-center gap-3 animate-in slide-in-from-top-2">
-                                        <span className="material-symbols-outlined text-indigo-600 text-[22px]">health_and_safety</span>
-                                        <div className="text-sm">
-                                            <span className="text-slate-600 dark:text-slate-300 font-medium">Chỉ số BMI tự động tính: </span>
-                                            <strong className="text-indigo-700 dark:text-indigo-400 text-base font-extrabold">{calculatedBmi} kg/m²</strong>
-                                            <span className="ml-2 text-[12px] px-2 py-0.5 rounded-full font-bold bg-white dark:bg-slate-800 text-indigo-600 border border-indigo-200">
-                                                {(() => {
-                                                    const v = parseFloat(calculatedBmi);
-                                                    if (v < 18.5) return 'Thiếu cân';
-                                                    if (v < 25) return 'Bình thường';
-                                                    if (v < 30) return 'Tiền béo phì';
-                                                    return 'Béo phì';
-                                                })()}
-                                            </span>
+                                    
+                                    {calculatedBmi && (
+                                        <div className="md:mt-[26px] h-[42px] px-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 flex items-center gap-3 animate-in slide-in-from-top-2">
+                                            <span className="material-symbols-outlined text-indigo-600 text-[20px]">health_and_safety</span>
+                                            <div className="text-sm truncate">
+                                                <span className="text-slate-600 dark:text-slate-300 font-medium hidden lg:inline">Chỉ số BMI: </span>
+                                                <span className="text-slate-600 dark:text-slate-300 font-medium lg:hidden">BMI: </span>
+                                                <strong className="text-indigo-700 dark:text-indigo-400 text-base font-extrabold">{calculatedBmi}</strong>
+                                                <span className="ml-2 text-[12px] px-2 py-0.5 rounded-full font-bold bg-white dark:bg-slate-800 text-indigo-600 border border-indigo-200 shadow-sm whitespace-nowrap">
+                                                    {(() => {
+                                                        const v = parseFloat(calculatedBmi);
+                                                        if (v < 18.5) return 'Thiếu cân';
+                                                        if (v < 25) return 'Bình thường';
+                                                        if (v < 30) return 'Tiền béo phì';
+                                                        return 'Béo phì';
+                                                    })()}
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
 
                                 {/* Security/Password */}
                                 <div className="mt-4">
