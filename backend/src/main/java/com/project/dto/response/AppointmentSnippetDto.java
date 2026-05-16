@@ -11,4 +11,8 @@ public class AppointmentSnippetDto {
     private String displayTime; // Example: "Today 14:30"
     private String type;
     private boolean isPast;
+    private String avatarUrl;
+    private Integer age;
+    private String condition;
+    private String gender;
 }

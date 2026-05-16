@@ -64,6 +64,10 @@ public class DoctorDashboardServiceImpl implements DoctorDashboardService {
                                                 .displayTime(apt.getAppointmentTime() != null ? DateTimeUtils.formatForDashboard(apt.getAppointmentTime()) : "N/A")
                                                 .type(apt.getType())
                                                 .isPast(apt.getAppointmentTime() != null && apt.getAppointmentTime().isBefore(now))
+                                                .avatarUrl(apt.getPatient() != null ? apt.getPatient().getAvatarUrl() : null)
+                                                .age(apt.getPatient() != null && apt.getPatient().getDateOfBirth() != null ? java.time.Period.between(apt.getPatient().getDateOfBirth(), java.time.LocalDate.now()).getYears() : null)
+                                                .condition(apt.getPatient() != null ? apt.getPatient().getChronicCondition() : "N/A")
+                                                .gender(apt.getPatient() != null ? apt.getPatient().getGender() : "N/A")
                                                 .build())
                                 .collect(Collectors.toList()));
 
@@ -93,16 +97,7 @@ public class DoctorDashboardServiceImpl implements DoctorDashboardService {
                                 .stats(stats)
                                 .upcomingAppointments(upcomingAppointmentsFuture.join())
                                 .recentPatients(recentPatientsFuture.join())
-                                .highRiskPatients(highRiskPatientsDataFuture.join().stream()
-                                                .map(p -> DoctorDashboardResponse.DoctorPatientResponseSnippet.builder()
-                                                                .id(p.getId())
-                                                                .name(p.getFullName())
-                                                                .condition(p.getChronicCondition())
-                                                                .riskLevel(p.getRiskLevel())
-                                                                .lastUpdate(p.getLastUpdate() != null ? p.getLastUpdate() : "Vừa xong")
-                                                                .img(p.getAvatarUrl())
-                                                                .build())
-                                                .collect(Collectors.toList()))
+                                .highRiskPatients(highRiskPatientsDataFuture.join())
                                 .insights(insightsFuture.join())
                                 .build();
         }

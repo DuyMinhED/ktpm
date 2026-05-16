@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
-import { authApi } from '../../api/auth';
 import { doctorApi } from '../../api/doctor';
 import { supportApi } from '../../api/support';
 import { useToast } from '../ui/ToastContext';
@@ -16,34 +15,12 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
     isSidebarOpen,
     isLoading = false
 }) => {
-    const navigate = useNavigate();
-    const [userInfo, setUserInfo] = useState({
-        name: localStorage.getItem('userName') || "Bác sĩ chuyên khoa",
-        avatar: localStorage.getItem('userAvatar')
-    });
     const [unreadCount, setUnreadCount] = useState(0);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isSavingSupport, setIsSavingSupport] = useState(false);
     const { showToast } = useToast();
 
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-                const response = await authApi.getMe();
-                if (response.success && response.data) {
-                    const { fullName, avatarUrl } = response.data;
-                    setUserInfo({
-                        name: fullName || "Bác sĩ chuyên khoa",
-                        avatar: avatarUrl
-                    });
-                    if (fullName) localStorage.setItem('userName', fullName);
-                    if (avatarUrl) localStorage.setItem('userAvatar', avatarUrl);
-                }
-            } catch (error) {
-                console.error("Error fetching user profile:", error);
-            }
-        };
-
         const fetchUnreadCount = async () => {
             try {
                 const res = await doctorApi.getConversations();
@@ -56,20 +33,10 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
             }
         };
 
-        fetchUserProfile();
         fetchUnreadCount();
         const interval = setInterval(fetchUnreadCount, 15000); // Refresh every 15s
         return () => clearInterval(interval);
     }, []);
-
-    const finalUserName = userInfo.name;
-    const displayName = finalUserName === "Bác sĩ chuyên khoa" || finalUserName.includes("Bác sĩ") ? finalUserName : `Bác sĩ ${finalUserName}`;
-    const finalUserAvatar = userInfo.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0D8ABC&color=fff";
-    
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate('/?action=login');
-    };
 
     const handleSaveSupport = async (data: any) => {
         setIsSavingSupport(true);
@@ -150,42 +117,6 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
                     <span>Hỗ trợ kỹ thuật</span>
                 </button>
             </nav>
-
-            <div className="p-4 mt-auto">
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-4 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-blue-400 p-0.5 shadow-lg shadow-primary/20 shrink-0">
-                            <img
-                                src={finalUserAvatar}
-                                alt={finalUserName}
-                                onError={(e) => {
-                                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=random`;
-                                }}
-                                className="w-full h-full object-cover rounded-[14px] border-2 border-white dark:border-slate-900 bg-white"
-                            />
-                        </div>
-                        <div className="min-w-0">
-                            {isLoading ? (
-                                <div className="space-y-2 animate-pulse pr-2">
-                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-24"></div>
-                                </div>
-                            ) : (
-                                <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight tracking-tight pr-2" title={displayName}>
-                                    {displayName}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                    
-                    <button 
-                        onClick={handleLogout}
-                        title="Đăng xuất"
-                        className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-500 hover:text-white transition-all shadow-sm group"
-                    >
-                        <span className="material-symbols-outlined text-[20px] font-bold group-hover:scale-110 transition-transform">logout</span>
-                    </button>
-                </div>
-            </div>
 
             <CreateTicketModal
                 isOpen={isSupportModalOpen}

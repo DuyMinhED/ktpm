@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import * as ExcelJS from 'exceljs';
+import { ResponsiveContainer, AreaChart, Area, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 import TopBar from '../components/common/TopBar';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import AdviceModal from '../features/patient/components/AdviceModal';
@@ -84,7 +84,6 @@ export default function DoctorDashboard() {
   const [showToast, setShowToast] = useState(false);
   const [toastTitle, setToastTitle] = useState('');
   const [dashboardTimeRange, setDashboardTimeRange] = useState('7 ngày qua');
-  const [filterRisk, setFilterRisk] = useState<'ALL' | 'HIGH_RISK' | 'STABLE'>('ALL');
 
   useEffect(() => {
     if (!isLoading) {
@@ -92,11 +91,6 @@ export default function DoctorDashboard() {
       fetchChartStats(days);
     }
   }, [dashboardTimeRange]);
-
-  const filteredPatients = useMemo(() => {
-    if (filterRisk === 'ALL') return myPatients;
-    return myPatients.filter((p: any) => p.status === (filterRisk === 'HIGH_RISK' ? 'Nguy cơ cao' : 'Ổn định'));
-  }, [myPatients, filterRisk]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -199,80 +193,6 @@ export default function DoctorDashboard() {
     }
   };
 
-  const handleExportExcel = async () => {
-    const today = new Date().toLocaleDateString('vi-VN');
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Báo Cáo Nhanh');
-
-    // Title Row
-    worksheet.addRow([`BÁO CÁO NHANH TÌNH TRẠNG BỆNH NHÂN - ${today}`]);
-    worksheet.mergeCells('A1:D1');
-    const titleRow = worksheet.getRow(1);
-    titleRow.font = { name: 'Arial', family: 4, size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
-    titleRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0284C7' } }; // sky-600
-    titleRow.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
-    titleRow.height = 30;
-
-    // Header Row
-    const headerRow = worksheet.addRow([
-      'Họ và Tên',
-      'Tuổi',
-      'Chỉ Số HA/Đường',
-      'Trạng Thái Nguy Cơ'
-    ]);
-
-    headerRow.font = { bold: true, color: { argb: 'FF1E293B' } }; // slate-800
-    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }; // slate-100
-    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
-    headerRow.height = 25;
-
-    // Column Widths
-    worksheet.columns = [
-      { width: 35 }, // Name
-      { width: 10 }, // Age
-      { width: 25 }, // Index
-      { width: 30 }  // Condition/Risk
-    ];
-
-    // Data Rows
-    const dataToExport = dashData?.highRiskPatients || [];
-    dataToExport.forEach((item: any) => {
-      const row = worksheet.addRow([
-        item.fullName,
-        item.age,
-        item.latestBp || 'N/A',
-        item.chronicCondition
-      ]);
-      row.alignment = { vertical: 'middle' };
-
-      const riskCell = row.getCell(4);
-      riskCell.font = { color: { argb: 'FFEF4444' }, bold: true };
-    });
-
-    // Borders
-    worksheet.eachRow((row: ExcelJS.Row, rowNumber: number) => {
-      if (rowNumber > 1) {
-        row.eachCell({ includeEmpty: true }, (cell: ExcelJS.Cell) => {
-          cell.border = {
-            top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
-            left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
-            bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
-            right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
-          };
-        });
-      }
-    });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `Bao_cao_nhanh_BS_${today.replace(/\//g, '-')}.xlsx`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
   return (
     <>
       <div className="flex min-h-screen font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
@@ -317,7 +237,7 @@ export default function DoctorDashboard() {
                       </div>
                       <span className="text-xs font-bold text-green-500 flex items-center">+2.4% <span className="material-symbols-outlined text-xs">trending_up</span></span>
                     </div>
-                    <h3 className="text-slate-500 text-sm font-medium">Tổng bệnh nhân</h3>
+                    <h3 className="text-slate-600 dark:text-slate-400 text-base font-bold tracking-tight">Tổng bệnh nhân</h3>
                     <p className="text-3xl font-extrabold mt-1">{dashData?.stats?.totalPatients || 0}</p>
                   </div>
                   <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-primary/5 shadow-sm">
@@ -327,7 +247,7 @@ export default function DoctorDashboard() {
                       </div>
                       <span className="px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded-full">Cảnh báo</span>
                     </div>
-                    <h3 className="text-slate-500 text-sm font-medium">Nguy cơ cao</h3>
+                    <h3 className="text-slate-600 dark:text-slate-400 text-base font-bold tracking-tight">Nguy cơ cao</h3>
                     <p className="text-3xl font-extrabold mt-1 text-red-500">{dashData?.stats?.highRiskCount || 0}</p>
                   </div>
                   <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-primary/5 shadow-sm">
@@ -336,7 +256,7 @@ export default function DoctorDashboard() {
                         <span className="material-symbols-outlined size-6">event_upcoming</span>
                       </div>
                     </div>
-                    <h3 className="text-slate-500 text-sm font-medium">Lịch hẹn chờ</h3>
+                    <h3 className="text-slate-600 dark:text-slate-400 text-base font-bold tracking-tight">Lịch hẹn chờ</h3>
                     <p className="text-3xl font-extrabold mt-1">{dashData?.upcomingAppointments?.length || 0}</p>
                   </div>
                   <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-primary/5 shadow-sm">
@@ -345,7 +265,7 @@ export default function DoctorDashboard() {
                         <span className="material-symbols-outlined size-6">mail</span>
                       </div>
                     </div>
-                    <h3 className="text-slate-500 text-sm font-medium">Tin nhắn mới</h3>
+                    <h3 className="text-slate-600 dark:text-slate-400 text-base font-bold tracking-tight">Tin nhắn mới</h3>
                     <p className="text-3xl font-extrabold mt-1">{dashData?.stats?.unreadMessagesCount || 0}</p>
                   </div>
                 </>
@@ -355,7 +275,7 @@ export default function DoctorDashboard() {
             {/* High Risk Patients Section */}
             <section className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-extrabold flex items-center gap-2">
+                <h2 className="text-xl font-medium text-slate-800 dark:text-slate-400 flex items-center gap-2">
                   <span className="material-symbols-outlined text-red-500">warning</span>
                   Phân tích nguy cơ cao
                 </h2>
@@ -383,36 +303,62 @@ export default function DoctorDashboard() {
                   <>
                     {dashData?.highRiskPatients?.length > 0 ? (
                       dashData.highRiskPatients.map((p: any) => (
-                        <div key={p.id} className="bg-white dark:bg-slate-900 p-4 md:p-5 rounded-lg border-l-4 border-l-red-500 border border-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 overflow-hidden flex-shrink-0 flex items-center justify-center text-primary font-bold">
-                              {p.fullName?.charAt(0)}
+                        <div key={p.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border-l-4 border-l-red-500 border border-primary/5 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 shadow-sm hover:shadow-md transition-all group/card">
+                          {/* Info Section */}
+                          <div className="flex items-center gap-4 xl:w-1/3">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 overflow-hidden flex-shrink-0 flex items-center justify-center text-primary font-bold border border-primary/20 shadow-inner">
+                              {p.avatarUrl ? (
+                                <img src={p.avatarUrl} alt={p.fullName} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.fullName || '')}&background=random`; }} />
+                              ) : (
+                                p.fullName?.charAt(0)
+                              )}
                             </div>
-                            <div>
-                              <p className="font-bold text-base md:text-lg text-slate-900 dark:text-white">{p.fullName}</p>
-                              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                            <div className="min-w-0">
+                              <p className="font-bold text-base md:text-lg text-slate-700 dark:text-white truncate flex items-center gap-2">
+                                {p.fullName}
+                                {p.treatmentStatus && <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/30 text-[11px] font-bold rounded-md">{p.treatmentStatus}</span>}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-2 text-[13px] text-slate-500 mt-1 font-medium">
                                 <span>{p.age} tuổi</span>
                                 <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                                <span className="truncate max-w-[150px]">{p.chronicCondition}</span>
+                                <span className="text-slate-700 dark:text-slate-300 truncate max-w-[150px]">{p.chronicCondition}</span>
+                                <span className="w-1 h-1 bg-slate-300 rounded-full hidden sm:block"></span>
+                                <span className="flex items-center gap-1 text-slate-400 hidden sm:flex" title="Thời gian cập nhật chỉ số sinh tồn gần nhất"><span className="material-symbols-outlined text-[14px]">schedule</span> Cập nhật: {p.lastUpdate || 'Vừa xong'}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center sm:flex-col justify-between w-full sm:w-auto sm:text-center px-0 sm:px-6 py-3 sm:py-0 border-y sm:border-y-0 border-slate-50 dark:border-slate-800">
-                            <p className="text-[14px] font-bold text-slate-400">Xu hướng HA</p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-red-500 font-extrabold text-base md:text-lg">{p.latestBp || 'N/A'}</p>
+
+                          {/* Metrics Grid */}
+                          <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto pb-2 xl:pb-0 scrollbar-hide">
+                            <div className="flex flex-col bg-red-50 dark:bg-red-900/10 px-4 py-2.5 rounded-xl border border-red-100 dark:border-red-900/20 min-w-[110px]">
+                              <span className="text-[12px] font-bold text-red-400 mb-0.5">Huyết áp</span>
+                              <span className="text-lg font-bold text-red-600 dark:text-red-400 leading-none">{p.latestBp || 'N/A'}</span>
+                            </div>
+                            <div className="flex flex-col bg-slate-50 dark:bg-slate-800/50 px-4 py-2.5 rounded-xl border border-slate-100 dark:border-slate-800 min-w-[110px]">
+                              <span className="text-[12px] font-bold text-slate-400 mb-0.5">Glucose</span>
+                              <span className="text-lg font-bold text-slate-700 dark:text-slate-200 leading-none">{p.latestGlucose || 'N/A'}</span>
+                            </div>
+                            <div className="flex flex-col bg-slate-50 dark:bg-slate-800/50 px-4 py-2.5 rounded-xl border border-slate-100 dark:border-slate-800 min-w-[110px]">
+                              <span className="text-[12px] font-bold text-slate-400 mb-0.5">Nhịp tim</span>
+                              <span className="text-lg font-bold text-slate-700 dark:text-slate-200 leading-none">{p.latestHeartRate || 'N/A'} <span className="text-[10px] font-bold text-slate-400">bpm</span></span>
                             </div>
                           </div>
-                          <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
-                            <span className="flex-1 sm:flex-none bg-red-500 text-white text-[11px] font-bold px-4 py-1.5 rounded-full text-center shadow-sm shadow-red-500/20 whitespace-nowrap">Nguy cấp</span>
-                            <div className="flex gap-2">
-                              <Link to={ROUTES.DOCTOR.MESSAGES} className="flex-1 sm:flex-none bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
-                                <span className="material-symbols-outlined text-base">chat</span>
+
+                          {/* Actions */}
+                          <div className="flex items-center justify-between xl:justify-end gap-6 w-full xl:w-auto border-t xl:border-t-0 border-slate-100 dark:border-slate-800 pt-4 xl:pt-0">
+                            <div className="flex flex-col items-start xl:items-end">
+                              <span className="bg-red-500 text-white text-[12px] font-bold px-3 py-1 rounded shadow-sm shadow-red-500/20 mb-1">Nguy cấp</span>
+                              <span className={`text-[12px] font-bold ${p.trendColor || 'text-red-500'} flex items-center gap-1`}><span className="material-symbols-outlined text-[16px]">trending_up</span> {p.healthTrend || 'Cần chú ý'}</span>
+                            </div>
+                            <div className="flex gap-3">
+                              <Link to={ROUTES.DOCTOR.MESSAGES} title="Nhắn tin" className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 hover:bg-blue-500 hover:text-white hover:-translate-y-1 transition-all flex items-center justify-center shadow-sm">
+                                <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
                               </Link>
                               <button
                                 onClick={() => { setIsAdviceModalOpen(true); setAdvicePatientName(p.fullName); setAdvicePatientId(p.id); setAdvicePatientAvatar(p.avatarUrl); }}
-                                className="flex-1 sm:flex-none bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
-                                <span className="material-symbols-outlined text-base">campaign</span>
+                                title="Gửi lời khuyên"
+                                className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-500 hover:bg-amber-500 hover:text-white hover:-translate-y-1 transition-all flex items-center justify-center shadow-sm">
+                                <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>campaign</span>
                               </button>
                             </div>
                           </div>
@@ -436,12 +382,12 @@ export default function DoctorDashboard() {
                     {isLoading ? (
                       <Skeleton className="h-6 w-48 mb-2" />
                     ) : (
-                      <h2 className="text-[19px] font-black tracking-tight text-slate-900 dark:text-white leading-tight">Biểu đồ rủi ro bệnh nhân</h2>
+                      <h2 className="text-[19px] font-medium text-slate-900 dark:text-white leading-tight">Biểu đồ rủi ro bệnh nhân</h2>
                     )}
                     {isLoading ? (
                       <Skeleton className="h-4 w-64" />
                     ) : (
-                      <p className="text-[14px] text-slate-500 font-medium tracking-tight">Thống kê ca nguy cơ cao theo thời gian</p>
+                      <p className="text-[15px] text-slate-500 font-medium tracking-tight">Thống kê ca nguy cơ cao theo thời gian</p>
                     )}
                   </div>
                   {isLoading ? (
@@ -455,55 +401,74 @@ export default function DoctorDashboard() {
                     />
                   )}
                 </div>
-                
-                <div className="h-48 flex items-end justify-between gap-1.5 sm:gap-2 px-2">
-                  {(isLoading || isChartLoading) ? (
-                    [...Array(dashboardTimeRange === '30 ngày qua' ? 30 : 7)].map((_, i) => (
-                      <Skeleton key={i} className="w-full flex-1" style={{ height: `${30 + Math.random() * 50}%` }} />
-                    ))
-                  ) : (
-                    <>
-                      {(patientStats?.chartDataBp || [120, 122, 118, 125, 132, 130, 127]).map((val: number, i: number) => {
-                        const minVal = 95;
-                        const maxVal = 150;
-                        const heightPercent = Math.min(100, Math.max(15, ((val - minVal) / (maxVal - minVal)) * 100));
-                        // Soft fade opacity based on index count
-                        const currentCount = patientStats?.chartDataBp?.length || 7;
-                        const opacity = 0.2 + (i * (0.8 / currentCount));
-                        
-                        return (
-                          <div 
-                            key={i} 
-                            className="w-full rounded-t-lg relative group transition-all cursor-pointer flex-1"
-                            style={{ 
-                              height: `${heightPercent}%`, 
-                              backgroundColor: `rgba(45, 212, 191, ${Math.min(1, opacity)})` 
-                            }}
-                          >
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-slate-700 text-white text-[11px] px-2 py-1 rounded shadow-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                              {Math.round(val)} mmHg
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </>
-                  )}
-                </div>
 
-                <div className="flex justify-between mt-4 px-4 text-[10px] font-bold text-slate-400 tracking-wide">
-                  {dashboardTimeRange === '30 ngày qua' ? (
-                    <>
-                      <span className="w-1/3 text-left">30 ngày trước</span>
-                      <span className="w-1/3 text-center">15 ngày trước</span>
-                      <span className="w-1/3 text-right">Hôm nay</span>
-                    </>
+                <div className="h-[250px] mt-6 w-full relative">
+                  {(isLoading || isChartLoading) ? (
+                    <div className="w-full h-full flex flex-col justify-end pb-6 pt-2 px-2">
+                      <Skeleton className="w-full h-full rounded-xl opacity-60" />
+                      <div className="flex justify-between mt-4">
+                        <Skeleton className="w-12 h-3" />
+                        <Skeleton className="w-12 h-3" />
+                        <Skeleton className="w-12 h-3" />
+                        <Skeleton className="w-12 h-3" />
+                        <Skeleton className="w-12 h-3" />
+                      </div>
+                    </div>
                   ) : (
-                    Array.from({ length: 7 }, (_, index) => {
-                      const d = new Date();
-                      d.setDate(d.getDate() - (6 - index));
-                      const dayLabels = ['CN', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7'];
-                      return <span key={index} className="flex-1 text-center">{dayLabels[d.getDay()]}</span>;
-                    })
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={(patientStats?.chartDataBp || Array(dashboardTimeRange === '30 ngày qua' ? 30 : 7).fill(120).map(() => 110 + Math.random() * 30)).map((val: number, i: number, arr: any[]) => {
+                           const d = new Date();
+                           d.setDate(d.getDate() - (arr.length - 1 - i));
+                           return {
+                             name: dashboardTimeRange === '30 ngày qua' 
+                               ? `${d.getDate()}/${d.getMonth() + 1}` 
+                               : ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][d.getDay()],
+                             value: Math.round(val)
+                           };
+                        })}
+                        margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                      >
+                        <defs>
+                          <linearGradient id="colorBp" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                        <XAxis 
+                          dataKey="name" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }}
+                          dy={10}
+                          minTickGap={20}
+                        />
+                        <YAxis 
+                          domain={['dataMin - 5', 'dataMax + 5']} 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }}
+                          dx={-10}
+                        />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)', backgroundColor: '#fff', color: '#0f172a', fontWeight: 'bold', padding: '8px 12px' }}
+                          itemStyle={{ color: '#0ea5e9', fontWeight: 'bold', fontSize: '13px' }}
+                          cursor={{ stroke: '#2dd4bf', strokeWidth: 1, strokeDasharray: '4 4' }}
+                          formatter={(value: number) => [`${value} mmHg`, 'Huyết áp']}
+                          labelStyle={{ color: '#64748b', marginBottom: '2px', fontSize: '11px', fontWeight: '500' }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#2dd4bf" 
+                          strokeWidth={3}
+                          fillOpacity={1} 
+                          fill="url(#colorBp)" 
+                          activeDot={{ r: 6, fill: '#2dd4bf', stroke: '#fff', strokeWidth: 2 }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   )}
                 </div>
               </section>
@@ -512,7 +477,7 @@ export default function DoctorDashboard() {
               <aside className="col-span-12 lg:col-span-4 space-y-8">
                 {/* Quick Actions */}
                 <section>
-                  <h2 className="text-xl font-extrabold mb-4">Thao tác nhanh</h2>
+                  <h2 className="text-xl font-medium text-slate-900 dark:text-slate-400 mb-4">Thao tác nhanh</h2>
                   <div className="grid grid-cols-1 gap-3">
                     {isLoading ? (
                       [...Array(3)].map((_, i) => (
@@ -554,7 +519,7 @@ export default function DoctorDashboard() {
 
                 {/* Recent Appointments */}
                 <section className="mt-8">
-                  <h2 className="text-[18px] font-extrabold mb-6 tracking-tight">Lịch hẹn sắp tới</h2>
+                  <h2 className="text-[18px] font-medium text-slate-900 dark:text-slate-400 mb-6 tracking-tight">Lịch hẹn sắp tới</h2>
                   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-primary/5 shadow-sm divide-y divide-primary/5 overflow-hidden">
                     {isLoading ? (
                       [...Array(3)].map((_, i) => (
@@ -572,23 +537,53 @@ export default function DoctorDashboard() {
                     ) : (
                       <>
                         {dashData?.upcomingAppointments?.length > 0 ? (
-                          dashData.upcomingAppointments.slice(0, 3).map((appt: any) => (
-                            <div key={appt.id} className="p-5 flex items-center gap-5 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group">
-                              <div className="flex-shrink-0 text-left min-w-[100px]">
-                                <p className="text-[12px] font-bold text-slate-400 mb-1">
-                                  {appt.isPast ? 'Đã diễn ra' : 'Sắp tới'}
-                                </p>
-                                <p className="text-lg font-black text-primary leading-tight">
-                                  {appt.displayTime}
-                                </p>
+                          dashData.upcomingAppointments.slice(0, 3).map((appt: any) => {
+                            const timeParts = appt.displayTime?.split(' ') || [];
+                            const timeStr = timeParts.pop() || 'N/A';
+                            const dateStr = timeParts.join(' ');
+
+                            return (
+                              <div key={appt.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group">
+                                <div className="flex-shrink-0 text-center min-w-[80px] bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2.5 border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">
+                                    {appt.isPast ? 'Đã qua' : 'Sắp tới'}
+                                  </p>
+                                  <p className="text-[17px] font-black text-primary leading-tight">
+                                    {timeStr}
+                                  </p>
+                                  <p className="text-[11px] font-bold text-slate-500 mt-0.5">
+                                    {dateStr}
+                                  </p>
+                                </div>
+
+                                <div className="flex-1 min-w-0 flex items-center gap-3">
+                                  <div className="relative flex-shrink-0">
+                                    {appt.avatarUrl ? (
+                                      <img src={appt.avatarUrl} alt="Avatar" className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-slate-800 shadow-sm" />
+                                    ) : (
+                                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[16px] border-2 border-white dark:border-slate-800 shadow-sm">
+                                        {appt.patientName?.charAt(0)}
+                                      </div>
+                                    )}
+                                    <div className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-900 rounded-full p-[1px] shadow-sm border border-slate-100 dark:border-slate-800">
+                                      <span className={`material-symbols-outlined text-[13px] leading-none ${appt.gender === 'Nam' ? 'text-blue-500' : 'text-pink-500'}`}>
+                                        {appt.gender === 'Nam' ? 'male' : 'female'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex-1 overflow-hidden">
+                                    <p className="font-bold truncate text-[15px] text-slate-900 dark:text-white group-hover:text-primary transition-colors mb-0.5">{appt.patientName}</p>
+                                    <div className="flex items-center gap-1.5 text-[13px] text-slate-500 font-medium truncate">
+                                      {appt.age && <span>{appt.age} tuổi</span>}
+                                      {appt.age && appt.condition && <span className="w-1 h-1 bg-slate-300 rounded-full flex-shrink-0"></span>}
+                                      <span className="truncate">{appt.condition || appt.reason || appt.type || 'Khám định kỳ'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-all text-xl">chevron_right</span>
                               </div>
-                              <div className="flex-1 overflow-hidden">
-                                <p className="font-bold truncate text-[15px] text-slate-900 dark:text-white mb-0.5">{appt.patientName}</p>
-                                <p className="text-[13px] text-slate-500 font-medium">{appt.reason}</p>
-                              </div>
-                              <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-all text-xl">chevron_right</span>
-                            </div>
-                          ))
+                            )
+                          })
                         ) : (
                           <div className="p-8 text-center text-slate-400 text-sm italic">Không có lịch hẹn sắp tới</div>
                         )}
@@ -604,169 +599,6 @@ export default function DoctorDashboard() {
                 </section>
               </aside>
             </div>
-
-            <section>
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-                <h2 className="text-xl font-extrabold">Quản lý bệnh nhân gần đây</h2>
-                <div className="flex items-center gap-4">
-                  {isLoading ? (
-                    <div className="w-64 h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl"></div>
-                  ) : (
-                    <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl relative overflow-hidden">
-                      {['TẤT CẢ', 'NGUY CƠ CAO', 'ỔN ĐỊNH'].map((opt) => (
-                        <button
-                          key={opt}
-                          onClick={() => setFilterRisk(opt === 'TẤT CẢ' ? 'ALL' : opt === 'NGUY CƠ CAO' ? 'HIGH_RISK' : 'STABLE')}
-                          className={`relative z-10 flex-1 px-5 py-2 text-[13px] font-bold transition-all duration-300 min-w-[110px] ${(filterRisk === 'ALL' && opt === 'TẤT CẢ') ||
-                            (filterRisk === 'HIGH_RISK' && opt === 'NGUY CƠ CAO') ||
-                            (filterRisk === 'STABLE' && opt === 'ỔN ĐỊNH')
-                            ? 'text-primary'
-                            : 'text-slate-500 hover:text-slate-700'
-                            }`}
-                        >
-                          {((filterRisk === 'ALL' && opt === 'TẤT CẢ') ||
-                            (filterRisk === 'HIGH_RISK' && opt === 'NGUY CƠ CAO') ||
-                            (filterRisk === 'STABLE' && opt === 'ỔN ĐỊNH')) && (
-                              <motion.div
-                                layoutId="activeTab"
-                                className="motion-active-bg"
-                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                              />
-                            )}
-                          <span className="relative z-10">{opt}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleExportExcel}
-                      className="px-4 py-2 bg-white dark:bg-slate-800 border border-primary/10 rounded-xl text-[14px] font-bold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">download</span>
-                      Xuất báo cáo
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-primary/5 shadow-sm pb-10 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead className="bg-primary/5 border-b border-primary/5">
-                      <tr>
-                        <th className="px-6 py-4 text-[14px] font-bold text-slate-500">Bệnh nhân</th>
-                        <th className="px-6 py-4 text-[14px] font-bold text-slate-500">Chỉ số gần nhất</th>
-                        <th className="px-6 py-4 text-[14px] font-bold text-slate-500">Tình trạng</th>
-                        <th className="px-6 py-4 text-[14px] font-bold text-slate-500">Cập nhật lần cuối</th>
-                        <th className="px-6 py-4 text-[14px] font-bold text-slate-500 text-right">Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-primary/5">
-                      {isLoading ? (
-                        [...Array(5)].map((_, i) => (
-                          <tr key={i}>
-                            <td className="px-6 py-4 h-[72px]">
-                              <div className="flex items-center gap-3">
-                                <Skeleton variant="circular" className="w-10 h-10 shrink-0" />
-                                <div className="space-y-2 flex-1">
-                                  <Skeleton className="h-4 w-24" />
-                                  <Skeleton className="h-3 w-32" />
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex gap-4">
-                                <Skeleton className="h-10 rounded-xl w-16" />
-                                <Skeleton className="h-10 rounded-xl w-16" />
-                              </div>
-                            </td>
-                            <td className="px-6 py-4"><Skeleton className="h-7 rounded-full w-20" /></td>
-                            <td className="px-6 py-4"><Skeleton className="h-4 rounded w-24" /></td>
-                            <td className="px-6 py-4 text-right relative">
-                              <Skeleton variant="circular" className="h-8 w-8 ml-auto" />
-                            </td>
-                          </tr>
-                        ))
-                      ) : filteredPatients.length > 0 ? (
-                        <AnimatePresence mode='popLayout'>
-                          {filteredPatients.map((p: any) => (
-                            <motion.tr
-                              layout
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.95 }}
-                              key={p.id}
-                              className="hover:bg-primary/5 transition-colors"
-                            >
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                                    {p.fullName?.charAt(0)}
-                                  </div>
-                                  <div>
-                                    <p className="text-[16px] font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight">{p.fullName}</p>
-                                    <p className="text-[13px] text-slate-400 dark:text-slate-500 font-medium tracking-tight">Mã hồ sơ: {p.patientCode}</p>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="flex gap-4">
-                                  <div className="text-[13px]">
-                                    <p className="text-slate-400 font-medium">Glucose</p>
-                                    <p className="font-bold text-[14px] text-slate-700 dark:text-slate-200">{p.latestGlucose || 'N/A'}</p>
-                                  </div>
-                                  <div className="text-[13px]">
-                                    <p className="text-slate-400 font-medium">Huyết áp</p>
-                                    <p className="font-bold text-[14px] text-slate-700 dark:text-slate-200">{p.latestBp || 'N/A'}</p>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <span className={`px-4 py-1.5 text-white text-[13px] font-bold rounded-full shadow-sm whitespace-nowrap inline-flex ${p.riskLevel === 'HIGH_RISK' ? 'bg-red-500' : p.riskLevel === 'MONITORING' ? 'bg-amber-500' : 'bg-emerald-500'
-                                  }`}>
-                                  {p.riskLevel === 'HIGH_RISK' ? 'Nguy cấp' : p.riskLevel === 'MONITORING' ? 'Cần theo dõi' : 'Ổn định'}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-[14px] text-slate-500 font-medium">{p.lastUpdate || 'Vừa xong'}</td>
-                              <td className="px-6 py-4 text-right relative">
-                                <button
-                                  onClick={() => setActiveMenu(activeMenu === p.id ? null : p.id)}
-                                  className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 rounded-full transition-all ml-auto">
-                                  <span className="material-symbols-outlined text-[22px]">more_vert</span>
-                                </button>
-                                {activeMenu === p.id && (
-                                  <>
-                                    <div className="fixed inset-0 z-[100]" onClick={() => setActiveMenu(null)}></div>
-                                    <div className="absolute right-6 top-12 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2.5 z-[110] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 overflow-hidden text-left">
-                                      <button
-                                        onClick={() => { setSelectedPatient(p); setIsPatientDetailModalOpen(true); setActiveMenu(null); }}
-                                        className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                        <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">visibility</span>
-                                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Xem chi tiết hồ sơ</span>
-                                      </button>
-                                      <button
-                                        onClick={() => { setIsAdviceModalOpen(true); setAdvicePatientName(p.fullName); setAdvicePatientId(p.id); setAdvicePatientAvatar(p.avatarUrl); setActiveMenu(null); }}
-                                        className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                        <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">send</span>
-                                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Gửi lời khuyên</span>
-                                      </button>
-                                    </div>
-                                  </>
-                                )}
-                              </td>
-                            </motion.tr>
-                          ))}
-                        </AnimatePresence>
-                      ) : (
-                        <tr>
-                          <td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">Chưa có bệnh nhân gần đây</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </section>
           </div>
         </main>
 
