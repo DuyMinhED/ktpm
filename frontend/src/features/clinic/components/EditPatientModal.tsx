@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import Dropdown from '../../../components/ui/Dropdown';
 import { uploadToCloudinary } from '../../../utils/cloudinary';
 
@@ -50,6 +50,7 @@ export default function EditPatientModal({
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Map available doctors for Dropdown
     const doctorOptions = availableDoctors.map(d => ({
@@ -241,7 +242,7 @@ export default function EditPatientModal({
                                     {/* Avatar Upload */}
                                     <div className="md:col-span-2 lg:col-span-2 flex items-center gap-5 pb-2 mb-1 border-b border-slate-50 dark:border-slate-800/50">
                                         <div
-                                            onClick={() => !isUploadingImage && document.getElementById('avatar-input-edit-patient')?.click()}
+                                            onClick={() => !isUploadingImage && fileInputRef.current?.click()}
                                             className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center cursor-pointer overflow-hidden group relative transition-all hover:border-primary shrink-0"
                                         >
                                             {isUploadingImage ? (
@@ -268,14 +269,14 @@ export default function EditPatientModal({
                                             <p className="text-[12px] text-slate-500 font-medium pb-1">Định dạng JPG, PNG. Tối đa 5MB.</p>
                                             <button
                                                 type="button"
-                                                onClick={() => document.getElementById('avatar-input-edit-patient')?.click()}
+                                                onClick={() => fileInputRef.current?.click()}
                                                 className="text-[13px] font-black text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5"
                                             >
                                                 <span className="material-symbols-outlined text-[18px]">upload_file</span>
                                                 Chọn tệp tin
                                             </button>
                                             <input
-                                                id="avatar-input-edit-patient"
+                                                ref={fileInputRef}
                                                 type="file"
                                                 accept="image/*"
                                                 className="hidden"
@@ -588,8 +589,9 @@ export default function EditPatientModal({
                                             name="notes"
                                             value={formData.notes}
                                             onChange={handleChange}
+                                            placeholder="Tiền sử bệnh, dị ứng..."
                                             rows={3}
-                                            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium outline-none text-slate-700 focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 resize-none custom-scrollbar transition-all"
+                                            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-sm text-[14px] font-medium outline-none text-slate-700 dark:text-slate-200 focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 resize-none custom-scrollbar transition-all"
                                         ></textarea>
                                     </div>
                                 </div>

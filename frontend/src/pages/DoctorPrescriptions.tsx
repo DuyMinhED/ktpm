@@ -146,8 +146,17 @@ export default function DoctorPrescriptions() {
                 <div className="p-8 space-y-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h2 className="text-[22px] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Đơn thuốc điện tử</h2>
-                        <p className="text-slate-500 mt-1">Quản lý và theo dõi phác đồ điều trị của bệnh nhân trực tiếp qua hệ thống</p>
+                        {loading ? (
+                            <>
+                                <Skeleton className="h-7 w-48 mb-2" />
+                                <Skeleton className="h-5 w-80" />
+                            </>
+                        ) : (
+                            <>
+                                <h2 className="text-[22px] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Đơn thuốc điện tử</h2>
+                                <p className="text-slate-500 mt-1">Quản lý và theo dõi phác đồ điều trị của bệnh nhân trực tiếp qua hệ thống</p>
+                            </>
+                        )}
                     </div>
                     <button
                         onClick={() => {
@@ -167,7 +176,7 @@ export default function DoctorPrescriptions() {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <p className="text-sm font-medium text-slate-500 mb-1">Tổng đơn thuốc</p>
-                                <h3 className="text-3xl font-black text-slate-900 tracking-tight">{stats?.totalPrescriptions || 0}</h3>
+                                {loading ? <Skeleton className="h-9 w-16 mt-1" /> : <h3 className="text-3xl font-black text-slate-900 tracking-tight">{stats?.totalPrescriptions || 0}</h3>}
                             </div>
                             <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                 <span className="material-symbols-outlined text-2xl">description</span>
@@ -183,7 +192,7 @@ export default function DoctorPrescriptions() {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <p className="text-sm font-medium text-slate-500 mb-1">Đang hiệu lực</p>
-                                <h3 className="text-3xl font-black text-slate-900 tracking-tight">{stats?.activePrescriptions || 0}</h3>
+                                {loading ? <Skeleton className="h-9 w-16 mt-1" /> : <h3 className="text-3xl font-black text-slate-900 tracking-tight">{stats?.activePrescriptions || 0}</h3>}
                             </div>
                             <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                 <span className="material-symbols-outlined text-2xl">medication</span>
@@ -196,7 +205,7 @@ export default function DoctorPrescriptions() {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <p className="text-sm font-medium text-slate-500 mb-1">Chờ tái cấp</p>
-                                <h3 className="text-3xl font-black text-slate-900 tracking-tight">{stats?.pendingRenewals || 0}</h3>
+                                {loading ? <Skeleton className="h-9 w-16 mt-1" /> : <h3 className="text-3xl font-black text-slate-900 tracking-tight">{stats?.pendingRenewals || 0}</h3>}
                             </div>
                             <div className="size-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-400">
                                 <span className="material-symbols-outlined text-2xl">update</span>
@@ -212,7 +221,7 @@ export default function DoctorPrescriptions() {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <p className="text-sm font-medium text-slate-500 mb-1">Hoàn thành</p>
-                                <h3 className="text-3xl font-black text-slate-900 tracking-tight">{stats?.completedPrescriptions || 0}</h3>
+                                {loading ? <Skeleton className="h-9 w-16 mt-1" /> : <h3 className="text-3xl font-black text-slate-900 tracking-tight">{stats?.completedPrescriptions || 0}</h3>}
                             </div>
                             <div className="size-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-400">
                                 <span className="material-symbols-outlined text-2xl">task_alt</span>

@@ -4,7 +4,7 @@ import PrescriptionModal from '../features/prescription/components/PrescriptionM
 import AdviceModal from '../features/patient/components/AdviceModal';
 import RescheduleModal from '../features/patient/components/RescheduleModal';
 import Toast from '../components/ui/Toast';
-import FilterDropdown from '../components/ui/FilterDropdown';
+import Dropdown from '../components/ui/Dropdown';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import CreatePatientModal from '../features/clinic/components/CreatePatientModal';
 import EditPatientModal from '../features/clinic/components/EditPatientModal';
@@ -77,6 +77,7 @@ export default function DoctorPatients() {
 
   // Toast state
   const [toast, setToast] = useState({ show: false, title: '', type: 'success' as 'success' | 'warning' | 'error' });
+  const [expandedMetrics, setExpandedMetrics] = useState<Record<string, boolean>>({});
 
   // Prescription states
   const [medications, setMedications] = useState([
@@ -139,7 +140,7 @@ export default function DoctorPatients() {
           notes: data.notes
         }));
       }
-      
+
       if (data.bpSystolic) {
         promises.push(clinicApi.recordHealthMetric(currentClinicId, selectedPatient.id, {
           metricType: 'BLOOD_PRESSURE',
@@ -294,88 +295,86 @@ export default function DoctorPatients() {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="max-w-2xl">
-              <h2 className="text-[22px] font-extrabold tracking-tight text-slate-900 mb-2">Danh sách bệnh nhân</h2>
-              <p className="text-slate-500 text-[15px] font-medium">Quản lý và theo dõi lộ trình chăm sóc sức khỏe của {totalPatients} bệnh nhân đang điều trị trực tiếp.</p>
+              {loadingPatients ? (
+                <>
+                  <Skeleton className="h-7 w-64 mb-3" />
+                  <Skeleton className="h-5 w-96" />
+                </>
+              ) : (
+                <>
+                  <h2 className="text-[22px] font-medium text-slate-900 mb-2">Danh sách bệnh nhân</h2>
+                  <p className="text-slate-500 text-[15px] font-medium">Quản lý và theo dõi lộ trình chăm sóc sức khỏe của {totalPatients} bệnh nhân đang điều trị trực tiếp.</p>
+                </>
+              )}
             </div>
             <div className="flex gap-3">
               <button
                 onClick={handleExportExcel}
-                className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50">
+                className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50">
                 <span className="material-symbols-outlined text-[20px]">ios_share</span>
                 Xuất danh sách
               </button>
               <button
                 onClick={() => setIsAddPatientModalOpen(true)}
-                className="bg-primary text-slate-900 px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shadow-lg shadow-primary/10 transition-all">
+                className="bg-primary text-white px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg shadow-primary/10 transition-all hover:bg-primary/90">
                 <span className="material-symbols-outlined text-[20px]">person_add</span>
                 Thêm bệnh nhân mới
               </button>
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <FilterDropdown
-              label="Loại bệnh"
-              icon="filter_list"
-              iconBgColor="bg-primary/10"
-              iconTextColor="text-primary"
-              options={['Tất cả bệnh lý', 'Tiểu đường Type 2', 'Tăng huyết áp', 'Tim mạch']}
-              value={diseaseFilter}
-              onChange={setDiseaseFilter}
-            />
-
-            <FilterDropdown
-              label="Mức độ nguy cơ"
-              icon="error"
-              iconBgColor="bg-orange-50"
-              iconTextColor="text-orange-500"
-              options={['Mọi mức độ', 'Nguy cơ cao', 'Đang theo dõi', 'Bình thường']}
-              value={riskFilter}
-              onChange={setRiskFilter}
-              optionColors={{
-                'Mọi mức độ': 'text-primary',
-                'Nguy cơ cao': 'text-red-500 hover:bg-red-50',
-                'Đang theo dõi': 'text-orange-500 hover:bg-orange-50',
-                'Bình thường': 'text-green-500 hover:bg-green-50'
-              }}
-            />
-
-            <div className="bg-white p-6 rounded-2xl shadow-sm flex items-center gap-4 border border-slate-100">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary flex-shrink-0">
-                <span className="material-symbols-outlined">groups</span>
+          {/* Filters & Stats */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="w-[240px]">
+                <Dropdown
+                  options={['Tất cả bệnh lý', 'Tiểu đường Type 2', 'Tăng huyết áp', 'Tim mạch']}
+                  value={diseaseFilter}
+                  onChange={setDiseaseFilter}
+                  size="lg"
+                  icon={<span className="material-symbols-outlined text-[20px] text-primary">vaccines</span>}
+                />
               </div>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-medium text-slate-500 mb-1">Tổng bệnh nhân</p>
-                <p className="text-3xl font-black text-slate-900 mt-1 tracking-tight truncate">{totalPatients.toLocaleString()}</p>
+              <div className="w-[220px]">
+                <Dropdown
+                  options={['Mọi mức độ', 'Nguy cơ cao', 'Đang theo dõi', 'Bình thường']}
+                  value={riskFilter}
+                  onChange={setRiskFilter}
+                  size="lg"
+                  icon={<span className="material-symbols-outlined text-[20px] text-orange-500">error</span>}
+                />
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm flex items-center gap-4 border border-slate-100">
-              <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
-                <span className="material-symbols-outlined">notification_important</span>
+            <div className="flex items-center gap-6 bg-white px-6 py-3 rounded-full border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
+                {loadingPatients ? <Skeleton className="w-20 h-5" /> : <span className="text-[15px] font-medium text-slate-600">Tổng: <span className="text-[17px] font-black text-slate-900">{totalPatients}</span></span>}
               </div>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-medium text-slate-500 mb-1">Cần can thiệp</p>
-                <p className="text-3xl font-black text-red-500 mt-1 tracking-tight truncate">{highRiskCount}</p>
+              <div className="w-px h-5 bg-slate-200"></div>
+              <div className="flex items-center gap-2.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></div>
+                {loadingPatients ? <Skeleton className="w-28 h-5" /> : <span className="text-[15px] font-medium text-slate-600">Cần can thiệp: <span className="text-[17px] font-black text-red-500">{highRiskCount}</span></span>}
               </div>
             </div>
           </div>
 
           {/* Table */}
-          <div className="bg-white rounded-lg shadow-sm border border-slate-100 pb-32">
-            <div className="">
+          <div className="bg-white rounded-lg shadow-sm border border-slate-100">
+            <div>
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50">
-                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Bệnh nhân</th>
-                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Mã Bệnh nhân</th>
-                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Tuổi / Giới tính</th>
-                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Chỉ số</th>
-                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Cập nhật</th>
-                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Xu hướng</th>
-                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide">Nguy cơ</th>
-                    <th className="px-6 py-5 text-[14px] font-extrabold text-slate-400 tracking-wide text-right">Thao tác</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Bệnh nhân</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Số điện thoại</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Mã Bệnh Nhân</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Tuổi</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Giới tính</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Chỉ số</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Cập nhật</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Xu hướng</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Nguy cơ</th>
+                    <th className="px-6 py-5 text-[14px] font-semibold text-slate-700">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -391,14 +390,11 @@ export default function DoctorPatients() {
                             </div>
                           </div>
                         </td>
+                        <td className="px-6 py-5"><Skeleton className="h-4 w-20" /></td>
                         <td className="px-6 py-5"><Skeleton className="h-4 w-16" /></td>
                         <td className="px-6 py-5"><Skeleton className="h-4 w-8" /></td>
-                        <td className="px-6 py-5">
-                          <div className="flex gap-2">
-                            <Skeleton className="h-8 rounded-lg w-20" />
-                            <Skeleton className="h-8 rounded-lg w-20" />
-                          </div>
-                        </td>
+                        <td className="px-6 py-5"><Skeleton className="h-4 w-12" /></td>
+                        <td className="px-6 py-5"><Skeleton className="h-8 rounded-lg w-20" /></td>
                         <td className="px-6 py-5"><Skeleton className="h-4 w-24" /></td>
                         <td className="px-6 py-5"><Skeleton className="h-7 rounded-lg w-24" /></td>
                         <td className="px-6 py-5"><Skeleton className="h-7 rounded-full w-20" /></td>
@@ -416,7 +412,7 @@ export default function DoctorPatients() {
                     if (rawRiskLabel === 'HIGH_RISK') rawRiskLabel = 'Nguy cơ cao';
                     else if (rawRiskLabel === 'MONITORING') rawRiskLabel = 'Theo dõi';
                     else if (rawRiskLabel === 'STABLE') rawRiskLabel = 'Ổn định';
-                    
+
                     const riskLabel = rawRiskLabel.replace(/\([^)]*\)/g, '').trim();
                     const menuKey = `p-${p.id}`;
                     return (
@@ -436,26 +432,60 @@ export default function DoctorPatients() {
                               <p className="text-[16px] font-bold text-slate-900 group-hover:text-primary transition-colors tracking-tight">{p.fullName}</p>
                               <div className="flex items-center gap-2 mt-0.5">
                                 <p className="text-[13px] text-slate-500 font-medium tracking-tight">{p.chronicCondition || 'Chưa xác định'}</p>
-                                {p.phone && (
-                                  <>
-                                    <span className="text-slate-300 text-[10px]">•</span>
-                                    <p className="text-[12px] text-slate-400 font-bold flex items-center gap-0.5 tracking-tight">
-                                      <span className="material-symbols-outlined text-[13px]">call</span>
-                                      {p.phone}
-                                    </p>
-                                  </>
-                                )}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-5 text-[15px] font-bold text-slate-600">{p.patientCode || 'N/A'}</td>
-                        <td className="px-6 py-5 text-[15px] font-bold text-slate-600">{p.age || '-'}<span className="text-slate-300 font-medium mx-1">/</span><span className="text-slate-400 text-[14px] font-medium">{p.gender || '-'}</span></td>
+                        <td className="px-6 py-5 text-[14px] font-medium text-slate-500">{p.phone || 'N/A'}</td>
+                        <td className="px-6 py-5 text-[14px] font-medium text-slate-500">{p.patientCode || 'N/A'}</td>
+                        <td className="px-6 py-5 text-[14px] font-medium text-slate-500">{p.age || '-'}</td>
+                        <td className="px-6 py-5 text-[14px] font-medium text-slate-500">{p.gender || '-'}</td>
                         <td className="px-6 py-5">
-                          <div className="flex items-center gap-2">
-                            <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[13px] font-bold rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">{p.latestGlucose || 'N/A'}</span>
-                            <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[13px] font-bold rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">{p.latestBp || 'N/A'}</span>
-                          </div>
+                          {(() => {
+                            const metrics = [];
+                            if (p.latestGlucose && p.latestGlucose !== 'N/A') metrics.push(p.latestGlucose);
+                            if (p.latestBp && p.latestBp !== 'N/A') metrics.push(p.latestBp);
+
+                            if (metrics.length === 0) return <span className="text-slate-400 italic text-[13px]">Trống</span>;
+
+                            const showAll = expandedMetrics[p.id];
+
+                            return (
+                              <div className="flex items-center gap-2 relative">
+                                <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[13px] font-bold rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm whitespace-nowrap">
+                                  {metrics[0]}
+                                </span>
+                                {metrics.length > 1 && (
+                                  <div className="relative">
+                                    <button
+                                      onClick={() => setExpandedMetrics({ ...expandedMetrics, [p.id]: !showAll })}
+                                      onBlur={() => setTimeout(() => setExpandedMetrics({ ...expandedMetrics, [p.id]: false }), 200)}
+                                      className={`w-7 h-7 flex items-center justify-center rounded-full text-[11px] font-bold transition-all ${showAll ? 'bg-primary text-white shadow-md shadow-primary/20 scale-110' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                                      title="Xem thêm chỉ số"
+                                    >
+                                      +{metrics.length - 1}
+                                    </button>
+
+                                    {/* Cloud Popover */}
+                                    {showAll && (
+                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-max bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl z-50 p-1.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2">
+                                        {/* Little arrow pointing down */}
+                                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white dark:bg-slate-800 border-b border-r border-slate-100 dark:border-slate-700 rotate-45"></div>
+
+                                        <div className="relative flex flex-col gap-1 z-10">
+                                          {metrics.slice(1).map((m, idx) => (
+                                            <span key={idx} className="px-3 py-2 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-[13px] font-bold rounded-xl whitespace-nowrap border border-slate-100/50">
+                                              {m}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="px-6 py-5 text-[14px] text-slate-500 font-medium">{p.lastUpdate || 'Chưa ghi nhận'}</td>
                         <td className="px-6 py-5">
@@ -469,8 +499,8 @@ export default function DoctorPatients() {
                         <td className="px-6 py-5">
                           <span
                             className={`px-4 py-1.5 text-[13px] font-bold rounded-full text-white shadow-sm whitespace-nowrap inline-flex ${riskColor === 'red' ? 'bg-red-500 shadow-red-500/10' :
-                                riskColor === 'orange' ? 'bg-amber-500 shadow-amber-500/10' :
-                                  'bg-emerald-500 shadow-emerald-500/10'
+                              riskColor === 'orange' ? 'bg-amber-500 shadow-amber-500/10' :
+                                'bg-emerald-500 shadow-emerald-500/10'
                               }`}
                           >
                             {riskLabel}
@@ -479,54 +509,77 @@ export default function DoctorPatients() {
                         <td className="px-6 py-5 text-right relative">
                           <button
                             onClick={() => setActiveMenu(activeMenu === menuKey ? null : menuKey)}
-                            className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 rounded-full transition-all ml-auto">
-                            <span className="material-symbols-outlined text-[22px]">more_vert</span>
+                            className={`
+                              relative flex items-center justify-between gap-3 transition-all duration-300 ml-auto
+                              px-4 min-h-[38px] bg-white dark:bg-slate-900 border rounded-full shadow-sm
+                              ${activeMenu === menuKey 
+                                ? 'border-primary shadow-md shadow-primary/10 ring-4 ring-primary/5' 
+                                : 'border-slate-300 dark:border-slate-700 hover:border-slate-400'
+                              }
+                            `}
+                          >
+                            <span className="text-[13.5px] font-medium font-display whitespace-nowrap text-slate-700 dark:text-slate-200">
+                              Tùy chọn
+                            </span>
+                            <span className={`material-symbols-outlined text-[18px] text-slate-400 transition-transform duration-300 ${activeMenu === menuKey ? 'rotate-180 text-primary' : ''}`}>
+                              expand_more
+                            </span>
                           </button>
 
+                          {/* Overlay */}
                           {activeMenu === menuKey && (
-                            <>
-                              <div className="fixed inset-0 z-[100]" onClick={() => setActiveMenu(null)}></div>
-                              <div className="absolute right-6 top-12 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2.5 z-[110] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 overflow-hidden text-left">
-                                <button
-                                  onClick={() => { setSelectedPatient(p); setIsPatientDetailModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">visibility</span>
-                                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Xem chi tiết hồ sơ</span>
+                            <div className="fixed inset-0 z-[100]" onClick={() => setActiveMenu(null)}></div>
+                          )}
+                          
+                          {/* Menu */}
+                          <div 
+                            className={`
+                              absolute right-6 top-[56px] w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl shadow-slate-200/50 dark:shadow-black/100 py-1 z-[110] text-left
+                              transition-all duration-200
+                              ${activeMenu === menuKey
+                                ? 'opacity-100 translate-y-0 pointer-events-auto'
+                                : 'opacity-0 -translate-y-2 pointer-events-none'
+                              }
+                            `}
+                          >
+                            <button
+                              onClick={() => { setSelectedPatient(p); setIsPatientDetailModalOpen(true); setActiveMenu(null); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">visibility</span>
+                                  <span className="font-display">Xem hồ sơ</span>
                                 </button>
                                 <button
                                   onClick={() => { setSelectedPatient(p); setIsEditPatientModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">edit</span>
-                                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Chỉnh sửa thông tin</span>
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">edit</span>
+                                  <span className="font-display">Sửa thông tin</span>
                                 </button>
                                 <button
                                   onClick={() => { setSelectedPatient(p); setIsRecordMetricModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-rose-500 text-xl" style={{fontVariationSettings: "'FILL' 1"}}>monitor_heart</span>
-                                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Ghi nhận chỉ số</span>
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-rose-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>monitor_heart</span>
+                                  <span className="font-display">Ghi nhận chỉ số</span>
                                 </button>
                                 <button
                                   onClick={() => { setSelectedPatient(p); setIsAdviceModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">send</span>
-                                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Gửi lời khuyên</span>
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">send</span>
+                                  <span className="font-display">Gửi lời khuyên</span>
                                 </button>
                                 <button
                                   onClick={() => { setSelectedPatient(p); setIsPrescriptionModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-xl">description</span>
-                                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Kê đơn thuốc</span>
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">description</span>
+                                  <span className="font-display">Kê đơn thuốc</span>
                                 </button>
                                 <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
                                 <button
                                   onClick={() => { setIsModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full px-4 py-3 text-left hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors flex items-center gap-3 group">
-                                  <span className="material-symbols-outlined text-primary text-xl">event</span>
-                                  <span className="text-sm font-bold text-primary">Đặt lịch tái khám</span>
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-semibold text-primary hover:bg-primary/5 transition-colors group">
+                                  <span className="material-symbols-outlined text-primary text-[18px]">event</span>
+                                  <span className="font-display">Đặt lịch tái khám</span>
                                 </button>
                               </div>
-                            </>
-                          )}
                         </td>
                       </tr>
                     );

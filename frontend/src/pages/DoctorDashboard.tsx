@@ -245,7 +245,7 @@ export default function DoctorDashboard() {
                       <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center text-red-500">
                         <span className="material-symbols-outlined size-6">emergency</span>
                       </div>
-                      <span className="px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded-full">Cảnh báo</span>
+                      <span className="px-3 py-1.5 bg-red-500 text-white text-[12px] font-bold rounded-full">Cảnh báo</span>
                     </div>
                     <h3 className="text-slate-600 dark:text-slate-400 text-base font-bold tracking-tight">Nguy cơ cao</h3>
                     <p className="text-3xl font-extrabold mt-1 text-red-500">{dashData?.stats?.highRiskCount || 0}</p>
@@ -275,11 +275,19 @@ export default function DoctorDashboard() {
             {/* High Risk Patients Section */}
             <section className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-medium text-slate-800 dark:text-slate-400 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-red-500">warning</span>
-                  Phân tích nguy cơ cao
-                </h2>
-                <Link className="text-primary text-sm font-bold hover:underline cursor-pointer" to={ROUTES.DOCTOR.ANALYTICS}>Xem tất cả</Link>
+                {isLoading ? (
+                  <Skeleton className="h-7 w-48" />
+                ) : (
+                  <h2 className="text-xl font-medium text-slate-800 dark:text-slate-400 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-red-500">warning</span>
+                    Phân tích nguy cơ cao
+                  </h2>
+                )}
+                {isLoading ? (
+                  <Skeleton className="h-5 w-20" />
+                ) : (
+                  <Link className="text-primary text-sm font-bold hover:underline cursor-pointer" to={ROUTES.DOCTOR.ANALYTICS}>Xem tất cả</Link>
+                )}
               </div>
               <div className="space-y-4">
                 {isLoading ? (
@@ -316,7 +324,7 @@ export default function DoctorDashboard() {
                             <div className="min-w-0">
                               <p className="font-bold text-base md:text-lg text-slate-700 dark:text-white truncate flex items-center gap-2">
                                 {p.fullName}
-                                {p.treatmentStatus && <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/30 text-[11px] font-bold rounded-md">{p.treatmentStatus}</span>}
+                                {p.treatmentStatus && <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/30 text-[11px] font-bold rounded-full">{p.treatmentStatus}</span>}
                               </p>
                               <div className="flex flex-wrap items-center gap-2 text-[13px] text-slate-500 mt-1 font-medium">
                                 <span>{p.age} tuổi</span>
@@ -347,7 +355,7 @@ export default function DoctorDashboard() {
                           {/* Actions */}
                           <div className="flex items-center justify-between xl:justify-end gap-6 w-full xl:w-auto border-t xl:border-t-0 border-slate-100 dark:border-slate-800 pt-4 xl:pt-0">
                             <div className="flex flex-col items-start xl:items-end">
-                              <span className="bg-red-500 text-white text-[12px] font-bold px-3 py-1 rounded shadow-sm shadow-red-500/20 mb-1">Nguy cấp</span>
+                              <span className="bg-red-500 text-white text-[14px] font-bold px-4 py-1.5 rounded-lg shadow-sm shadow-red-500/20 mb-1">Nguy cấp</span>
                               <span className={`text-[12px] font-bold ${p.trendColor || 'text-red-500'} flex items-center gap-1`}><span className="material-symbols-outlined text-[16px]">trending_up</span> {p.healthTrend || 'Cần chú ý'}</span>
                             </div>
                             <div className="flex gap-3">
@@ -418,53 +426,55 @@ export default function DoctorDashboard() {
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
                         data={(patientStats?.chartDataBp || Array(dashboardTimeRange === '30 ngày qua' ? 30 : 7).fill(120).map(() => 110 + Math.random() * 30)).map((val: number, i: number, arr: any[]) => {
-                           const d = new Date();
-                           d.setDate(d.getDate() - (arr.length - 1 - i));
-                           return {
-                             name: dashboardTimeRange === '30 ngày qua' 
-                               ? `${d.getDate()}/${d.getMonth() + 1}` 
-                               : ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][d.getDay()],
-                             value: Math.round(val)
-                           };
+                          const d = new Date();
+                          d.setDate(d.getDate() - (arr.length - 1 - i));
+                          return {
+                            name: dashboardTimeRange === '30 ngày qua'
+                              ? `${d.getDate()}/${d.getMonth() + 1}`
+                              : ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][d.getDay()],
+                            value: Math.round(val)
+                          };
                         })}
-                        margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                        margin={{ top: 10, right: 25, left: 5, bottom: 0 }}
                       >
                         <defs>
                           <linearGradient id="colorBp" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.4} />
+                            <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                        <XAxis 
-                          dataKey="name" 
-                          axisLine={false} 
-                          tickLine={false} 
-                          tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }}
-                          dy={10}
-                          minTickGap={20}
+                        <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#cbd5e1" opacity={0.4} />
+                        <XAxis
+                          dataKey="name"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: '#64748b', fontSize: 13, fontWeight: 600 }}
+                          dy={12}
+                          minTickGap={dashboardTimeRange === '30 ngày qua' ? 60 : 5}
+                          interval={dashboardTimeRange === '30 ngày qua' ? 'preserveStartEnd' : 0}
                         />
-                        <YAxis 
-                          domain={['dataMin - 5', 'dataMax + 5']} 
-                          axisLine={false} 
-                          tickLine={false} 
-                          tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }}
+                        <YAxis
+                          domain={['dataMin - 5', 'dataMax + 5']}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
                           dx={-10}
+                          width={40}
                         />
-                        <Tooltip 
+                        <Tooltip
                           contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)', backgroundColor: '#fff', color: '#0f172a', fontWeight: 'bold', padding: '8px 12px' }}
                           itemStyle={{ color: '#0ea5e9', fontWeight: 'bold', fontSize: '13px' }}
                           cursor={{ stroke: '#2dd4bf', strokeWidth: 1, strokeDasharray: '4 4' }}
                           formatter={(value: number) => [`${value} mmHg`, 'Huyết áp']}
                           labelStyle={{ color: '#64748b', marginBottom: '2px', fontSize: '11px', fontWeight: '500' }}
                         />
-                        <Area 
-                          type="monotone" 
-                          dataKey="value" 
-                          stroke="#2dd4bf" 
+                        <Area
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#2dd4bf"
                           strokeWidth={3}
-                          fillOpacity={1} 
-                          fill="url(#colorBp)" 
+                          fillOpacity={1}
+                          fill="url(#colorBp)"
                           activeDot={{ r: 6, fill: '#2dd4bf', stroke: '#fff', strokeWidth: 2 }}
                         />
                       </AreaChart>
@@ -477,7 +487,11 @@ export default function DoctorDashboard() {
               <aside className="col-span-12 lg:col-span-4 space-y-8">
                 {/* Quick Actions */}
                 <section>
-                  <h2 className="text-xl font-medium text-slate-900 dark:text-slate-400 mb-4">Thao tác nhanh</h2>
+                  {isLoading ? (
+                    <Skeleton className="h-7 w-40 mb-4" />
+                  ) : (
+                    <h2 className="text-xl font-medium text-slate-900 dark:text-slate-400 mb-4">Thao tác nhanh</h2>
+                  )}
                   <div className="grid grid-cols-1 gap-3">
                     {isLoading ? (
                       [...Array(3)].map((_, i) => (
@@ -490,27 +504,45 @@ export default function DoctorDashboard() {
                       <>
                         <button
                           onClick={() => setIsPrescriptionModalOpen(true)}
-                          className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 hover:border-primary transition-all rounded-lg border border-primary/10 shadow-sm text-left group">
-                          <div className="w-10 h-10 bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white rounded-lg flex items-center justify-center transition-colors">
-                            <span className="material-symbols-outlined">description</span>
+                          className="relative flex items-center gap-4 p-4 bg-white dark:bg-slate-800/50 hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-all duration-300 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-violet-200 dark:hover:border-violet-800 shadow-sm hover:shadow-md text-left group overflow-hidden"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/0 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="relative w-12 h-12 bg-gradient-to-br from-violet-100 to-violet-50 dark:from-violet-500/20 dark:to-violet-500/10 text-violet-600 dark:text-violet-400 group-hover:scale-110 rounded-xl flex items-center justify-center transition-all duration-300 shadow-inner">
+                            <span className="material-symbols-outlined text-[24px]">prescriptions</span>
                           </div>
-                          <span className="font-bold text-[14px]">Kê đơn thuốc mới</span>
+                          <div className="relative z-10 flex flex-col">
+                            <span className="font-semibold text-[15px] text-slate-900 dark:text-slate-100 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">Kê đơn thuốc mới</span>
+                            <span className="text-[12px] font-medium text-slate-500">Tạo đơn thuốc điện tử</span>
+                          </div>
+                          <span className="material-symbols-outlined absolute right-4 text-slate-300 group-hover:text-violet-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">arrow_forward</span>
                         </button>
                         <button
                           onClick={() => setIsAdviceModalOpen(true)}
-                          className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 hover:border-primary transition-all rounded-lg border border-primary/10 shadow-sm text-left group">
-                          <div className="w-10 h-10 bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white rounded-lg flex items-center justify-center transition-colors">
-                            <span className="material-symbols-outlined">send</span>
+                          className="relative flex items-center gap-4 p-4 bg-white dark:bg-slate-800/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-all duration-300 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800 shadow-sm hover:shadow-md text-left group overflow-hidden"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="relative w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 dark:to-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 rounded-xl flex items-center justify-center transition-all duration-300 shadow-inner">
+                            <span className="material-symbols-outlined text-[24px]">mark_email_read</span>
                           </div>
-                          <span className="font-bold text-[14px]">Gửi lời khuyên</span>
+                          <div className="relative z-10 flex flex-col">
+                            <span className="font-semibold text-[15px] text-slate-800 dark:text-slate-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">Gửi lời khuyên</span>
+                            <span className="text-[12px] font-medium text-slate-500">Nhắn tin dặn dò bệnh nhân</span>
+                          </div>
+                          <span className="material-symbols-outlined absolute right-4 text-slate-300 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">arrow_forward</span>
                         </button>
                         <button
                           onClick={() => setIsModalOpen(true)}
-                          className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 hover:border-primary transition-all rounded-lg border border-primary/10 shadow-sm text-left group">
-                          <div className="w-10 h-10 bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white rounded-lg flex items-center justify-center transition-colors">
-                            <span className="material-symbols-outlined">event</span>
+                          className="relative flex items-center gap-4 p-4 bg-white dark:bg-slate-800/50 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 transition-all duration-300 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-amber-200 dark:hover:border-amber-800 shadow-sm hover:shadow-md text-left group overflow-hidden"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/0 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="relative w-12 h-12 bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-500/20 dark:to-amber-500/10 text-amber-600 dark:text-amber-400 group-hover:scale-110 rounded-xl flex items-center justify-center transition-all duration-300 shadow-inner">
+                            <span className="material-symbols-outlined text-[24px]">edit_calendar</span>
                           </div>
-                          <span className="font-bold text-[14px]">Đặt lịch tái khám</span>
+                          <div className="relative z-10 flex flex-col">
+                            <span className="font-semibold text-[15px] text-slate-900 dark:text-slate-100 group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">Đặt lịch tái khám</span>
+                            <span className="text-[12px] font-medium text-slate-500">Hẹn lịch khám tiếp theo</span>
+                          </div>
+                          <span className="material-symbols-outlined absolute right-4 text-slate-300 group-hover:text-amber-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">arrow_forward</span>
                         </button>
                       </>
                     )}
@@ -519,7 +551,11 @@ export default function DoctorDashboard() {
 
                 {/* Recent Appointments */}
                 <section className="mt-8">
-                  <h2 className="text-[18px] font-medium text-slate-900 dark:text-slate-400 mb-6 tracking-tight">Lịch hẹn sắp tới</h2>
+                  {isLoading ? (
+                    <Skeleton className="h-6 w-40 mb-6" />
+                  ) : (
+                    <h2 className="text-[18px] font-medium text-slate-900 dark:text-slate-400 mb-6 tracking-tight">Lịch hẹn sắp tới</h2>
+                  )}
                   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-primary/5 shadow-sm divide-y divide-primary/5 overflow-hidden">
                     {isLoading ? (
                       [...Array(3)].map((_, i) => (
@@ -590,12 +626,16 @@ export default function DoctorDashboard() {
                       </>
                     )}
                   </div>
-                  <Link
-                    to={ROUTES.DOCTOR.APPOINTMENTS}
-                    className="w-full mt-4 py-3 border border-dashed border-primary/30 text-primary font-bold text-[14px] rounded-lg hover:bg-primary/5 transition-colors flex items-center justify-center"
-                  >
-                    Xem toàn bộ lịch trình
-                  </Link>
+                  {isLoading ? (
+                    <Skeleton className="w-full h-[46px] mt-4 rounded-lg" />
+                  ) : (
+                    <Link
+                      to={ROUTES.DOCTOR.APPOINTMENTS}
+                      className="w-full mt-4 py-3 border border-dashed border-primary/30 text-primary font-bold text-[14px] rounded-lg hover:bg-primary/5 transition-colors flex items-center justify-center"
+                    >
+                      Xem toàn bộ lịch trình
+                    </Link>
+                  )}
                 </section>
               </aside>
             </div>

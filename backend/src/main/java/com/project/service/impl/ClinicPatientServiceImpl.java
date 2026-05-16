@@ -268,6 +268,7 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
         if (request.getWeightKg() != null) patient.setWeightKg(request.getWeightKg());
         if (request.getHeightCm() != null) patient.setHeightCm(request.getHeightCm());
         if (request.getBloodType() != null) patient.setBloodType(request.getBloodType());
+        if (request.getAvatarUrl() != null) patient.setAvatarUrl(request.getAvatarUrl());
         
         if (request.getDateOfBirth() != null) {
             patient.setDateOfBirth(request.getDateOfBirth());

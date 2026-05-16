@@ -181,9 +181,19 @@ export default function DoctorAnalytics() {
                     {/* Header Section */}
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                         <div>
-                            <h2 className="text-[22px] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Phân tích nguy cơ</h2>
-                            <p className="text-slate-500 text-[15px] font-medium mt-1">Hệ thống giám sát và dự báo rủi ro sức khỏe bệnh nhân</p>
+                            {loading ? (
+                                <>
+                                    <Skeleton className="h-7 w-48 mb-2" />
+                                    <Skeleton className="h-5 w-80" />
+                                </>
+                            ) : (
+                                <>
+                                    <h2 className="text-[22px] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Phân tích nguy cơ</h2>
+                                    <p className="text-slate-500 text-[15px] font-medium mt-1">Hệ thống giám sát và dự báo rủi ro sức khỏe bệnh nhân</p>
+                                </>
+                            )}
                         </div>
+
                         <button
                             onClick={handleExportExcel}
                             className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50">
@@ -198,7 +208,7 @@ export default function DoctorAnalytics() {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-slate-500 mb-1">Tổng bệnh nhân</p>
-                                    <h3 className="text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">{stats?.totalPatients || 0}</h3>
+                                    {loading ? <Skeleton className="h-9 w-16 mt-1" /> : <h3 className="text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">{stats?.totalPatients || 0}</h3>}
                                 </div>
                                 <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-500">
                                     <span className="material-symbols-outlined text-3xl">monitoring</span>
@@ -213,7 +223,7 @@ export default function DoctorAnalytics() {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-slate-500 mb-1">Nguy cơ cao</p>
-                                    <h3 className="text-3xl font-extrabold mt-1 text-red-500">{stats?.highRiskCount || 0}</h3>
+                                    {loading ? <Skeleton className="h-9 w-16 mt-1" /> : <h3 className="text-3xl font-extrabold mt-1 text-red-500">{stats?.highRiskCount || 0}</h3>}
                                 </div>
                                 <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center text-red-500">
                                     <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
@@ -225,7 +235,7 @@ export default function DoctorAnalytics() {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-slate-500 mb-1">Cần theo dõi</p>
-                                    <h3 className="text-3xl font-extrabold mt-1 text-orange-500">{stats?.monitoringCount || 0}</h3>
+                                    {loading ? <Skeleton className="h-9 w-16 mt-1" /> : <h3 className="text-3xl font-extrabold mt-1 text-orange-500">{stats?.monitoringCount || 0}</h3>}
                                 </div>
                                 <div className="w-12 h-12 bg-orange-50 dark:bg-orange-900/30 rounded-xl flex items-center justify-center text-orange-500">
                                     <span className="material-symbols-outlined text-3xl">trending_down</span>
@@ -239,7 +249,7 @@ export default function DoctorAnalytics() {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-slate-500 mb-1">Ổn định</p>
-                                    <h3 className="text-3xl font-extrabold mt-1 text-primary">{stats?.stableCount || 0}</h3>
+                                    {loading ? <Skeleton className="h-9 w-16 mt-1" /> : <h3 className="text-3xl font-extrabold mt-1 text-primary">{stats?.stableCount || 0}</h3>}
                                 </div>
                                 <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                                     <span className="material-symbols-outlined text-3xl"

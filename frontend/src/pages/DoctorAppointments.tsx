@@ -269,12 +269,16 @@ export default function DoctorAppointments() {
                     {/* Title & Actions */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <h1 className="text-[22px] font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Lịch
-                                hẹn khám</h1>
                             {loading ? (
-                                <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-80 mt-2"></div>
+                                <>
+                                    <Skeleton className="h-7 w-48 mb-2" />
+                                    <Skeleton className="h-5 w-80" />
+                                </>
                             ) : (
-                                <p className="text-slate-500 dark:text-slate-400 mt-1">{getGreeting()}, {formattedName}. Bạn có {todayActiveCount} lịch hẹn trong hôm nay.</p>
+                                <>
+                                    <h1 className="text-[22px] font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Lịch hẹn khám</h1>
+                                    <p className="text-slate-500 dark:text-slate-400 mt-1">{getGreeting()}, {formattedName}. Bạn có {todayActiveCount} lịch hẹn trong hôm nay.</p>
+                                </>
                             )}
                         </div>
                         <div className="flex items-center gap-3">
