@@ -11,7 +11,6 @@ interface AdviceModalProps {
   onSave: () => Promise<void>;
   patientName: string;
   patientAvatar?: string;
-  patientData?: any;
 }
 
 const AdviceModal: React.FC<AdviceModalProps> = ({
@@ -24,8 +23,7 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
   isSaving,
   onSave,
   patientName,
-  patientAvatar,
-  patientData
+  patientAvatar
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -63,26 +61,9 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
             <div className="relative z-10 flex-1 text-center sm:text-left">
               <div className="flex flex-col sm:flex-row items-center gap-2">
                 <p className="font-extrabold text-slate-900 dark:text-white text-lg">{patientName}</p>
-                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-md">{patientData?.age || '--'} tuổi</span>
-                {patientData?.gender && (
-                  <>
-                    <span className="w-1 h-1 bg-slate-300 rounded-full hidden sm:block"></span>
-                    <span className="text-slate-500 font-medium text-xs hidden sm:block">{patientData.gender}</span>
-                  </>
-                )}
-                {patientData?.chronicCondition && (
-                  <>
-                    <span className="w-1 h-1 bg-slate-300 rounded-full hidden sm:block"></span>
-                    <span className="text-primary font-medium text-xs hidden sm:block truncate max-w-[150px]">{patientData.chronicCondition}</span>
-                  </>
-                )}
-                {patientData?.riskLevel && (
-                  <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full text-white shadow-sm sm:ml-auto ${patientData.riskLevel.includes('HIGH_RISK') || patientData.riskLevel.includes('cao') ? 'bg-red-500 shadow-red-500/20' : patientData.riskLevel.includes('MONITORING') || patientData.riskLevel.includes('dõi') ? 'bg-orange-500 shadow-orange-500/20' : 'bg-emerald-500 shadow-emerald-500/20'}`}>
-                    {patientData.riskLevel === 'HIGH_RISK' ? 'Nguy cơ cao' : patientData.riskLevel === 'MONITORING' ? 'Theo dõi' : patientData.riskLevel === 'STABLE' ? 'Ổn định' : patientData.riskLevel.replace(/\([^)]*\)/g, '').trim()}
-                  </span>
-                )}
+                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-md">65 tuổi</span>
               </div>
-              <p className="text-[10px] md:text-xs text-slate-500 font-bold tracking-wide opacity-70 mt-1">BN quản lý thường trực • ID: {patientData?.patientCode || 'BN-123456'}</p>
+              <p className="text-[10px] md:text-xs text-slate-500 font-bold tracking-wide opacity-70">BN quản lý thường trực • ID: BN-123456</p>
             </div>
           </div>
 
@@ -137,7 +118,7 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
 
           {/* Suggestions Section */}
           <div className="space-y-4 text-left">
-            <p className="text-[14px] font-extrabold text-slate-500 dark:text-slate-400 tracking-wide pl-1">Gợi ý mẫu tư vấn nhanh</p>
+            <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-100 pl-1">Gợi ý mẫu tư vấn nhanh</p>
             <div className="flex flex-wrap gap-3">
               {[
                 { text: 'Hạn chế muối trong thức ăn', icon: 'restaurant' },
