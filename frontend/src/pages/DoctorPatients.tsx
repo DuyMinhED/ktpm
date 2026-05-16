@@ -534,8 +534,8 @@ export default function DoctorPatients() {
                             className={`
                               relative flex items-center justify-between gap-3 transition-all duration-300 ml-auto
                               px-4 min-h-[38px] bg-white dark:bg-slate-900 border rounded-full shadow-sm
-                              ${activeMenu === menuKey 
-                                ? 'border-primary shadow-md shadow-primary/10 ring-4 ring-primary/5' 
+                              ${activeMenu === menuKey
+                                ? 'border-primary shadow-md shadow-primary/10 ring-4 ring-primary/5'
                                 : 'border-slate-300 dark:border-slate-700 hover:border-slate-400'
                               }
                             `}
@@ -552,9 +552,9 @@ export default function DoctorPatients() {
                           {activeMenu === menuKey && (
                             <div className="fixed inset-0 z-[100]" onClick={() => setActiveMenu(null)}></div>
                           )}
-                          
+
                           {/* Menu */}
-                          <div 
+                          <div
                             className={`
                               absolute right-6 top-[56px] w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl shadow-slate-200/50 dark:shadow-black/100 py-1 z-[110] text-left
                               transition-all duration-200
@@ -567,41 +567,41 @@ export default function DoctorPatients() {
                             <button
                               onClick={() => { setSelectedPatient(p); setIsPatientDetailModalOpen(true); setActiveMenu(null); }}
                               className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">visibility</span>
-                                  <span className="font-display">Xem hồ sơ</span>
-                                </button>
-                                <button
-                                  onClick={() => { setSelectedPatient(p); setIsEditPatientModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">edit</span>
-                                  <span className="font-display">Sửa thông tin</span>
-                                </button>
-                                <button
-                                  onClick={() => { setSelectedPatient(p); setIsRecordMetricModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-rose-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>monitor_heart</span>
-                                  <span className="font-display">Ghi nhận chỉ số</span>
-                                </button>
-                                <button
-                                  onClick={() => { setSelectedPatient(p); setIsAdviceModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">send</span>
-                                  <span className="font-display">Gửi lời khuyên</span>
-                                </button>
-                                <button
-                                  onClick={() => { setSelectedPatient(p); setIsPrescriptionModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-                                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">description</span>
-                                  <span className="font-display">Kê đơn thuốc</span>
-                                </button>
-                                <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
-                                <button
-                                  onClick={() => { setIsModalOpen(true); setActiveMenu(null); }}
-                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-semibold text-primary hover:bg-primary/5 transition-colors group">
-                                  <span className="material-symbols-outlined text-primary text-[18px]">event</span>
-                                  <span className="font-display">Đặt lịch tái khám</span>
-                                </button>
-                              </div>
+                              <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">visibility</span>
+                              <span className="font-display">Xem hồ sơ</span>
+                            </button>
+                            <button
+                              onClick={() => { setSelectedPatient(p); setIsEditPatientModalOpen(true); setActiveMenu(null); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                              <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">edit</span>
+                              <span className="font-display">Sửa thông tin</span>
+                            </button>
+                            <button
+                              onClick={() => { setSelectedPatient(p); setIsRecordMetricModalOpen(true); setActiveMenu(null); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                              <span className="material-symbols-outlined text-slate-400 group-hover:text-rose-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>monitor_heart</span>
+                              <span className="font-display">Ghi nhận chỉ số</span>
+                            </button>
+                            <button
+                              onClick={() => { setSelectedPatient(p); setIsAdviceModalOpen(true); setActiveMenu(null); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                              <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">send</span>
+                              <span className="font-display">Gửi lời khuyên</span>
+                            </button>
+                            <button
+                              onClick={() => { setSelectedPatient(p); setIsPrescriptionModalOpen(true); setActiveMenu(null); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                              <span className="material-symbols-outlined text-slate-400 group-hover:text-primary text-[18px]">description</span>
+                              <span className="font-display">Kê đơn thuốc</span>
+                            </button>
+                            <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+                            <button
+                              onClick={() => { setIsModalOpen(true); setActiveMenu(null); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-[14.5px] font-semibold text-primary hover:bg-primary/5 transition-colors group">
+                              <span className="material-symbols-outlined text-primary text-[18px]">event</span>
+                              <span className="font-display">Đặt lịch tái khám</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

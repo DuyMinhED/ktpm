@@ -1,19 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ResponsiveContainer, AreaChart, Area, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { useEffect, useState } from 'react';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import TopBar from '../components/common/TopBar';
-import PatientDetailModal from '../features/patient/components/PatientDetailModal';
-import AdviceModal from '../features/patient/components/AdviceModal';
-import Toast from '../components/ui/Toast';
-import PrescriptionModal from '../features/prescription/components/PrescriptionModal';
-import RescheduleModal from '../features/patient/components/RescheduleModal';
 import Dropdown from '../components/ui/Dropdown';
+import Toast from '../components/ui/Toast';
+import AdviceModal from '../features/patient/components/AdviceModal';
+import PatientDetailModal from '../features/patient/components/PatientDetailModal';
+import RescheduleModal from '../features/patient/components/RescheduleModal';
+import PrescriptionModal from '../features/prescription/components/PrescriptionModal';
 
 import { Link } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
 import { doctorApi } from '../api/doctor';
 import DoctorSidebar from '../components/common/DoctorSidebar';
 import Skeleton from '../components/ui/Skeleton';
+import { ROUTES } from '../constants/routes';
 
 export default function DoctorDashboard() {
   const [isLoading, setIsLoading] = useState(true);
