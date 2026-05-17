@@ -5,6 +5,7 @@ import { doctorApi } from '../../api/doctor';
 import { supportApi } from '../../api/support';
 import { useToast } from '../ui/ToastContext';
 import CreateTicketModal from '../../features/admin/components/CreateTicketModal';
+import ChangePasswordModal from './ChangePasswordModal';
 import DamDiepLogo from './DamDiepLogo';
 
 interface DoctorSidebarProps {
@@ -18,6 +19,7 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isSavingSupport, setIsSavingSupport] = useState(false);
     const { showToast } = useToast();
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     useEffect(() => {
         const fetchUnreadCount = async () => {
@@ -110,6 +112,15 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
                     <span className="material-symbols-outlined text-amber-500">support_agent</span>
                     <span>Hỗ trợ kỹ thuật</span>
                 </button>
+
+                <button
+                    type="button"
+                    onClick={() => setIsChangePasswordOpen(true)}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary text-left border border-dashed border-slate-200 dark:border-slate-800"
+                >
+                    <span className="material-symbols-outlined text-primary">lock</span>
+                    <span>Đổi mật khẩu</span>
+                </button>
             </nav>
 
             <CreateTicketModal
@@ -117,6 +128,12 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
                 onClose={() => setIsSupportModalOpen(false)}
                 onSave={handleSaveSupport}
                 isSaving={isSavingSupport}
+            />
+
+            <ChangePasswordModal
+                isOpen={isChangePasswordOpen}
+                onClose={() => setIsChangePasswordOpen(false)}
+                onSuccess={() => showToast('Đổi mật khẩu thành công!', 'success')}
             />
 
             <style>{`

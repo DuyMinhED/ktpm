@@ -2,6 +2,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppRoutes from './routes/AppRoutes';
 import SessionTimeoutWarning from './components/common/SessionTimeoutWarning';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,14 +19,16 @@ import { ToastProvider } from './components/ui/ToastContext';
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <Router>
-          <AppRoutes />
-          <SessionTimeoutWarning />
-        </Router>
-      </ToastProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <Router>
+            <AppRoutes />
+            <SessionTimeoutWarning />
+          </Router>
+        </ToastProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

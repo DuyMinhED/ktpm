@@ -184,7 +184,7 @@ public class ClinicDashboardController {
             + "') and @securityService.isClinicManagerOf(#clinicId)")
     public ApiResponse<Void> createAppointment(
             @PathVariable Long clinicId,
-            @RequestBody com.project.dto.request.DoctorCreateAppointmentRequest request) {
+            @Valid @RequestBody com.project.dto.request.DoctorCreateAppointmentRequest request) {
 
         clinicDashboardService.createAppointment(clinicId, request);
         return ApiResponse.success("Appointment created successfully", null);
@@ -196,7 +196,7 @@ public class ClinicDashboardController {
     public ApiResponse<Void> updateAppointment(
             @PathVariable Long clinicId,
             @PathVariable Long appointmentId,
-            @RequestBody com.project.dto.request.DoctorCreateAppointmentRequest request) {
+            @Valid @RequestBody com.project.dto.request.DoctorCreateAppointmentRequest request) {
 
         clinicDashboardService.updateAppointment(clinicId, appointmentId, request);
         return ApiResponse.success("Appointment updated successfully", null);
