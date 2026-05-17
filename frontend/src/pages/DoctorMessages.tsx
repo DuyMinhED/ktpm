@@ -238,7 +238,7 @@ export default function DoctorMessages() {
                                     <div key={conv.id} onClick={() => setActiveConv(conv)} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${activeConv?.id === conv.id ? 'bg-primary/5 border border-primary/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
                                         <div className="relative">
                                             <img className="size-12 rounded-full object-cover bg-slate-200" src={conv.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(conv.patientName)} alt="Avatar" />
-                                            <span className={`absolute bottom-0 right-0 size-3 border-2 border-white rounded-full ${conv.isOnline ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+                                            <span className={`absolute bottom-0 right-0 size-3 border-2 border-white rounded-full ${(conv.online ?? conv.isOnline) ? 'bg-green-500' : 'bg-slate-300'}`}></span>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-center mb-0.5">
@@ -267,8 +267,8 @@ export default function DoctorMessages() {
                                 <div>
                                     <h3 className="text-sm font-bold leading-none">{activeConv.patientName}</h3>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <span className={`size-2 rounded-full ${activeConv.isOnline ? 'bg-green-500' : 'bg-slate-300'}`}></span>
-                                        <span className="text-xs text-slate-500">{activeConv.isOnline ? 'Đang hoạt động' : 'Ngoại tuyến'}</span>
+                                        <span className={`size-2 rounded-full ${(activeConv.online ?? activeConv.isOnline) ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+                                        <span className="text-xs text-slate-500">{(activeConv.online ?? activeConv.isOnline) ? 'Đang hoạt động' : 'Ngoại tuyến'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -285,9 +285,9 @@ export default function DoctorMessages() {
                                     {msg.senderType !== 'DOCTOR' && (
                                         <img className="size-8 rounded-full self-end bg-slate-200" src={activeConv.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(activeConv.patientName)} alt="P" />
                                     )}
-                                    <div className={`${msg.senderType === 'DOCTOR' ? 'bg-primary text-slate-900 rounded-br-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-none border border-slate-100 dark:border-slate-700'} p-4 rounded-2xl shadow-sm`}>
+                                    <div className={`${msg.senderType === 'DOCTOR' ? 'bg-primary text-white rounded-br-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-none border border-slate-100 dark:border-slate-700'} p-4 rounded-2xl shadow-sm`}>
                                         <p className="text-[15px] font-medium leading-relaxed">{msg.content}</p>
-                                        <span className={`text-[12px] mt-1.5 block font-medium ${msg.senderType === 'DOCTOR' ? 'text-slate-900/60 text-right' : 'text-slate-400'}`}>
+                                        <span className={`text-[12px] mt-1.5 block font-medium ${msg.senderType === 'DOCTOR' ? 'text-white/70 text-right' : 'text-slate-400'}`}>
                                             {formatTime(msg.sentAt)}
                                         </span>
                                     </div>
