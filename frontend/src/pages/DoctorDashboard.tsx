@@ -4,7 +4,6 @@ import TopBar from '../components/common/TopBar';
 import Dropdown from '../components/ui/Dropdown';
 import Toast from '../components/ui/Toast';
 import AdviceModal from '../features/patient/components/AdviceModal';
-import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import RescheduleModal from '../features/patient/components/RescheduleModal';
 import PrescriptionModal from '../features/prescription/components/PrescriptionModal';
 
@@ -66,9 +65,6 @@ export default function DoctorDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
   const [isAddingNewMedicine, setIsAddingNewMedicine] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [isPatientDetailModalOpen, setIsPatientDetailModalOpen] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<any>(null);
 
   // Advice Modal State
   const [isAdviceModalOpen, setIsAdviceModalOpen] = useState(false);
@@ -675,13 +671,7 @@ export default function DoctorDashboard() {
           patients={myPatients}
         />
 
-        {selectedPatient && (
-          <PatientDetailModal
-            isOpen={isPatientDetailModalOpen}
-            onClose={() => setIsPatientDetailModalOpen(false)}
-            patient={selectedPatient}
-          />
-        )}
+
 
         <AdviceModal
           isOpen={isAdviceModalOpen}

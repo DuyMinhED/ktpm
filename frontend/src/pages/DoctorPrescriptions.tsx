@@ -17,7 +17,6 @@ export default function DoctorPrescriptions() {
     // Pagination & Filter States
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const [totalElements, setTotalElements] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
     const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('Tất cả trạng thái');
@@ -50,7 +49,6 @@ export default function DoctorPrescriptions() {
             if (pRes.success) {
                 setPrescriptions(pRes.data.content || []);
                 setTotalPages(pRes.data.totalPages || 0);
-                setTotalElements(pRes.data.totalElements || 0);
             }
             if (sRes.success) setStats(sRes.data);
             if (patRes.success) setMyPatients(patRes.data.content || []);

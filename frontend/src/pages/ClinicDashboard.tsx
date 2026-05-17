@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import ClinicSidebar from '../components/common/ClinicSidebar';
 import TopBar from '../components/common/TopBar';
-import Dropdown from '../components/ui/Dropdown';
 import { clinicApi } from '../api/clinic';
 import PatientDetailModal from '../features/patient/components/PatientDetailModal';
 import {

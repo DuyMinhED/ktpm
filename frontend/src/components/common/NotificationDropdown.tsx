@@ -11,7 +11,6 @@ interface Notification {
 
 interface NotificationDropdownProps {
   isOpen: boolean;
-  onClose: () => void;
   notifications: Notification[];
   onMarkRead?: (id: number) => void;
   onClearAll?: () => void;
@@ -20,7 +19,6 @@ interface NotificationDropdownProps {
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   isOpen,
-  onClose,
   notifications,
   onMarkRead,
   onClearAll,

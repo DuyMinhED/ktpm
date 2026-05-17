@@ -15,7 +15,6 @@ export default function DoctorAnalytics() {
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const [totalElements, setTotalElements] = useState(0);
 
     useEffect(() => {
         fetchData();
@@ -32,7 +31,6 @@ export default function DoctorAnalytics() {
             if (pRes.success) {
                 setPatients(pRes.data.content || []);
                 setTotalPages(pRes.data.totalPages || 0);
-                setTotalElements(pRes.data.totalElements || 0);
             }
             if (sRes.success) setStats(sRes.data);
             if (dRes.success) setInsights(dRes.data.insights || []);

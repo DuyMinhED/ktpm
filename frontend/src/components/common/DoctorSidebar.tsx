@@ -8,12 +8,10 @@ import CreateTicketModal from '../../features/admin/components/CreateTicketModal
 
 interface DoctorSidebarProps {
     isSidebarOpen: boolean;
-    isLoading?: boolean;
 }
 
 const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
-    isSidebarOpen,
-    isLoading = false
+    isSidebarOpen
 }) => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
