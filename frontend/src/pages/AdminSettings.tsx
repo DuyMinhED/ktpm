@@ -3,6 +3,7 @@ import AdminLayout from '../layouts/AdminLayout';
 import Dropdown from '../components/ui/Dropdown';
 import Toast from '../components/ui/Toast';
 import MaintenanceConfirmModal from '../features/admin/components/MaintenanceConfirmModal';
+import ChangePasswordModal from '../components/common/ChangePasswordModal';
 import { configApi } from '../api/config';
 
 export default function AdminSettings() {
@@ -21,6 +22,7 @@ export default function AdminSettings() {
     twoFactor: false
   });
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const [thresholds, setThresholds] = useState({
     bp_sys: "140",
@@ -436,6 +438,30 @@ export default function AdminSettings() {
                 </div>
               </div>
             </section>
+
+            {/* Account Security */}
+            <section className="bg-white dark:bg-slate-900 p-4 md:p-8 rounded-3xl border border-primary/5 shadow-sm">
+              <div className="flex items-center gap-4 border-l-4 border-l-emerald-500 pl-4 mb-6">
+                <h3 className="text-[19px] font-black tracking-tight text-slate-900 dark:text-white">Tài khoản</h3>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <span className="material-symbols-outlined text-primary text-lg">lock</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Mật khẩu đăng nhập</p>
+                    <p className="text-xs text-slate-400">Thay đổi mật khẩu để bảo vệ tài khoản</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsChangePasswordOpen(true)}
+                  className="px-4 py-2 text-xs font-bold text-primary border border-primary/20 rounded-lg hover:bg-primary/5 transition-all"
+                >
+                  Đổi mật khẩu
+                </button>
+              </div>
+            </section>
           </div>
 
         </div>
@@ -450,6 +476,15 @@ export default function AdminSettings() {
             setShowToast(true);
           }}
           isEnabling={!isMaintenance}
+        />
+
+        <ChangePasswordModal
+          isOpen={isChangePasswordOpen}
+          onClose={() => setIsChangePasswordOpen(false)}
+          onSuccess={() => {
+            setToastTitle('Đổi mật khẩu thành công!');
+            setShowToast(true);
+          }}
         />
 
         <Toast

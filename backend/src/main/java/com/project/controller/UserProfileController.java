@@ -8,6 +8,7 @@ import com.project.repository.UserRepository;
 import com.project.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class UserProfileController {
 
     @PutMapping("/change-password")
     @Operation(summary = "Change current user password")
-    public ApiResponse<String> changePassword(@RequestBody ChangePasswordRequest request) {
+    public ApiResponse<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         return SecurityUtils.getCurrentUserDetails()
                 .map(userDetails -> {
                     User user = userRepository.findById(userDetails.getId())

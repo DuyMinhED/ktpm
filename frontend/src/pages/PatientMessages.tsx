@@ -39,7 +39,7 @@ const PatientMessages: React.FC = () => {
             }
         } catch (error) {
             console.error(error);
-            alert("Không thể tải danh sách cuộc trò chuyện");
+            // Silent fail - conversations panel just stays empty
         } finally {
             setLoading(false);
         }
@@ -53,7 +53,7 @@ const PatientMessages: React.FC = () => {
             setMessages(res.data?.content?.reverse() || []); // Reversing if backend defaults to page mapping desc.
         } catch (error) {
             console.error(error);
-            alert("Không thể tải tin nhắn");
+            // Silent fail - messages area will show empty
         }
     };
 
@@ -73,7 +73,7 @@ const PatientMessages: React.FC = () => {
             // Optional: loadConversations() to update the left sidebar's 'last message' snippet
         } catch (error) {
             console.error(error);
-            alert("Lỗi khi gửi tin nhắn");
+            // Message stays in input so user can retry
         } finally {
             setSending(false);
         }

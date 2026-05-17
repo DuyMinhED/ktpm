@@ -242,7 +242,7 @@ export default function AdminUsers() {
       queryClient.invalidateQueries({ queryKey: ['userStats'] });
     } catch (error: any) {
       console.error('Failed to create user:', error);
-      alert('Không thể tạo tài khoản: ' + (error.response?.data?.message || 'Có lỗi xảy ra'));
+      showNotification('Không thể tạo tài khoản: ' + (error.response?.data?.message || 'Có lỗi xảy ra'), 'error');
     } finally {
       setIsSaving(false);
     }
@@ -258,7 +258,7 @@ export default function AdminUsers() {
       queryClient.invalidateQueries({ queryKey: ['userStats'] });
     } catch (error: any) {
       console.error('Failed to update user:', error);
-      alert('Lỗi cập nhật: ' + (error.response?.data?.message || 'Có lỗi xảy ra'));
+      showNotification('Lỗi cập nhật: ' + (error.response?.data?.message || 'Có lỗi xảy ra'), 'error');
     } finally {
       setIsSaving(false);
     }
@@ -295,7 +295,7 @@ export default function AdminUsers() {
       queryClient.invalidateQueries({ queryKey: ['userStats'] });
     } catch (error: any) {
       console.error('Failed to delete user:', error);
-      alert('Lỗi khi xóa người dùng: ' + (error.response?.data?.message || 'Có lỗi xảy ra'));
+      showNotification('Lỗi khi xóa người dùng: ' + (error.response?.data?.message || 'Có lỗi xảy ra'), 'error');
     } finally {
       setIsSaving(false);
       setDeletingUser(null);

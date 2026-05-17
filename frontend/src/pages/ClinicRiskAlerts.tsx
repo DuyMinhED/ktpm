@@ -4,9 +4,11 @@ import TopBar from '../components/common/TopBar';
 import { clinicApi } from '../api/clinic';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
+import { useToast } from '../components/ui/ToastContext';
 
 export default function ClinicRiskAlerts() {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [alertTimeFilter, setAlertTimeFilter] = useState('Hôm nay');
     const [notifications, setNotifications] = useState<any[]>([]);
@@ -296,7 +298,7 @@ export default function ClinicRiskAlerts() {
                                                             <button onClick={() => navigate(ROUTES.CLINIC.PATIENTS)} className="p-2 text-primary rounded-lg hover:bg-primary/10 transition-colors" title="Xem hồ sơ">
                                                                 <span className="material-symbols-outlined text-[22px]">visibility</span>
                                                             </button>
-                                                            <button onClick={() => alert('Tính năng Kê đơn nhanh đang được phát triển')} className="p-2 text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Kê đơn nhanh">
+                                                            <button onClick={() => showToast('Tính năng Kê đơn nhanh đang được phát triển', 'warning')} className="p-2 text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Kê đơn nhanh">
                                                                 <span className="material-symbols-outlined text-[22px]">prescriptions</span>
                                                             </button>
                                                         </td>
@@ -356,9 +358,9 @@ export default function ClinicRiskAlerts() {
                                         ))
                                     ) : (
                                         [
-                                            { icon: 'contact_phone', label: 'Trạm y tế gần nhất', action: () => alert('Đang tìm kiếm các trạm y tế và bệnh viện liên kết lân cận...') },
-                                            { icon: 'description', label: 'Xuất hồ sơ khẩn cấp', action: () => alert('Tính năng xuất hồ sơ cấp cứu (PDF) đang được phát triển.') },
-                                            { icon: 'history_edu', label: 'Lịch sử phác đồ', action: () => alert('Hệ thống lưu trữ phác đồ điều trị đang được tích hợp.') }
+                                            { icon: 'contact_phone', label: 'Trạm y tế gần nhất', action: () => showToast('Đang tìm kiếm các trạm y tế và bệnh viện liên kết lân cận...', 'success') },
+                                            { icon: 'description', label: 'Xuất hồ sơ khẩn cấp', action: () => showToast('Tính năng xuất hồ sơ cấp cứu (PDF) đang được phát triển.', 'warning') },
+                                            { icon: 'history_edu', label: 'Lịch sử phác đồ', action: () => showToast('Hệ thống lưu trữ phác đồ điều trị đang được tích hợp.', 'warning') }
                                         ].map((item, idx) => (
                                             <button 
                                                 key={idx} 
