@@ -44,7 +44,11 @@ public class UserProfileController {
     public ApiResponse<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         return SecurityUtils.getCurrentUserDetails()
                 .map(userDetails -> {
-                    User user = userRepository.findById(userDetails.getId())
+                    Long userId = userDetails.getId();
+                    if (userId == null) {
+                        return ApiResponse.<String>error("Không xác định được người dùng", null);
+                    }
+                    User user = userRepository.findById(userId)
                             .orElse(null);
                     if (user == null) {
                         return ApiResponse.<String>error("Người dùng không tồn tại", null);
