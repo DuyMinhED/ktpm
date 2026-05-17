@@ -415,7 +415,7 @@ export default function ClinicAppointments() {
                                                 <div
                                                     key={day}
                                                     onClick={() => setSelectedDay(day)}
-                                                    className={`${isSelected ? 'bg-primary/5 dark:bg-primary/10 ring-2 ring-inset ring-primary' : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'} min-h-[100px] p-2 transition-colors cursor-pointer relative`}
+                                                    className={`${isSelected ? 'bg-primary/5 dark:bg-primary/10 ring-2 ring-inset ring-primary' : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'} min-h-[100px] p-2 transition-all duration-200 active:scale-[0.98] cursor-pointer relative`}
                                                 >
                                                     <span className={`text-sm font-medium ${isSelected ? 'text-primary font-bold underline decoration-2 underline-offset-4' : ''}`}>{day}</span>
                                                     <div className="mt-2 space-y-1 overflow-hidden">

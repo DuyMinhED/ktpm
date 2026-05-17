@@ -15,5 +15,6 @@ public class PrescriptionResponse {
     private String status;
     private String colorCode;
     private String patientAvatarUrl;
+    private int medicationCount;
     private LocalDateTime createdAt;
 }

@@ -420,14 +420,14 @@ export default function DoctorDashboard() {
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
-                        data={(patientStats?.chartDataBp || Array(dashboardTimeRange === '30 ngày qua' ? 30 : 7).fill(120).map(() => 110 + Math.random() * 30)).map((val: number, i: number, arr: any[]) => {
+                        data={(patientStats?.chartDataBp || []).map((val: number | null, i: number, arr: any[]) => {
                           const d = new Date();
                           d.setDate(d.getDate() - (arr.length - 1 - i));
                           return {
                             name: dashboardTimeRange === '30 ngày qua'
                               ? `${d.getDate()}/${d.getMonth() + 1}`
                               : ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][d.getDay()],
-                            value: Math.round(val)
+                            value: val === null ? null : Math.round(val)
                           };
                         })}
                         margin={{ top: 10, right: 25, left: 5, bottom: 0 }}
@@ -443,7 +443,7 @@ export default function DoctorDashboard() {
                           dataKey="name"
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fill: '#64748b', fontSize: 13, fontWeight: 600 }}
+                          tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }}
                           dy={12}
                           minTickGap={dashboardTimeRange === '30 ngày qua' ? 60 : 5}
                           interval={dashboardTimeRange === '30 ngày qua' ? 'preserveStartEnd' : 0}
@@ -452,7 +452,7 @@ export default function DoctorDashboard() {
                           domain={['dataMin - 5', 'dataMax + 5']}
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
+                          tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
                           dx={-10}
                           width={40}
                         />
@@ -470,7 +470,8 @@ export default function DoctorDashboard() {
                           strokeWidth={3}
                           fillOpacity={1}
                           fill="url(#colorBp)"
-                          activeDot={{ r: 6, fill: '#2dd4bf', stroke: '#fff', strokeWidth: 2 }}
+                          connectNulls={true}
+                          activeDot={{ r: 6, strokeWidth: 0, fill: "#0f766e" }}
                         />
                       </AreaChart>
                     </ResponsiveContainer>

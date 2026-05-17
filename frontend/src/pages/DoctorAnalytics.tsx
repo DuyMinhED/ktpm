@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import ExcelJS from 'exceljs';
 import TopBar from '../components/common/TopBar';
 import DoctorSidebar from '../components/common/DoctorSidebar';
@@ -24,7 +25,7 @@ export default function DoctorAnalytics() {
         setLoading(true);
         try {
             const [pRes, sRes, dRes] = await Promise.all([
-                doctorApi.getMyPatients({ riskLevel: 'HIGH_RISK', size: 10, page: currentPage }),
+                doctorApi.getMyPatients({ riskLevel: 'Nguy cơ cao', size: 10, page: currentPage }),
                 doctorApi.getPatientStats(),
                 doctorApi.getDashboard()
             ]);
@@ -186,7 +187,7 @@ export default function DoctorAnalytics() {
                                 </>
                             ) : (
                                 <>
-                                    <h2 className="text-[22px] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Phân tích nguy cơ</h2>
+                                    <h2 className="text-[22px] font-semibold text-slate-900 dark:text-slate-100">Phân tích nguy cơ</h2>
                                     <p className="text-slate-500 text-[15px] font-medium mt-1">Hệ thống giám sát và dự báo rủi ro sức khỏe bệnh nhân</p>
                                 </>
                             )}
@@ -194,7 +195,7 @@ export default function DoctorAnalytics() {
 
                         <button
                             onClick={handleExportExcel}
-                            className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50">
+                            className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50">
                             <span className="material-symbols-outlined text-[20px]">ios_share</span>
                             Xuất dữ liệu
                         </button>
@@ -266,60 +267,86 @@ export default function DoctorAnalytics() {
                         <div className="lg:col-span-2 bg-white p-8 rounded-lg shadow-sm border border-slate-100">
                             <div className="flex justify-between items-center mb-8">
                                 <div>
-                                    <h4 className="text-lg font-bold">Xu hướng sức khỏe cộng đồng</h4>
-                                    <p className="text-sm text-slate-500">Biến động chỉ số trung bình (7 ngày qua)</p>
+                                    <h4 className="text-lg font-medium text-slate-800">Xu hướng sức khỏe</h4>
                                 </div>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setChartType('bp')}
-                                        className={`px-4 py-2 text-xs font-bold rounded-lg border transition-all ${chartType === 'bp' ? 'bg-primary/5 text-primary border-emerald-100 shadow-sm' : 'text-slate-500 hover:bg-slate-50 border-transparent'}`}>
+                                        className={`px-5 py-2.5 text-sm font-bold rounded-lg border transition-all ${chartType === 'bp' ? 'bg-primary/5 text-primary border-transparent shadow-sm' : 'text-slate-500 hover:bg-slate-50 border-transparent'}`}>
                                         Huyết áp
                                     </button>
                                     <button
                                         onClick={() => setChartType('glucose')}
-                                        className={`px-4 py-2 text-xs font-bold rounded-lg border transition-all ${chartType === 'glucose' ? 'bg-primary/5 text-primary border-emerald-100 shadow-sm' : 'text-slate-500 hover:bg-slate-50 border-transparent'}`}>
+                                        className={`px-5 py-2.5 text-sm font-bold rounded-lg border transition-all ${chartType === 'glucose' ? 'bg-primary/5 text-primary border-transparent shadow-sm' : 'text-slate-500 hover:bg-slate-50 border-transparent'}`}>
                                         Đường huyết
                                     </button>
                                 </div>
                             </div>
-                            {/* Chart Simulation */}
-                            <div className="h-64 flex items-end justify-between gap-4 px-4 border-b border-slate-100 pb-2">
-                                {(chartType === 'bp' ? (stats?.chartDataBp || [0,0,0,0,0,0,0]) : (stats?.chartDataGlucose || [0,0,0,0,0,0,0])).map((val: number, i: number) => {
-                                    const minVal = chartType === 'bp' ? 90 : 4;
-                                    const maxVal = chartType === 'bp' ? 150 : 10;
-                                    const heightPercent = Math.min(100, Math.max(10, ((val - minVal) / (maxVal - minVal)) * 100));
-                                    const opacity = 0.2 + (i * 0.1);
-                                    const dayLabels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-                                    const dayIndices = Array.from({ length: 7 }, (_, index) => {
-                                        const d = new Date();
-                                        d.setDate(d.getDate() - (6 - index));
-                                        return dayLabels[d.getDay()];
-                                    });
-                                    const days = dayIndices;
-                                    return (
-                                        <div key={i} className="w-full flex flex-col items-center group">
-                                            <div
-                                                className="w-full transition-colors rounded-t-lg relative"
-                                                style={{ height: `${heightPercent}%`, backgroundColor: `rgba(45, 212, 191, ${opacity})` }}>
-                                                <div
-                                                    className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    {val}
-                                                </div>
-                                            </div>
-                                            <span className="text-[10px] mt-2 text-slate-400 font-bold">{days[i]}</span>
+                            {/* Dynamic Chart (Recharts) */}
+                            <div className="h-[260px] mt-6 w-full relative">
+                                {loading ? (
+                                    <div className="w-full h-full flex flex-col justify-end pb-6 pt-2 px-2">
+                                        <Skeleton className="w-full h-full rounded-xl opacity-60" />
+                                        <div className="flex justify-between mt-4">
+                                            <Skeleton className="w-12 h-3" />
+                                            <Skeleton className="w-12 h-3" />
+                                            <Skeleton className="w-12 h-3" />
+                                            <Skeleton className="w-12 h-3" />
+                                            <Skeleton className="w-12 h-3" />
                                         </div>
-                                    );
-                                })}
-                            </div>
-                            <div className="flex items-center gap-6 mt-6">
-                                <div className="flex items-center gap-2">
-                                    <span className="w-3 h-3 rounded-full bg-primary/80"></span>
-                                    <span className="text-[14px] text-slate-500">Trung bình nhóm nguy cơ</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="w-3 h-3 rounded-full bg-slate-200"></span>
-                                    <span className="text-[14px] text-slate-500">Ngưỡng an toàn (120 mmHg)</span>
-                                </div>
+                                    </div>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart
+                                            data={(chartType === 'bp' ? stats?.chartDataBp : stats?.chartDataGlucose) ? (chartType === 'bp' ? stats?.chartDataBp : stats?.chartDataGlucose).map((val: number, i: number, arr: any[]) => {
+                                                const d = new Date();
+                                                d.setDate(d.getDate() - (arr.length - 1 - i));
+                                                return {
+                                                    name: ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][d.getDay()],
+                                                    value: val
+                                                };
+                                            }) : []}
+                                            margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                                        >
+                                            <defs>
+                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor={chartType === 'bp' ? "#2dd4bf" : "#3b82f6"} stopOpacity={0.4} />
+                                                    <stop offset="95%" stopColor={chartType === 'bp' ? "#2dd4bf" : "#3b82f6"} stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#cbd5e1" opacity={0.4} />
+                                            <XAxis
+                                                dataKey="name"
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }}
+                                                dy={12}
+                                            />
+                                            <YAxis
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 500 }}
+                                                domain={chartType === 'bp' ? [90, 150] : [4, 10]}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)' }}
+                                                itemStyle={{ fontWeight: 'bold' }}
+                                                labelStyle={{ color: '#64748b', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}
+                                                formatter={(value: number) => [`${value} ${chartType === 'bp' ? 'mmHg' : 'mmol/L'}`, chartType === 'bp' ? 'Huyết áp trung bình' : 'Đường huyết trung bình']}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="value"
+                                                stroke={chartType === 'bp' ? "#2dd4bf" : "#3b82f6"}
+                                                strokeWidth={3}
+                                                fillOpacity={1}
+                                                fill="url(#colorValue)"
+                                                connectNulls={true}
+                                                activeDot={{ r: 6, strokeWidth: 0, fill: chartType === 'bp' ? "#0f766e" : "#1d4ed8" }}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                )}
                             </div>
                         </div>
                         {/* AI Insights Panel */}
@@ -327,7 +354,7 @@ export default function DoctorAnalytics() {
                             <div className="flex items-center gap-2 mb-4">
                                 <span className="material-symbols-outlined text-primary"
                                     style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                                <h4 className="text-lg font-bold">AI Insights</h4>
+                                <h4 className="text-lg font-medium">AI Insights</h4>
                             </div>
                             {insights.length > 0 ? (
                                 insights.map((insight, idx) => (
@@ -356,7 +383,7 @@ export default function DoctorAnalytics() {
                     {/* Patient Table Section */}
                     <div className="bg-white rounded-lg shadow-sm border border-slate-100 overflow-hidden">
                         <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                            <h4 className="text-xl font-extrabold text-slate-900 dark:text-white">Bệnh nhân nguy cơ cao</h4>
+                            <h4 className="text-lg font-medium text-slate-900 dark:text-white">Bệnh nhân nguy cơ cao</h4>
                             <button
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-100 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">
                                 <span className="material-symbols-outlined text-sm">filter_list</span>
@@ -368,6 +395,8 @@ export default function DoctorAnalytics() {
                                 <thead>
                                     <tr className="bg-primary/5 border-b border-primary/5">
                                         <th className="px-8 py-4 text-[14px] font-bold text-slate-500">Bệnh nhân</th>
+                                        <th className="px-8 py-4 text-[14px] font-bold text-slate-500">Thông tin cá nhân</th>
+                                        <th className="px-8 py-4 text-[14px] font-bold text-slate-500">Bệnh lý</th>
                                         <th className="px-8 py-4 text-[14px] font-bold text-slate-500">Chỉ số mới nhất</th>
                                         <th className="px-8 py-4 text-[14px] font-bold text-slate-500">Phân tích từ AI</th>
                                         <th className="px-8 py-4 text-[14px] font-bold text-slate-500 text-right whitespace-nowrap">Thao tác</th>
@@ -387,6 +416,15 @@ export default function DoctorAnalytics() {
                                                     </div>
                                                 </td>
                                                 <td className="px-8 py-5">
+                                                    <div className="space-y-2">
+                                                        <Skeleton className="h-4 w-20" />
+                                                        <Skeleton className="h-3 w-16" />
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-5">
+                                                    <Skeleton className="h-4 w-24" />
+                                                </td>
+                                                <td className="px-8 py-5">
                                                     <div className="flex items-center gap-2">
                                                         <Skeleton className="h-5 w-16" />
                                                     </div>
@@ -404,14 +442,29 @@ export default function DoctorAnalytics() {
                                             <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
                                                 <td className="px-8 py-5">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                                            {p.fullName?.charAt(0)}
+                                                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                                                            {p.avatarUrl ? (
+                                                                <img src={p.avatarUrl} alt={p.fullName} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-black text-[15px]">
+                                                                    {p.fullName?.split(' ').pop()?.charAt(0).toUpperCase() || '?'}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <p className="text-[16px] font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight">{p.fullName}</p>
                                                             <p className="text-[13px] text-slate-400 dark:text-slate-500 font-medium tracking-tight">Mã hồ sơ: {p.patientCode}</p>
                                                         </div>
                                                     </div>
+                                                </td>
+                                                <td className="px-8 py-5">
+                                                    <p className="text-[14px] text-slate-600 font-medium">{p.age ? `${p.age} tuổi` : '-'} • {p.gender || '-'}</p>
+                                                    <p className="text-[13px] text-slate-400 font-medium mt-0.5">{p.phone || 'Chưa cập nhật SĐT'}</p>
+                                                </td>
+                                                <td className="px-8 py-5">
+                                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[13px] font-medium">
+                                                        {p.chronicCondition || 'Chưa xác định'}
+                                                    </span>
                                                 </td>
                                                 <td className="px-8 py-5">
                                                     <div className="flex items-center gap-2">
@@ -442,7 +495,7 @@ export default function DoctorAnalytics() {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={4} className="px-8 py-10 text-center text-slate-500 italic">Không có bệnh nhân nguy cơ cao nào</td>
+                                            <td colSpan={6} className="px-8 py-10 text-center text-slate-500 italic">Không có bệnh nhân nguy cơ cao nào</td>
                                         </tr>
                                     )}
                                 </tbody>

@@ -224,7 +224,7 @@ export default function DoctorAppointments() {
                 <div
                     key={d}
                     onClick={() => setSelectedDay(d)}
-                    className={`bg-white dark:bg-slate-800 min-h-[100px] p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer ${isSelected ? 'ring-2 ring-inset ring-primary bg-primary/5 dark:bg-primary/10' : ''}`}
+                    className={`bg-white dark:bg-slate-800 min-h-[100px] p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 active:scale-[0.98] cursor-pointer ${isSelected ? 'ring-2 ring-inset ring-primary bg-primary/5 dark:bg-primary/10' : ''}`}
                 >
                     <span className={`text-sm font-medium ${isSelected ? 'text-primary font-bold underline underline-offset-4 decoration-2' : ''}`}>{d}</span>
                     <div className="mt-2 space-y-1">

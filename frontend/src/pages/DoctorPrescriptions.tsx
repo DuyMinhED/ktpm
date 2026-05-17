@@ -161,7 +161,7 @@ export default function DoctorPrescriptions() {
                             setSelectedPatientForRenewal(undefined);
                             setIsPrescriptionModalOpen(true);
                         }}
-                        className="bg-primary text-slate-900 font-bold px-6 py-3.5 rounded-2xl text-[15px] flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-primary/20 active:scale-95"
+                        className="bg-primary text-white font-bold px-6 py-3.5 rounded-full text-[15px] flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-primary/20 active:scale-95"
                     >
                         <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
                         Kê đơn thuốc mới
@@ -289,6 +289,8 @@ export default function DoctorPrescriptions() {
                                             <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400">Mã đơn</th>
                                             <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400">Bệnh nhân</th>
                                             <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400">Chẩn đoán</th>
+                                            <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400">Ngày kê đơn</th>
+                                            <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400 text-center">Số lượng</th>
                                             <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400">Trạng thái</th>
                                             <th className="px-6 py-4 text-[13px] font-medium uppercase tracking-wider text-slate-400 text-right">Thao tác</th>
                                         </tr>
@@ -305,6 +307,8 @@ export default function DoctorPrescriptions() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-5"><Skeleton className="h-4 w-36" /></td>
+                                                    <td className="px-6 py-5"><Skeleton className="h-4 w-24" /></td>
+                                                    <td className="px-6 py-5"><Skeleton className="h-4 w-8 mx-auto" /></td>
                                                     <td className="px-6 py-5"><Skeleton className="h-6 rounded-full w-20" /></td>
                                                     <td className="px-6 py-5 text-right"><Skeleton className="h-8 w-16 ml-auto" /></td>
                                                 </tr>
@@ -330,6 +334,12 @@ export default function DoctorPrescriptions() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-5 text-[15px] text-slate-600 dark:text-slate-400 font-medium max-w-[250px] truncate">{row.diagnosis}</td>
+                                                    <td className="px-6 py-5 text-[15px] font-medium text-slate-600 dark:text-slate-400">
+                                                        {row.createdAt ? new Date(row.createdAt).toLocaleDateString('vi-VN') : 'N/A'}
+                                                    </td>
+                                                    <td className="px-6 py-5 text-[15px] font-bold text-slate-700 dark:text-slate-300 text-center">
+                                                        {row.medicationCount || 0}
+                                                    </td>
                                                     <td className="px-6 py-5">
                                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                                                             (row.status?.toLowerCase().includes('active') || row.status === 'Active') ? 'bg-emerald-50 text-emerald-600' :
@@ -370,7 +380,7 @@ export default function DoctorPrescriptions() {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan={4} className="px-6 py-10 text-center text-slate-500 italic">Chưa có đơn thuốc nào</td>
+                                                <td colSpan={7} className="px-6 py-10 text-center text-slate-500 italic">Chưa có đơn thuốc nào</td>
                                             </tr>
                                         )}
                                     </tbody>

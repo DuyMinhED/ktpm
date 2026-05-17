@@ -21,6 +21,7 @@ public class PrescriptionMapper {
                 .status(mapStatusForUI(prescription.getStatus()))
                 .colorCode(mapColorCode(prescription.getStatus()))
                 .patientAvatarUrl(prescription.getPatient().getAvatarUrl())
+                .medicationCount(prescription.getItems() != null ? prescription.getItems().size() : 0)
                 .createdAt(prescription.getCreatedAt())
                 .build();
     }

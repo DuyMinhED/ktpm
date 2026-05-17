@@ -98,23 +98,17 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
                 ));
 
         java.util.List<Double> result = new java.util.ArrayList<>();
-        // Seed natural starting points based on typical ideal conditions so interpolation stays visible
-        double fallback = (type == MetricType.BLOOD_SUGAR) ? 6.5 : 120.0;
-        double lastAvg = fallback;
-        
         // Build temporal vector backwards starting 'days' ago until today
         for (int i = days - 1; i >= 0; i--) {
             LocalDate d = LocalDate.now().minusDays(i);
             java.util.List<Double> dayVals = grouped.get(d);
             
             if (dayVals != null && !dayVals.isEmpty()) {
-                double avg = dayVals.stream().mapToDouble(v -> v).average().orElse(lastAvg);
+                double avg = dayVals.stream().mapToDouble(v -> v).average().orElse(0);
                 avg = Math.round(avg * 10.0) / 10.0; // format to one decimal
                 result.add(avg);
-                lastAvg = avg; // propagate continuity forward
             } else {
-                // Natural variation mock for empty days builds continuous believable line instead of dropout zeros
-                result.add(lastAvg);
+                result.add(null);
             }
         }
         return result;
