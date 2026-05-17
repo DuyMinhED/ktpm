@@ -8,12 +8,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 
 @SpringBootApplication
 @org.springframework.scheduling.annotation.EnableAsync
 @org.springframework.cache.annotation.EnableCaching
 @Slf4j
 public class BackendApplication {
+
+    @Value("${app.admin.default-password:#{null}}")
+    private String adminDefaultPassword;
+
     public static void main(String[] args) {
         SpringApplication.run(BackendApplication.class, args);
     }
@@ -22,22 +27,22 @@ public class BackendApplication {
     public CommandLineRunner initSchema(JdbcTemplate jdbcTemplate, PasswordEncoder passwordEncoder) {
         return args -> {
             try {
-                // Ensure there is at least one admin for development testing
                 String email = "admin@care.com";
-                String password = "password";
+                String password = (adminDefaultPassword != null && !adminDefaultPassword.isBlank())
+                        ? adminDefaultPassword
+                        : "password";
                 String hashedPwd = passwordEncoder.encode(password);
                 
                 log.info("Checking data for user: {}", email);
                 
-                // Check if admin exists
+                // Check if admin exists — only seed if missing, never overwrite existing password
                 Integer adminCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users WHERE email = ?", Integer.class, email);
                 if (adminCount == null || adminCount == 0) {
                     log.info("Admin user not found. Seeding system admin...");
                     jdbcTemplate.update("INSERT INTO users (email, password, role, full_name, status, created_at, is_deleted) VALUES (?, ?, 'ADMIN', 'System Admin', 'ACTIVE', NOW(), false)", 
                         email, hashedPwd);
                 } else {
-                    log.info("Admin user already exists. Updating password to ensure it matches 'password'...");
-                    jdbcTemplate.update("UPDATE users SET password = ? WHERE email = ?", hashedPwd, email);
+                    log.info("Admin user already exists. Skipping password update.");
                 }
 
                 // Check if patient exists
@@ -63,3 +68,4 @@ public class BackendApplication {
         };
     }
 }
+

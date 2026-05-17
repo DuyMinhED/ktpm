@@ -29,4 +29,8 @@ export const userApi = {
     const response = await axiosInstance.delete(`/v1/admin/users/${id}`);
     return response.data;
   },
+  changePassword: async (data: { currentPassword: string; newPassword: string }) => {
+    const response = await axiosInstance.put('/v1/users/change-password', data);
+    return response.data;
+  },
 };

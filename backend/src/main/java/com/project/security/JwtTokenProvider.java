@@ -12,7 +12,10 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class JwtTokenProvider {
 
     @Value("${jwt.secret}")
@@ -53,8 +56,16 @@ public class JwtTokenProvider {
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
             return true;
-        } catch (Exception ex) {
-            // Log error
+        } catch (io.jsonwebtoken.security.SecurityException ex) {
+            log.error("Invalid JWT signature: {}", ex.getMessage());
+        } catch (io.jsonwebtoken.MalformedJwtException ex) {
+            log.error("Invalid JWT token: {}", ex.getMessage());
+        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            log.error("Expired JWT token: {}", ex.getMessage());
+        } catch (io.jsonwebtoken.UnsupportedJwtException ex) {
+            log.error("Unsupported JWT token: {}", ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            log.error("JWT claims string is empty: {}", ex.getMessage());
         }
         return false;
     }

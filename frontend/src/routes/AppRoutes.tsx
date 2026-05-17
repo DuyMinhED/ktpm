@@ -1,92 +1,120 @@
 import { Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
-import DoctorDashboard from '../pages/DoctorDashboard';
-import DoctorAppointments from '../pages/DoctorAppointments';
-import DoctorMessages from '../pages/DoctorMessages';
-import ClinicDashboard from '../pages/ClinicDashboard';
-import DoctorAnalytics from '../pages/DoctorAnalytics';
-import DoctorPatients from '../pages/DoctorPatients';
-import DoctorPrescriptions from '../pages/DoctorPrescriptions';
 import { ROUTES } from '../constants/routes';
-import AdminDashboard from '../pages/AdminDashboard';
-import AdminClinics from '../pages/AdminClinics';
-import AdminUsers from '../pages/AdminUsers';
-import AdminServices from '../pages/AdminServices';
-import AdminReports from '../pages/AdminReports';
-import AdminSettings from '../pages/AdminSettings';
-import AdminAuditLogs from '../pages/AdminAuditLogs';
-import AdminSupport from '../pages/AdminSupport';
-import ClinicReports from '../pages/ClinicReports';
-import ClinicRiskAlerts from '../pages/ClinicRiskAlerts';
-import ClinicPatients from '../pages/ClinicPatients';
-import ClinicDoctors from '../pages/ClinicDoctors';
-import ClinicAssignment from '../pages/ClinicAssignment';
-import ClinicSettings from '../pages/ClinicSettings';
-import ClinicAppointments from '../pages/ClinicAppointments';
-import ClinicServices from '../pages/ClinicServices';
-import ClinicSupport from '../pages/ClinicSupport';
 
+// Landing page - load ngay vì là entry point
 import LandingPage from '../pages/VelorahLandingPage';
-import PatientLayout from '../layouts/PatientLayout';
-import PatientDashboard from '../pages/PatientDashboard';
-import PatientAppointments from '../pages/PatientAppointments';
-import PatientHealthMetrics from '../pages/PatientHealthMetrics';
-import PatientMessages from '../pages/PatientMessages';
-import PatientPrescriptions from '../pages/PatientPrescriptions';
-import PatientProfile from '../pages/PatientProfile';
-import PatientServices from '../pages/PatientServices';
+import NotFoundPage from '../pages/NotFoundPage';
 
+// Layouts
+import PatientLayout from '../layouts/PatientLayout';
+
+// === LAZY LOADED PAGES ===
+// Patient
+const PatientDashboard = lazy(() => import('../pages/PatientDashboard'));
+const PatientAppointments = lazy(() => import('../pages/PatientAppointments'));
+const PatientHealthMetrics = lazy(() => import('../pages/PatientHealthMetrics'));
+const PatientMessages = lazy(() => import('../pages/PatientMessages'));
+const PatientPrescriptions = lazy(() => import('../pages/PatientPrescriptions'));
+const PatientProfile = lazy(() => import('../pages/PatientProfile'));
+const PatientServices = lazy(() => import('../pages/PatientServices'));
+
+// Doctor
+const DoctorDashboard = lazy(() => import('../pages/DoctorDashboard'));
+const DoctorAnalytics = lazy(() => import('../pages/DoctorAnalytics'));
+const DoctorAppointments = lazy(() => import('../pages/DoctorAppointments'));
+const DoctorMessages = lazy(() => import('../pages/DoctorMessages'));
+const DoctorPatients = lazy(() => import('../pages/DoctorPatients'));
+const DoctorPrescriptions = lazy(() => import('../pages/DoctorPrescriptions'));
+
+// Clinic Manager
+const ClinicDashboard = lazy(() => import('../pages/ClinicDashboard'));
+const ClinicReports = lazy(() => import('../pages/ClinicReports'));
+const ClinicRiskAlerts = lazy(() => import('../pages/ClinicRiskAlerts'));
+const ClinicPatients = lazy(() => import('../pages/ClinicPatients'));
+const ClinicDoctors = lazy(() => import('../pages/ClinicDoctors'));
+const ClinicAssignment = lazy(() => import('../pages/ClinicAssignment'));
+const ClinicAppointments = lazy(() => import('../pages/ClinicAppointments'));
+const ClinicServices = lazy(() => import('../pages/ClinicServices'));
+const ClinicSettings = lazy(() => import('../pages/ClinicSettings'));
+const ClinicSupport = lazy(() => import('../pages/ClinicSupport'));
+
+// Admin
+const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
+const AdminClinics = lazy(() => import('../pages/AdminClinics'));
+const AdminUsers = lazy(() => import('../pages/AdminUsers'));
+const AdminServices = lazy(() => import('../pages/AdminServices'));
+const AdminReports = lazy(() => import('../pages/AdminReports'));
+const AdminSettings = lazy(() => import('../pages/AdminSettings'));
+const AdminAuditLogs = lazy(() => import('../pages/AdminAuditLogs'));
+const AdminSupport = lazy(() => import('../pages/AdminSupport'));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-10 h-10 border-3 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+      <p className="text-sm text-slate-400 font-medium animate-pulse">Đang tải...</p>
+    </div>
+  </div>
+);
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      <Route path={ROUTES.HOME} element={<LandingPage />} />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path={ROUTES.HOME} element={<LandingPage />} />
 
-      {/* Patient Portal Routes — Only PATIENT role */}
-      <Route path="/patient" element={
-        <ProtectedRoute allowedRoles={['PATIENT']}>
-          <PatientLayout />
-        </ProtectedRoute>
-      }>
-        <Route index element={<PatientDashboard />} />
-        <Route path="metrics" element={<PatientHealthMetrics />} />
-        <Route path="appointments" element={<PatientAppointments />} />
-        <Route path="prescriptions" element={<PatientPrescriptions />} />
-        <Route path="messages" element={<PatientMessages />} />
-        <Route path="profile" element={<PatientProfile />} />
-        <Route path="services" element={<PatientServices />} />
-      </Route>
+        {/* Patient Portal Routes — Only PATIENT role */}
+        <Route path="/patient" element={
+          <ProtectedRoute allowedRoles={['PATIENT']}>
+            <PatientLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<PatientDashboard />} />
+          <Route path="metrics" element={<PatientHealthMetrics />} />
+          <Route path="appointments" element={<PatientAppointments />} />
+          <Route path="prescriptions" element={<PatientPrescriptions />} />
+          <Route path="messages" element={<PatientMessages />} />
+          <Route path="profile" element={<PatientProfile />} />
+          <Route path="services" element={<PatientServices />} />
+        </Route>
 
-      {/* Doctor Routes — Only DOCTOR role */}
-      <Route path={ROUTES.DOCTOR.DASHBOARD} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorDashboard /></ProtectedRoute>} />
-      <Route path={ROUTES.DOCTOR.ANALYTICS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorAnalytics /></ProtectedRoute>} />
-      <Route path={ROUTES.DOCTOR.APPOINTMENTS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorAppointments /></ProtectedRoute>} />
-      <Route path={ROUTES.DOCTOR.MESSAGES} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorMessages /></ProtectedRoute>} />
-      <Route path={ROUTES.DOCTOR.PATIENTS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorPatients /></ProtectedRoute>} />
-      <Route path={ROUTES.DOCTOR.PRESCRIPTIONS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorPrescriptions /></ProtectedRoute>} />
+        {/* Doctor Routes — Only DOCTOR role */}
+        <Route path={ROUTES.DOCTOR.DASHBOARD} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorDashboard /></ProtectedRoute>} />
+        <Route path={ROUTES.DOCTOR.ANALYTICS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorAnalytics /></ProtectedRoute>} />
+        <Route path={ROUTES.DOCTOR.APPOINTMENTS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorAppointments /></ProtectedRoute>} />
+        <Route path={ROUTES.DOCTOR.MESSAGES} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorMessages /></ProtectedRoute>} />
+        <Route path={ROUTES.DOCTOR.PATIENTS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorPatients /></ProtectedRoute>} />
+        <Route path={ROUTES.DOCTOR.PRESCRIPTIONS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorPrescriptions /></ProtectedRoute>} />
 
-      {/* Clinic Manager Routes — Only CLINIC_MANAGER or ADMIN */}
-      <Route path={ROUTES.CLINIC.DASHBOARD} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicDashboard /></ProtectedRoute>} />
-      <Route path={ROUTES.CLINIC.REPORTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicReports /></ProtectedRoute>} />
-      <Route path={ROUTES.CLINIC.ALERTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicRiskAlerts /></ProtectedRoute>} />
-      <Route path={ROUTES.CLINIC.PATIENTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicPatients /></ProtectedRoute>} />
-      <Route path={ROUTES.CLINIC.DOCTORS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicDoctors /></ProtectedRoute>} />
-      <Route path={ROUTES.CLINIC.ASSIGNMENT} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicAssignment /></ProtectedRoute>} />
-      <Route path={ROUTES.CLINIC.APPOINTMENTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicAppointments /></ProtectedRoute>} />
-      <Route path={ROUTES.CLINIC.SERVICES} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicServices /></ProtectedRoute>} />
-      <Route path={ROUTES.CLINIC.SETTINGS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicSettings /></ProtectedRoute>} />
-      <Route path={ROUTES.CLINIC.SUPPORT} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicSupport /></ProtectedRoute>} />
+        {/* Clinic Manager Routes — Only CLINIC_MANAGER or ADMIN */}
+        <Route path={ROUTES.CLINIC.DASHBOARD} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicDashboard /></ProtectedRoute>} />
+        <Route path={ROUTES.CLINIC.REPORTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicReports /></ProtectedRoute>} />
+        <Route path={ROUTES.CLINIC.ALERTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicRiskAlerts /></ProtectedRoute>} />
+        <Route path={ROUTES.CLINIC.PATIENTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicPatients /></ProtectedRoute>} />
+        <Route path={ROUTES.CLINIC.DOCTORS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicDoctors /></ProtectedRoute>} />
+        <Route path={ROUTES.CLINIC.ASSIGNMENT} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicAssignment /></ProtectedRoute>} />
+        <Route path={ROUTES.CLINIC.APPOINTMENTS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicAppointments /></ProtectedRoute>} />
+        <Route path={ROUTES.CLINIC.SERVICES} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicServices /></ProtectedRoute>} />
+        <Route path={ROUTES.CLINIC.SETTINGS} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicSettings /></ProtectedRoute>} />
+        <Route path={ROUTES.CLINIC.SUPPORT} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicSupport /></ProtectedRoute>} />
 
-      {/* Admin Routes — Only ADMIN */}
-      <Route path={ROUTES.ADMIN.DASHBOARD} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
-      <Route path={ROUTES.ADMIN.CLINICS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminClinics /></ProtectedRoute>} />
-      <Route path={ROUTES.ADMIN.USERS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminUsers /></ProtectedRoute>} />
-      <Route path={ROUTES.ADMIN.SERVICES} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminServices /></ProtectedRoute>} />
-      <Route path={ROUTES.ADMIN.REPORTS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminReports /></ProtectedRoute>} />
-      <Route path={ROUTES.ADMIN.AUDIT_LOGS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAuditLogs /></ProtectedRoute>} />
-      <Route path={ROUTES.ADMIN.SUPPORT} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSupport /></ProtectedRoute>} />
-      <Route path={ROUTES.ADMIN.SETTINGS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSettings /></ProtectedRoute>} />
-    </Routes>
+        {/* Admin Routes — Only ADMIN */}
+        <Route path={ROUTES.ADMIN.DASHBOARD} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
+        <Route path={ROUTES.ADMIN.CLINICS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminClinics /></ProtectedRoute>} />
+        <Route path={ROUTES.ADMIN.USERS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminUsers /></ProtectedRoute>} />
+        <Route path={ROUTES.ADMIN.SERVICES} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminServices /></ProtectedRoute>} />
+        <Route path={ROUTES.ADMIN.REPORTS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminReports /></ProtectedRoute>} />
+        <Route path={ROUTES.ADMIN.AUDIT_LOGS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAuditLogs /></ProtectedRoute>} />
+        <Route path={ROUTES.ADMIN.SUPPORT} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSupport /></ProtectedRoute>} />
+        <Route path={ROUTES.ADMIN.SETTINGS} element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSettings /></ProtectedRoute>} />
+
+        {/* 404 Catch-all */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
   );
 };
 

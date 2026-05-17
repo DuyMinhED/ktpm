@@ -1,12 +1,18 @@
 package com.project.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
 public class CreatePatientRequest {
+    @NotBlank(message = "Tên bệnh nhân không được để trống")
+    @Size(max = 100, message = "Tên không được vượt quá 100 ký tự")
     private String name;
     private String age;
+    @NotBlank(message = "Giới tính không được để trống")
     private String gender;
+    @NotBlank(message = "Số điện thoại không được để trống")
     private String phone;
     private Long doctorId;
     private String email;
@@ -48,3 +54,4 @@ public class CreatePatientRequest {
     private java.math.BigDecimal heightCm;
     private String bloodType;
 }
+

@@ -3,6 +3,7 @@ package com.project.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "support_tickets", indexes = {
@@ -59,7 +60,7 @@ public class SupportTicket extends BaseEntity {
             this.status = "Mới";
         }
         if (this.ticketCode == null) {
-            this.ticketCode = "TKT-" + (int)(Math.random() * 90000 + 10000);
+            this.ticketCode = "TKT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         }
     }
 }
