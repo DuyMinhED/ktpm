@@ -494,6 +494,7 @@ export default function DoctorAnalytics() {
                 onSave={handleSaveAdvice}
                 patientName={advicePatient?.fullName || ""}
                 patientAvatar={advicePatient?.avatarUrl}
+                patientData={advicePatient}
             />
 
             <Toast
