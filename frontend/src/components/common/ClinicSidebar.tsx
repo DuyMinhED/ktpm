@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
+import DamDiepLogo from './DamDiepLogo';
 
 interface ClinicSidebarProps {
     isSidebarOpen: boolean;
@@ -25,13 +26,8 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
 
     return (
         <aside className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-900 border-r border-slate-200/60 dark:border-slate-800/50 flex flex-col z-[150] transition-transform duration-300 w-72 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl lg:shadow-none shadow-primary/10 font-display`}>
-            <div className="p-6 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800/50">
-                <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl text-white shadow-lg shadow-primary/20">
-                    <span className="material-symbols-outlined fill-1">health_metrics</span>
-                </div>
-                <div>
-                    <h1 className="text-xl font-extrabold text-slate-900 dark:text-white leading-none">DamDiep</h1>
-                </div>
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800/50">
+                <DamDiepLogo size={40} />
             </div>
 
             <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar italic-none">

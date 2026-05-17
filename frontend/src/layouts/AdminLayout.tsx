@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import TopBar from '../components/common/TopBar';
 import { authApi } from '../api/auth';
+import DamDiepLogo from '../components/common/DamDiepLogo';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -70,13 +71,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Sidebar Navigation - Shared across Admin Pages */}
       <aside className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-900 border-r border-primary/10 flex flex-col z-[150] transition-transform duration-300 ease-out w-[280px] lg:w-72 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl lg:shadow-none shadow-primary/10`}>
         <div className="p-6 flex items-center justify-between border-b border-primary/5">
-          <Link to={ROUTES.HOME} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer">
-            <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl text-white shadow-lg shadow-primary/20">
-              <span className="material-symbols-outlined fill-1" style={{ fontVariationSettings: "'FILL' 1" }}>health_metrics</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-black text-slate-900 dark:text-white leading-none">DamDiep</h1>
-            </div>
+          <Link to={ROUTES.HOME} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity cursor-pointer">
+            <DamDiepLogo size={40} />
           </Link>
           <button
             onClick={() => setIsSidebarOpen(false)}
