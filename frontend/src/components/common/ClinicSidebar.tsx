@@ -4,10 +4,12 @@ import { ROUTES } from '../../constants/routes';
 
 interface ClinicSidebarProps {
     isSidebarOpen: boolean;
+    isLoading?: boolean;
 }
 
 const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
-    isSidebarOpen
+    isSidebarOpen,
+    isLoading
 }) => {
     const navItems = [
         { path: ROUTES.CLINIC.DASHBOARD, label: 'Tổng quan phòng khám', icon: 'dashboard' },

@@ -26,7 +26,6 @@ const MedicalHistoryModal: React.FC<MedicalHistoryModalProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [triggerFilter, setTriggerFilter] = useState(false);
 
   // Child view modal
   const [selectedResult, setSelectedResult] = useState<any | null>(null);

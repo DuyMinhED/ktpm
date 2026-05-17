@@ -11,6 +11,7 @@ interface Notification {
 
 interface NotificationDropdownProps {
   isOpen: boolean;
+  onClose?: () => void;
   notifications: Notification[];
   onMarkRead?: (id: number) => void;
   onClearAll?: () => void;
