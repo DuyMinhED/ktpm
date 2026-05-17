@@ -49,4 +49,8 @@ springdoc:
     path: /swagger-ui.html
     enabled: ${SWAGGER_ENABLED:false}
 
-
+# AI Health Assistant (Google Gemini)
+ai:
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-2.0-flash}

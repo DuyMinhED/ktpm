@@ -4,6 +4,7 @@ import AppRoutes from './routes/AppRoutes';
 import SessionTimeoutWarning from './components/common/SessionTimeoutWarning';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import ScrollToTop from './components/common/ScrollToTop';
+import AiChatWidget from './components/common/AiChatWidget';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +28,7 @@ function App() {
             <ScrollToTop />
             <AppRoutes />
             <SessionTimeoutWarning />
+            <AiChatWidget />
           </Router>
         </ToastProvider>
       </QueryClientProvider>

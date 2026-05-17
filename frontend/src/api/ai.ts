@@ -1,17 +1,22 @@
 import axiosInstance from './axios';
 
-export interface AIChatRequest {
-  message: string;
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
-export interface AIChatResponse {
-  reply: string;
-  agentName: string;
+export interface AiChatResponse {
+  success: boolean;
+  reply: string | null;
+  error: string | null;
 }
 
-export const aiService = {
-  chat: async (data: AIChatRequest) => {
-    const response = await axiosInstance.post<any>('/v1/ai/chat', data);
-    return response.data.data as AIChatResponse;
+export const aiApi = {
+  chat: async (message: string, history: ChatMessage[] = []): Promise<AiChatResponse> => {
+    const response = await axiosInstance.post('/v1/ai/chat', {
+      message,
+      history,
+    });
+    return response.data;
   },
 };
