@@ -10,7 +10,7 @@ interface ClinicSidebarProps {
 
 const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
     isSidebarOpen,
-    isLoading
+    isLoading: _isLoading
 }) => {
     const navItems = [
         { path: ROUTES.CLINIC.DASHBOARD, label: 'Tổng quan phòng khám', icon: 'dashboard' },

@@ -12,7 +12,7 @@ interface PatientSidebarProps {
     setIsSidebarOpen: (isOpen: boolean) => void;
 }
 
-const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) => {
+const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSidebarOpen: _setIsSidebarOpen }) => {
     const navigate = useNavigate();
     const [userInfo, setUserInfo] = useState({
         name: localStorage.getItem('userName') || "Bệnh nhân",
@@ -70,7 +70,7 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
     const handleSaveSupport = async (data: any) => {
         setIsSavingSupport(true);
         try {
-            const response = await supportApi.createTicket({
+            await supportApi.createTicket({
                 subject: data.subject,
                 message: data.message,
                 category: data.category,

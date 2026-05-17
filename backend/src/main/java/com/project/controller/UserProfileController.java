@@ -61,7 +61,7 @@ public class UserProfileController {
 
                     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                     userRepository.save(user);
-                    return ApiResponse.success("Đổi mật khẩu thành công", null);
+                    return ApiResponse.<String>success("Đổi mật khẩu thành công", null);
                 })
                 .orElse(ApiResponse.error("Not authenticated", null));
     }
