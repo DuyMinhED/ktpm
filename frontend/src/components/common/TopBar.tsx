@@ -126,6 +126,18 @@ const TopBar: React.FC<TopBarProps> = ({
           <span className="text-[10px] font-extrabold text-slate-500 uppercase hidden xs:inline">VN</span>
         </div>
 
+        {/* Dark Mode Toggle */}
+        <button
+          onClick={() => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          }}
+          className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-xl bg-background-light dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all hover:bg-slate-200 dark:hover:bg-slate-700"
+          title="Chuyển đổi giao diện sáng/tối"
+        >
+          <span className="material-symbols-outlined text-xl dark:hidden">dark_mode</span>
+          <span className="material-symbols-outlined text-xl hidden dark:block">light_mode</span>
+        </button>
         <div className="relative" ref={notificationRef}>
           <button
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}

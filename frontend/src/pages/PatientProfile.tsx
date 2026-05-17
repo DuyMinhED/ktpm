@@ -3,6 +3,7 @@ import { patientApi } from '../api/patient';
 import EditProfileModal from './profile-modals/EditProfileModal';
 import EmergencyContactModal from './profile-modals/EmergencyContactModal';
 import Toast from '../components/ui/Toast';
+import ChangePasswordModal from '../components/common/ChangePasswordModal';
 
 const PatientProfile: React.FC = () => {
     const [profile, setProfile] = useState<any>(null);
@@ -11,6 +12,7 @@ const PatientProfile: React.FC = () => {
     // Modal states
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
     const [isEmergencyContactOpen, setIsEmergencyContactOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
     const [toast, setToast] = useState({ show: false, title: '', type: 'success' as 'success' | 'error' | 'warning' });
 
     const fetchProfile = async () => {
@@ -320,6 +322,33 @@ const PatientProfile: React.FC = () => {
                             {profile.emergencyContact ? 'Cập nhật thông tin khẩn cấp' : 'Thêm liên hệ khẩn cấp'}
                         </button>
                     </section>
+
+                    {/* Account Security Section */}
+                    <section className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800">
+                        <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900 dark:text-slate-100">
+                            <span className="material-symbols-outlined text-primary">shield_person</span>
+                            Bảo mật tài khoản
+                        </h3>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-primary text-lg">lock</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Mật khẩu đăng nhập</p>
+                                        <p className="text-xs text-slate-400">Thay đổi mật khẩu để bảo vệ tài khoản</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setIsChangePasswordOpen(true)}
+                                    className="px-4 py-2 text-xs font-bold text-primary border border-primary/20 rounded-lg hover:bg-primary/5 transition-all"
+                                >
+                                    Đổi mật khẩu
+                                </button>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
 
@@ -336,6 +365,12 @@ const PatientProfile: React.FC = () => {
                 onClose={() => setIsEmergencyContactOpen(false)} 
                 onSave={handleSaveEmergencyContact} 
                 initialData={profile.emergencyContact}
+            />
+
+            <ChangePasswordModal
+                isOpen={isChangePasswordOpen}
+                onClose={() => setIsChangePasswordOpen(false)}
+                onSuccess={() => setToast({ show: true, title: 'Đổi mật khẩu thành công!', type: 'success' })}
             />
 
             <Toast 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import { authApi } from '../api/auth';
+import ForgotPasswordModal from '../components/common/ForgotPasswordModal';
 
 const VelorahLandingPage = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const VelorahLandingPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const location = useLocation();
 
   React.useEffect(() => {
@@ -303,7 +305,7 @@ const VelorahLandingPage = () => {
                   </div>
                   <span className="text-[13px] text-white/50 group-hover:text-white/80 transition-colors pointer-events-none">Ghi nhớ đăng nhập</span>
                 </label>
-                <button type="button" onClick={(e) => { e.preventDefault(); }} className="text-[13px] text-white/50 hover:text-white transition-colors cursor-pointer focus:outline-none">Quên mật khẩu?</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); setShowForgotPassword(true); }} className="text-[13px] text-white/50 hover:text-white transition-colors cursor-pointer focus:outline-none">Quên mật khẩu?</button>
               </div>
 
               <button
@@ -357,6 +359,11 @@ const VelorahLandingPage = () => {
           </div>
         </div>
       )}
+
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
     </div>
   );
 };
