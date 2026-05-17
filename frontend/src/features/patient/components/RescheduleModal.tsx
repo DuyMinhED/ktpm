@@ -76,18 +76,15 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-white/20 dark:bg-slate-900/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px]"
         onClick={onClose}
       ></div>
 
       <div className="relative bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] md:max-h-[90vh] animate-in fade-in zoom-in duration-200 border border-primary/10 transition-all mx-2 md:mx-4">
-        <div className="px-6 md:px-10 py-5 md:py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-10 transition-all">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-10 transition-all">
           <h2 className="text-[20px] font-medium text-slate-900 dark:text-white">
             {isRescheduling ? 'Cập nhật / Dời lịch hẹn' : 'Đặt lịch tái khám'}
           </h2>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 transition-colors">
-            <span className="material-symbols-outlined font-medium">close</span>
-          </button>
         </div>
 
         <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar text-left">
@@ -106,7 +103,8 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                   value={selectedPatientId}
                   onChange={setSelectedPatientId}
                   className="w-full"
-                  disabled={isRescheduling}
+                  disabled={isRescheduling || !!initialPatientId}
+                  icon={<span className="material-symbols-outlined text-[20px] text-slate-400">person</span>}
                 />
                 {selectedPatientId && patients.find(p => p.id.toString() === selectedPatientId) && !patients.find(p => p.id.toString() === selectedPatientId).doctorId && (
                   <p className="text-xs text-red-500 font-medium mt-1 pl-2">
@@ -158,21 +156,40 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                   <div className="grid grid-cols-7 text-center text-xs font-bold text-slate-400 mb-2 tracking-wide opacity-60">
                     <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
                   </div>
-                  <div className="grid grid-cols-7 gap-3">
-                    {[27, 28, 29, 30, 31].map(d => <div key={d} className="text-xs h-10 flex items-center justify-center text-slate-300 font-medium">{d}</div>)}
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map(d => (
-                      <button
-                        key={d}
-                        type="button"
-                        onClick={() => setSelectedDay(d)}
-                        className={`text-xs font-bold h-10 flex items-center justify-center rounded-xl transition-all ${selectedDay === d
-                          ? 'bg-primary text-slate-900 shadow-xl shadow-primary/20 transform scale-110 z-10'
-                          : 'hover:bg-primary/10 hover:text-primary'
-                          }`}
-                      >
-                        {d}
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-7 gap-x-3 gap-y-2">
+                    {(() => {
+                      const daysInCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                      const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+                      
+                      const prevMonthDays = [];
+                      for (let i = firstDay - 1; i >= 0; i--) {
+                        prevMonthDays.push(daysInPrevMonth - i);
+                      }
+                      
+                      const currentMonthDays = Array.from({ length: daysInCurrentMonth }, (_, i) => i + 1);
+                      
+                      return (
+                        <>
+                          {prevMonthDays.map((d, i) => (
+                            <div key={`prev-${i}`} className="text-[13px] h-10 flex items-center justify-center text-slate-300 font-medium">{d}</div>
+                          ))}
+                          {currentMonthDays.map(d => (
+                            <button
+                              key={`cur-${d}`}
+                              type="button"
+                              onClick={() => setSelectedDay(d)}
+                              className={`text-[13px] font-bold h-10 flex items-center justify-center rounded-full transition-all ${selectedDay === d
+                                ? 'bg-primary text-white shadow-md shadow-primary/20 transform scale-110 z-10'
+                                : 'text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary'
+                                }`}
+                            >
+                              {d}
+                            </button>
+                          ))}
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -220,13 +237,16 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                     <span className="material-symbols-outlined text-[20px] text-primary">link</span>
                     Link họp Trực tuyến
                   </label>
-                  <input
-                    type="text"
-                    value={meetingLink}
-                    onChange={(e) => setMeetingLink(e.target.value)}
-                    className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm font-medium transition-all shadow-sm outline-none"
-                    placeholder="Dán link Google Meet"
-                  />
+                  <div className="relative group">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px] pointer-events-none z-10 group-focus-within:text-primary transition-colors">link</span>
+                    <input
+                      type="text"
+                      value={meetingLink}
+                      onChange={(e) => setMeetingLink(e.target.value)}
+                      className="w-full pl-11 pr-4 py-[9.5px] rounded-full border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 outline-none transition-all text-slate-700 dark:text-slate-200 font-medium font-display text-[14px] md:text-[15px] shadow-sm relative"
+                      placeholder="Dán link Google Meet"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -241,9 +261,9 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                       key={time}
                       type="button"
                       onClick={() => setSelectedTime(time)}
-                      className={`py-3 text-xs font-bold rounded-xl border-2 transition-all ${selectedTime === time
-                        ? 'border-primary bg-primary/5 text-primary scale-105 shadow-sm shadow-primary/10'
-                        : 'border-slate-50 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-primary/30'
+                      className={`py-3 text-[13px] font-bold rounded-full border-2 transition-all ${selectedTime === time
+                        ? 'border-primary bg-primary/5 text-primary shadow-sm shadow-primary/10'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary/50 text-slate-600 dark:text-slate-300'
                         }`}
                     >
                       {time}
@@ -260,7 +280,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full p-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm font-medium transition-all shadow-sm outline-none resize-none"
+                  className="w-full px-5 py-4 rounded-2xl border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-primary focus:shadow-lg focus:shadow-primary/10 focus:ring-4 focus:ring-primary/5 outline-none transition-all text-slate-700 dark:text-slate-200 font-medium font-display text-[14px] md:text-[15px] shadow-sm resize-none custom-scrollbar"
                   placeholder="BS ghi chú thêm dặn dò cho bệnh nhân tại đây..."
                   rows={3}
                 ></textarea>
@@ -269,10 +289,10 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
           </div>
         </div>
 
-        <div className="px-10 py-6 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 sticky bottom-0 z-10 transition-all">
+        <div className="px-6 py-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-4 sticky bottom-0 z-10 transition-all">
           <button
             onClick={onClose}
-            className="px-8 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all"
+            className="whitespace-nowrap px-5 py-2 bg-red-500 text-white rounded-full font-bold text-[14px] hover:bg-red-600 transition-all active:scale-95 flex items-center justify-center shadow-sm"
           >
             Hủy bỏ
           </button>
@@ -286,16 +306,16 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
               meetingLink: appointmentType === 'ONLINE' ? meetingLink : undefined
             })}
             disabled={Boolean(isSaving || !selectedPatientId)}
-            className="px-10 py-3 text-sm font-bold text-white bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-xl shadow-primary/20 flex items-center gap-3 active:scale-95 transform disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`whitespace-nowrap px-5 py-2 rounded-full font-bold text-[14px] bg-primary text-white hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50 ${isSaving ? 'disabled:cursor-wait' : 'disabled:cursor-not-allowed'}`}
           >
             {isSaving ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 {isRescheduling ? 'Đang cập nhật...' : 'Đang đặt lịch...'}
               </>
             ) : (
               <>
-                <span className="material-symbols-outlined font-bold">send</span>
+                <span className="material-symbols-outlined text-[18px]">send</span>
                 {isRescheduling ? 'Xác nhận cập nhật' : 'Xác nhận đặt lịch'}
               </>
             )}

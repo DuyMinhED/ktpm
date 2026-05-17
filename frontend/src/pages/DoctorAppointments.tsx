@@ -31,6 +31,7 @@ export default function DoctorAppointments() {
     const [linkPrompt, setLinkPrompt] = useState<{ show: boolean; apptId?: number; initialLink?: string }>({ show: false });
     const [completePrompt, setCompletePrompt] = useState<{ show: boolean; apptId?: number; patientName?: string }>({ show: false });
     const [viewMode, setViewMode] = useState<'active' | 'history'>('active');
+    const [historyFilter, setHistoryFilter] = useState<'ALL' | 'COMPLETED' | 'CANCELLED'>('ALL');
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
     const [isBatchSaving, setIsBatchSaving] = useState(false);
 
@@ -42,14 +43,14 @@ export default function DoctorAppointments() {
         // BOM for UTF-8 in Excel
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
         csvContent += "Mã Hẹn,Bệnh Nhân,Thời Gian,Hình Thức,Trạng Thái,Lý Do,Link Cuộc Gọi\n";
-        
+
         appointments.forEach(appt => {
             const time = new Date(appt.appointmentTime).toLocaleString('vi-VN');
             const type = appt.appointmentType === 'ONLINE' ? 'Trực tuyến' : 'Tại phòng khám';
-            const statusStr = appt.status === 'PENDING' ? 'Chờ duyệt' : 
-                           appt.status === 'SCHEDULED' ? 'Đã xác nhận' : 
-                           appt.status === 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy';
-            
+            const statusStr = appt.status === 'PENDING' ? 'Chờ duyệt' :
+                appt.status === 'SCHEDULED' ? 'Đã xác nhận' :
+                    appt.status === 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy';
+
             const row = [
                 appt.id,
                 `"${appt.patientName || ''}"`,
@@ -78,10 +79,10 @@ export default function DoctorAppointments() {
             const res = await doctorApi.batchReschedule(sourceDate, targetDate);
             if (res.success) {
                 const count = res.data?.movedCount || 0;
-                setToast({ 
-                    show: true, 
-                    title: `Đã dời ${count} ca hẹn thành công!`, 
-                    type: 'success' 
+                setToast({
+                    show: true,
+                    title: `Đã dời ${count} ca hẹn thành công!`,
+                    type: 'success'
                 });
                 setIsBatchModalOpen(false);
                 await loadAppointments();
@@ -175,7 +176,12 @@ export default function DoctorAppointments() {
     }).length;
 
     const completedHistory = appointments
-        .filter(a => a.status === 'COMPLETED')
+        .filter(a => {
+            if (historyFilter === 'ALL') return a.status === 'COMPLETED' || a.status === 'CANCELLED';
+            if (historyFilter === 'COMPLETED') return a.status === 'COMPLETED';
+            if (historyFilter === 'CANCELLED') return a.status === 'CANCELLED';
+            return false;
+        })
         .sort((a, b) => new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime());
 
     const getGreeting = () => {
@@ -306,7 +312,7 @@ export default function DoctorAppointments() {
                                 {loading ? (
                                     <Skeleton className="h-9 w-12" />
                                 ) : (
-                                    <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">{todayActiveCount}</span>
+                                    <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">{activeAppointments.length}</span>
                                 )}
                                 <span className="text-xs font-bold text-primary flex items-center gap-0.5">
                                     <span className="material-symbols-outlined text-xs">trending_up</span>
@@ -328,7 +334,7 @@ export default function DoctorAppointments() {
                                     <Skeleton className="h-9 w-12" />
                                 ) : (
                                     <span className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                                        {activeAppointments.filter(a => a.appointmentType === 'ONSITE').length}
+                                        {activeAppointments.filter(a => a.appointmentType === 'IN_PERSON').length}
                                     </span>
                                 )}
                                 <span className="text-xs font-bold text-primary flex items-center gap-0.5">
@@ -495,22 +501,20 @@ export default function DoctorAppointments() {
                                     <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
                                         <button
                                             onClick={() => setViewMode('active')}
-                                            className={`flex-1 py-2 px-3 text-[12px] font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                                                viewMode === 'active' 
-                                                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' 
+                                            className={`flex-1 py-2 px-3 text-[14px] font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${viewMode === 'active'
+                                                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
                                                 : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                                            }`}
+                                                }`}
                                         >
                                             <span className="material-symbols-outlined text-[18px]">calendar_today</span>
                                             Lịch khám
                                         </button>
                                         <button
                                             onClick={() => setViewMode('history')}
-                                            className={`flex-1 py-2 px-3 text-[12px] font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                                                viewMode === 'history' 
-                                                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' 
+                                            className={`flex-1 py-2 px-3 text-[14px] font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${viewMode === 'history'
+                                                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
                                                 : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                                            }`}
+                                                }`}
                                         >
                                             <span className="material-symbols-outlined text-[18px]">history</span>
                                             Lịch sử
@@ -533,226 +537,245 @@ export default function DoctorAppointments() {
                                     ) : (
                                         viewMode === 'active' ? (
                                             <>
-                                            {/* 1. Pending queue at the top */}
-                                            {activeAppointments.filter(a => a.status === 'PENDING').length > 0 && (
-                                                <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
-                                                    <div className="flex items-center gap-2 mb-1 px-1">
-                                                        <span className="material-symbols-outlined text-[18px] text-amber-500 filled">notifications_active</span>
-                                                        <h4 className="text-[13px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-500">Yêu cầu chờ duyệt ({activeAppointments.filter(a => a.status === 'PENDING').length})</h4>
+                                                {/* 1. Pending queue at the top */}
+                                                {activeAppointments.filter(a => a.status === 'PENDING').length > 0 && (
+                                                    <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
+                                                        <div className="flex items-center gap-2 mb-1 px-1">
+                                                            <span className="material-symbols-outlined text-[18px] text-amber-500 filled">notifications_active</span>
+                                                            <h4 className="text-[13px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-500">Yêu cầu chờ duyệt ({activeAppointments.filter(a => a.status === 'PENDING').length})</h4>
+                                                        </div>
+                                                        {activeAppointments.filter(a => a.status === 'PENDING').map(appt => (
+                                                            <div key={`pending-${appt.id}`} className="group p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border-l-4 border-amber-400 transition-all shadow-sm hover:shadow-md">
+                                                                <div className="flex items-start justify-between mb-3">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="size-10 rounded-full overflow-hidden bg-amber-100 ring-2 ring-white dark:ring-slate-800">
+                                                                            <img className="size-full object-cover"
+                                                                                src={appt.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(appt.patientName)} />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h4 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                                                                                {appt.patientName}</h4>
+                                                                            <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1 mt-0.5">
+                                                                                <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                                                {new Date(appt.appointmentTime).toLocaleDateString('vi-VN')}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <span className="text-[13px] font-bold px-3 py-1 bg-white dark:bg-slate-800 shadow-sm rounded-lg text-amber-600">{formatTime(appt.appointmentTime)}</span>
+                                                                </div>
+                                                                <div className="flex items-center justify-between mt-4 pt-3 border-t border-amber-200/30">
+                                                                    <div className="flex items-center gap-1 text-[12px] font-medium text-slate-600 bg-white/60 dark:bg-slate-800 px-2 py-1 rounded-md shadow-sm">
+                                                                        <span className="material-symbols-outlined text-[14px]">{appt.appointmentType === 'ONLINE' ? 'video_call' : 'location_on'}</span>
+                                                                        {appt.appointmentType === 'ONLINE' ? 'Online' : 'Trực tiếp'}
+                                                                    </div>
+                                                                    <div className="flex gap-2">
+                                                                        <button
+                                                                            onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
+                                                                            disabled={isUpdatingStatus}
+                                                                            className="px-3 py-1.5 flex items-center gap-1 bg-red-50 dark:bg-red-900/20 text-red-600 text-[12px] font-bold rounded-lg hover:bg-red-500 hover:text-white transition-colors">
+                                                                            Từ chối
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                if (appt.appointmentType === 'ONLINE') {
+                                                                                    setLinkPrompt({
+                                                                                        show: true,
+                                                                                        apptId: appt.id,
+                                                                                        initialLink: appt.meetingLink || ""
+                                                                                    });
+                                                                                } else {
+                                                                                    updateStatus(appt.id, 'SCHEDULED');
+                                                                                }
+                                                                            }}
+                                                                            disabled={isUpdatingStatus}
+                                                                            className="px-3 py-1.5 flex items-center gap-1 bg-emerald-500 text-white text-[12px] font-bold rounded-lg hover:bg-emerald-600 shadow-md shadow-emerald-500/20 transition-all active:scale-95">
+                                                                            <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                                                                            Duyệt
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                    {activeAppointments.filter(a => a.status === 'PENDING').map(appt => (
-                                                        <div key={`pending-${appt.id}`} className="group p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border-l-4 border-amber-400 transition-all shadow-sm hover:shadow-md">
-                                                            <div className="flex items-start justify-between mb-3">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="size-10 rounded-full overflow-hidden bg-amber-100 ring-2 ring-white dark:ring-slate-800">
-                                                                        <img className="size-full object-cover"
-                                                                            src={appt.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(appt.patientName)} />
-                                                                    </div>
-                                                                    <div>
-                                                                        <h4 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">
-                                                                            {appt.patientName}</h4>
-                                                                        <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1 mt-0.5">
-                                                                            <span className="material-symbols-outlined text-[14px]">calendar_today</span>
-                                                                            {new Date(appt.appointmentTime).toLocaleDateString('vi-VN')}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <span className="text-[13px] font-bold px-3 py-1 bg-white dark:bg-slate-800 shadow-sm rounded-lg text-amber-600">{formatTime(appt.appointmentTime)}</span>
-                                                            </div>
-                                                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-amber-200/30">
-                                                                <div className="flex items-center gap-1 text-[12px] font-medium text-slate-600 bg-white/60 dark:bg-slate-800 px-2 py-1 rounded-md shadow-sm">
-                                                                    <span className="material-symbols-outlined text-[14px]">{appt.appointmentType === 'ONLINE' ? 'video_call' : 'location_on'}</span>
-                                                                    {appt.appointmentType === 'ONLINE' ? 'Online' : 'Trực tiếp'}
-                                                                </div>
-                                                                <div className="flex gap-2">
-                                                                    <button
-                                                                        onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
-                                                                        disabled={isUpdatingStatus}
-                                                                        className="px-3 py-1.5 flex items-center gap-1 bg-red-50 dark:bg-red-900/20 text-red-600 text-[12px] font-bold rounded-lg hover:bg-red-500 hover:text-white transition-colors">
-                                                                        Từ chối
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            if (appt.appointmentType === 'ONLINE') {
-                                                                                setLinkPrompt({
-                                                                                    show: true,
-                                                                                    apptId: appt.id,
-                                                                                    initialLink: appt.meetingLink || ""
-                                                                                });
-                                                                            } else {
-                                                                                updateStatus(appt.id, 'SCHEDULED');
-                                                                            }
-                                                                        }}
-                                                                        disabled={isUpdatingStatus}
-                                                                        className="px-3 py-1.5 flex items-center gap-1 bg-emerald-500 text-white text-[12px] font-bold rounded-lg hover:bg-emerald-600 shadow-md shadow-emerald-500/20 transition-all active:scale-95">
-                                                                        <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                                                                        Duyệt
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                                )}
 
-                                            {activeAppointments.filter(a => a.status === 'PENDING').length > 0 && (
-                                                <hr className="border-slate-100 dark:border-slate-700 opacity-50 my-4" />
-                                            )}
+                                                {activeAppointments.filter(a => a.status === 'PENDING').length > 0 && (
+                                                    <hr className="border-slate-100 dark:border-slate-700 opacity-50 my-4" />
+                                                )}
 
-                                            {/* 2. Specific schedule queue */}
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between px-1 mb-2">
-                                                    <h4 className="text-[13px] font-bold uppercase tracking-wider text-slate-500">Lịch trình {selectedDay}/{currentMonth + 1}</h4>
-                                                    {agendaAppointments.length > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full font-bold">{agendaAppointments.length} ca</span>}
-                                                </div>
+                                                {/* 2. Specific schedule queue */}
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center justify-between px-1 mb-2">
+                                                        <h4 className="text-[13px] font-bold uppercase tracking-wider text-slate-500">Lịch trình {selectedDay}/{currentMonth + 1}</h4>
+                                                        {agendaAppointments.length > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full font-bold">{agendaAppointments.length} ca</span>}
+                                                    </div>
 
-                                                {agendaAppointments.length === 0 ? (
-                                                    <div className="text-center text-slate-400 text-xs font-medium bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">Không có ca khám trong ngày</div>
-                                                ) : agendaAppointments.map(appt => {
-                                                    const isOnline = appt.appointmentType === 'ONLINE';
-                                                    const isPending = appt.status === 'PENDING';
-                                                    const borderClass = isPending ? 'border-slate-300 dark:border-slate-600 opacity-70' : (isOnline ? 'border-primary' : 'border-blue-500');
-                                                    const timeClass = isPending ? 'text-slate-400' : (isOnline ? 'bg-primary/20 text-slate-900 dark:text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-slate-900 dark:text-white');
+                                                    {agendaAppointments.length === 0 ? (
+                                                        <div className="text-center text-slate-400 text-xs font-medium bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">Không có ca khám trong ngày</div>
+                                                    ) : agendaAppointments.map(appt => {
+                                                        const isOnline = appt.appointmentType === 'ONLINE';
+                                                        const isPending = appt.status === 'PENDING';
+                                                        const borderClass = isPending ? 'border-slate-300 dark:border-slate-600 opacity-70' : (isOnline ? 'border-primary' : 'border-blue-500');
+                                                        const timeClass = isPending ? 'text-slate-400' : (isOnline ? 'bg-primary/20 text-slate-900 dark:text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-slate-900 dark:text-white');
 
-                                                    return (
-                                                        <div key={appt.id} className={`group p-4 bg-white dark:bg-slate-900 rounded-xl border-l-4 ${borderClass} transition-all hover:shadow-sm border border-slate-100 dark:border-slate-800`}>
-                                                            <div className="flex items-start justify-between mb-3">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="size-10 rounded-full overflow-hidden bg-slate-200">
-                                                                        <img className="size-full object-cover"
-                                                                            src={appt.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(appt.patientName)} />
-                                                                    </div>
-                                                                    <div>
-                                                                        <h4 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">
-                                                                            {appt.patientName}</h4>
-                                                                        <p className="text-[13px] text-slate-500 font-medium">{appt.reason || "Không có lý do"}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <span className={`text-sm font-bold px-3 py-1 rounded-lg ${timeClass}`}>{formatTime(appt.appointmentTime)}</span>
-                                                            </div>
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-2">
-                                                                    {isPending ? (
-                                                                        <>
-                                                                            <span className="material-symbols-outlined text-[18px] text-slate-400">hourglass_top</span>
-                                                                            <span className="text-[13px] font-medium text-slate-400">Chờ xác nhận</span>
-                                                                        </>
-                                                                    ) : isOnline ? (
-                                                                        <>
-                                                                            <span className="material-symbols-outlined text-[18px] text-primary">video_call</span>
-                                                                            <span className="text-[13px] font-medium text-slate-600">Trực tuyến</span>
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <span className="material-symbols-outlined text-[18px] text-blue-500">location_on</span>
-                                                                            <span className="text-[13px] font-medium text-slate-600">Tại phòng khám</span>
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex gap-1.5">
-                                                                    {isPending ? (
-                                                                        <>
-                                                                            <button
-                                                                                onClick={() => {
-                                                                                    if (isOnline) {
-                                                                                        setLinkPrompt({
-                                                                                            show: true,
-                                                                                            apptId: appt.id,
-                                                                                            initialLink: appt.meetingLink || ""
-                                                                                        });
-                                                                                    } else {
-                                                                                        updateStatus(appt.id, 'SCHEDULED');
-                                                                                    }
-                                                                                }}
-                                                                                disabled={isUpdatingStatus}
-                                                                                className="size-8 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full hover:bg-emerald-600 hover:text-white transition-all duration-300 active:scale-90 group/btn">
-                                                                                <span className="material-symbols-outlined text-[18px] font-bold">done</span>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
-                                                                                disabled={isUpdatingStatus}
-                                                                                className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
-                                                                                <span className="material-symbols-outlined text-[18px] font-bold">close</span>
-                                                                            </button>
-                                                                        </>
-                                                                    ) : isOnline ? (
-                                                                        <div className="flex items-center gap-1.5">
-                                                                            <button
-                                                                                onClick={() => window.open(appt.meetingLink || 'https://meet.google.com/abc-xyz', '_blank')}
-                                                                                className="px-4 py-2 bg-primary text-slate-900 text-[12px] font-bold rounded-full shadow-md shadow-primary/20 transition-all active:scale-95 flex items-center gap-1">
-                                                                                <span className="material-symbols-outlined text-[16px]">videocam</span>
-                                                                                Vào phòng
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => setCompletePrompt({ show: true, apptId: appt.id, patientName: appt.patientName })}
-                                                                                disabled={isUpdatingStatus}
-                                                                                title="Hoàn tất khám"
-                                                                                className="size-8 flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400 rounded-full hover:bg-emerald-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
-                                                                                <span className="material-symbols-outlined text-[18px] font-bold">check_circle</span>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => {
-                                                                                    setPrefilledPatientId(appt.patientId.toString());
-                                                                                    setReschedulingAppointmentId(appt.id);
-                                                                                    setPrefilledMeetingLink(appt.meetingLink);
-                                                                                    setIsRescheduleModalOpen(true);
-                                                                                }}
-                                                                                title="Dời lịch"
-                                                                                className="size-8 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
-                                                                                <span className="material-symbols-outlined text-[18px] font-bold">edit_calendar</span>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
-                                                                                disabled={isUpdatingStatus}
-                                                                                title="Hủy lịch"
-                                                                                className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
-                                                                                <span className="material-symbols-outlined text-[18px] font-bold">close</span>
-                                                                            </button>
+                                                        return (
+                                                            <div key={appt.id} className={`group p-4 bg-white dark:bg-slate-900 rounded-xl border-l-4 ${borderClass} transition-all hover:shadow-sm border border-slate-100 dark:border-slate-800`}>
+                                                                <div className="flex items-start justify-between mb-3">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="size-10 rounded-full overflow-hidden bg-slate-200">
+                                                                            <img className="size-full object-cover"
+                                                                                src={appt.patientAvatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(appt.patientName)} />
                                                                         </div>
-                                                                    ) : (
-                                                                        <div className="flex items-center gap-1.5">
-                                                                            <button
-                                                                                onClick={() => setCompletePrompt({ show: true, apptId: appt.id, patientName: appt.patientName })}
-                                                                                disabled={isUpdatingStatus}
-                                                                                title="Hoàn tất khám"
-                                                                                className="size-8 flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400 rounded-full hover:bg-emerald-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
-                                                                                <span className="material-symbols-outlined text-[18px] font-bold">check_circle</span>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => {
-                                                                                    setPrefilledPatientId(appt.patientId.toString());
-                                                                                    setReschedulingAppointmentId(appt.id);
-                                                                                    setPrefilledMeetingLink(appt.meetingLink);
-                                                                                    setIsRescheduleModalOpen(true);
-                                                                                }}
-                                                                                title="Dời lịch"
-                                                                                className="size-8 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
-                                                                                <span className="material-symbols-outlined text-[18px] font-bold">edit_calendar</span>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
-                                                                                disabled={isUpdatingStatus}
-                                                                                title="Hủy lịch"
-                                                                                className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
-                                                                                <span className="material-symbols-outlined text-[18px] font-bold">close</span>
-                                                                            </button>
+                                                                        <div>
+                                                                            <h4 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">
+                                                                                {appt.patientName}</h4>
+                                                                            <p className="text-[13px] text-slate-500 font-medium">{appt.reason || "Không có lý do"}</p>
                                                                         </div>
-                                                                    )}
+                                                                    </div>
+                                                                    <span className={`text-sm font-bold px-3 py-1 rounded-lg ${timeClass}`}>{formatTime(appt.appointmentTime)}</span>
+                                                                </div>
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {isPending ? (
+                                                                            <>
+                                                                                <span className="material-symbols-outlined text-[18px] text-slate-400">hourglass_top</span>
+                                                                                <span className="text-[13px] font-medium text-slate-400">Chờ xác nhận</span>
+                                                                            </>
+                                                                        ) : isOnline ? (
+                                                                            <>
+                                                                                <span className="material-symbols-outlined text-[18px] text-primary">video_call</span>
+                                                                                <span className="text-[13px] font-medium text-slate-600">Trực tuyến</span>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <span className="material-symbols-outlined text-[18px] text-blue-500">location_on</span>
+                                                                                <span className="text-[13px] font-medium text-slate-600">Tại phòng khám</span>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex gap-1.5">
+                                                                        {isPending ? (
+                                                                            <>
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        if (isOnline) {
+                                                                                            setLinkPrompt({
+                                                                                                show: true,
+                                                                                                apptId: appt.id,
+                                                                                                initialLink: appt.meetingLink || ""
+                                                                                            });
+                                                                                        } else {
+                                                                                            updateStatus(appt.id, 'SCHEDULED');
+                                                                                        }
+                                                                                    }}
+                                                                                    disabled={isUpdatingStatus}
+                                                                                    className="size-8 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full hover:bg-emerald-600 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                    <span className="material-symbols-outlined text-[18px] font-bold">done</span>
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
+                                                                                    disabled={isUpdatingStatus}
+                                                                                    className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                    <span className="material-symbols-outlined text-[18px] font-bold">close</span>
+                                                                                </button>
+                                                                            </>
+                                                                        ) : isOnline ? (
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                <button
+                                                                                    onClick={() => window.open(appt.meetingLink || 'https://meet.google.com/abc-xyz', '_blank')}
+                                                                                    className="px-4 py-2 bg-primary text-slate-900 text-[12px] font-bold rounded-full shadow-md shadow-primary/20 transition-all active:scale-95 flex items-center gap-1">
+                                                                                    <span className="material-symbols-outlined text-[16px]">videocam</span>
+                                                                                    Vào phòng
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => setCompletePrompt({ show: true, apptId: appt.id, patientName: appt.patientName })}
+                                                                                    disabled={isUpdatingStatus}
+                                                                                    title="Hoàn tất khám"
+                                                                                    className="size-8 flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400 rounded-full hover:bg-emerald-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                    <span className="material-symbols-outlined text-[18px] font-bold">check_circle</span>
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        setPrefilledPatientId(appt.patientId.toString());
+                                                                                        setReschedulingAppointmentId(appt.id);
+                                                                                        setPrefilledMeetingLink(appt.meetingLink);
+                                                                                        setIsRescheduleModalOpen(true);
+                                                                                    }}
+                                                                                    title="Dời lịch"
+                                                                                    className="size-8 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                    <span className="material-symbols-outlined text-[18px] font-bold">edit_calendar</span>
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
+                                                                                    disabled={isUpdatingStatus}
+                                                                                    title="Hủy lịch"
+                                                                                    className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                    <span className="material-symbols-outlined text-[18px] font-bold">close</span>
+                                                                                </button>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                <button
+                                                                                    onClick={() => setCompletePrompt({ show: true, apptId: appt.id, patientName: appt.patientName })}
+                                                                                    disabled={isUpdatingStatus}
+                                                                                    title="Hoàn tất khám"
+                                                                                    className="size-8 flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400 rounded-full hover:bg-emerald-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                    <span className="material-symbols-outlined text-[18px] font-bold">check_circle</span>
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        setPrefilledPatientId(appt.patientId.toString());
+                                                                                        setReschedulingAppointmentId(appt.id);
+                                                                                        setPrefilledMeetingLink(appt.meetingLink);
+                                                                                        setIsRescheduleModalOpen(true);
+                                                                                    }}
+                                                                                    title="Dời lịch"
+                                                                                    className="size-8 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                    <span className="material-symbols-outlined text-[18px] font-bold">edit_calendar</span>
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => setConfirmModal({ show: true, appointmentId: appt.id })}
+                                                                                    disabled={isUpdatingStatus}
+                                                                                    title="Hủy lịch"
+                                                                                    className="size-8 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 active:scale-90 group/btn">
+                                                                                    <span className="material-symbols-outlined text-[18px] font-bold">close</span>
+                                                                                </button>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </>
                                         ) : (
                                             /* 3. History Perspective */
-                                            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                                                <div className="flex items-center justify-between px-1">
-                                                    <h4 className="text-[13px] font-extrabold uppercase tracking-wider text-slate-500">Lịch sử khám gần đây</h4>
-                                                    <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold">{completedHistory.length} ca</span>
+                                            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300 relative">
+                                                <div className="sticky top-0 -mt-4 -mx-4 px-4 pt-4 pb-3 z-10 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-slate-700/60 shadow-sm">
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="text-[14px] font-bold  text-slate-500">Lịch sử khám</h4>
+                                                        <span className="text-[13px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full font-bold">{completedHistory.length} ca</span>
+                                                    </div>
+                                                    <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full">
+                                                        <button
+                                                            onClick={() => setHistoryFilter('ALL')}
+                                                            className={`px-4 py-1 text-[12px] font-bold rounded-full transition-all ${historyFilter === 'ALL' ? 'bg-white dark:bg-slate-600 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                                                            Tất cả
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setHistoryFilter('COMPLETED')}
+                                                            className={`px-4 py-1 text-[12px] font-bold rounded-full transition-all ${historyFilter === 'COMPLETED' ? 'bg-white dark:bg-slate-600 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                                                            Hoàn thành
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setHistoryFilter('CANCELLED')}
+                                                            className={`px-4 py-1 text-[12px] font-bold rounded-full transition-all ${historyFilter === 'CANCELLED' ? 'bg-white dark:bg-slate-600 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                                                            Đã hủy
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                
+
                                                 {completedHistory.length === 0 ? (
                                                     <div className="text-center text-slate-400 py-12 px-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center gap-2">
                                                         <span className="material-symbols-outlined text-3xl opacity-50">history_toggle_off</span>
@@ -776,9 +799,14 @@ export default function DoctorAppointments() {
                                                                         </p>
                                                                     </div>
                                                                 </div>
-                                                                <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-1 border border-emerald-100 dark:border-emerald-800">
-                                                                    <span className="material-symbols-outlined text-[12px] font-bold">check_circle</span>
-                                                                    Đã xong
+                                                                <span className={`px-3 py-1.5 rounded-full text-[12px] font-bold flex items-center gap-1 border ${appt.status === 'COMPLETED'
+                                                                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800'
+                                                                    : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-100 dark:border-red-800'
+                                                                    }`}>
+                                                                    <span className="material-symbols-outlined text-[14px] font-bold">
+                                                                        {appt.status === 'COMPLETED' ? 'check_circle' : 'cancel'}
+                                                                    </span>
+                                                                    {appt.status === 'COMPLETED' ? 'Đã xong' : 'Đã hủy'}
                                                                 </span>
                                                             </div>
                                                             <div className="pl-13 mt-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
@@ -812,7 +840,7 @@ export default function DoctorAppointments() {
                                 <div
                                     className="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-b-2xl border-t border-slate-100 dark:border-slate-700">
                                     <div className="flex gap-2">
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 if (agendaAppointments.length === 0) {
                                                     setToast({ show: true, title: 'Ngày được chọn không có ca khám nào để dời!', type: 'warning' });
@@ -821,22 +849,20 @@ export default function DoctorAppointments() {
                                                 setIsBatchModalOpen(true);
                                             }}
                                             disabled={agendaAppointments.length === 0}
-                                            className={`flex-1 px-4 py-2 font-bold text-[12px] rounded-full transition-all duration-200 ${
-                                                agendaAppointments.length === 0 
-                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-60' 
+                                            className={`flex-1 px-4 py-2 font-bold text-[13px] rounded-full transition-all duration-200 ${agendaAppointments.length === 0
+                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-60'
                                                 : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95'
-                                            }`}
+                                                }`}
                                         >
                                             Dời lịch hàng loạt
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={handleExportCSV}
                                             disabled={appointments.length === 0}
-                                            className={`flex-1 px-4 py-2 font-bold text-[12px] rounded-full transition-all duration-200 ${
-                                                appointments.length === 0 
-                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-60' 
+                                            className={`flex-1 px-4 py-2 font-bold text-[13px] rounded-full transition-all duration-200 ${appointments.length === 0
+                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-60'
                                                 : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95'
-                                            }`}
+                                                }`}
                                         >
                                             Xuất file CSV
                                         </button>

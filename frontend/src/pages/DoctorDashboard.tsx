@@ -90,7 +90,7 @@ export default function DoctorDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleSaveAdvice = async () => {
-    if (!advicePatientId) return;
+    if (!advicePatient?.id) return;
     setIsAdviceSaving(true);
     try {
       // Find or create a conversation for this patient in a real app
@@ -512,7 +512,7 @@ export default function DoctorDashboard() {
                           <span className="material-symbols-outlined absolute right-4 text-slate-300 group-hover:text-violet-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">arrow_forward</span>
                         </button>
                         <button
-                          onClick={() => {setIsAdviceModalOpen(true); setAdvicePatient(p); setAdvicePatientName(p.fullName); setAdvicePatientAvatar(p.avatarUrl); }}
+                          onClick={() => { setIsAdviceModalOpen(true); setAdvicePatient(null); setAdvicePatientName(''); setAdvicePatientAvatar(''); }}
                           className="relative flex items-center gap-4 p-4 bg-white dark:bg-slate-800/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-all duration-300 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800 shadow-sm hover:shadow-md text-left group overflow-hidden"
                         >
                           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

@@ -24,6 +24,7 @@ export default function ClinicAppointments() {
     const [editingAppointment, setEditingAppointment] = useState<any>(null);
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
     const [isBatchSaving, setIsBatchSaving] = useState(false);
+    const [agendaFilter, setAgendaFilter] = useState<'ALL' | 'COMPLETED' | 'CANCELLED'>('ALL');
 
     const handleConfirmBatchReschedule = async (sourceDate: string, targetDate: string) => {
         setIsBatchSaving(true);
@@ -186,7 +187,13 @@ export default function ClinicAppointments() {
     // Filter for current selected day visually
     const agendaAppointments = appointments.filter(a => {
         const d = new Date(a.appointmentTime);
-        return d.getDate() === selectedDay && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        const isSameDay = d.getDate() === selectedDay && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        if (!isSameDay) return false;
+        
+        if (agendaFilter === 'ALL') return true;
+        if (agendaFilter === 'COMPLETED') return a.status === 'COMPLETED';
+        if (agendaFilter === 'CANCELLED') return a.status === 'CANCELLED';
+        return true;
     });
     return (
         <div className="flex min-h-screen font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
@@ -445,10 +452,27 @@ export default function ClinicAppointments() {
                         <div className="lg:col-span-4 space-y-6">
                             <div
                                 className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col h-full">
-                                <div className="p-6 border-b border-slate-100 dark:border-slate-700">
+                                <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-col gap-3">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">Lịch trình</h3>
                                         <span className="text-[13px] text-slate-500 font-medium">{String(selectedDay).padStart(2, '0')}/{String(currentMonth + 1).padStart(2, '0')}/{currentYear}</span>
+                                    </div>
+                                    <div className="flex bg-slate-100 dark:bg-slate-700/50 p-1.5 rounded-full w-fit">
+                                        <button
+                                            onClick={() => setAgendaFilter('ALL')}
+                                            className={`px-4 py-1 text-[12px] font-bold rounded-full transition-all ${agendaFilter === 'ALL' ? 'bg-white dark:bg-slate-600 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                                            Tất cả
+                                        </button>
+                                        <button
+                                            onClick={() => setAgendaFilter('COMPLETED')}
+                                            className={`px-4 py-1 text-[12px] font-bold rounded-full transition-all ${agendaFilter === 'COMPLETED' ? 'bg-white dark:bg-slate-600 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                                            Hoàn thành
+                                        </button>
+                                        <button
+                                            onClick={() => setAgendaFilter('CANCELLED')}
+                                            className={`px-4 py-1 text-[12px] font-bold rounded-full transition-all ${agendaFilter === 'CANCELLED' ? 'bg-white dark:bg-slate-600 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                                            Đã hủy
+                                        </button>
                                     </div>
                                 </div>
                                 <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[600px]">

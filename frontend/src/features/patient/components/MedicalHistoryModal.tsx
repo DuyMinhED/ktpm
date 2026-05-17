@@ -193,6 +193,7 @@ const MedicalHistoryModal: React.FC<MedicalHistoryModalProps> = ({
                         <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Bác sĩ</th>
                         <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Chẩn đoán</th>
                         <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Hình thức</th>
+                        <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
                         <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Thao tác</th>
                       </tr>
                     </thead>
@@ -234,6 +235,19 @@ const MedicalHistoryModal: React.FC<MedicalHistoryModalProps> = ({
                                 : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
                               }`}>
                                 {row.appointmentType === 'ONLINE' ? 'Tư vấn trực tuyến' : 'Tại phòng khám'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span className={`px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
+                                row.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                row.status === 'CANCELLED' ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
+                                row.status === 'SCHEDULED' ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+                              }`}>
+                                {row.status === 'COMPLETED' ? 'Hoàn tất' :
+                                 row.status === 'CANCELLED' ? 'Đã hủy' :
+                                 row.status === 'SCHEDULED' ? 'Đã lên lịch' :
+                                 row.status === 'PENDING' ? 'Chờ xác nhận' : row.status}
                               </span>
                             </td>
                             <td className="px-4 py-4 text-right">
