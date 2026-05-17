@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import DamDiepLogo from './DamDiepLogo';
+import ChangePasswordModal from './ChangePasswordModal';
+import { useToast } from '../ui/ToastContext';
 
 interface ClinicSidebarProps {
     isSidebarOpen: boolean;
@@ -12,6 +14,8 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
     isSidebarOpen,
     isLoading: _isLoading
 }) => {
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    const { showToast } = useToast();
     const navItems = [
         { path: ROUTES.CLINIC.DASHBOARD, label: 'Tổng quan phòng khám', icon: 'dashboard' },
         { path: ROUTES.CLINIC.PATIENTS, label: 'Quản lý Bệnh nhân', icon: 'group' },
@@ -67,7 +71,22 @@ const ClinicSidebar: React.FC<ClinicSidebarProps> = ({
                     <span className="material-symbols-outlined text-amber-500">support_agent</span>
                     <span>Hỗ trợ kỹ thuật</span>
                 </NavLink>
+
+                <button
+                    type="button"
+                    onClick={() => setIsChangePasswordOpen(true)}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary text-left border border-dashed border-slate-200 dark:border-slate-800"
+                >
+                    <span className="material-symbols-outlined text-primary">lock</span>
+                    <span>Đổi mật khẩu</span>
+                </button>
             </nav>
+
+            <ChangePasswordModal
+                isOpen={isChangePasswordOpen}
+                onClose={() => setIsChangePasswordOpen(false)}
+                onSuccess={() => showToast('Đổi mật khẩu thành công!', 'success')}
+            />
 
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

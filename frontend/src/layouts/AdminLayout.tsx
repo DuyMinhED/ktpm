@@ -4,6 +4,8 @@ import { ROUTES } from '../constants/routes';
 import TopBar from '../components/common/TopBar';
 import { authApi } from '../api/auth';
 import DamDiepLogo from '../components/common/DamDiepLogo';
+import ChangePasswordModal from '../components/common/ChangePasswordModal';
+import { useToast } from '../components/ui/ToastContext';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -39,6 +41,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const finalUserAvatar = userInfo.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=3b82f6&color=fff";
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const { showToast } = useToast();
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'Cảnh báo hệ thống', message: 'Phòng khám Quận 1 đang quá tải bệnh nhân.', time: '5 phút trước', type: 'warning' },
     { id: 2, title: 'Báo cáo mới', message: 'Báo cáo hợp nhất tháng 10 đã sẵn sàng.', time: '2 giờ trước', type: 'info' }
@@ -107,6 +111,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           })}
         </nav>
 
+        {/* Change Password Button */}
+        <div className="px-4 mb-2">
+          <button
+            type="button"
+            onClick={() => setIsChangePasswordOpen(true)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary text-left border border-dashed border-slate-200 dark:border-slate-800"
+          >
+            <span className="material-symbols-outlined text-primary">lock</span>
+            <span className="text-base">Đổi mật khẩu</span>
+          </button>
+        </div>
+
         <div className="mt-auto p-4 border-t border-primary/5">
           <div className="flex items-center justify-between gap-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-primary/5 group relative">
             <div className="flex items-center gap-3 overflow-hidden">
@@ -149,6 +165,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         />
         {children}
       </div>
+
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        onSuccess={() => showToast('Đổi mật khẩu thành công!', 'success')}
+      />
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }

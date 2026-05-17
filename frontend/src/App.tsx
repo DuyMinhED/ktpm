@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppRoutes from './routes/AppRoutes';
 import SessionTimeoutWarning from './components/common/SessionTimeoutWarning';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import ScrollToTop from './components/common/ScrollToTop';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,6 +24,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           <Router>
+            <ScrollToTop />
             <AppRoutes />
             <SessionTimeoutWarning />
           </Router>
