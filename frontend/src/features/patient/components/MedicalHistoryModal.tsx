@@ -115,7 +115,7 @@ const MedicalHistoryModal: React.FC<MedicalHistoryModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px]"
             onClick={onClose}
           />
 
@@ -125,11 +125,11 @@ const MedicalHistoryModal: React.FC<MedicalHistoryModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] rounded-[24px] shadow-2xl flex flex-col overflow-hidden border border-primary/10 z-10"
+            className="relative bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800 z-10"
           >
             
             {/* Modal Header */}
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+            <div className="px-6 md:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-20">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined font-bold">history</span>
@@ -142,7 +142,7 @@ const MedicalHistoryModal: React.FC<MedicalHistoryModalProps> = ({
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-slate-900">
+            <div className="px-6 md:px-8 pt-6 pb-6 flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-slate-900/50">
               {/* Filters */}
               <div className="flex flex-wrap gap-4 mb-6">
                 <div className="flex-1 min-w-[240px] relative">
@@ -277,11 +277,11 @@ const MedicalHistoryModal: React.FC<MedicalHistoryModalProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="px-6 md:px-8 py-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 rounded-b-3xl">
               <span className="text-xs text-slate-500 font-medium">
                 Hiển thị {filteredAppointments.length} trên {appointments.length} lượt khám
               </span>
-              <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex gap-2 w-full sm:w-auto text-left">
                 <button 
                   onClick={onClose}
                   className="flex-1 sm:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-95"

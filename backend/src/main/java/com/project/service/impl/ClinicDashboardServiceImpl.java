@@ -101,19 +101,30 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         
         List<ClinicDashboardResponse.DiseaseRatioDto> diseaseRatios = calculateDiseaseRatios(clinicId, totalPatients);
 
-        List<ClinicDashboardResponse.PatientGrowthChartDto> growthChart = patientStatsFuture.join().stream()
-                .map(row -> ClinicDashboardResponse.PatientGrowthChartDto.builder()
-                        .month(isDaily ? row[0].toString() : (row[0] + "/" + row[1]))
-                        .value(isDaily ? ((Number) row[1]).intValue() : ((Number) row[2]).intValue())
-                        .build())
-                .collect(Collectors.toList());
+        List<ClinicDashboardResponse.PatientGrowthChartDto> growthChart = padChartData(patientStatsFuture.join(), startDate, now, isDaily);
+        List<ClinicDashboardResponse.PatientGrowthChartDto> riskChart = padChartData(riskStatsFuture.join(), startDate, now, isDaily);
 
-        List<ClinicDashboardResponse.PatientGrowthChartDto> riskChart = riskStatsFuture.join().stream()
-                .map(row -> ClinicDashboardResponse.PatientGrowthChartDto.builder()
-                        .month(isDaily ? row[0].toString() : (row[0] + "/" + row[1]))
-                        .value(isDaily ? ((Number) row[1]).intValue() : ((Number) row[2]).intValue())
-                        .build())
-                .collect(Collectors.toList());
+        int totalVal = 0;
+        int maxVal = -1;
+        String peakMonth = "Chưa cập nhật";
+        for (ClinicDashboardResponse.PatientGrowthChartDto dto : growthChart) {
+            totalVal += dto.getValue();
+            if (dto.getValue() > maxVal) {
+                maxVal = dto.getValue();
+                peakMonth = dto.getMonth();
+            }
+        }
+        double avg = growthChart.isEmpty() ? 0 : (double) totalVal / growthChart.size();
+        String averageStr = isDaily ? String.format(java.util.Locale.US, "%.1f ca/ngày", avg) : String.format(java.util.Locale.US, "%.1f ca/tháng", avg);
+        if (!"Chưa cập nhật".equals(peakMonth)) {
+            peakMonth = formatLabel(peakMonth);
+        }
+
+        ClinicDashboardResponse.GrowthStatsDto growthStats = ClinicDashboardResponse.GrowthStatsDto.builder()
+                .growth(patientGrowth)
+                .average(averageStr)
+                .peakMonth(peakMonth)
+                .build();
 
         List<ClinicDashboardResponse.RiskPatientDto> riskPatients = riskPatientsListFuture.join().stream()
                 .map((Patient p) -> ClinicDashboardResponse.RiskPatientDto.builder()
@@ -212,6 +223,7 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .avgConsultationTime(avgConsultationTime)
                 .diseaseAnalytics(diseaseAnalytics)
                 .doctorPerformances(doctorPerformances)
+                .growthStats(growthStats)
                 .build();
     }
 
@@ -524,5 +536,54 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         }
 
         return appointments.size();
+    }
+
+    private List<ClinicDashboardResponse.PatientGrowthChartDto> padChartData(List<Object[]> dbRows, LocalDateTime startDate, LocalDateTime now, boolean isDaily) {
+        Map<String, Integer> dataMap = new java.util.LinkedHashMap<>();
+        if (isDaily) {
+            java.time.LocalDate start = startDate.toLocalDate();
+            java.time.LocalDate end = now.toLocalDate();
+            for (java.time.LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                dataMap.put(date.toString(), 0);
+            }
+            for (Object[] row : dbRows) {
+                if (row == null || row.length < 2 || row[0] == null) continue;
+                String key = row[0].toString();
+                if (key.length() > 10) {
+                    key = key.substring(0, 10);
+                }
+                int value = ((Number) row[1]).intValue();
+                dataMap.put(key, value);
+            }
+        } else {
+            java.time.YearMonth start = java.time.YearMonth.from(startDate);
+            java.time.YearMonth end = java.time.YearMonth.from(now);
+            for (java.time.YearMonth ym = start; !ym.isAfter(end); ym = ym.plusMonths(1)) {
+                dataMap.put(ym.getYear() + "/" + String.format("%02d", ym.getMonthValue()), 0);
+            }
+            for (Object[] row : dbRows) {
+                if (row == null || row.length < 3 || row[0] == null || row[1] == null) continue;
+                int y = ((Number) row[0]).intValue();
+                int m = ((Number) row[1]).intValue();
+                String key = y + "/" + String.format("%02d", m);
+                int value = ((Number) row[2]).intValue();
+                dataMap.put(key, value);
+            }
+        }
+        return dataMap.entrySet().stream()
+                .map(entry -> ClinicDashboardResponse.PatientGrowthChartDto.builder()
+                        .month(entry.getKey())
+                        .value(entry.getValue())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private String formatLabel(String val) {
+        if (val == null) return "";
+        if (val.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+            String[] parts = val.split("-");
+            return parts[2] + "/" + parts[1] + "/" + parts[0];
+        }
+        return val;
     }
 }

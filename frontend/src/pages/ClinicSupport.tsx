@@ -166,6 +166,7 @@ export default function ClinicSupport() {
                 id: t.ticketCode || `TKT-${t.id}`,
                 dbId: t.id,
                 user: t.creator?.fullName || 'Nhân viên Phòng khám',
+                clinic: t.clinic?.name || '',
                 subject: t.subject,
                 message: t.message,
                 adminNote: t.adminNote,
@@ -296,8 +297,10 @@ export default function ClinicSupport() {
                             <table className="w-full text-left min-w-[800px]">
                                 <thead>
                                     <tr className="bg-slate-50/60 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800">
-                                        <th className="px-6 py-4 text-[14.5px] font-bold text-slate-600">Mã đơn</th>
+                                        <th className="px-6 py-4 text-[14.5px] font-bold text-slate-600">Thời gian</th>
+                                        <th className="px-6 py-4 text-[14.5px] font-bold text-slate-600">Người gửi</th>
                                         <th className="px-6 py-4 text-[14.5px] font-bold text-slate-600">Tiêu đề hỗ trợ</th>
+                                        <th className="px-6 py-4 text-[14.5px] font-bold text-slate-600">Danh mục</th>
                                         <th className="px-6 py-4 text-[14.5px] font-bold text-slate-600">Cấp độ</th>
                                         <th className="px-6 py-4 text-[14.5px] font-bold text-slate-600">Trạng thái</th>
                                         <th className="px-6 py-4 text-[14.5px] font-bold text-slate-600">Phản hồi</th>
@@ -309,7 +312,9 @@ export default function ClinicSupport() {
                                         [...Array(5)].map((_, i) => (
                                             <tr key={i} className="animate-pulse">
                                                 <td className="px-6 py-4"><div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-16"></div></td>
+                                                <td className="px-6 py-4"><div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-24"></div></td>
                                                 <td className="px-6 py-4"><div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-48"></div></td>
+                                                <td className="px-6 py-4"><div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-20"></div></td>
                                                 <td className="px-6 py-4"><div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-12"></div></td>
                                                 <td className="px-6 py-4"><div className="h-6 bg-slate-100 dark:bg-slate-800 rounded-full w-20"></div></td>
                                                 <td className="px-6 py-4"><div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-24"></div></td>
@@ -318,7 +323,7 @@ export default function ClinicSupport() {
                                         ))
                                     ) : filteredTickets.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-12 text-center text-slate-400 font-medium">
+                                            <td colSpan={8} className="px-6 py-12 text-center text-slate-400 font-medium">
                                                 <div className="flex flex-col items-center gap-3">
                                                     <span className="material-symbols-outlined text-4xl text-slate-300">folder_off</span>
                                                     <span>Không tìm thấy đơn hỗ trợ nào</span>
@@ -329,12 +334,20 @@ export default function ClinicSupport() {
                                         filteredTickets.map((ticket) => (
                                             <tr key={ticket.dbId} className="hover:bg-slate-50/50 dark:hover:bg-slate-850 transition-all group">
                                                 <td className="px-6 py-4">
-                                                    <span className="text-[13.5px] font-black text-slate-700 dark:text-slate-300 tracking-tight">{ticket.id}</span>
-                                                    <p className="text-[11px] text-slate-400 font-medium mt-0.5">{ticket.date}</p>
+                                                    <span className="text-[13.5px] font-medium text-slate-700 dark:text-slate-300">{ticket.date}</span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <p className="text-[14px] font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
+                                                        {ticket.clinic || ticket.user}
+                                                    </p>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <p className="text-[14px] font-bold text-slate-800 dark:text-white line-clamp-1">{ticket.subject}</p>
-                                                    <p className="text-[12px] text-slate-400 font-medium">{ticket.category}</p>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-[13px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
+                                                        {ticket.category}
+                                                    </span>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`text-[13px] font-bold ${ticket.priority === 'Khẩn cấp' ? 'text-rose-500' : ticket.priority === 'Cao' ? 'text-orange-500' : 'text-slate-600'}`}>

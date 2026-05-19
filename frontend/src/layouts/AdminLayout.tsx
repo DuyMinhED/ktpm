@@ -123,37 +123,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </button>
         </div>
 
-        <div className="mt-auto p-4 border-t border-primary/5">
-          <div className="flex items-center justify-between gap-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-primary/5 group relative">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="relative shrink-0">
-                <img
-                  alt={finalUserName}
-                  className="w-10 h-10 rounded-full object-cover border-2 border-primary/20"
-                  src={finalUserAvatar}
-                  onError={(e) => {
-                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=3b82f6&color=fff`;
-                  }}
-                />
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
-              </div>
-              <div className="overflow-hidden text-left">
-                <p className="text-[14px] font-bold text-slate-900 dark:text-white truncate" title={finalUserName}>{finalUserName}</p>
-                <p className="text-[12px] text-slate-500 font-medium opacity-70 leading-tight">Quản trị viên</p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                localStorage.clear();
-                navigate('/?action=login');
-              }}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all shrink-0 active:scale-90"
-              title="Đăng xuất"
-            >
-              <span className="material-symbols-outlined text-[20px]">logout</span>
-            </button>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content Area */}

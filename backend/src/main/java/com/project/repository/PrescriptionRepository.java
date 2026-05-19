@@ -33,10 +33,10 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     
     long countByDoctorIdInAndCreatedAtBetweenAndIsDeletedFalse(java.util.List<Long> doctorIds, java.time.LocalDateTime start, java.time.LocalDateTime end);
 
-    @org.springframework.data.jpa.repository.Query(value = "SELECT CAST(p.created_at AS date), COUNT(p.id) FROM prescriptions p WHERE p.doctor_id IN :doctorIds AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY CAST(p.created_at AS date)", nativeQuery = true)
+    @org.springframework.data.jpa.repository.Query(value = "SELECT CAST(p.created_at AS date) AS d, COUNT(p.id) FROM prescriptions p WHERE p.doctor_id IN :doctorIds AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY CAST(p.created_at AS date) ORDER BY d ASC", nativeQuery = true)
     java.util.List<Object[]> countDailyPrescriptionsByDoctorIds(@org.springframework.data.repository.query.Param("doctorIds") java.util.List<Long> doctorIds, @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate);
 
-    @org.springframework.data.jpa.repository.Query(value = "SELECT EXTRACT(YEAR FROM p.created_at), EXTRACT(MONTH FROM p.created_at), COUNT(p.id) FROM prescriptions p WHERE p.doctor_id IN :doctorIds AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY EXTRACT(YEAR FROM p.created_at), EXTRACT(MONTH FROM p.created_at)", nativeQuery = true)
+    @org.springframework.data.jpa.repository.Query(value = "SELECT EXTRACT(YEAR FROM p.created_at) AS y, EXTRACT(MONTH FROM p.created_at) AS m, COUNT(p.id) FROM prescriptions p WHERE p.doctor_id IN :doctorIds AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY EXTRACT(YEAR FROM p.created_at), EXTRACT(MONTH FROM p.created_at) ORDER BY y ASC, m ASC", nativeQuery = true)
     java.util.List<Object[]> countMonthlyPrescriptionsByDoctorIds(@org.springframework.data.repository.query.Param("doctorIds") java.util.List<Long> doctorIds, @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate);
 
     @Query("SELECT p.doctorId, COUNT(p) FROM Prescription p WHERE p.doctorId IN :doctorIds AND p.isDeleted = false GROUP BY p.doctorId")

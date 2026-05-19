@@ -422,7 +422,7 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-900/10 backdrop-blur-sm print:hidden"
+              className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] print:hidden"
               onClick={onClose}
             />
 
@@ -432,7 +432,7 @@ export default function PatientDetailModal({ isOpen, onClose, patient }: Patient
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-6xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-[24px] shadow-2xl overflow-hidden flex flex-col modal-main-container border border-primary/10 z-10"
+              className="relative w-full max-w-6xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col modal-main-container border border-slate-200 dark:border-slate-800 z-10"
             >
               {/* Modal Body with absolute close icon */}
               <button onClick={onClose} className="absolute top-6 right-6 z-20 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 transition-colors print:hidden">

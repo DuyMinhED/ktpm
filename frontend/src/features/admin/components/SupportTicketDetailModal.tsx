@@ -18,6 +18,9 @@ const SupportTicketDetailModal: React.FC<SupportTicketDetailModalProps> = ({
   const [replyMessage, setReplyMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const adminName = localStorage.getItem('userName') || 'Hùng Admin';
+  const adminAvatar = localStorage.getItem('userAvatar') || `https://ui-avatars.com/api/?name=${encodeURIComponent(adminName)}&background=3b82f6&color=fff`;
+
   const handleSendReply = async () => {
     if (!replyMessage.trim() || isSubmitting) return;
     setIsSubmitting(true);
@@ -88,7 +91,10 @@ const SupportTicketDetailModal: React.FC<SupportTicketDetailModalProps> = ({
                   <img className="w-9 h-9 rounded-xl ring-2 ring-primary/5 shrink-0" src={ticket.avatar} alt={ticket.user} />
                   <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-200 dark:border-slate-700 flex-1 shadow-sm">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[13px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">{ticket.user}</span>
+                      <div className="flex flex-col">
+                        <span className="text-[13px] font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{ticket.user}</span>
+                        <span className="text-[11px] text-slate-500 font-bold dark:text-slate-400 mt-1 leading-none">{ticket.clinic || 'Không có phòng khám'}</span>
+                      </div>
                       <span className="text-[10px] font-bold text-slate-400 italic-none">{ticket.date}</span>
                     </div>
                     <h4 className="text-[14px] font-bold text-slate-800 dark:text-white mb-1">{ticket.subject}</h4>
@@ -100,10 +106,17 @@ const SupportTicketDetailModal: React.FC<SupportTicketDetailModalProps> = ({
 
                 {ticket.adminNote && (
                   <div className="flex gap-3 flex-row-reverse">
-                    <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xs shrink-0 shadow-md">AD</div>
+                    <img 
+                      className="w-9 h-9 rounded-xl ring-2 ring-primary/5 shrink-0 object-cover" 
+                      src={adminAvatar} 
+                      alt={adminName} 
+                      onError={(e) => {
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(adminName)}&background=3b82f6&color=fff`;
+                      }}
+                    />
                     <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-2xl rounded-tr-none border border-primary/20 flex-1 shadow-sm">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-[13px] font-black text-primary uppercase tracking-tighter">ADMIN</span>
+                        <span className="text-[13px] font-black text-primary uppercase tracking-tighter">{adminName}</span>
                       </div>
                       <p className="text-[13.5px] text-slate-600 dark:text-slate-300 font-medium italic-none leading-relaxed">
                         {ticket.adminNote}

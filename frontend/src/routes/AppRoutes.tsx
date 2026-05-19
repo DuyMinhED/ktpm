@@ -19,6 +19,7 @@ const PatientMessages = lazy(() => import('../pages/PatientMessages'));
 const PatientPrescriptions = lazy(() => import('../pages/PatientPrescriptions'));
 const PatientProfile = lazy(() => import('../pages/PatientProfile'));
 const PatientServices = lazy(() => import('../pages/PatientServices'));
+const PatientSupport = lazy(() => import('../pages/PatientSupport'));
 
 // Doctor
 const DoctorDashboard = lazy(() => import('../pages/DoctorDashboard'));
@@ -27,6 +28,7 @@ const DoctorAppointments = lazy(() => import('../pages/DoctorAppointments'));
 const DoctorMessages = lazy(() => import('../pages/DoctorMessages'));
 const DoctorPatients = lazy(() => import('../pages/DoctorPatients'));
 const DoctorPrescriptions = lazy(() => import('../pages/DoctorPrescriptions'));
+const DoctorSupport = lazy(() => import('../pages/DoctorSupport'));
 
 // Clinic Manager
 const ClinicDashboard = lazy(() => import('../pages/ClinicDashboard'));
@@ -89,6 +91,7 @@ const AppRoutes = () => {
           <Route path="messages" element={<PatientMessages />} />
           <Route path="profile" element={<PatientProfile />} />
           <Route path="services" element={<PatientServices />} />
+          <Route path="support" element={<PatientSupport />} />
         </Route>
 
         {/* Doctor Routes — Only DOCTOR role */}
@@ -98,6 +101,7 @@ const AppRoutes = () => {
         <Route path={ROUTES.DOCTOR.MESSAGES} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorMessages /></ProtectedRoute>} />
         <Route path={ROUTES.DOCTOR.PATIENTS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorPatients /></ProtectedRoute>} />
         <Route path={ROUTES.DOCTOR.PRESCRIPTIONS} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorPrescriptions /></ProtectedRoute>} />
+        <Route path={ROUTES.DOCTOR.SUPPORT} element={<ProtectedRoute allowedRoles={['DOCTOR']}><DoctorSupport /></ProtectedRoute>} />
 
         {/* Clinic Manager Routes — Only CLINIC_MANAGER or ADMIN */}
         <Route path={ROUTES.CLINIC.DASHBOARD} element={<ProtectedRoute allowedRoles={['CLINIC_MANAGER', 'ADMIN']}><ClinicDashboard /></ProtectedRoute>} />

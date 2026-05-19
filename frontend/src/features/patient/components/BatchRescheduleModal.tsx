@@ -55,7 +55,7 @@ const BatchRescheduleModal: React.FC<BatchRescheduleModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[3px]"
+            className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px]"
             onClick={onClose}
           />
           <motion.div
@@ -63,16 +63,16 @@ const BatchRescheduleModal: React.FC<BatchRescheduleModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-primary/10 z-10"
+            className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 z-10"
           >
             {/* Header */}
-            <div className="px-8 py-5 border-b border-slate-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95">
+            <div className="px-6 md:px-8 py-5 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-20">
               <h2 className="text-[20px] font-bold text-slate-900 dark:text-white tracking-tight">Dời lịch hàng loạt</h2>
               <p className="text-sm text-slate-500 mt-1">Dời toàn bộ lịch hẹn từ một ngày sang ngày khác</p>
             </div>
 
             {/* Body */}
-            <div className="px-8 py-6 space-y-5">
+            <div className="px-6 md:px-8 pt-6 pb-6 overflow-y-auto custom-scrollbar flex-1 bg-white dark:bg-slate-900/50 space-y-5">
               {/* Source Date */}
               <div>
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 block">
@@ -103,7 +103,7 @@ const BatchRescheduleModal: React.FC<BatchRescheduleModalProps> = ({
                     </span>
                   </div>
                   {affectedCount > 0 && (
-                    <div className="space-y-1.5 mt-3 max-h-32 overflow-y-auto">
+                    <div className="space-y-1.5 mt-3 max-h-32 overflow-y-auto text-left">
                       {affectedAppointments.map(a => (
                         <div key={a.id} className="flex items-center gap-3 text-xs">
                           <span className="font-bold text-amber-600 dark:text-amber-400 w-12">{formatTime(a.appointmentTime)}</span>
@@ -151,7 +151,7 @@ const BatchRescheduleModal: React.FC<BatchRescheduleModalProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="px-8 py-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="px-6 md:px-8 py-5 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3 bg-slate-50 dark:bg-slate-900 rounded-b-3xl">
               <button
                 onClick={onClose}
                 disabled={isSaving}

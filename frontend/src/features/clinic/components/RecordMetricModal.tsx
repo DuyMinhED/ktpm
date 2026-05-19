@@ -133,15 +133,15 @@ export default function RecordMetricModal({
             ></div>
 
             {/* Modal Container */}
-            <div className="relative w-full max-w-[550px] bg-white dark:bg-slate-900 rounded-[24px] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border border-primary/10">
+            <div className="relative w-full max-w-[550px] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border border-slate-200 dark:border-slate-800 transition-all">
 
                 {/* Header */}
-                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-center items-center bg-white dark:bg-slate-900 z-10 sticky top-0">
+                <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-center items-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-20 rounded-t-3xl sticky top-0">
                     <h3 className="text-[20px] font-semibold text-slate-800 dark:text-white tracking-tight leading-tight">Ghi nhận chỉ số mới</h3>
                 </div>
 
                 {/* Form Content */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[70vh]">
+                <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[70vh] bg-white dark:bg-slate-900/50">
 
                     {errors.general && (
                         <div className="p-3 bg-red-50 text-red-600 rounded-xl text-[13px] font-bold border border-red-100 flex items-center gap-2">
@@ -289,12 +289,12 @@ export default function RecordMetricModal({
                 </form>
 
                 {/* Actions Footer */}
-                <div className="p-6 border-t border-slate-100 dark:border-slate-800 flex gap-3 justify-end bg-slate-50/50 dark:bg-slate-900">
+                <div className="px-6 py-5 border-t border-slate-200 dark:border-slate-800 flex gap-3 justify-end bg-slate-50 dark:bg-slate-900 rounded-b-3xl sticky bottom-0 z-20">
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={isSaving}
-                        className="px-5 py-2.5 rounded-xl text-[14px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+                        className="px-6 py-2.5 rounded-xl text-[14px] font-bold text-slate-500 hover:bg-slate-100 transition-colors disabled:opacity-50"
                     >
                         Hủy
                     </button>
@@ -302,7 +302,7 @@ export default function RecordMetricModal({
                         type="submit"
                         onClick={handleSubmit}
                         disabled={isSaving}
-                        className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-[14px] font-extrabold shadow-lg shadow-primary/20 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:scale-100"
+                        className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-[14px] font-extrabold shadow-lg shadow-primary/20 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:scale-100"
                     >
                         {isSaving ? (
                             <>

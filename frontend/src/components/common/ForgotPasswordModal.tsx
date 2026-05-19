@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -37,11 +38,11 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={handleClose} />
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 font-display">
+      <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] transition-all duration-300" onClick={handleClose} />
 
-      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-300 border border-slate-200 dark:border-slate-800">
+      <div className="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-300 border border-slate-200 dark:border-slate-800">
 
         {step === 'email' ? (
           <>
@@ -114,7 +115,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
         ) : (
           /* Success State */
           <div className="p-8 text-center">
-            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
+            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-950/30 rounded-full flex items-center justify-center mx-auto mb-5">
               <span className="material-symbols-outlined text-emerald-500 text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>mark_email_read</span>
             </div>
             <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Kiểm tra email của bạn</h4>
@@ -148,6 +149,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

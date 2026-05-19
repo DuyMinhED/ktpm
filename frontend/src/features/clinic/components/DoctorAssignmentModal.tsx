@@ -202,13 +202,14 @@ export default function DoctorAssignmentModal({
 
             <div className="relative bg-white dark:bg-slate-900 w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300 border border-slate-200 dark:border-slate-800 transition-all max-h-[92vh]">
                 {/* Fixed Header */}
-                <div className="px-6 md:px-8 pt-8 pb-3 flex flex-col bg-white dark:bg-slate-900 shrink-0">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-[19px] font-bold text-slate-800 dark:text-white">Gán bệnh nhân cho bác sĩ</h2>
-                    </div>
+                <div className="px-6 md:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-20 rounded-t-3xl">
+                    <h2 className="text-[20px] font-semibold text-slate-800 dark:text-white tracking-tight leading-tight">Gán bệnh nhân cho bác sĩ</h2>
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 transition-colors">
+                        <span className="material-symbols-outlined font-medium">close</span>
+                    </button>
                 </div>
 
-                <div className="overflow-y-auto custom-scrollbar flex-1 pb-32">
+                <div className="overflow-y-auto custom-scrollbar flex-1 pb-16">
                     {/* Fixed Metrics Section */}
                     <div className="px-6 md:px-8 pt-1 pb-2 space-y-6 shrink-0">
                         <div className="space-y-4">

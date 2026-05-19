@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Dropdown from '../../../components/ui/Dropdown';
 
 interface AddHealthMetricModalProps {
@@ -80,19 +81,20 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
 
     const isBloodPressure = metricType === 'BLOOD_PRESSURE';
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <div
-                className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-opacity"
-                onClick={onClose}
-            ></div>
+            {/* Modal Backdrop */}
+            <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] transition-all duration-300" onClick={onClose}></div>
 
-            <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200 border border-primary/10">
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 text-left bg-primary/5 font-display">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Nhập chỉ số sức khỏe</h2>
+            {/* Modal Container */}
+            <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in fade-in zoom-in duration-300 border border-slate-200 dark:border-slate-800 font-display">
+                {/* Modal Header */}
+                <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-20">
+                    <h2 className="text-[20px] font-semibold text-slate-800 dark:text-white tracking-tight leading-tight">Nhập chỉ số sức khỏe</h2>
                 </div>
 
-                <div className="p-6 overflow-y-auto custom-scrollbar text-left flex-1 space-y-3 font-display">
+                {/* Form Body */}
+                <div className="px-6 py-6 overflow-y-auto custom-scrollbar text-left flex-1 bg-white dark:bg-slate-900/50 space-y-4">
                     <form id="health-metric-form" onSubmit={handleSubmit} className="space-y-3">
                         <div className="grid grid-cols-[1.2fr,1fr] gap-4 items-end">
                             <div className="flex flex-col gap-0.5">
@@ -214,10 +216,12 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
                     </form>
                 </div>
 
-                <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 z-10 font-display">
+                {/* Modal Footer */}
+                <div className="px-6 py-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 rounded-b-3xl z-10">
                     <button
                         onClick={onClose}
-                        className="px-5 py-2 rounded-full text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors text-[13px]"
+                        className="px-6 py-2.5 rounded-xl text-[14px] font-bold text-slate-500 hover:bg-slate-100 transition-all"
+                        type="button"
                     >
                         Hủy bỏ
                     </button>
@@ -225,7 +229,7 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
                         type="submit"
                         form="health-metric-form"
                         disabled={isSaving}
-                        className={`px-6 py-2 bg-primary text-white font-bold rounded-full shadow-lg shadow-primary/20 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 text-[13px] ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`px-8 py-2.5 bg-primary text-white text-[14px] font-bold rounded-xl shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${isSaving ? 'cursor-not-allowed' : ''}`}
                     >
                         {isSaving ? (
                             <div className="flex items-center gap-2">
@@ -238,7 +242,8 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

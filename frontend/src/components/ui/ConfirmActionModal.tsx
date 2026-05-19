@@ -94,8 +94,8 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
             </div>
 
             {/* Modal Body */}
-            <div className="px-8 py-6">
-              <div className={`p-5 ${styles.bg} rounded-2xl flex gap-4 items-start`}>
+            <div className="px-8 py-6 bg-white dark:bg-slate-900/50">
+              <div className={`p-5 ${styles.bg} rounded-2xl border border-slate-100 dark:border-slate-800 flex gap-4 items-start`}>
                 <span className={`material-symbols-outlined text-2xl mt-0.5 ${styles.iconColor}`}>{iconName}</span>
                 <p className="text-[15px] text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
                   {description}
@@ -104,7 +104,7 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="px-8 py-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 bg-slate-50/50 dark:bg-slate-900/50 sticky bottom-0 z-20">
+            <div className="px-8 py-5 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3 bg-slate-50/50 dark:bg-slate-900/50 sticky bottom-0 z-20">
               <button
                 onClick={onClose}
                 disabled={isLoading}

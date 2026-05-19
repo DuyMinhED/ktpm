@@ -1,10 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authApi } from '../../api/auth';
 
 interface PatientHeaderProps {
     setIsSidebarOpen: (isOpen: boolean) => void;
 }
 
 const PatientHeader: React.FC<PatientHeaderProps> = ({ setIsSidebarOpen }) => {
+    const navigate = useNavigate();
+    const [userInfo, setUserInfo] = useState({
+        name: localStorage.getItem('userName') || "Bệnh nhân",
+        avatar: localStorage.getItem('userAvatar')
+    });
+
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const response = await authApi.getMe();
+                if (response.success && response.data) {
+                    const { fullName, avatarUrl } = response.data;
+                    setUserInfo({
+                        name: fullName || "Bệnh nhân",
+                        avatar: avatarUrl
+                    });
+                    if (fullName) localStorage.setItem('userName', fullName);
+                    if (avatarUrl) localStorage.setItem('userAvatar', avatarUrl);
+                }
+            } catch (error) {
+                console.error("Error fetching patient user profile:", error);
+            }
+        };
+        fetchUserProfile();
+    }, []);
+
+    const finalUserName = userInfo.name;
+    const finalUserAvatar = userInfo.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0ea5e9&color=fff";
+
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/?action=login');
+    };
+
     return (
         <header className="h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-primary/5 px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] transition-all">
             <div className="flex items-center gap-4 flex-1 text-left">
@@ -17,14 +53,14 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ setIsSidebarOpen }) => {
 
                 <div className="relative group max-w-md w-full hidden md:block">
                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors font-bold text-xl">search</span>
-                    <input 
-                        className="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50 text-sm outline-none transition-all" 
-                        placeholder="Tìm kiếm thông tin y tế..." 
-                        type="search" 
+                    <input
+                        className="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50 text-sm outline-none transition-all"
+                        placeholder="Tìm kiếm thông tin y tế..."
+                        type="search"
                     />
                 </div>
             </div>
-            
+
             <div className="flex items-center gap-2 md:gap-4 ml-4">
                 {/* Animated Vietnam Flag */}
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 rounded-full border border-slate-100 dark:border-slate-800 group cursor-default">
@@ -59,6 +95,30 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ setIsSidebarOpen }) => {
                 <button className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-xl bg-background-light dark:bg-slate-800 text-slate-600 transition-all hover:bg-slate-200 dark:hover:bg-slate-700 group">
                     <span className="material-symbols-outlined text-xl font-bold group-hover:text-primary transition-colors">settings</span>
                 </button>
+
+                <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-1.5 pl-3 border border-slate-100 dark:border-slate-800/50 shadow-sm ml-2 group hover:border-primary/20 hover:shadow-md transition-all duration-300 shrink-0">
+                    <div className="text-left hidden md:block shrink-0">
+                        <p className="text-[16px] font-bold text-slate-700 dark:text-slate-200 leading-tight whitespace-nowrap pr-1" title={finalUserName}>
+                            {finalUserName}
+                        </p>
+                    </div>
+                    <img
+                        src={finalUserAvatar}
+                        alt="Avatar"
+                        onError={(e) => {
+                            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=0ea5e9&color=fff`;
+                        }}
+                        className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700 bg-white shadow-sm shrink-0 hover:scale-105 transition-transform"
+                    />
+                    <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-0.5"></div>
+                    <button
+                        onClick={handleLogout}
+                        className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-500 hover:text-white transition-all active:scale-95 group/btn"
+                        title="Đăng xuất"
+                    >
+                        <span className="material-symbols-outlined text-[18px] font-bold group-hover/btn:scale-110 transition-transform">logout</span>
+                    </button>
+                </div>
             </div>
 
             <style>{`

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { userApi } from '../../api/user';
 
 interface ChangePasswordModalProps {
@@ -90,11 +91,11 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }: Chan
 
   const strength = passwordStrength();
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={handleClose} />
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 font-display">
+      <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] transition-all duration-300" onClick={handleClose} />
       
-      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-300 border border-slate-200 dark:border-slate-800">
+      <div className="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-300 border border-slate-200 dark:border-slate-800">
         {/* Header */}
         <div className="p-6 pb-0">
           <div className="flex items-center justify-between">
@@ -241,6 +242,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }: Chan
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

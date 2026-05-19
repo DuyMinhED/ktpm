@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import { doctorApi } from '../../api/doctor';
-import { supportApi } from '../../api/support';
 import { useToast } from '../ui/ToastContext';
-import CreateTicketModal from '../../features/admin/components/CreateTicketModal';
 import ChangePasswordModal from './ChangePasswordModal';
 import DamDiepLogo from './DamDiepLogo';
 
@@ -16,8 +14,6 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
     isSidebarOpen
 }) => {
     const [unreadCount, setUnreadCount] = useState(0);
-    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
-    const [isSavingSupport, setIsSavingSupport] = useState(false);
     const { showToast } = useToast();
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
@@ -39,26 +35,6 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
         return () => clearInterval(interval);
     }, []);
 
-    const handleSaveSupport = async (data: any) => {
-        setIsSavingSupport(true);
-        try {
-            await supportApi.createTicket({
-                subject: data.subject,
-                message: data.message,
-                category: data.category,
-                priority: data.priority,
-                status: 'Mới'
-            });
-            showToast("Gửi yêu cầu thành công!", 'success');
-            setIsSupportModalOpen(false);
-        } catch (error) {
-            console.error("Failed to create support ticket:", error);
-            showToast("Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại sau.", "error");
-        } finally {
-            setIsSavingSupport(false);
-        }
-    };
-
     const navItems = [
         { path: ROUTES.DOCTOR.DASHBOARD, label: 'Bảng điều khiển', icon: 'dashboard' },
         { path: ROUTES.DOCTOR.PATIENTS, label: 'Danh sách bệnh nhân', icon: 'groups' },
@@ -66,6 +42,7 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
         { path: ROUTES.DOCTOR.PRESCRIPTIONS, label: 'Đơn thuốc điện tử', icon: 'prescriptions' },
         { path: ROUTES.DOCTOR.APPOINTMENTS, label: 'Lịch hẹn khám', icon: 'calendar_today' },
         { path: ROUTES.DOCTOR.MESSAGES, label: 'Tin nhắn', icon: 'chat', badge: unreadCount > 0 ? `${unreadCount}` : undefined },
+        { path: ROUTES.DOCTOR.SUPPORT, label: 'Hỗ trợ kỹ thuật', icon: 'support_agent' },
     ];
 
 
@@ -106,29 +83,13 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
 
                 <button
                     type="button"
-                    onClick={() => setIsSupportModalOpen(true)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-amber-500/10 hover:text-amber-600 text-left mt-2 border border-dashed border-slate-200 dark:border-slate-800"
-                >
-                    <span className="material-symbols-outlined text-amber-500">support_agent</span>
-                    <span>Hỗ trợ kỹ thuật</span>
-                </button>
-
-                <button
-                    type="button"
                     onClick={() => setIsChangePasswordOpen(true)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary text-left border border-dashed border-slate-200 dark:border-slate-800"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary text-left border border-dashed border-slate-200 dark:border-slate-800 mt-2"
                 >
                     <span className="material-symbols-outlined text-primary">lock</span>
                     <span>Đổi mật khẩu</span>
                 </button>
             </nav>
-
-            <CreateTicketModal
-                isOpen={isSupportModalOpen}
-                onClose={() => setIsSupportModalOpen(false)}
-                onSave={handleSaveSupport}
-                isSaving={isSavingSupport}
-            />
 
             <ChangePasswordModal
                 isOpen={isChangePasswordOpen}

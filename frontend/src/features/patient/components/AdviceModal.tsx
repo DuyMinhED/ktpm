@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface AdviceModalProps {
   isOpen: boolean;
@@ -40,25 +41,25 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] transition-all duration-300"
         onClick={onClose}
       ></div>
 
-      <div className="relative bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300 border border-primary/10 transition-all max-h-[90vh]">
-        <div className="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-20 font-display">
+      <div className="relative bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300 border border-slate-200 dark:border-slate-800 transition-all max-h-[90vh]">
+        <div className="px-6 md:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-20 font-display">
           <h2 className="text-[20px] font-medium text-slate-900 dark:text-white leading-tight">Gửi lời khuyên sức khỏe</h2>
         </div>
 
         {/* Advice Content Area */}
-        <div className="p-6 md:p-8 space-y-8 overflow-y-auto custom-scrollbar flex-1 bg-white dark:bg-slate-900">
+        <div className="px-6 md:px-8 pt-3 pb-6 overflow-y-auto custom-scrollbar flex-1 bg-white dark:bg-slate-900/50 space-y-8">
           {/* Patient Profile Banner - Responsive Stack */}
           <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-6 p-5 md:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 relative group overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 md:gap-5 relative z-10 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 md:gap-5 relative z-10 w-full md:w-auto text-left">
               <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-slate-200 overflow-hidden shadow-inner flex-shrink-0 border-2 border-primary/20"
                 style={{ backgroundImage: `url('${patientAvatar || patientData?.avatarUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuBUstbGh5q911TPTLus7gX2RIO2ML_RSZbjV67EFkDBw0zf6vQQzS7IP3LwXkWI6OWS4mwx5KhEFyn-NJ5T-OeMOhMLb321T1uEw1ypz_mfVSy4RJSGZA4h5NHgwDOx8syKTRjqsnQ5cRRZlRIs0lxo8cA7nJHIBpBUgVAUxh3e6QkBpGR5iW1WaEsU3Xu5JdVd5WA_HjKsBFimtKG_GF5CgYz-JAa03FTdaPVVyoP_Kqd8-PCCC03jKnqOMbqTRYOC5StfAJMV2wM"}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
               </div>
@@ -141,7 +142,7 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
                 <span className="material-symbols-outlined text-primary text-lg">category</span>
                 Chọn nhóm tư vấn
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 text-left">
                 {[
                   { icon: 'restaurant', label: 'Dinh dưỡng' },
                   { icon: 'fitness_center', label: 'Vận động' },
@@ -164,12 +165,12 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
             </div>
 
             {/* Right side: Advice Content */}
-            <div className="space-y-4">
+            <div className="space-y-4 text-left">
               <label className="text-sm font-bold text-slate-600 dark:text-slate-100 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-lg">edit_note</span>
                 Lời khuyên từ bác sĩ
               </label>
-              <div className="relative group">
+              <div className="relative group text-left">
                 <textarea
                   className="w-full rounded-2xl border-2 border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary min-h-[160px] p-6 outline-none transition-all shadow-sm resize-none group-hover:bg-white dark:group-hover:bg-slate-800"
                   placeholder="Bác sĩ nhập lời khuyên chi tiết..."
@@ -232,10 +233,10 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
         </div>
 
         {/* Premium Footer */}
-        <div className="px-8 py-6 bg-slate-50 dark:bg-slate-900/50 flex gap-4 border-t border-slate-100 dark:border-slate-800 sticky bottom-0 z-20">
+        <div className="px-6 md:px-8 py-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex gap-4 rounded-b-3xl sticky bottom-0 z-20 text-left">
           <button
             onClick={onClose}
-            className="flex-1 py-3 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
             type="button"
           >
             Hủy bỏ
@@ -243,7 +244,7 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
           <button
             onClick={onSave}
             disabled={isSaving}
-            className="flex-[1.8] py-3 rounded-full bg-primary hover:bg-primary/90 text-white font-extrabold text-sm shadow-lg shadow-primary/25 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-wait"
+            className="flex-[1.8] py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-extrabold text-sm shadow-lg shadow-primary/25 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-wait"
             type="button"
           >
             {isSaving ? (
@@ -260,7 +261,8 @@ const AdviceModal: React.FC<AdviceModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

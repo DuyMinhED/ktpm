@@ -60,10 +60,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         long countByDoctorIdInAndCreatedAtBetweenAndIsDeletedFalse(List<Long> doctorIds, LocalDateTime start, LocalDateTime end);
         long countByDoctorIdAndIsDeletedFalse(Long doctorId);
         
-        @org.springframework.data.jpa.repository.Query(value = "SELECT CAST(a.created_at AS date), COUNT(a.id) FROM appointments a WHERE a.doctor_id IN :doctorIds AND a.is_deleted = false AND a.created_at >= :startDate GROUP BY CAST(a.created_at AS date)", nativeQuery = true)
+        @org.springframework.data.jpa.repository.Query(value = "SELECT CAST(a.created_at AS date) AS d, COUNT(a.id) FROM appointments a WHERE a.doctor_id IN :doctorIds AND a.is_deleted = false AND a.created_at >= :startDate GROUP BY CAST(a.created_at AS date) ORDER BY d ASC", nativeQuery = true)
         List<Object[]> countDailyAppointmentsByDoctorIds(@org.springframework.data.repository.query.Param("doctorIds") List<Long> doctorIds, @org.springframework.data.repository.query.Param("startDate") LocalDateTime startDate);
 
-        @org.springframework.data.jpa.repository.Query(value = "SELECT EXTRACT(YEAR FROM a.created_at), EXTRACT(MONTH FROM a.created_at), COUNT(a.id) FROM appointments a WHERE a.doctor_id IN :doctorIds AND a.is_deleted = false AND a.created_at >= :startDate GROUP BY EXTRACT(YEAR FROM a.created_at), EXTRACT(MONTH FROM a.created_at)", nativeQuery = true)
+        @org.springframework.data.jpa.repository.Query(value = "SELECT EXTRACT(YEAR FROM a.created_at) AS y, EXTRACT(MONTH FROM a.created_at) AS m, COUNT(a.id) FROM appointments a WHERE a.doctor_id IN :doctorIds AND a.is_deleted = false AND a.created_at >= :startDate GROUP BY EXTRACT(YEAR FROM a.created_at), EXTRACT(MONTH FROM a.created_at) ORDER BY y ASC, m ASC", nativeQuery = true)
         List<Object[]> countMonthlyAppointmentsByDoctorIds(@org.springframework.data.repository.query.Param("doctorIds") List<Long> doctorIds, @org.springframework.data.repository.query.Param("startDate") LocalDateTime startDate);
 
         @Query("SELECT a.doctorId, COUNT(a) FROM Appointment a WHERE a.doctorId IN :doctorIds AND a.isDeleted = false GROUP BY a.doctorId")

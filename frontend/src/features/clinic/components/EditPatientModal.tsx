@@ -210,9 +210,9 @@ export default function EditPatientModal({
                 onClick={onClose}
             ></div>
 
-            <div className="relative bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300 border border-primary/10 transition-all max-h-[92vh]">
+            <div className="relative bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300 border border-slate-200 dark:border-slate-800 transition-all max-h-[92vh]">
                 {/* Modal Header */}
-                <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-20">
+                <div className="px-6 md:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-20 rounded-t-3xl">
                     <div className="flex items-center gap-4 text-left">
                         <div>
                             <h2 className="text-[20px] font-semibold text-slate-800 dark:text-white tracking-tight leading-tight">Cập nhật hồ sơ bệnh nhân</h2>
@@ -602,11 +602,11 @@ export default function EditPatientModal({
                 </div>
 
                 {/* Modal Footer */}
-                <div className="px-6 md:px-8 py-5 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end sticky bottom-0 z-20">
+                <div className="px-6 md:px-8 py-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end rounded-b-3xl sticky bottom-0 z-20">
                     <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                         <button
                             onClick={onClose}
-                            className="px-6 py-2.5 text-[14px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
+                            className="px-6 py-2.5 text-[14px] font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
                             type="button"
                         >
                             Hủy bỏ

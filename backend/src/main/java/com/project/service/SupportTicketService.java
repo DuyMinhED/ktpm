@@ -17,6 +17,8 @@ public interface SupportTicketService {
     
     Page<SupportTicket> getTicketsByClinic(Long clinicId, String status, Pageable pageable);
 
+    Page<SupportTicket> getTicketsByCreator(Long creatorId, String status, Pageable pageable);
+
     Page<SupportTicket> getAllTickets(String status, String priority, Pageable pageable);
     
     Map<String, Long> getTicketStats();

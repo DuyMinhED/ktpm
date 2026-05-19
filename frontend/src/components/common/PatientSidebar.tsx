@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { authApi } from '../../api/auth';
+import { NavLink } from 'react-router-dom';
 import { patientApi } from '../../api/patient';
-import { supportApi } from '../../api/support';
 import { useToast } from '../ui/ToastContext';
-import CreateTicketModal from '../../features/admin/components/CreateTicketModal';
 import ChangePasswordModal from './ChangePasswordModal';
 import DamDiepLogo from './DamDiepLogo';
 
@@ -14,35 +11,11 @@ interface PatientSidebarProps {
 }
 
 const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSidebarOpen: _setIsSidebarOpen }) => {
-    const navigate = useNavigate();
-    const [userInfo, setUserInfo] = useState({
-        name: localStorage.getItem('userName') || "Bệnh nhân",
-        avatar: localStorage.getItem('userAvatar')
-    });
     const [unreadCount, setUnreadCount] = useState(0);
-    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
-    const [isSavingSupport, setIsSavingSupport] = useState(false);
     const { showToast } = useToast();
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-                const response = await authApi.getMe();
-                if (response.success && response.data) {
-                    const { fullName, avatarUrl } = response.data;
-                    setUserInfo({
-                        name: fullName || "Bệnh nhân",
-                        avatar: avatarUrl
-                    });
-                    if (fullName) localStorage.setItem('userName', fullName);
-                    if (avatarUrl) localStorage.setItem('userAvatar', avatarUrl);
-                }
-            } catch (error) {
-                console.error("Error fetching patient user profile:", error);
-            }
-        };
-
         const fetchUnreadCount = async () => {
             try {
                 const res = await patientApi.getConversations();
@@ -55,39 +28,10 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
             }
         };
 
-        fetchUserProfile();
         fetchUnreadCount();
         const interval = setInterval(fetchUnreadCount, 15000); // Refresh every 15s
         return () => clearInterval(interval);
     }, []);
-
-    const finalUserName = userInfo.name;
-    const finalUserAvatar = userInfo.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(finalUserName) + "&background=0ea5e9&color=fff";
-
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate('/?action=login');
-    };
-
-    const handleSaveSupport = async (data: any) => {
-        setIsSavingSupport(true);
-        try {
-            await supportApi.createTicket({
-                subject: data.subject,
-                message: data.message,
-                category: data.category,
-                priority: data.priority,
-                status: 'Mới'
-            });
-            showToast("Gửi yêu cầu thành công!", 'success');
-            setIsSupportModalOpen(false);
-        } catch (error) {
-            console.error("Failed to create support ticket:", error);
-            showToast("Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại sau.", "error");
-        } finally {
-            setIsSavingSupport(false);
-        }
-    };
 
     const navItems = [
         { path: '/patient', label: 'Bảng điều khiển', icon: 'dashboard' },
@@ -97,6 +41,7 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
         { path: '/patient/messages', label: 'Tin nhắn bác sĩ', icon: 'chat', badge: unreadCount > 0 ? `${unreadCount}` : undefined },
         { path: '/patient/services', label: 'Gói dịch vụ', icon: 'medical_services' },
         { path: '/patient/profile', label: 'Hồ sơ cá nhân', icon: 'person' },
+        { path: '/patient/support', label: 'Hỗ trợ kỹ thuật', icon: 'support_agent' },
     ];
 
 
@@ -138,55 +83,13 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({ isSidebarOpen, setIsSid
 
                 <button
                     type="button"
-                    onClick={() => setIsSupportModalOpen(true)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-amber-500/10 hover:text-amber-600 text-left mt-2 border border-dashed border-slate-200 dark:border-slate-800"
-                >
-                    <span className="material-symbols-outlined text-amber-500">support_agent</span>
-                    <span>Hỗ trợ kỹ thuật</span>
-                </button>
-
-                <button
-                    type="button"
                     onClick={() => setIsChangePasswordOpen(true)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary text-left border border-dashed border-slate-200 dark:border-slate-800"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary text-left border border-dashed border-slate-200 dark:border-slate-800 mt-2"
                 >
                     <span className="material-symbols-outlined text-primary">lock</span>
                     <span>Đổi mật khẩu</span>
                 </button>
             </nav>
-
-            <div className="p-4 mt-auto">
-                <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-                    <div className="flex items-center gap-3 mb-3">
-                        <img
-                            src={finalUserAvatar}
-                            alt={finalUserName}
-                            onError={(e) => {
-                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(finalUserName)}&background=0ea5e9&color=fff`;
-                            }}
-                            className="w-10 h-10 rounded-full object-cover shadow-inner border-2 border-white dark:border-slate-800"
-                        />
-                        <div className="overflow-hidden">
-                            <p className="text-sm font-bold truncate text-slate-900 dark:text-white" title={finalUserName}>{finalUserName}</p>
-                            <p className="text-xs text-slate-500 font-medium">Bệnh nhân</p>
-                        </div>
-                    </div>
-                    <button 
-                        onClick={handleLogout}
-                        className="w-full flex items-center justify-center gap-2 py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors active:scale-95"
-                    >
-                        <span className="material-symbols-outlined text-sm font-bold">logout</span>
-                        Đăng xuất
-                    </button>
-                </div>
-            </div>
-
-            <CreateTicketModal
-                isOpen={isSupportModalOpen}
-                onClose={() => setIsSupportModalOpen(false)}
-                onSave={handleSaveSupport}
-                isSaving={isSavingSupport}
-            />
 
             <ChangePasswordModal
                 isOpen={isChangePasswordOpen}

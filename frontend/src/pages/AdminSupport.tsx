@@ -169,7 +169,7 @@ export default function AdminSupport() {
           ) : (
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-primary text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-primary/20 active:scale-95 transition-all text-[14px] hover:shadow-primary/30"
+              className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all text-[14px] hover:shadow-primary/30"
             >
               Tạo yêu cầu mới
             </button>
@@ -275,9 +275,9 @@ export default function AdminSupport() {
                     <img className="w-9 h-9 rounded-full ring-2 ring-primary/10 shrink-0" src={t.avatar} alt={t.user} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-black text-slate-900 dark:text-white truncate">{t.user}</p>
-                      <p className="text-[11px] text-slate-400">{t.date}</p>
+                      <p className="text-[11.5px] text-slate-500 font-bold dark:text-slate-400 mt-0.5 truncate">{t.clinic || 'Không có phòng khám'}</p>
+                      <p className="text-[11px] text-slate-450 dark:text-slate-500 mt-0.5">{t.date}</p>
                     </div>
-                    <span className="text-[11px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md shrink-0">{t.id}</span>
                   </div>
                   <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-2 line-clamp-2">{t.subject}</p>
                   <div className="flex items-center justify-between">
@@ -307,13 +307,19 @@ export default function AdminSupport() {
               <thead>
                 <tr className="bg-slate-50/50 dark:bg-slate-800/50 rounded-t-3xl">
                   <th className="px-8 py-5">
-                    {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[15px] font-medium text-slate-600">Mã yêu cầu</span>}
+                    {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[15px] font-medium text-slate-600">Thời gian</span>}
                   </th>
                   <th className="px-6 py-5">
-                    {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-48"></div> : <span className="text-[15px] font-medium text-slate-600">Người gửi & Phòng khám</span>}
+                    {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-32"></div> : <span className="text-[15px] font-medium text-slate-600">Người gửi</span>}
+                  </th>
+                  <th className="px-6 py-5">
+                    {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-32"></div> : <span className="text-[15px] font-medium text-slate-600">Phòng khám</span>}
                   </th>
                   <th className="px-6 py-5">
                     {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-32"></div> : <span className="text-[15px] font-medium text-slate-600">Tiêu đề</span>}
+                  </th>
+                  <th className="px-6 py-5">
+                    {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-20"></div> : <span className="text-[15px] font-medium text-slate-600">Danh mục</span>}
                   </th>
                   <th className="px-6 py-5">
                     {isLoading ? <div className="h-4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded w-16"></div> : <span className="text-[15px] font-medium text-slate-600">Ưu tiên</span>}
@@ -341,7 +347,13 @@ export default function AdminSupport() {
                         </div>
                       </td>
                       <td className="px-6 py-5">
+                        <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-28"></div>
+                      </td>
+                      <td className="px-6 py-5">
                         <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-48"></div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-20"></div>
                       </td>
                       <td className="px-6 py-5">
                         <div className="h-4 bg-slate-100 dark:bg-slate-800/50 rounded w-16"></div>
@@ -358,26 +370,28 @@ export default function AdminSupport() {
                   paginatedTickets.map((t) => (
                     <tr key={t.id} className="hover:bg-primary/5 transition-colors group">
                       <td className="px-8 py-5">
-                        <span className="text-[14px] font-bold">{t.id}</span>
-                        <p className="text-[13px] text-slate-500 font-medium mt-0.5">{t.date}</p>
+                        <span className="text-[14px] font-medium text-slate-700 dark:text-slate-300">{t.date}</span>
                       </td>
                       <td className="px-6 py-5">
-                        <div className="flex items-center gap-3 relative group/tooltip">
+                        <div className="flex items-center gap-3">
                           <img className="w-9 h-9 rounded-full ring-2 ring-primary/10" src={t.avatar} alt={t.user} />
                           <div>
                             <p className="text-[14px] font-black text-slate-900 dark:text-white leading-tight cursor-default">{t.user}</p>
                           </div>
-                          {/* Tooltip */}
-                          <div className="absolute bottom-full left-10 mb-2 invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 translate-y-2 group-hover/tooltip:translate-y-0 z-[100]">
-                            <div className="bg-slate-900 text-white text-[12px] font-bold px-4 py-2 rounded-2xl whitespace-nowrap shadow-2xl relative">
-                              {t.clinic}
-                              <div className="absolute top-full left-4 border-[6px] border-transparent border-t-slate-900"></div>
-                            </div>
-                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-5">
+                        <span className="text-[13.5px] font-bold text-slate-700 dark:text-slate-300">
+                          {t.clinic || 'Không có phòng khám'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5">
                         <p className="text-[14px] font-bold text-slate-800 dark:text-slate-200 line-clamp-1 max-w-xs">{t.subject}</p>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className="text-[13px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
+                          {t.category}
+                        </span>
                       </td>
                       <td className="px-6 py-5">
                         <span className="text-[14px] font-bold text-slate-700 dark:text-slate-200">

@@ -39,6 +39,14 @@ public class SupportTicketController {
         return ResponseEntity.ok(ticketService.getTicketsByClinic(clinicId, status, pageable));
     }
 
+    @GetMapping("/creator/{creatorId}")
+    public ResponseEntity<Page<SupportTicket>> getTicketsByCreator(
+            @PathVariable Long creatorId,
+            @RequestParam(required = false) String status,
+            Pageable pageable) {
+        return ResponseEntity.ok(ticketService.getTicketsByCreator(creatorId, status, pageable));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<SupportTicket> getTicketById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.getTicketById(id));

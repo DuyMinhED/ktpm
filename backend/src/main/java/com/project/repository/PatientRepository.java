@@ -56,16 +56,16 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     @Query("SELECT p.doctorId, COUNT(p) FROM Patient p WHERE p.clinicId = :clinicId AND p.riskLevel = :riskLevel AND p.isDeleted = false GROUP BY p.doctorId")
     List<Object[]> countHighRiskPatientsByDoctorIds(Long clinicId, String riskLevel);
 
-    @org.springframework.data.jpa.repository.Query(value = "SELECT CAST(p.created_at AS date), COUNT(p.id) FROM patients p WHERE p.clinic_id = :clinicId AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY CAST(p.created_at AS date)", nativeQuery = true)
+    @org.springframework.data.jpa.repository.Query(value = "SELECT CAST(p.created_at AS date) AS d, COUNT(p.id) FROM patients p WHERE p.clinic_id = :clinicId AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY CAST(p.created_at AS date) ORDER BY d ASC", nativeQuery = true)
     List<Object[]> countDailyPatients(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate);
 
-    @org.springframework.data.jpa.repository.Query(value = "SELECT CAST(p.created_at AS date), COUNT(p.id) FROM patients p WHERE p.clinic_id = :clinicId AND p.risk_level = :riskLevel AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY CAST(p.created_at AS date)", nativeQuery = true)
+    @org.springframework.data.jpa.repository.Query(value = "SELECT CAST(p.created_at AS date) AS d, COUNT(p.id) FROM patients p WHERE p.clinic_id = :clinicId AND p.risk_level = :riskLevel AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY CAST(p.created_at AS date) ORDER BY d ASC", nativeQuery = true)
     List<Object[]> countDailyHighRiskPatients(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("riskLevel") String riskLevel, @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate);
 
-    @org.springframework.data.jpa.repository.Query(value = "SELECT EXTRACT(YEAR FROM p.created_at), EXTRACT(MONTH FROM p.created_at), COUNT(p.id) FROM patients p WHERE p.clinic_id = :clinicId AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY EXTRACT(YEAR FROM p.created_at), EXTRACT(MONTH FROM p.created_at)", nativeQuery = true)
+    @org.springframework.data.jpa.repository.Query(value = "SELECT EXTRACT(YEAR FROM p.created_at) AS y, EXTRACT(MONTH FROM p.created_at) AS m, COUNT(p.id) FROM patients p WHERE p.clinic_id = :clinicId AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY EXTRACT(YEAR FROM p.created_at), EXTRACT(MONTH FROM p.created_at) ORDER BY y ASC, m ASC", nativeQuery = true)
     List<Object[]> countMonthlyPatients(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate);
 
-    @org.springframework.data.jpa.repository.Query(value = "SELECT EXTRACT(YEAR FROM p.created_at), EXTRACT(MONTH FROM p.created_at), COUNT(p.id) FROM patients p WHERE p.clinic_id = :clinicId AND p.risk_level = :riskLevel AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY EXTRACT(YEAR FROM p.created_at), EXTRACT(MONTH FROM p.created_at)", nativeQuery = true)
+    @org.springframework.data.jpa.repository.Query(value = "SELECT EXTRACT(YEAR FROM p.created_at) AS y, EXTRACT(MONTH FROM p.created_at) AS m, COUNT(p.id) FROM patients p WHERE p.clinic_id = :clinicId AND p.risk_level = :riskLevel AND p.is_deleted = false AND p.created_at >= :startDate GROUP BY EXTRACT(YEAR FROM p.created_at), EXTRACT(MONTH FROM p.created_at) ORDER BY y ASC, m ASC", nativeQuery = true)
     List<Object[]> countMonthlyHighRiskPatients(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("riskLevel") String riskLevel, @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate);
 
     long countByDoctorIdAndRiskLevelAndIsDeletedFalse(Long doctorId, String riskLevel);

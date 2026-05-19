@@ -3,7 +3,6 @@ import { clinicApi } from '../api/clinic';
 import Toast from '../components/ui/Toast';
 import ClinicSidebar from '../components/common/ClinicSidebar';
 import TopBar from '../components/common/TopBar';
-import ChangePasswordModal from '../components/common/ChangePasswordModal';
 
 export default function ClinicSettings() {
     const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +25,6 @@ export default function ClinicSettings() {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
-    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     useEffect(() => {
         const fetchClinicProfile = async () => {
@@ -240,41 +238,6 @@ export default function ClinicSettings() {
                         </div>
                     </div>
                 </div>
-
-                    {/* Account Security Section */}
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 mt-6">
-                        <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-900 dark:text-white">
-                            <span className="material-symbols-outlined text-primary">shield_person</span>
-                            Bảo mật tài khoản
-                        </h3>
-                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                            <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-primary text-lg">lock</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Mật khẩu đăng nhập</p>
-                                    <p className="text-xs text-slate-400">Thay đổi mật khẩu để bảo vệ tài khoản</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => setIsChangePasswordOpen(true)}
-                                className="px-4 py-2 text-xs font-bold text-primary border border-primary/20 rounded-lg hover:bg-primary/5 transition-all"
-                            >
-                                Đổi mật khẩu
-                            </button>
-                        </div>
-                    </div>
-
-                <ChangePasswordModal
-                    isOpen={isChangePasswordOpen}
-                    onClose={() => setIsChangePasswordOpen(false)}
-                    onSuccess={() => {
-                        setToastMessage('Đổi mật khẩu thành công!');
-                        setToastType('success');
-                        setShowToast(true);
-                    }}
-                />
 
                 <Toast
                     show={showToast}

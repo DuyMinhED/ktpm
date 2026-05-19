@@ -19,6 +19,8 @@ public interface SupportTicketRepository extends JpaRepository<SupportTicket, Lo
     Page<SupportTicket> findByPriority(String priority, Pageable pageable);
     
     Page<SupportTicket> findByCreatorId(Long creatorId, Pageable pageable);
+
+    Page<SupportTicket> findByCreatorIdAndStatus(Long creatorId, String status, Pageable pageable);
     
     Page<SupportTicket> findByClinicId(Long clinicId, Pageable pageable);
     

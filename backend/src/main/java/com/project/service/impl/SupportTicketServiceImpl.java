@@ -101,6 +101,14 @@ public class SupportTicketServiceImpl implements SupportTicketService {
     }
 
     @Override
+    public Page<SupportTicket> getTicketsByCreator(Long creatorId, String status, Pageable pageable) {
+        if (status != null && !status.isEmpty() && !"Tất cả trạng thái".equals(status)) {
+            return ticketRepository.findByCreatorIdAndStatus(creatorId, status, pageable);
+        }
+        return ticketRepository.findByCreatorId(creatorId, pageable);
+    }
+
+    @Override
     public Page<SupportTicket> getAllTickets(String status, String priority, Pageable pageable) {
         // Simple filtering logic for demonstration
         if (status != null && !status.isEmpty() && !"Tất cả trạng thái".equals(status)) {

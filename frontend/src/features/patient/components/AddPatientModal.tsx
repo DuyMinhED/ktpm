@@ -68,29 +68,30 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      {/* Overlay from HTML */}
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 font-display">
+      {/* Overlay */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-opacity"
+        className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] transition-all duration-300"
         onClick={onClose}
       ></div>
 
-      {/* Modal Container: Matched with Scheduling Modal styling */}
-      <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200 border border-primary/10 font-display">
+      {/* Modal Container */}
+      <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in duration-300 border border-slate-200 dark:border-slate-800 transition-all">
 
-        {/* Header from HTML: Primary/5 background */}
-        <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-primary/5">
-          <div className="text-left">
-            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Thêm bệnh nhân mới</h2>
-          </div>
+        {/* Header */}
+        <div className="px-6 md:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-20 rounded-t-3xl">
+          <h2 className="text-[20px] font-semibold text-slate-800 dark:text-white tracking-tight leading-tight">Thêm bệnh nhân mới</h2>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 transition-colors">
+            <span className="material-symbols-outlined font-medium">close</span>
+          </button>
         </div>
 
         {/* Content: 3-column Grid for Width Optimization */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-white dark:bg-slate-900/50 custom-scrollbar text-left pb-12">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             {/* ROW 1: ID, NAME, DOB */}
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Mã bệnh nhân</label>
               <input
                 className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 cursor-not-allowed px-4 py-2.5 outline-none font-medium"
@@ -100,7 +101,7 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
               />
             </div>
 
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Họ và tên <span className="text-red-500">*</span></label>
               <input
                 className={`rounded-xl border ${errors.fullName ? 'border-red-500 bg-red-50/30' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'} text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-medium`}
@@ -111,7 +112,7 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
               {errors.fullName && <p className="text-[12px] text-red-500 font-bold ml-1">{errors.fullName}</p>}
             </div>
 
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Ngày sinh <span className="text-red-500">*</span></label>
               <input
                 className={`rounded-xl border ${errors.dob ? 'border-red-500 bg-red-50/30' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'} text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-medium`}
@@ -123,7 +124,7 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
             </div>
 
             {/* ROW 2: PHONE, GENDER, DISEASE */}
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Số điện thoại <span className="text-red-500">*</span></label>
               <input
                 className={`rounded-xl border ${errors.phone ? 'border-red-500 bg-red-50/30' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'} text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-medium`}
@@ -135,7 +136,7 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
               {errors.phone && <p className="text-[12px] text-red-500 font-bold ml-1">{errors.phone}</p>}
             </div>
 
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Giới tính</label>
               <div className="flex gap-4 items-center h-[46px]">
                 {['Nam', 'Nữ', 'Khác'].map((g) => (
@@ -153,7 +154,7 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nhóm bệnh</label>
               <Dropdown
                 options={['Tiểu đường', 'Cao huyết áp', 'Tim mạch', 'Hô hấp', 'Khác']}
@@ -166,7 +167,7 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
             {/* ACCOUNT SECTION: STANDS OUT (2 Cols wide + 1 helper/placeholder) */}
             <div className="md:col-span-3 h-[2px] bg-slate-100 dark:bg-slate-800 my-2"></div>
 
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-blue-600 dark:text-blue-400">Tên đăng nhập (Email) <span className="text-red-500">*</span></label>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-sm">alternate_email</span>
@@ -180,7 +181,7 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
               {errors.email && <p className="text-[12px] text-red-500 font-bold ml-1">{errors.email}</p>}
             </div>
 
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-blue-600 dark:text-blue-400">Mật khẩu khởi tạo <span className="text-red-500">*</span></label>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-sm">lock</span>
@@ -202,12 +203,12 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
               {errors.password && <p className="text-[12px] text-red-500 font-bold ml-1">{errors.password}</p>}
             </div>
 
-            <div className="flex flex-col gap-2 text-left pb-2 justify-end">
+            <div className="flex flex-col gap-2 pb-2 justify-end">
               <p className="text-[13px] text-slate-500 italic font-medium leading-relaxed">Bác sĩ cung cấp thông tin này để bệnh nhân có thể truy cập hệ thống.</p>
             </div>
 
             {/* RISK LEVEL FROM HTML: Segmented control */}
-            <div className="md:col-span-3 flex flex-col gap-3 text-left">
+            <div className="md:col-span-3 flex flex-col gap-3">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Mức độ rủi ro ban đầu</label>
               <div className="flex flex-wrap p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
                 {['Bình thường', 'Cần theo dõi', 'Nguy cơ cao'].map((r) => (
@@ -230,7 +231,7 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
             </div>
 
             {/* DIAGNOSIS */}
-            <div className="md:col-span-3 flex flex-col gap-2 text-left">
+            <div className="md:col-span-3 flex flex-col gap-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Chẩn đoán ban đầu / Ghi chú</label>
               <textarea
                 className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all resize-none font-medium h-24"
@@ -242,27 +243,27 @@ export default function AddPatientModal({ isOpen, onClose, onAdd, isSaving = fal
           </form>
         </div>
 
-        {/* Footer from HTML: slate-50 background, rounded-xl buttons */}
-        <div className="px-8 py-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-4">
+        {/* Footer */}
+        <div className="px-6 md:px-8 py-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-4 rounded-b-3xl sticky bottom-0 z-20">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="px-6 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 font-bold transition-colors"
           >
             Hủy bỏ
           </button>
           <button
             onClick={handleSubmit}
             disabled={isSaving}
-            className="px-10 py-2.5 bg-primary text-slate-900 font-extrabold rounded-xl disabled:opacity-50 flex items-center gap-2"
+            className="px-8 py-2.5 text-[14px] font-bold text-white bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-xl shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait"
           >
             {isSaving ? (
               <>
-                <div className="w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Đang xử lý...
               </>
             ) : (
               <>
-                <span className="material-symbols-outlined text-lg">person_add</span>
+                <span className="material-symbols-outlined text-[18px]">person_add</span>
                 Thêm bệnh nhân
               </>
             )}

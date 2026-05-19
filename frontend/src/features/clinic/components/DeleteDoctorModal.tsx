@@ -47,9 +47,9 @@ export default function DeleteDoctorModal({
         onClick={onClose}
       ></div>
 
-      <div className="relative bg-white dark:bg-slate-900 w-full max-w-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300 border border-slate-200 dark:border-slate-800 transition-all max-h-[95vh]">
+      <div className="relative bg-white dark:bg-slate-900 w-full max-w-[500px] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300 border border-slate-200 dark:border-slate-800 transition-all max-h-[95vh]">
         {/* Modal Header */}
-        <div className="px-6 md:px-8 py-5 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-20 rounded-t-2xl">
+        <div className="px-6 md:px-8 py-5 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-20 rounded-t-3xl">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white leading-tight italic-none">
             Xóa hồ sơ bác sĩ
           </h2>
@@ -100,10 +100,10 @@ export default function DeleteDoctorModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 md:px-8 py-5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between sticky bottom-0 z-20 rounded-b-2xl">
+        <div className="px-6 md:px-8 py-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between sticky bottom-0 z-20 rounded-b-3xl">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-all border border-slate-200 dark:border-slate-700 shadow-sm"
+            className="px-6 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
             type="button"
           >
             Hủy bỏ
@@ -111,7 +111,7 @@ export default function DeleteDoctorModal({
           <button
             onClick={() => onDelete(doctorData.dbId)}
             disabled={isDeleting || !isConfirmed}
-            className={`px-8 py-2.5 text-sm font-bold text-white rounded-lg transition-all shadow-md flex items-center gap-2 ${isConfirmed
+            className={`px-8 py-2.5 text-sm font-bold text-white rounded-xl transition-all shadow-md flex items-center gap-2 ${isConfirmed
                 ? 'bg-red-600 hover:bg-red-700 shadow-red-500/20'
                 : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-200 dark:border-slate-700 shadow-none'
               }`}
