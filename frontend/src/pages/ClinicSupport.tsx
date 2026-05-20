@@ -269,7 +269,6 @@ export default function ClinicSupport() {
                         </button>
                     </div>
 
-                    {/* Filters Panel */}
                     <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm flex flex-col md:flex-row gap-4 text-left">
                         <div className="flex-1 relative">
                             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
@@ -278,8 +277,16 @@ export default function ClinicSupport() {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Tìm kiếm theo tiêu đề, mã đơn..."
-                                className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary dark:focus:border-primary text-[13.5px] font-medium transition-all"
+                                className="w-full pl-11 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary dark:focus:border-primary text-[13.5px] font-medium transition-all"
                             />
+                            {searchTerm && (
+                                <button
+                                    onClick={() => setSearchTerm('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-all flex items-center justify-center"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">close</span>
+                                </button>
+                            )}
                         </div>
                         <div className="w-full md:w-64">
                             <Dropdown

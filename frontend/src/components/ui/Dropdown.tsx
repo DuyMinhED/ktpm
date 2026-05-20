@@ -4,6 +4,7 @@ import { ChevronDown, Check } from 'lucide-react';
 interface DropdownOption {
   label: string;
   value: string;
+  icon?: React.ReactNode;
 }
 
 interface DropdownProps {
@@ -123,7 +124,10 @@ export default function Dropdown({
                   }
                 `}
               >
-                <span className="font-display">{option.label}</span>
+                <div className="flex items-center gap-3">
+                  {option.icon}
+                  <span className="font-display">{option.label}</span>
+                </div>
                 {isSelected && <Check className="w-4 h-4" strokeWidth={3} />}
               </button>
             );

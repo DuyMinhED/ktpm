@@ -123,37 +123,37 @@ export default function ClinicRiskAlerts() {
                                 <div className="bg-white dark:bg-slate-900 p-4 md:p-5 rounded-2xl shadow-sm relative overflow-hidden group border border-primary/5">
                                     <div className="relative z-10">
                                         <p className="text-[12px] md:text-sm font-medium text-slate-500 mb-3 md:mb-4">Tổng cảnh báo</p>
-                                        <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-none">{(dashboardStats?.highRiskAlerts || 0) + (dashboardStats?.pendingFollowUps || 0)}</h3>
+                                        <h3 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-none">{(dashboardStats?.highRiskAlerts || 0) + (dashboardStats?.pendingFollowUps || 0)}</h3>
                                     </div>
                                     <div className="mt-4 md:mt-6 flex items-center text-primary text-[11px] md:text-[13px] font-bold gap-1">
                                         <span className="material-symbols-outlined text-sm">monitor_heart</span>
                                         Theo dõi thời gian thực
                                     </div>
                                 </div>
-
+ 
                                 <div className="bg-white dark:bg-slate-900 p-4 md:p-5 rounded-2xl shadow-sm relative overflow-hidden group border border-red-100 dark:border-red-900/30">
                                     <div>
                                         <div className="flex items-center gap-2 mb-3 md:mb-4">
                                             <p className="text-[12px] md:text-sm font-bold text-red-500">Khẩn cấp</p>
                                         </div>
-                                        <h3 className="text-xl md:text-3xl font-black text-red-500 leading-none">{dashboardStats?.highRiskAlerts || 0}</h3>
+                                        <h3 className="text-3xl md:text-5xl font-black text-red-500 leading-none">{dashboardStats?.highRiskAlerts || 0}</h3>
                                     </div>
                                     <p className="text-red-600/70 text-[12px] md:text-[14px] font-medium mt-3 md:mt-4">Nguy cơ cao</p>
                                 </div>
-
+ 
                                 <div className="bg-white dark:bg-slate-900 p-4 md:p-5 rounded-2xl shadow-sm relative overflow-hidden group border border-amber-100 dark:border-amber-900/30">
                                     <div>
                                         <div className="flex items-center gap-2 mb-3 md:mb-4">
                                             <p className="text-[12px] md:text-sm font-bold text-amber-600">Theo dõi</p>
                                         </div>
-                                        <h3 className="text-xl md:text-3xl font-black text-amber-600 leading-none">{dashboardStats?.pendingFollowUps || 0}</h3>
+                                        <h3 className="text-3xl md:text-5xl font-black text-amber-600 leading-none">{dashboardStats?.pendingFollowUps || 0}</h3>
                                     </div>
                                     <p className="text-amber-600/70 text-[12px] md:text-[14px] font-medium mt-3 md:mt-4">Đang trong ngưỡng theo dõi</p>
                                 </div>
                                 <div className="bg-white dark:bg-slate-900 p-4 md:p-5 rounded-2xl shadow-sm border border-primary/5">
                                     <div>
                                         <p className="text-[12px] md:text-sm font-medium text-slate-500 mb-3 md:mb-4">Ổn định</p>
-                                        <h3 className="text-xl md:text-3xl font-black text-emerald-600 leading-none">{Math.max(0, (dashboardStats?.totalPatients || 0) - (dashboardStats?.highRiskAlerts || 0) - (dashboardStats?.pendingFollowUps || 0))}</h3>
+                                        <h3 className="text-3xl md:text-5xl font-black text-emerald-600 leading-none">{Math.max(0, (dashboardStats?.totalPatients || 0) - (dashboardStats?.highRiskAlerts || 0) - (dashboardStats?.pendingFollowUps || 0))}</h3>
                                     </div>
                                     <p className="text-emerald-600/70 text-[12px] md:text-[14px] font-medium mt-3 md:mt-4">Đã an toàn</p>
                                 </div>

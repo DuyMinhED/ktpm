@@ -283,8 +283,16 @@ export default function DoctorSupport() {
                                         placeholder="Tìm theo tiêu đề, mã yêu cầu..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full bg-slate-50 dark:bg-slate-800/40 border border-slate-300 dark:border-slate-700 rounded-xl pl-11 pr-4 h-[42px] text-[13.5px] font-medium text-slate-700 dark:text-slate-200 outline-none hover:border-slate-400 dark:hover:border-slate-600 focus:border-primary transition-all"
+                                        className="w-full bg-slate-50 dark:bg-slate-800/40 border border-slate-300 dark:border-slate-700 rounded-xl pl-11 pr-10 h-[42px] text-[13.5px] font-medium text-slate-700 dark:text-slate-200 outline-none hover:border-slate-400 dark:hover:border-slate-600 focus:border-primary transition-all"
                                     />
+                                    {searchTerm && (
+                                        <button
+                                            onClick={() => setSearchTerm('')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-all flex items-center justify-center"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">close</span>
+                                        </button>
+                                    )}
                                 </div>
                                 <div className="w-full md:w-[220px] md:ml-auto">
                                     <Dropdown

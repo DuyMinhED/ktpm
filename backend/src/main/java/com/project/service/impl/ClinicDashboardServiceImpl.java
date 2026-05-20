@@ -60,7 +60,11 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
 
         boolean isDaily = "7d".equals(period) || "30d".equals(period);
 
-        var patientStatsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+        var newPatientsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> 
+            isDaily ? patientRepository.countDailyPatients(clinicId, startDate)
+                    : patientRepository.countMonthlyPatients(clinicId, startDate)
+        );
+        var doctorLoadFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> {
             List<Long> doctorIds = userRepository.findByClinicIdAndRoleAndIsDeletedFalse(clinicId, UserRole.DOCTOR).stream().map(User::getId).collect(Collectors.toList());
             if (doctorIds.isEmpty()) return List.<Object[]>of();
             return isDaily ? appointmentRepository.countDailyAppointmentsByDoctorIds(doctorIds, startDate)
@@ -73,7 +77,7 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         var riskPatientsListFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> 
             patientRepository.findByClinicIdAndFilters(clinicId, null, null, AppConstants.RISK_HIGH, null, null, PageRequest.of(0, 5)).getContent());
 
-        java.util.concurrent.CompletableFuture.allOf(totalPatientsFuture, highRiskCountFuture, monitoringCountFuture, pathologyFuture, insightsFuture, patientStatsFuture, riskStatsFuture, riskPatientsListFuture, avgConsultTimeFuture, adherenceRateFuture).join();
+        java.util.concurrent.CompletableFuture.allOf(totalPatientsFuture, highRiskCountFuture, monitoringCountFuture, pathologyFuture, insightsFuture, newPatientsFuture, doctorLoadFuture, riskStatsFuture, riskPatientsListFuture, avgConsultTimeFuture, adherenceRateFuture).join();
 
         // Mapping and calculation logic
         long totalPatients = totalPatientsFuture.join();
@@ -101,7 +105,8 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         
         List<ClinicDashboardResponse.DiseaseRatioDto> diseaseRatios = calculateDiseaseRatios(clinicId, totalPatients);
 
-        List<ClinicDashboardResponse.PatientGrowthChartDto> growthChart = padChartData(patientStatsFuture.join(), startDate, now, isDaily);
+        List<ClinicDashboardResponse.PatientGrowthChartDto> growthChart = padChartData(newPatientsFuture.join(), startDate, now, isDaily);
+        List<ClinicDashboardResponse.PatientGrowthChartDto> doctorLoadChart = padChartData(doctorLoadFuture.join(), startDate, now, isDaily);
         List<ClinicDashboardResponse.PatientGrowthChartDto> riskChart = padChartData(riskStatsFuture.join(), startDate, now, isDaily);
 
         int totalVal = 0;
@@ -213,6 +218,7 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
                 .pendingFollowUps(monitoringCount)
                 .diseaseRatios(diseaseRatios)
                 .patientGrowthChart(growthChart)
+                .doctorLoadChart(doctorLoadChart)
                 .riskIndexChart(riskChart)
                 .riskPatients(riskPatients)
                 .insights(insightsFuture.join())
