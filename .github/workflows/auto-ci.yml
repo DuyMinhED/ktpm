@@ -1,4 +1,4 @@
-name: Automated Build and Test Flow
+name: Java Automated Build and Test Flow
 
 # Pipeline kích hoạt mỗi khi có ai đó push code vào nhánh chính (main hoặc master)
 on:
@@ -7,39 +7,50 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest # Chạy trên máy ảo Ubuntu của GitHub
+    runs-on: ubuntu-latest # Chạy trên máy ảo Ubuntu độc lập của GitHub
 
     steps:
-    # 1. Tải code từ GitHub về máy ảo
+    # 1. Tải toàn bộ mã nguồn Java từ GitHub về máy ảo
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    # 2. Cài đặt môi trường (Ví dụ này dùng cho Node.js, bạn đổi theo ngôn ngữ của dự án)
-    - name: Setup Node.js Environment
+    # 2. Cài đặt môi trường Java (JDK 17 - bạn có thể đổi thành '11' hoặc '21' tùy dự án)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven # Tự động cache các thư viện để lần sau build nhanh hơn
+
+    # 3. Biên dịch và Đóng gói ứng dụng (Cài thư viện & chạy Unit Test mặc định của Java nếu có)
+    # Lệnh này sẽ tạo ra file .jar trong thư mục 'target/'
+    - name: Build Application with Maven
+      run: mvn clean package -DskipTests=false
+
+    # 4. Chạy ngầm ứng dụng Java vừa build xong để chuẩn bị Test API
+    # Hãy thay đổi tên file 'du_an_cua_ban-0.0.1-SNAPSHOT.jar' thành tên file jar thực tế của bạn
+    - name: Start Java Application for API Testing
+      run: |
+        java -jar target/du_an_cua_ban-0.0.1-SNAPSHOT.jar &
+      # Dấu & giúp ứng dụng chạy ngầm ở nền, không làm kẹt Pipeline để chạy tiếp bước dưới
+
+    # 5. Chờ một chút (khoảng 10-15 giây) để ứng dụng Java khởi động xong hoàn toàn
+    - name: Wait for Application to Start
+      run: sleep 15
+
+    # 6. Cài đặt Node.js để có môi trường chạy công cụ test Postman (Newman)
+    - name: Setup Node.js (for Newman)
       uses: actions/setup-node@v4
       with:
         node-version: '20'
 
-    # 3. Cài đặt các thư viện phụ thuộc của dự án
-    - name: Install Project Dependencies
-      run: npm install
-
-    # 4. Biên dịch/Build thử phần mềm
-    - name: Build Application
-      run: npm run build
-
-    # 5. Khởi động ứng dụng ngầm trên máy ảo để chuẩn bị test API
-    - name: Start Application for Testing
-      run: npm start & 
-      # Dấu & giúp ứng dụng chạy ngầm để chạy tiếp bước dưới
-
-    # 6. Cài đặt Newman (Postman CLI) và chạy Test tự động
+    # 7. Cài đặt Newman và chạy các bài Test API tự động từ Postman
     - name: Run Postman API Tests
       run: |
         npm install -g newman
-        newman run "https://api.getpostman.com/collections/MA_COLLECTION_CUA_BAN?apikey=${{ secrets.POSTMAN_API_KEY }}"
+        newman run "https://api.getpostman.com/collections/${{ secrets.POSTMAN_COLLECTION_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}"
 
-    # 7. Đăng nhập vào Jira (Chỉ chạy khi các bước trên thành công)
+    # 8. Đăng nhập vào Jira (Bước này và bước dưới chỉ chạy nếu TẤT CẢ các bước trên thành công)
     - name: Login to Jira
       if: success()
       uses: atlassian/gajira-login@v3
@@ -48,9 +59,9 @@ jobs:
         JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
         JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-    # 8. Tự động cập nhật trạng thái Ticket Jira sang "DONE" hoặc "READY TO TEST"
+    # 9. Tự động tìm Ticket Jira tương ứng dựa trên tên nhánh/commit và chuyển trạng thái sang "Done"
     - name: Update Jira Ticket Status
       if: success()
       uses: atlassian/gajira-cli@v3
       with:
-        args: "transition 'Done' --comment 'Pipeline chạy Auto Build & Test thành công! Hoàn thành nhiệm vụ.'"
+        args: "transition 'Done' --comment 'Pipeline Java Auto Build & Test API thành công!'"
