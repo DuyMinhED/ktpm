@@ -58,13 +58,16 @@ jobs:
         JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
         JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-    # 9. Tự động tìm kiếm mã Issue/Ticket dựa trên tên nhánh hoặc nội dung commit
+   # 9. Tự động tìm kiếm mã Issue/Ticket (Cấu hình nâng cấp thông minh)
     - name: Search Jira Ticket Key
       if: success()
       id: info
       uses: atlassian/gajira-find-issue-key@v3
       with:
-        string: ${{ github.event.ref }} # Tự động bốc mã ticket từ tên nhánh phụ vừa push
+        string: |
+          ${{ github.event.pull_request.title }}
+          ${{ github.event.pull_request.head.ref }}
+          ${{ github.event.head_commit.message }}
 
     # 10. Thực hiện chuyển trạng thái Ticket sang cột mong muốn (Ví dụ: Done)
     - name: Transition Jira Ticket Status
