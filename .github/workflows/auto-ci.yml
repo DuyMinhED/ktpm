@@ -1,56 +1,55 @@
-name: Java Automated Build and Test Flow
+name: Java Monorepo Auto Build and Test Flow
 
-# Pipeline kích hoạt mỗi khi có ai đó push code vào nhánh chính (main hoặc master)
 on:
   push:
     branches: [ "main", "master" ]
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest # Chạy trên máy ảo Ubuntu độc lập của GitHub
+    runs-on: ubuntu-latest
 
     steps:
-    # 1. Tải toàn bộ mã nguồn Java từ GitHub về máy ảo
+    # 1. Tải toàn bộ mã nguồn (cả FR và BE) về máy ảo
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    # 2. Cài đặt môi trường Java (JDK 17 - bạn có thể đổi thành '11' hoặc '21' tùy dự án)
+    # 2. Cài đặt môi trường Java JDK 17
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: maven # Tự động cache các thư viện để lần sau build nhanh hơn
+        cache: maven
 
-    # 3. Biên dịch và Đóng gói ứng dụng (Cài thư viện & chạy Unit Test mặc định của Java nếu có)
-    # Lệnh này sẽ tạo ra file .jar trong thư mục 'target/'
-    - name: Build Application with Maven
+    # 3. Biên dịch Java - Chỉ định chạy bên trong thư mục 'backend'
+    # Lệnh này sẽ tạo ra file .jar bên trong thư mục 'backend/target/'
+    - name: Build Java Backend with Maven
+      working-directory: ./backend
       run: mvn clean package -DskipTests=false
 
-    # 4. Chạy ngầm ứng dụng Java vừa build xong để chuẩn bị Test API
-    # Hãy thay đổi tên file 'du_an_cua_ban-0.0.1-SNAPSHOT.jar' thành tên file jar thực tế của bạn
+    # 4. Chạy ngầm ứng dụng Java - Nhớ trỏ đúng đường dẫn vào thư mục 'backend'
+    # (Hãy thay đổi tên file .jar cho đúng với file thực tế của bạn)
     - name: Start Java Application for API Testing
       run: |
-        java -jar target/du_an_cua_ban-0.0.1-SNAPSHOT.jar &
-      # Dấu & giúp ứng dụng chạy ngầm ở nền, không làm kẹt Pipeline để chạy tiếp bước dưới
+        java -jar backend/target/du_an_cua_ban-0.0.1-SNAPSHOT.jar &
 
-    # 5. Chờ một chút (khoảng 10-15 giây) để ứng dụng Java khởi động xong hoàn toàn
+    # 5. Chờ 15 giây để ứng dụng Java khởi động xong
     - name: Wait for Application to Start
       run: sleep 15
 
-    # 6. Cài đặt Node.js để có môi trường chạy công cụ test Postman (Newman)
+    # 6. Cài đặt Node.js để chạy Newman (Postman)
     - name: Setup Node.js (for Newman)
       uses: actions/setup-node@v4
       with:
         node-version: '20'
 
-    # 7. Cài đặt Newman và chạy các bài Test API tự động từ Postman
+    # 7. Chạy Test API tự động từ Postman
     - name: Run Postman API Tests
       run: |
         npm install -g newman
         newman run "https://api.getpostman.com/collections/${{ secrets.POSTMAN_COLLECTION_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}"
 
-    # 8. Đăng nhập vào Jira (Bước này và bước dưới chỉ chạy nếu TẤT CẢ các bước trên thành công)
+    # 8. Đăng nhập vào Jira
     - name: Login to Jira
       if: success()
       uses: atlassian/gajira-login@v3
@@ -59,9 +58,9 @@ jobs:
         JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
         JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-    # 9. Tự động tìm Ticket Jira tương ứng dựa trên tên nhánh/commit và chuyển trạng thái sang "Done"
+    # 9. Cập nhật trạng thái Ticket Jira sang "Done"
     - name: Update Jira Ticket Status
       if: success()
       uses: atlassian/gajira-cli@v3
       with:
-        args: "transition 'Done' --comment 'Pipeline Java Auto Build & Test API thành công!'"
+        args: "transition 'Done' --comment 'Pipeline Backend Java (Monorepo) đã Auto Build & Test API thành công!'"
