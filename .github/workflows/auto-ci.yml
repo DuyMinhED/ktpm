@@ -1,0 +1,56 @@
+name: Automated Build and Test Flow
+
+# Pipeline kích hoạt mỗi khi có ai đó push code vào nhánh chính (main hoặc master)
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Chạy trên máy ảo Ubuntu của GitHub
+
+    steps:
+    # 1. Tải code từ GitHub về máy ảo
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    # 2. Cài đặt môi trường (Ví dụ này dùng cho Node.js, bạn đổi theo ngôn ngữ của dự án)
+    - name: Setup Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    # 3. Cài đặt các thư viện phụ thuộc của dự án
+    - name: Install Project Dependencies
+      run: npm install
+
+    # 4. Biên dịch/Build thử phần mềm
+    - name: Build Application
+      run: npm run build
+
+    # 5. Khởi động ứng dụng ngầm trên máy ảo để chuẩn bị test API
+    - name: Start Application for Testing
+      run: npm start & 
+      # Dấu & giúp ứng dụng chạy ngầm để chạy tiếp bước dưới
+
+    # 6. Cài đặt Newman (Postman CLI) và chạy Test tự động
+    - name: Run Postman API Tests
+      run: |
+        npm install -g newman
+        newman run "https://api.getpostman.com/collections/MA_COLLECTION_CUA_BAN?apikey=${{ secrets.POSTMAN_API_KEY }}"
+
+    # 7. Đăng nhập vào Jira (Chỉ chạy khi các bước trên thành công)
+    - name: Login to Jira
+      if: success()
+      uses: atlassian/gajira-login@v3
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+    # 8. Tự động cập nhật trạng thái Ticket Jira sang "DONE" hoặc "READY TO TEST"
+    - name: Update Jira Ticket Status
+      if: success()
+      uses: atlassian/gajira-cli@v3
+      with:
+        args: "transition 'Done' --comment 'Pipeline chạy Auto Build & Test thành công! Hoàn thành nhiệm vụ.'"
