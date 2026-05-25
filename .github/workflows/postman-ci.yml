@@ -1,66 +1,86 @@
-name: CI Automated API Testing (Java BE + Postman API Key)
+name: Java Monorepo Auto Build and Test Flow
 
-# Hệ thống tự động kích hoạt khi có thành viên tạo Pull Request (PR) vào nhánh develop hoặc main
 on:
-  pull_request:
-    branches: [ "develop", "main" ]
+  push:
+    branches: [ "main", "master" ]
 
 jobs:
-  api-verification:
-    runs-on: ubuntu-latest # Chạy trên máy chủ ảo Ubuntu của GitHub
+  build-and-test:
+    runs-on: ubuntu-latest
 
     steps:
-    # Bước 1: Tải mã nguồn của dự án từ GitHub về máy ảo
-    - name: Checkout Code
+    # 1. Tải toàn bộ mã nguồn (cả FR và BE) về máy ảo
+    - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    # Bước 2: Cài đặt môi trường Java (JDK 17) để chạy Backend
-    # (Nếu dự án dùng Java 11 hoặc 21, bạn hãy sửa lại số ở dòng java-version)
+    # 2. Cài đặt môi trường Java JDK 17
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: 'maven' # Tối ưu tốc độ build bằng cách cache các thư viện Maven
+        cache: maven
 
-    # Bước 3: Cài đặt Node.js để chạy công cụ Newman (Postman)
-    - name: Setup Node.js
+    # 3. Biên dịch Java - Chỉ định chạy bên trong thư mục 'backend'
+    # Lệnh này sẽ tạo ra file .jar bên trong thư mục 'backend/target/'
+    - name: Build Java Backend with Maven
+      working-directory: ./backend
+      run: mvn clean package -DskipTests=false
+
+    # 4. Chạy ngầm ứng dụng Java - Nhớ trỏ đúng đường dẫn vào thư mục 'backend'
+    # (Hãy thay đổi tên file .jar cho đúng với file thực tế của bạn)
+    - name: Start Java Application for API Testing
+      run: |
+        java -jar backend/target/du_an_cua_ban-0.0.1-SNAPSHOT.jar &
+
+    # 5. Chờ 15 giây để ứng dụng Java khởi động xong
+    - name: Wait for Application to Start
+      run: sleep 15
+
+    # 6. Cài đặt Node.js để chạy Newman (Postman)
+    - name: Setup Node.js (for Newman)
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
 
-    # Bước 4: Đóng gói (Build) ứng dụng Java Backend thành file .jar
-    # Bỏ qua unit test mặc định của Java (-DskipTests) để tập trung chạy test API của Postman
-    # LƯU Ý: Nếu dự án dùng Gradle thay vì Maven, sửa dòng dưới thành: ./gradlew build -x test
-    - name: Build Java Backend
-      run: mvn clean package -DskipTests
-
-    # Bước 5: Khởi động Server Backend Java chạy ngầm (&) và chờ cổng 8080 sẵn sàng
-    # LƯU Ý: Nếu dự án của bạn là Monorepo (thư mục backend nằm riêng trong thư mục con),
-    # hãy sửa đường dẫn thành: java -jar tên_thư_mục_con/target/*.jar &
-    - name: Start Java Application Server
+    # 7. Chạy Test API tự động từ Postman
+    - name: Run Postman API Tests
       run: |
-        java -jar target/*.jar &
-        npx wait-on http://localhost:8080 --timeout 60000 # Chờ tối đa 60s cho đến khi cổng 8080 của Java khởi động xong
+        npm install -g newman
+        newman run "https://api.getpostman.com/collections/${{ secrets.POSTMAN_COLLECTION_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}"
 
-    # Bước 6: Cài đặt Newman (Trình chạy Postman CLI) và công cụ xuất báo cáo HTML đẹp mắt
-    - name: Install Newman & Reporter
-      run: npm install -g newman newman-reporter-htmlextra
+   # 8. Đăng nhập vào Jira (Giữ nguyên bước này vì log báo Successfully logged in rồi)
+    - name: Login to Jira
+      if: success()
+      uses: atlassian/gajira-login@v3
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-    # Bước 7: Dùng Postman API Key để tải và chạy trực tiếp Collection + Environment từ Cloud
-    # Hệ thống sẽ tự động lấy các chuỗi Secret bảo mật đã cấu hình trên GitHub Settings của bạn
-    - name: Execute Postman Tests via API Key
-      run: |
-        newman run "https://api.getpostman.com/collections/${{ secrets.POSTMAN_COLLECTION_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
-        -e "https://api.getpostman.com/environments/${{ secrets.POSTMAN_ENVIRONMENT_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
-        -r cli,htmlextra \
-        --reporter-htmlextra-export ./newman-report.html
-
-    # Bước 8: Luôn luôn xuất và lưu trữ file báo cáo HTML lên GitHub (Kể cả khi test Pass hay Fail)
-    # Thành viên trong nhóm và Giảng viên có thể vào tab "Actions" để tải file này về xem giao diện trực quan
-    - name: Upload Test Report Artifact
-      if: always() # Tham số bắt buộc phải chạy bước này dù các bước trên có lỗi hay không
-      uses: actions/upload-artifact@v4
+   # 9. Tự động tìm kiếm mã Issue/Ticket (Cấu hình nâng cấp thông minh)
+    - name: Search Jira Ticket Key
+      if: success()
+      id: info
+      uses: atlassian/gajira-find-issue-key@v3
       with:
-        name: postman-html-report
-        path: ./newman-report.html
+        string: |
+          ${{ github.event.pull_request.title }}
+          ${{ github.event.pull_request.head.ref }}
+          ${{ github.event.head_commit.message }}
+
+    # 10. Thực hiện chuyển trạng thái Ticket sang cột mong muốn (Ví dụ: Done)
+    - name: Transition Jira Ticket Status
+      if: success() && steps.info.outputs.issue
+      uses: atlassian/gajira-transition@v3
+      with:
+        issue: ${{ steps.info.outputs.issue }}
+        transition: 'Done' # <-- Hãy đảm bảo cột trên bảng Jira của bạn có tên chính xác là 'Done'
+
+    # 11. Tự động để lại bình luận (Comment) báo cáo vào trong Ticket đó
+    - name: Add Comment to Jira Ticket
+      if: success() && steps.info.outputs.issue
+      uses: atlassian/gajira-comment@v3
+      with:
+        issue: ${{ steps.info.outputs.issue }}
+        comment: "Pipeline Backend Java (Monorepo) đã Auto Build & Test API thành công 100%! 🎉"
