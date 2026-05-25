@@ -1,0 +1,66 @@
+name: CI Automated API Testing (Java BE + Postman API Key)
+
+# Hệ thống tự động kích hoạt khi có thành viên tạo Pull Request (PR) vào nhánh develop hoặc main
+on:
+  pull_request:
+    branches: [ "develop", "main" ]
+
+jobs:
+  api-verification:
+    runs-on: ubuntu-latest # Chạy trên máy chủ ảo Ubuntu của GitHub
+
+    steps:
+    # Bước 1: Tải mã nguồn của dự án từ GitHub về máy ảo
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Bước 2: Cài đặt môi trường Java (JDK 17) để chạy Backend
+    # (Nếu dự án dùng Java 11 hoặc 21, bạn hãy sửa lại số ở dòng java-version)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'maven' # Tối ưu tốc độ build bằng cách cache các thư viện Maven
+
+    # Bước 3: Cài đặt Node.js để chạy công cụ Newman (Postman)
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    # Bước 4: Đóng gói (Build) ứng dụng Java Backend thành file .jar
+    # Bỏ qua unit test mặc định của Java (-DskipTests) để tập trung chạy test API của Postman
+    # LƯU Ý: Nếu dự án dùng Gradle thay vì Maven, sửa dòng dưới thành: ./gradlew build -x test
+    - name: Build Java Backend
+      run: mvn clean package -DskipTests
+
+    # Bước 5: Khởi động Server Backend Java chạy ngầm (&) và chờ cổng 8080 sẵn sàng
+    # LƯU Ý: Nếu dự án của bạn là Monorepo (thư mục backend nằm riêng trong thư mục con),
+    # hãy sửa đường dẫn thành: java -jar tên_thư_mục_con/target/*.jar &
+    - name: Start Java Application Server
+      run: |
+        java -jar target/*.jar &
+        npx wait-on http://localhost:8080 --timeout 60000 # Chờ tối đa 60s cho đến khi cổng 8080 của Java khởi động xong
+
+    # Bước 6: Cài đặt Newman (Trình chạy Postman CLI) và công cụ xuất báo cáo HTML đẹp mắt
+    - name: Install Newman & Reporter
+      run: npm install -g newman newman-reporter-htmlextra
+
+    # Bước 7: Dùng Postman API Key để tải và chạy trực tiếp Collection + Environment từ Cloud
+    # Hệ thống sẽ tự động lấy các chuỗi Secret bảo mật đã cấu hình trên GitHub Settings của bạn
+    - name: Execute Postman Tests via API Key
+      run: |
+        newman run "https://api.getpostman.com/collections/${{ secrets.POSTMAN_COLLECTION_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
+        -e "https://api.getpostman.com/environments/${{ secrets.POSTMAN_ENVIRONMENT_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
+        -r cli,htmlextra \
+        --reporter-htmlextra-export ./newman-report.html
+
+    # Bước 8: Luôn luôn xuất và lưu trữ file báo cáo HTML lên GitHub (Kể cả khi test Pass hay Fail)
+    # Thành viên trong nhóm và Giảng viên có thể vào tab "Actions" để tải file này về xem giao diện trực quan
+    - name: Upload Test Report Artifact
+      if: always() # Tham số bắt buộc phải chạy bước này dù các bước trên có lỗi hay không
+      uses: actions/upload-artifact@v4
+      with:
+        name: postman-html-report
+        path: ./newman-report.html
