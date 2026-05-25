@@ -1,40 +1,53 @@
-name: CI Automated API Testing (Render Cloud BE)
+name: CI Automated API Testing (Render Cloud BE - Collection Variables)
 
+# Tự động kích hoạt khi có Pull Request vào nhánh develop hoặc main
 on:
   pull_request:
     branches: [ "develop", "main" ]
 
 jobs:
   api-verification:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Chạy trên máy chủ ảo Ubuntu của GitHub
 
     steps:
-    # Bước 1: Tải mã nguồn từ GitHub về để lấy cấu hình (nếu có)
+    # Bước 1: Tải mã nguồn của dự án từ GitHub về máy ảo
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # Bước 2: Cài đặt Node.js để chạy công cụ Newman
+    # Bước 2: Cài đặt Node.js để chạy công cụ Newman (Postman)
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
 
-    # Bước 3: Cài đặt Newman và công cụ xuất báo cáo HTML
+    # Bước 3: Cài đặt Newman và thư viện xuất báo cáo htmlextra đẹp mắt
     - name: Install Newman & Reporter
       run: npm install -g newman newman-reporter-htmlextra
 
-    # Bước 4: Chạy test trực tiếp lên server Render bằng Postman API Key
-    - name: Execute Postman Tests via API Key
+    # Bước 4: Chạy lần lượt từng Collection bằng Postman API Key
+    # Cấu hình KHÔNG cần tham số -e vì toàn bộ biến (baseUrl, token) đã nằm sẵn trong Collection Variables
+    - name: Execute All Postman Collections via API Key
       run: |
-        newman run "https://api.getpostman.com/collections/${{ secrets.POSTMAN_COLLECTION_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
-        -e "https://api.getpostman.com/environments/${{ secrets.POSTMAN_ENVIRONMENT_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
-        -r cli,htmlextra \
-        --reporter-htmlextra-export ./newman-report.html
+        echo "--- Running Patient API Tests ---"
+        newman run "https://api.getpostman.com/collections/${{ secrets.COLLECTION_PATIENT_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
+        -r cli,htmlextra --reporter-htmlextra-export ./report-patient.html
 
-    # Bước 5: Luôn luôn lưu trữ file báo cáo HTML lên GitHub
-    - name: Upload Test Report Artifact
-      if: always()
+        echo "--- Running Doctor API Tests ---"
+        newman run "https://api.getpostman.com/collections/${{ secrets.COLLECTION_DOCTOR_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
+        -r cli,htmlextra --reporter-htmlextra-export ./report-doctor.html
+
+        echo "--- Running Clinic API Tests ---"
+        newman run "https://api.getpostman.com/collections/${{ secrets.COLLECTION_CLINIC_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
+        -r cli,htmlextra --reporter-htmlextra-export ./report-clinic.html
+
+    # Bước 5: Luôn lưu trữ và gom 3 file báo cáo kết quả HTML lên GitHub Artifacts
+    # Kể cả khi test Pass hay Fail, bước này vẫn luôn chạy để nhóm dễ dàng tải về kiểm tra xem lỗi ở đâu
+    - name: Upload All Test Reports
+      if: always() 
       uses: actions/upload-artifact@v4
       with:
-        name: postman-html-report
-        path: ./newman-report.html
+        name: postman-html-reports
+        path: |
+          ./report-patient.html
+          ./report-doctor.html
+          ./report-clinic.html
