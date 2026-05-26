@@ -236,8 +236,10 @@ public class AdminControllerTest {
     @Test
     void getConfig_success() throws Exception {
         SystemConfigResponse mockConfig = SystemConfigResponse.builder()
-                .specialCharRequired(true)
-                .upperNumberRequired(true)
+                .security(SystemConfigResponse.SecuritySettingsDto.builder()
+                        .specialChar(true)
+                        .upperNumber(true)
+                        .build())
                 .build();
         when(adminConfigService.getConfig()).thenReturn(mockConfig);
 
@@ -245,7 +247,7 @@ public class AdminControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.specialCharRequired").value(true));
+                .andExpect(jsonPath("$.data.security.specialChar").value(true));
 
         verify(adminConfigService, times(1)).getConfig();
     }
