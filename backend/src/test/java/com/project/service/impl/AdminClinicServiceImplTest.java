@@ -200,6 +200,37 @@ public class AdminClinicServiceImplTest {
     }
 
     @Test
+    void updateClinic_partialUpdate_success() {
+        UpdateClinicRequest request = new UpdateClinicRequest();
+        request.setAddress("New Address Only");
+        // name, phone, imageUrl, status are null
+
+        when(clinicRepository.findById(1L)).thenReturn(Optional.of(sampleClinic));
+        when(clinicRepository.save(any(Clinic.class))).thenReturn(sampleClinic);
+
+        AdminClinicResponse response = AdminClinicResponse.builder()
+                .id(1L)
+                .name(sampleClinic.getName())
+                .address("New Address Only")
+                .build();
+        when(clinicMapper.toAdminClinicResponse(any(Clinic.class))).thenReturn(response);
+
+        AdminClinicResponse result = adminClinicService.updateClinic(1L, request);
+
+        assertNotNull(result);
+        assertEquals("New Address Only", result.getAddress());
+        verify(userRepository, never()).updateStatusByClinicId(anyLong(), anyString()); // Status should not be updated
+    }
+
+    @Test
+    void updateClinic_notFound_shouldThrowException() {
+        UpdateClinicRequest request = new UpdateClinicRequest();
+        when(clinicRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(java.util.NoSuchElementException.class, () -> adminClinicService.updateClinic(99L, request));
+    }
+
+    @Test
     void toggleClinicStatus_success() {
         when(clinicRepository.findById(1L)).thenReturn(Optional.of(sampleClinic));
         when(clinicRepository.save(any(Clinic.class))).thenReturn(sampleClinic);
@@ -211,5 +242,12 @@ public class AdminClinicServiceImplTest {
         verify(clinicRepository, times(1)).save(sampleClinic);
         verify(userRepository, times(1)).updateStatusByClinicId(1L, "INACTIVE");
         verify(auditService, times(1)).recordActivity(eq("Đổi trạng thái"), eq("Quản lý phòng khám"), anyString(), eq("warning"));
+    }
+
+    @Test
+    void toggleClinicStatus_notFound_shouldThrowException() {
+        when(clinicRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(java.util.NoSuchElementException.class, () -> adminClinicService.toggleClinicStatus(99L));
     }
 }
