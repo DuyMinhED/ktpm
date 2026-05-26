@@ -13,6 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -129,5 +130,54 @@ public class ClinicDashboardControllerSecurityIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden()); // 403 Forbidden
+    }
+
+    // === KCPM-20: RBAC Admin/Doctor Security Integration Tests ===
+
+    @Test
+    @WithMockUser(username = "admin@example.com", roles = {"ADMIN"})
+    void whenAdminCallsDashboardApi_thenSuccess() throws Exception {
+        // Admin always has bypass or isClinicManagerOf returns true
+        when(securityService.isClinicManagerOf(eq(1L))).thenReturn(true);
+
+        mockMvc.perform(get("/api/v1/clinics/1/dashboard")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "doctor@example.com", roles = {"DOCTOR"})
+    void whenDoctorCallsDoctorsListApi_thenForbidden() throws Exception {
+        // Doctors list GET endpoint is restricted to CLINIC_MANAGER and ADMIN
+        mockMvc.perform(get("/api/v1/clinics/1/doctors")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden()); // 403 Forbidden
+    }
+
+    @Test
+    @WithMockUser(username = "doctor@example.com", roles = {"DOCTOR"})
+    void whenDoctorRecordsHealthMetric_thenSuccess() throws Exception {
+        when(securityService.isClinicManagerOf(eq(1L))).thenReturn(false);
+        when(securityService.isDoctorOfClinic(eq(1L))).thenReturn(true);
+
+        com.project.dto.request.CreateHealthMetricRequest request = new com.project.dto.request.CreateHealthMetricRequest();
+        request.setMetricType("BLOOD_SUGAR");
+        request.setValue(new java.math.BigDecimal("120.00"));
+        request.setUnit("mg/dL");
+        request.setNotes("Normal");
+
+        com.project.dto.response.HealthMetricResponse response = com.project.dto.response.HealthMetricResponse.builder()
+                .id(1L)
+                .metricType("BLOOD_SUGAR")
+                .value(new java.math.BigDecimal("120.00"))
+                .build();
+
+        when(patientHealthMetricService.recordMetricForPatient(eq(2L), any(com.project.dto.request.CreateHealthMetricRequest.class)))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/clinics/1/patients/2/health-metrics")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
     }
 }

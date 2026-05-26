@@ -1,7 +1,9 @@
 D:\KTPM\ktpm\backend\src\test\java\com\project\controller\AdminControllerSecurityIntegrationTest.java
 D:\KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardControllerTest.java
+D:\KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicReportControllerTest.java
 D:\KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardControllerSecurityIntegrationTest.java
 D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\AdminUserServiceImplTest.java
 D:\KTPM\ktpm\backend\src\test\java\com\project\controller\AdminControllerTest.java
 D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\ClinicDoctorServiceImplTest.java
+D:\KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardSecurityIntegrationTest.java
 D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\AdminClinicServiceImplTest.java
