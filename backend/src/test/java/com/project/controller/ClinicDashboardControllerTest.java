@@ -439,4 +439,48 @@ public class ClinicDashboardControllerTest {
                 .andExpect(jsonPath("$.message").value("Đã dời 5 ca hẹn thành công!"))
                 .andExpect(jsonPath("$.data.movedCount").value(5));
     }
+
+    // === KCPM-20: Error-handling Scenarios ===
+
+    @Test
+    void createPatient_validationFailed() throws Exception {
+        CreatePatientRequest request = new CreatePatientRequest();
+        // Empty name and phone should trigger validation errors (Constraint violation)
+        request.setName("");
+        request.setPhone("");
+        request.setGender("");
+
+        mockMvc.perform(post("/api/v1/clinics/{clinicId}/patients", clinicId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Validation failed"));
+    }
+
+    @Test
+    void deletePatient_notFound() throws Exception {
+        Long patientId = 999L;
+        doThrow(new com.project.exception.ResourceNotFoundException("Patient not found"))
+                .when(clinicPatientService).deletePatient(eq(clinicId), eq(patientId));
+
+        mockMvc.perform(delete("/api/v1/clinics/{clinicId}/patients/{patientId}", clinicId, patientId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Patient not found"));
+    }
+
+    @Test
+    void getDashboard_runtimeException() throws Exception {
+        when(clinicDashboardService.getDashboardData(eq(clinicId), eq("6m")))
+                .thenThrow(new RuntimeException("Database error"));
+
+        mockMvc.perform(get("/api/v1/clinics/{clinicId}/dashboard", clinicId)
+                        .param("period", "6m")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Hệ thống đang bận hoặc có lỗi xảy ra. Vui lòng thử lại sau."));
+    }
 }
