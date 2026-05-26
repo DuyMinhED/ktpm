@@ -61,4 +61,13 @@ public class SecurityService {
                user.getClinicId() != null && 
                user.getClinicId().equals(clinicId);
     }
+
+    public boolean isDoctorSelf(Long doctorId) {
+        CustomUserDetails user = SecurityUtils.getCurrentUserDetails().orElse(null);
+        if (user == null || user.getRole() == null) return false;
+        
+        return RoleUtils.DOCTOR.equals(user.getRole()) && 
+               user.getId() != null && 
+               user.getId().equals(doctorId);
+    }
 }
