@@ -193,4 +193,46 @@ public class PatientProfileControllerSecurityIntegrationTest {
                 .andExpect(header().string("Content-Type", "text/plain"))
                 .andExpect(content().bytes(mockReport));
     }
+
+    // ==========================================
+    // Validation Error Tests
+    // ==========================================
+
+    @Test
+    @WithMockUser(roles = { "PATIENT" })
+    void updateProfile_validationFail_blankName() throws Exception {
+        UpdatePatientProfileRequest invalidRequest = new UpdatePatientProfileRequest();
+        invalidRequest.setFullName(""); // Blank name violates @NotBlank
+        invalidRequest.setPhone("0987654321");
+
+        mockMvc.perform(put("/api/v1/patient/profile")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest()); // 400 Bad Request
+    }
+
+    @Test
+    @WithMockUser(roles = { "PATIENT" })
+    void updateProfile_validationFail_invalidPhone() throws Exception {
+        UpdatePatientProfileRequest invalidRequest = new UpdatePatientProfileRequest();
+        invalidRequest.setFullName("Valid Name");
+        invalidRequest.setPhone("123"); // Too short violates @Pattern
+
+        mockMvc.perform(put("/api/v1/patient/profile")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest()); // 400 Bad Request
+    }
+
+    @Test
+    @WithMockUser(roles = { "PATIENT" })
+    void addEmergencyContact_validationFail_missingFields() throws Exception {
+        EmergencyContactRequest invalidRequest = new EmergencyContactRequest();
+        // Missing all required fields (@NotBlank on name, relationship, phone)
+
+        mockMvc.perform(post("/api/v1/patient/profile/emergency-contacts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest()); // 400 Bad Request
+    }
 }
