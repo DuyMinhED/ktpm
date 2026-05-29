@@ -1,5 +1,31 @@
 package com.project.controller;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Optional;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import static org.mockito.Mockito.when;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.dto.request.PrescriptionItemRequest;
 import com.project.dto.request.PrescriptionRequest;
@@ -11,32 +37,6 @@ import com.project.security.JwtAuthenticationFilter;
 import com.project.security.JwtTokenProvider;
 import com.project.service.PrescriptionService;
 import com.project.util.SecurityUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = PrescriptionController.class, excludeAutoConfiguration = { SecurityAutoConfiguration.class })
 @AutoConfigureMockMvc(addFilters = false)
@@ -184,6 +184,25 @@ public class PrescriptionControllerTest {
     @Test
     void createPrescription_validationFailed_emptyItems() throws Exception {
         sampleRequest.setItems(Collections.emptyList());
+
+        mockMvc.perform(post("/api/v1/doctor/prescriptions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(sampleRequest)))
+                .andExpect(status().isBadRequest());
+    }
+    @Test
+    void createPrescription_validationFailed_diagnosisTooLong() throws Exception {
+        sampleRequest.setDiagnosis("A".repeat(256));
+
+        mockMvc.perform(post("/api/v1/doctor/prescriptions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(sampleRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createPrescription_validationFailed_nullItems() throws Exception {
+        sampleRequest.setItems(null);
 
         mockMvc.perform(post("/api/v1/doctor/prescriptions")
                         .contentType(MediaType.APPLICATION_JSON)
