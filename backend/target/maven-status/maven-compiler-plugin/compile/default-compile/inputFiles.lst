@@ -1,201 +1,201 @@
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicDashboardServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateAppointmentRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\mapper\PatientMapper.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\PrescriptionStatsResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\PatientPrescriptionService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorAppointmentResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientProfileResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\config\RateLimitFilter.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\PrescriptionRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\AuditLogRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\security\CustomUserDetailsService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientPrescriptionServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AiChatResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\DoctorMessageService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\security\CustomUserDetailsServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorPatientController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\ClinicRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientDashboardResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicReportServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\EmergencyContactRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\User.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientProfileServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\mapper\UserMapper.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\AdminConfigService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\PatientAlert.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\RiskAlertServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\ChangePasswordRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\PrescriptionItem.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientHealthMetricServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientMessageServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateClinicRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\security\SecurityService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorMessageController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreatePatientRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\AppointmentRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\NotificationService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\UserProfileController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\AuditLog.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\MedicationLog.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\security\JwtAuthenticationEntryPoint.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\UserProfileResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\JwtAuthenticationResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\PatientDashboardController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\config\JpaAuditConfig.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminReportsResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorDashboardResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientAlertResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\PatientHealthMetricController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\AuditService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\HealthMetricResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\ClinicReportService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\MedicationSchedule.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\PatientPrescriptionController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientPrescriptionResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicDoctorResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\SystemConfigResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\PrescriptionServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\ClinicalAnalyticsService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\MedicationScheduleRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicDashboardResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\SystemConfigRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicalAnalyticsServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\config\SecurityConfig.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorSnippetDto.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\AppointmentStatus.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\ConversationRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\AdminClinicService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorPatientDetailResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\BackendApplication.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\security\JwtAuthenticationFilter.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorAppointmentController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\MedicalServiceServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\Conversation.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\PatientAlertRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientAppointmentServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\PatientAppointmentService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\DoctorCreateAppointmentRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\PatientMessageController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\MetricType.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\SendMessageRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\SupportTicketRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\ClinicDoctorService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\PatientProfileService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\util\SecurityUtils.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\ConversationResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\Message.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminClinicStatsResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorSimpleResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdateClinicRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\SupportTicket.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicAppointmentResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminClinicResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\RiskAlertService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\BaseEntity.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\AdminController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorAppointmentServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\DoctorPatientService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\exception\GlobalExceptionHandler.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\AdminUserService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminUserStatsResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\Appointment.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\MedicationLogRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminClinicServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\Prescription.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\exception\ResourceNotFoundException.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\NotificationController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\RiskAlertResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\PatientDashboardService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorDashboardServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\NotificationServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\Clinic.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\MessageRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateHealthMetricRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\ClinicDashboardController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicReportResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\PatientHealthMetricService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\DashboardController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\UserRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminConfigServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateDoctorRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\MedicalServiceRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\ClinicDashboardService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\PrescriptionStatus.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\PrescriptionRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\MedicationScheduleResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\security\Audit.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\HealthMetricSummaryResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientDashboardServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdateUserRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\UserRole.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\MedicalServiceController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\SupportTicketController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\HealthMetricRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\PrescriptionService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\specification\PatientSpecification.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\MedicalService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\RiskAlertController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\ClinicPatientService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\AdminDashboardService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\AiChatController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorPatientResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\util\RoleUtils.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\util\AppConstants.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminUserServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\SystemConfig.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\AuthRestController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\ApiResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\DashboardStatsDto.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\Patient.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorPatientServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\DoctorAppointmentService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\MessageResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\PatientRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\SupportTicketServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\SupportTicketService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\EmergencyContactRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\Notification.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminUserResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\mapper\ClinicMapper.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\PrescriptionResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\AiChatRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\PrescriptionItemRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdateSystemConfigRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateUserRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\security\JwtTokenProvider.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\AiChatService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\DoctorDashboardService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\PatientAppointmentController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\LoginRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\PatientMessageService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\util\DateTimeUtils.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\DoctorService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AppointmentSnippetDto.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicPatientServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\NotificationResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\repository\NotificationRepository.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\GeminiAiChatServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminDashboardServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminMedicalServiceStatsResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorMessageServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\EmergencyContactResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AuditLogResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\security\CustomUserDetails.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\PrescriptionController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\security\AuditAspect.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicDoctorServiceImpl.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicPatientResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\ClinicReportController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientAppointmentResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\controller\PatientProfileController.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdatePatientProfileRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\HealthMetric.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\LogMedicationRequest.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\service\MedicalServiceService.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminDashboardResponse.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\entity\EmergencyContact.java
-D:\KTPM\ktpm\backend\src\main\java\com\project\mapper\PrescriptionMapper.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\mapper\PatientMapper.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\UserProfileResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DashboardController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientAlertResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PrescriptionServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\ChangePasswordRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Conversation.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\SecurityService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicDashboardResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DashboardStatsDto.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\mapper\UserMapper.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\HealthMetricResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminReportsResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\RiskAlertResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Patient.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminUserResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicDoctorService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientAppointmentResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\AuditLog.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorMessageServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\MedicationLog.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientMessageController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\EmergencyContactResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\JwtTokenProvider.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateDoctorRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorPatientDetailResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\ConversationRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\MetricType.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientProfileServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientPrescriptionService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicDashboardService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicPatientServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AuditService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateHealthMetricRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\RiskAlertController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\JwtAuthenticationResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorMessageController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\RiskAlertService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicalAnalyticsService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicReportServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Prescription.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientProfileService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\BaseEntity.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorSnippetDto.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\exception\GlobalExceptionHandler.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorPatientController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Message.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdateUserRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\LogMedicationRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\SupportTicketController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\SendMessageRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\ClinicReportController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\UserRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientDashboardController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\AuditLogRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\NotificationRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminConfigServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\NotificationResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientDashboardService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\CustomUserDetails.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientMessageServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AdminUserService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\SupportTicketServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\NotificationController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicDashboardServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientHealthMetricController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientPrescriptionServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\LoginRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AiChatService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\PatientRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\SupportTicketService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\EmergencyContactRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\HealthMetricSummaryResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\MessageResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\NotificationService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\GeminiAiChatServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\ClinicDashboardController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\User.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PrescriptionService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\SupportTicketRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicalAnalyticsServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\UserProfileController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\SupportTicket.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorAppointmentServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\util\AppConstants.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorDashboardServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\util\RoleUtils.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Notification.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PrescriptionStatsResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientAppointmentController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\CustomUserDetailsServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdateClinicRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\HealthMetric.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\JwtAuthenticationFilter.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientPrescriptionResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AdminClinicService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\Audit.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientPrescriptionController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\util\SecurityUtils.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorAppointmentController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\specification\PatientSpecification.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Appointment.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminDashboardServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\MedicationScheduleResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientHealthMetricService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreatePatientRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\mapper\PrescriptionMapper.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicDoctorServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\AppointmentStatus.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdatePatientProfileRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientProfileController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientHealthMetricServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\AuthRestController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\AiChatController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\config\RateLimitFilter.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\CustomUserDetailsService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminUserServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\MedicationLogRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\AdminController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AdminDashboardService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\ClinicRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\PrescriptionRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\config\SecurityConfig.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\BackendApplication.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminDashboardResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminMedicalServiceStatsResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicDoctorResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminClinicStatsResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\PrescriptionRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\MedicalServiceService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicReportResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorPatientResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\NotificationServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PrescriptionController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Clinic.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AdminConfigService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminClinicResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\MedicalService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AuditLogResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorMessageService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientDashboardResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AiChatResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ConversationResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\HealthMetricRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\AiChatRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\SystemConfig.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateAppointmentRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientProfileResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminUserStatsResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorPatientServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\exception\ResourceNotFoundException.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\DoctorCreateAppointmentRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AppointmentSnippetDto.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\PrescriptionStatus.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\MedicationSchedule.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\MedicalServiceRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorDashboardService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientAppointmentService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\config\JpaAuditConfig.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PrescriptionResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorPatientService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicAppointmentResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\util\DateTimeUtils.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateClinicRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ApiResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorSimpleResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientMessageService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\SystemConfigRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\EmergencyContact.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicPatientService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicPatientResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\PatientAlert.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\JwtAuthenticationEntryPoint.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\MedicationScheduleRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\MedicalServiceController.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientDashboardServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\SystemConfigResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\EmergencyContactRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorAppointmentResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\PatientAlertRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\MedicalServiceServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorDashboardResponse.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\AppointmentRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\UserRole.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientAppointmentServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\mapper\ClinicMapper.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorAppointmentService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\PrescriptionItem.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\MessageRepository.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\AuditAspect.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminClinicServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateUserRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicReportService.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\RiskAlertServiceImpl.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\PrescriptionItemRequest.java
+F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdateSystemConfigRequest.java

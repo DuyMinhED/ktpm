@@ -1,18 +1,18 @@
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\AdminControllerSecurityIntegrationTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardControllerTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\PrescriptionServiceImplTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\DoctorControllerSecurityIntegrationTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\PrescriptionControllerSecurityIntegrationTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\PrescriptionServiceTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardControllerSecurityIntegrationTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\DoctorServiceImplTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\AdminControllerTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\ClinicDoctorServiceImplTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardSecurityIntegrationTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\AdminClinicServiceImplTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\PatientProfileServiceImplTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicReportControllerTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\DoctorControllerTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\service\impl\AdminUserServiceImplTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\PrescriptionControllerTest.java
-D:\KTPM\ktpm\backend\src\test\java\com\project\controller\PatientProfileControllerSecurityIntegrationTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardSecurityIntegrationTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\PrescriptionControllerTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\PrescriptionControllerSecurityIntegrationTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\PatientProfileControllerSecurityIntegrationTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\AdminUserServiceImplTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\DoctorControllerTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\ClinicDoctorServiceImplTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\PrescriptionServiceImplTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\AdminControllerTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\DoctorControllerSecurityIntegrationTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardControllerSecurityIntegrationTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardControllerTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\DoctorServiceImplTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicReportControllerTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\AdminClinicServiceImplTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\PatientProfileServiceImplTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\AdminControllerSecurityIntegrationTest.java
+F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\PrescriptionServiceTest.java
