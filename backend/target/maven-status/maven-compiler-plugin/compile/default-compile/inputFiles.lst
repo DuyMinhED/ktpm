@@ -36,9 +36,11 @@ D:\KTPM\ktpm\backend\src\main\java\com\project\repository\AppointmentRepository.
 D:\KTPM\ktpm\backend\src\main\java\com\project\service\NotificationService.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\controller\UserProfileController.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\entity\AuditLog.java
+D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorServiceImpl.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\entity\MedicationLog.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\security\JwtAuthenticationEntryPoint.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\UserProfileResponse.java
+D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorResponse.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\JwtAuthenticationResponse.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\controller\PatientDashboardController.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\config\JpaAuditConfig.java
@@ -170,6 +172,7 @@ D:\KTPM\ktpm\backend\src\main\java\com\project\controller\PatientAppointmentCont
 D:\KTPM\ktpm\backend\src\main\java\com\project\dto\request\LoginRequest.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\service\PatientMessageService.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\util\DateTimeUtils.java
+D:\KTPM\ktpm\backend\src\main\java\com\project\service\DoctorService.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AppointmentSnippetDto.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicPatientServiceImpl.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\NotificationResponse.java
@@ -177,6 +180,7 @@ D:\KTPM\ktpm\backend\src\main\java\com\project\repository\NotificationRepository
 D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\GeminiAiChatServiceImpl.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminDashboardServiceImpl.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminMedicalServiceStatsResponse.java
+D:\KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorController.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorMessageServiceImpl.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\EmergencyContactResponse.java
 D:\KTPM\ktpm\backend\src\main\java\com\project\dto\response\AuditLogResponse.java

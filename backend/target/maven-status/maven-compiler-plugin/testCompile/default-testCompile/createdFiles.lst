@@ -1,5 +1,8 @@
+com\project\controller\PrescriptionControllerTest.class
+com\project\service\impl\ClinicDoctorServiceImplTest.class
+com\project\controller\PrescriptionControllerSecurityIntegrationTest.class
 com\project\controller\AdminControllerTest.class
 com\project\controller\ClinicDashboardControllerTest.class
 com\project\controller\ClinicDashboardControllerSecurityIntegrationTest.class
-com\project\service\impl\ClinicDoctorServiceImplTest.class
+com\project\service\impl\PrescriptionServiceTest.class
 com\project\service\impl\AdminUserServiceImplTest.class
