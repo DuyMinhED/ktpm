@@ -1,18 +1,16 @@
 package com.project.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.dto.request.PrescriptionItemRequest;
-import com.project.dto.request.PrescriptionRequest;
-import com.project.dto.response.PrescriptionResponse;
-import com.project.dto.response.PrescriptionStatsResponse;
-import com.project.security.SecurityService;
-import com.project.service.PrescriptionService;
-import com.project.util.SecurityUtils;
+import java.util.Collections;
+import java.util.Optional;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,16 +21,18 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.dto.request.PrescriptionItemRequest;
+import com.project.dto.request.PrescriptionRequest;
+import com.project.dto.response.PrescriptionResponse;
+import com.project.dto.response.PrescriptionStatsResponse;
+import com.project.security.SecurityService;
+import com.project.service.PrescriptionService;
+import com.project.util.SecurityUtils;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -107,6 +107,14 @@ public class PrescriptionControllerSecurityIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin@example.com", roles = {"ADMIN"})
+    void whenGetPrescriptionsAsAdmin_thenForbidden() throws Exception {
+        mockMvc.perform(get("/api/v1/doctor/prescriptions")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @WithMockUser(username = "doctor@example.com", roles = {"DOCTOR"})
     void whenGetPrescriptionsAsDoctor_thenSuccess() throws Exception {
         when(prescriptionService.getDoctorPrescriptions(eq(2L), any(), any(), any(Pageable.class)))
@@ -126,6 +134,14 @@ public class PrescriptionControllerSecurityIntegrationTest {
         mockMvc.perform(get("/api/v1/doctor/prescriptions/stats")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "admin@example.com", roles = {"ADMIN"})
+    void whenGetStatsAsAdmin_thenForbidden() throws Exception {
+        mockMvc.perform(get("/api/v1/doctor/prescriptions/stats")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -149,6 +165,15 @@ public class PrescriptionControllerSecurityIntegrationTest {
     // =========================================================================
     // 3. POST /api/v1/doctor/prescriptions
     // =========================================================================
+
+    @Test
+    @WithMockUser(username = "admin@example.com", roles = {"ADMIN"})
+    void whenCreatePrescriptionAsAdmin_thenForbidden() throws Exception {
+        mockMvc.perform(post("/api/v1/doctor/prescriptions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(sampleRequest)))
+                .andExpect(status().isForbidden());
+    }
 
     @Test
     void whenCreatePrescriptionWithoutToken_thenUnauthorized() throws Exception {
