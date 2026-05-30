@@ -133,7 +133,7 @@ jobs:
           ACTOR: ${{ github.actor }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          node << 'EOF'
+          node --input-type=commonjs << 'EOF'
           const fs    = require("fs");
           const https = require("https");
 
