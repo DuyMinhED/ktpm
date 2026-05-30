@@ -51,3 +51,79 @@ jobs:
           ./report-patient.html
           ./report-doctor.html
           ./report-clinic.html
+
+    # Bước 6: Tự động tạo Jira Issue nếu có lỗi xảy ra ở các bước trước đó
+    - name: Create Jira Issue on Failure
+      if: failure()
+      run: |
+        curl --request POST \
+          --url '${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue' \
+          --user '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
+          --header 'Accept: application/json' \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "fields": {
+              "project": {
+                "key": "${{ secrets.JIRA_PROJECT_KEY }}"
+              },
+              "summary": "Build/Test Failed: CI Run #${{ github.run_number }}",
+              "description": {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Workflow "
+                      },
+                      {
+                        "type": "text",
+                        "text": "${{ github.workflow }}",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " bị lỗi ở lần chạy thứ #${{ github.run_number }}. Người kích hoạt: "
+                      },
+                      {
+                        "type": "text",
+                        "text": "${{ github.actor }}",
+                        "marks": [
+                          {
+                            "type": "em"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": ".\nXem chi tiết lỗi tại đây: "
+                      },
+                      {
+                        "type": "text",
+                        "text": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "marks": [
+                          {
+                            "type": "link",
+                            "attrs": {
+                              "href": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                              "title": "GitHub Actions Run"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "issuetype": {
+                "name": "Bug"
+              }
+            }
+          }'
+
