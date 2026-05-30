@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,6 +58,9 @@ public class AdminControllerTest {
          @MockBean
         private JdbcTemplate jdbcTemplate;
 
+        @MockBean
+        private PasswordEncoder passwordEncoder;
+         
         @Autowired
         private ObjectMapper objectMapper;
 

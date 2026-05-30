@@ -7,7 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.beans.factory.annotation.Value;
 
 @SpringBootApplication
@@ -24,7 +24,8 @@ public class BackendApplication {
     }
 
     @Bean
-    public CommandLineRunner initSchema(JdbcTemplate jdbcTemplate, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner initSchema(JdbcTemplate jdbcTemplate) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         return args -> {
             try {
                 String email = "admin@care.com";
