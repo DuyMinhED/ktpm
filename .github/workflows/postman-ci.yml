@@ -310,45 +310,47 @@ jobs:
             }
           }
 
-          if (failures.length === 0) {
-            console.log("✅ Không có lỗi nào — không cần xử lý Jira.");
-            process.exit(0);
-          }
+          // ── Hàm main bọc toàn bộ async logic ──────────────────────────
+          // CommonJS không hỗ trợ top-level await, phải wrap vào async function.
+          async function main() {
+            if (failures.length === 0) {
+              console.log("✅ Không có lỗi nào — không cần xử lý Jira.");
+              process.exit(0);
+            }
 
-          console.log(`📋 Tổng lỗi duy nhất phát hiện: ${failures.length}\n`);
+            console.log(`📋 Tổng lỗi duy nhất phát hiện: ${failures.length}\n`);
 
-          // ── Xử lý tuần tự: check trùng → tạo mới hoặc comment ──────────
-          // Tuần tự (không dùng Promise.all) để tránh rate limit Jira Search API.
-          // assigneeIndex chỉ tăng khi tạo mới — round-robin không bị lệch
-          // do các ticket bị skip.
-          let created      = 0;
-          let commented    = 0;
-          let assigneeIdx  = 0;
+            // Tuần tự để tránh rate limit Jira Search API.
+            // assigneeIdx chỉ tăng khi tạo mới — round-robin không bị lệch do skip.
+            let created     = 0;
+            let commented   = 0;
+            let assigneeIdx = 0;
 
-          for (const bug of failures) {
-            const summary  = `[CI/CD] Lỗi API: ${bug.apiName} (${bug.moduleName})`;
-            const existing = await findExistingIssue(summary);
+            for (const bug of failures) {
+              const summary  = `[CI/CD] Lỗi API: ${bug.apiName} (${bug.moduleName})`;
+              const existing = await findExistingIssue(summary);
 
-            if (existing) {
-              // Ticket đã tồn tại → comment cảnh báo tái phát
-              console.log(`🔍 Trùng lặp: ${existing.key} (${existing.fields?.status?.name}) — "${summary}"`);
-              await addWarningComment(existing.key);
-              commented++;
-            } else {
-              // Chưa có → tạo mới và gán round-robin
-              const assigneeId = members[assigneeIdx % members.length];
-              const result     = await createIssue(bug, summary, assigneeId);
-              if (result?.key) {
-                console.log(`✅ Tạo mới: ${result.key} — "${summary}" → gán index ${assigneeIdx % members.length}`);
-                assigneeIdx++;
-                created++;
+              if (existing) {
+                console.log(`🔍 Trùng lặp: ${existing.key} (${existing.fields?.status?.name}) — "${summary}"`);
+                await addWarningComment(existing.key);
+                commented++;
               } else {
-                console.error(`❌ Tạo thất bại: "${summary}"`, JSON.stringify(result));
+                const assigneeId = members[assigneeIdx % members.length];
+                const result     = await createIssue(bug, summary, assigneeId);
+                if (result?.key) {
+                  console.log(`✅ Tạo mới: ${result.key} — "${summary}" → gán index ${assigneeIdx % members.length}`);
+                  assigneeIdx++;
+                  created++;
+                } else {
+                  console.error(`❌ Tạo thất bại: "${summary}"`, JSON.stringify(result));
+                }
               }
             }
+
+            console.log(`\n🏁 Hoàn tất — Tạo mới: ${created} | Comment tái phát: ${commented} | Tổng: ${failures.length}`);
           }
 
-          console.log(`\n🏁 Hoàn tất — Tạo mới: ${created} | Comment tái phát: ${commented} | Tổng: ${failures.length}`);
+          main().catch((err) => { console.error("❌ Lỗi không mong đợi:", err); process.exit(1); });
           EOF
 
       # ----------------------------------------------------------
