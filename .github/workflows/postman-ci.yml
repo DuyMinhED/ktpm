@@ -1,4 +1,4 @@
-name: Automated API Verification & Smart Jira Logging
+name: Automated API Verification & Multi-Ticket Jira Logging
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
       run: mkdir -p postman-reports
 
     # =======================================================================
-    # CHẠY TEST BẰNG FILE OFFLINE (Giữ nguyên cấu hình cây thư mục của bạn)
+    # CHẠY TEST BẰNG FILE OFFLINE
     # =======================================================================
     - name: Run Admin API Tests
       run: |
@@ -63,15 +63,20 @@ jobs:
           --suppress-exit-code
 
     # =======================================================================
-    # SCRIPT THÔNG MINH: ĐÃ ĐƯỢC SỬA LỖI TRUYỀN BIẾN ĐA DÒNG (EOF)
+    # SCRIPT VÒNG LẶP: DUYỆT TỪNG LỖI VÀ GỌI API JIRA ĐỂ TẠO MỖI LỖI 1 THẺ RIÊNG
     # =======================================================================
-    - name: Parse Newman JSON Reports for Failures
-      id: parse_errors
+    - name: Parse Failures and Create Individual Jira Tickets
+      env:
+        JIRA_BASE_URL: https://ayemqh-1766052090391.atlassian.net
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        PROJECT_KEY: 'KCPM'
+        ACTOR: ${{ github.actor }}
+        BRANCH: ${{ github.ref_name }}
       run: |
         node -e '
         const fs = require("fs");
-        let jiraDescription = "Hệ thống CI/CD phát hiện các ca kiểm thử API sau đây bị gãy:\n\n";
-        let hasErrors = false;
+        const { execSync } = require("child_process");
         
         const files = [
           { name: "Admin API", file: "./postman-reports/summary-admin.json" },
@@ -80,31 +85,59 @@ jobs:
           { name: "Patient API", file: "./postman-reports/summary-patient.json" }
         ];
         
+        // Tạo chuỗi chứng thực Base64 để gọi API Jira trực tiếp
+        const auth = Buffer.from(`${process.env.JIRA_USER_EMAIL}:${process.env.JIRA_API_TOKEN}`).toString("base64");
+        
         files.forEach(item => {
           if (fs.existsSync(item.file)) {
             const data = JSON.parse(fs.readFileSync(item.file, "utf8"));
             if (data.run && data.run.failures && data.run.failures.length > 0) {
-              hasErrors = true;
-              jiraDescription += `📌 *Bộ kịch bản: ${item.name}*\n`;
-              data.run.failures.forEach((fail, index) => {
+              
+              // Vòng lặp quét qua từng lỗi đơn lẻ
+              data.run.failures.forEach((fail) => {
                 const apiName = fail.source ? fail.source.name : "Không rõ API";
                 let assertionError = fail.error ? fail.error.message : "Lỗi Assert";
-                // Loại bỏ các ký tự có khả năng phá vỡ định dạng chuỗi
-                assertionError = assertionError.replace(/[\r\n]+/g, " ");
-                jiraDescription += `${index + 1}. API: _${apiName}_  ->  ❌ Lỗi: ${assertionError}\n`;
+                assertionError = assertionError.replace(/[\r\n\"]+/g, " "); // Làm sạch chuỗi
+                
+                // Cấu hình tiêu đề và mô tả riêng cho từng chiếc thẻ Bug
+                const summary = `❌ [CI/CD] Lỗi API: ${apiName} (${item.name})`;
+                const description = `Hệ thống kiểm thử tự động phát hiện ca assert này bị gãy:\n\n` +
+                                    `* Bộ kịch bản: ${item.name}\n` +
+                                    `* Tên API: ${apiName}\n` +
+                                    `* Chi tiết lỗi: {color:red}${assertionError}{color}\n\n` +
+                                    `---\n` +
+                                    `* Người kích hoạt: ${process.env.ACTOR}\n` +
+                                    `* Nhánh code: ${process.env.BRANCH}\n` +
+                                    `* Chi tiết đồ thị: Tải file báo cáo HTML trong mục Artifacts trên GitHub.`;
+                
+                // Khối dữ liệu JSON gửi sang Jira theo đúng cấu thức Atlassian API v2
+                const jiraData = {
+                  fields: {
+                    project: { key: process.env.PROJECT_KEY },
+                    summary: summary,
+                    description: description,
+                    issuetype: { name: "Bug" },
+                    priority: { name: "High" }
+                  }
+                };
+                
+                // Tiến hành bắn API tạo thẻ ngay lập tức bằng lệnh curl
+                try {
+                  const curlCommand = `curl -s -X POST -H "Authorization: Basic ${auth}" ` +
+                                      `-H "Content-Type: application/json" ` +
+                                      `-d @- "${process.env.JIRA_BASE_URL}/rest/api/2/issue"`;
+                  
+                  const response = execSync(curlCommand, { input: JSON.stringify(jiraData), encoding: "utf8" });
+                  const resJson = JSON.parse(response);
+                  console.log(`✅ Đã tạo riêng thẻ thành công cho lỗi [${apiName}] -> Mã ticket: ${resJson.key}`);
+                } catch (error) {
+                  console.error(`❌ Không thể tạo thẻ cho lỗi [${apiName}]:`, error.message);
+                }
               });
-              jiraDescription += "\n";
+              
             }
           }
         });
-        
-        if (hasErrors) {
-          // Sử dụng cú pháp EOF để truyền chuỗi đa dòng an toàn vào GITHUB_ENV
-          fs.appendFileSync(process.env.GITHUB_ENV, "JIRA_ERROR_DETAILS<<EOF\n" + jiraDescription + "\nEOF\n");
-          fs.appendFileSync(process.env.GITHUB_ENV, "SHOULD_CREATE_JIRA_BUG=true\n");
-        } else {
-          fs.appendFileSync(process.env.GITHUB_ENV, "SHOULD_CREATE_JIRA_BUG=false\n");
-        }
         '
 
     # ==========================================
@@ -116,33 +149,3 @@ jobs:
       with:
         name: Complete-Postman-Test-Reports
         path: postman-reports/
-
-    # ==========================================
-    # ĐĂNG NHẬP JIRA
-    # ==========================================
-    - name: Login to Jira
-      if: env.SHOULD_CREATE_JIRA_BUG == 'true'
-      uses: atlassian/gajira-login@v3
-      env:
-        JIRA_BASE_URL: https://ayemqh-1766052090391.atlassian.net
-        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-
-    # ==========================================
-    # TẠO TICKET VỚI CHI TIẾT LỖI TỰ ĐỘNG BẮN VÀO DESCRIPTION
-    # ==========================================
-    - name: Create Bug Ticket on Jira
-      if: env.SHOULD_CREATE_JIRA_BUG == 'true'
-      uses: atlassian/gajira-create@v3
-      with:
-        project: 'KCPM' 
-        issuetype: 'Bug'
-        summary: '❌ [CI/CD] Phát hiện lỗi Assert API tự động'
-        description: |
-          ${{ env.JIRA_ERROR_DETAILS }}
-          
-          *Thông tin kiểm thử:*
-          - Người kích hoạt: ${{ github.actor }}
-          - Nhánh code: ${{ github.ref_name }}
-          - Xem biểu đồ chi tiết: Vui lòng tải file report HTML trong mục Artifacts của GitHub Actions.
-        fields: '{"priority": {"name": "High"}}'
