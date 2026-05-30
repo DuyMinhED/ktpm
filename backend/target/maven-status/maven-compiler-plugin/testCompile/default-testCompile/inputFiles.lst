@@ -1,18 +1,18 @@
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardSecurityIntegrationTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\PrescriptionControllerTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\PrescriptionControllerSecurityIntegrationTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\PatientProfileControllerSecurityIntegrationTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\AdminUserServiceImplTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\DoctorControllerTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\ClinicDoctorServiceImplTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\PrescriptionServiceImplTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\AdminControllerTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\DoctorControllerSecurityIntegrationTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardControllerSecurityIntegrationTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicDashboardControllerTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\DoctorServiceImplTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\ClinicReportControllerTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\AdminClinicServiceImplTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\PatientProfileServiceImplTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\controller\AdminControllerSecurityIntegrationTest.java
-F:\Git Clone KTPM\ktpm\backend\src\test\java\com\project\service\impl\PrescriptionServiceTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\service\impl\PatientProfileServiceImplTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\AdminControllerSecurityIntegrationTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\service\impl\AdminClinicServiceImplTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\service\impl\AdminUserServiceImplTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\ClinicReportControllerTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\PrescriptionControllerTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\service\impl\ClinicDoctorServiceImplTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\PrescriptionControllerSecurityIntegrationTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\AdminControllerTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\PatientProfileControllerSecurityIntegrationTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\ClinicDashboardSecurityIntegrationTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\service\impl\PrescriptionServiceTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\ClinicDashboardControllerTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\service\impl\PrescriptionServiceImplTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\ClinicDashboardControllerSecurityIntegrationTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\service\impl\DoctorServiceImplTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\DoctorControllerSecurityIntegrationTest.java
+C:\Projects\chronic-disease-management\backend\src\test\java\com\project\controller\DoctorControllerTest.java

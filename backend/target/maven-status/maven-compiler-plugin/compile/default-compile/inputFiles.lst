@@ -1,201 +1,201 @@
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\mapper\PatientMapper.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\UserProfileResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DashboardController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientAlertResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PrescriptionServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\ChangePasswordRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Conversation.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\SecurityService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicDashboardResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DashboardStatsDto.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\mapper\UserMapper.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\HealthMetricResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminReportsResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\RiskAlertResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Patient.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminUserResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicDoctorService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientAppointmentResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\AuditLog.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorMessageServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\MedicationLog.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientMessageController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\EmergencyContactResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\JwtTokenProvider.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateDoctorRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorPatientDetailResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\ConversationRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\MetricType.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientProfileServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientPrescriptionService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicDashboardService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicPatientServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AuditService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateHealthMetricRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\RiskAlertController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\JwtAuthenticationResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorMessageController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\RiskAlertService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicalAnalyticsService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicReportServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Prescription.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientProfileService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\BaseEntity.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorSnippetDto.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\exception\GlobalExceptionHandler.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorPatientController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Message.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdateUserRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\LogMedicationRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\SupportTicketController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\SendMessageRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\ClinicReportController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\UserRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientDashboardController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\AuditLogRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\NotificationRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminConfigServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\NotificationResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientDashboardService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\CustomUserDetails.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientMessageServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AdminUserService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\SupportTicketServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\NotificationController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicDashboardServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientHealthMetricController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientPrescriptionServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\LoginRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AiChatService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\PatientRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\SupportTicketService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\EmergencyContactRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\HealthMetricSummaryResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\MessageResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\NotificationService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\GeminiAiChatServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\ClinicDashboardController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\User.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PrescriptionService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\SupportTicketRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicalAnalyticsServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\UserProfileController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\SupportTicket.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorAppointmentServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\util\AppConstants.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorDashboardServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\util\RoleUtils.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Notification.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PrescriptionStatsResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientAppointmentController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\CustomUserDetailsServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdateClinicRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\HealthMetric.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\JwtAuthenticationFilter.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientPrescriptionResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AdminClinicService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\Audit.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientPrescriptionController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\util\SecurityUtils.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\DoctorAppointmentController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\specification\PatientSpecification.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Appointment.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminDashboardServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\MedicationScheduleResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientHealthMetricService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreatePatientRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\mapper\PrescriptionMapper.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\ClinicDoctorServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\AppointmentStatus.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdatePatientProfileRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PatientProfileController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientHealthMetricServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\AuthRestController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\AiChatController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\config\RateLimitFilter.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\CustomUserDetailsService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminUserServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\MedicationLogRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\AdminController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AdminDashboardService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\ClinicRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\PrescriptionRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\config\SecurityConfig.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\BackendApplication.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminDashboardResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminMedicalServiceStatsResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicDoctorResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminClinicStatsResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\PrescriptionRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\MedicalServiceService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicReportResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorPatientResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\NotificationServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\PrescriptionController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\Clinic.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\AdminConfigService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminClinicResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\MedicalService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AuditLogResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorMessageService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientDashboardResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AiChatResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ConversationResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\HealthMetricRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\AiChatRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\SystemConfig.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateAppointmentRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PatientProfileResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AdminUserStatsResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\DoctorPatientServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\exception\ResourceNotFoundException.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\DoctorCreateAppointmentRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\AppointmentSnippetDto.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\PrescriptionStatus.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\MedicationSchedule.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\MedicalServiceRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorDashboardService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientAppointmentService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\config\JpaAuditConfig.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\PrescriptionResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorPatientService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicAppointmentResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\util\DateTimeUtils.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateClinicRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ApiResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorSimpleResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\PatientMessageService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\SystemConfigRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\EmergencyContact.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicPatientService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\ClinicPatientResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\PatientAlert.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\JwtAuthenticationEntryPoint.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\MedicationScheduleRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\controller\MedicalServiceController.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientDashboardServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\SystemConfigResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\EmergencyContactRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorAppointmentResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\PatientAlertRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\MedicalServiceServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\response\DoctorDashboardResponse.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\AppointmentRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\UserRole.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\PatientAppointmentServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\mapper\ClinicMapper.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\DoctorAppointmentService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\entity\PrescriptionItem.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\repository\MessageRepository.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\security\AuditAspect.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\AdminClinicServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\CreateUserRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\ClinicReportService.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\service\impl\RiskAlertServiceImpl.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\PrescriptionItemRequest.java
-F:\Git Clone KTPM\ktpm\backend\src\main\java\com\project\dto\request\UpdateSystemConfigRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\RiskAlertResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\DoctorResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\AiChatRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\security\CustomUserDetailsServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\ClinicReportResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\SupportTicketController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\ClinicDoctorServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\DashboardStatsDto.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\UserProfileController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\SupportTicketRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\HealthMetricRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\MedicationLog.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\PatientAppointmentService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\PrescriptionRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\ClinicPatientService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\PatientPrescriptionServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\util\DateTimeUtils.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\ClinicReportServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AdminClinicStatsResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\EmergencyContact.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\PatientDashboardResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\config\RateLimitFilter.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\MedicationScheduleRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\GeminiAiChatServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\PrescriptionStatus.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AdminUserResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\BackendApplication.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\User.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\ApiResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\NotificationResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\security\CustomUserDetailsService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\CreateAppointmentRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AiChatResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\ClinicDoctorResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\MedicationLogRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\util\SecurityUtils.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\SystemConfig.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\PatientMessageService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\DoctorDashboardResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\SupportTicket.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\mapper\PrescriptionMapper.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AdminUserStatsResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\ConversationResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\config\JpaAuditConfig.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\DoctorPatientResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\PrescriptionItem.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\ClinicReportService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\DashboardController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\AdminClinicService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\Clinic.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\mapper\ClinicMapper.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\DoctorDashboardServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\Notification.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\UserProfileResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\specification\PatientSpecification.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\PrescriptionController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\DoctorAppointmentService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\DoctorDashboardService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\UpdateUserRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\AdminConfigServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\security\JwtAuthenticationEntryPoint.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\DoctorPatientController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\EmergencyContactRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\AppointmentRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\UpdateSystemConfigRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\AiChatController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\PatientProfileService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\Conversation.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\AdminDashboardServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\CreatePatientRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\ClinicDashboardServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\DoctorSnippetDto.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\security\CustomUserDetails.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\DoctorController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\PatientPrescriptionService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\UpdateClinicRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\BaseEntity.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\mapper\PatientMapper.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\DoctorCreateAppointmentRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\Message.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\ClinicPatientServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\AuditLogRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\MessageRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\security\JwtTokenProvider.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\RiskAlertService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\PatientAlertResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\PrescriptionItemRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\UserRole.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\AdminConfigService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\ClinicalAnalyticsServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\AdminUserService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\CreateHealthMetricRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\DoctorPatientServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\MedicationSchedule.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\AppointmentStatus.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\PatientRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\SupportTicketService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AuditLogResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\LogMedicationRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\AdminDashboardService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\DoctorSimpleResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\CreateClinicRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AppointmentSnippetDto.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\AdminController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\PatientAppointmentServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\PatientMessageServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\DoctorMessageServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\PatientDashboardServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\DoctorAppointmentResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\MetricType.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\DoctorMessageService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\security\AuditAspect.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\Patient.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\MedicalService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\UserRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\PatientAlert.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\NotificationRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\util\AppConstants.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\EmergencyContactRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\PatientProfileController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\MedicalServiceServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\PatientHealthMetricServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AdminMedicalServiceStatsResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\ClinicReportController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\DoctorServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\util\RoleUtils.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\config\SecurityConfig.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AdminDashboardResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\security\SecurityService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\PrescriptionService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\JwtAuthenticationResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\PatientAppointmentController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\ClinicResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\security\Audit.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\DoctorPatientService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\DoctorMessageController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\EmergencyContactResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\AuthRestController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\PrescriptionRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\DoctorPatientDetailResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\PatientDashboardController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\PatientAppointmentResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\AdminUserServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\ClinicRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\PatientHealthMetricController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\RiskAlertServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\DoctorAppointmentServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\MedicalServiceRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\MedicationScheduleResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\NotificationService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\exception\ResourceNotFoundException.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\HealthMetricSummaryResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\PatientAlertRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\PatientMessageController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\PatientPrescriptionController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\ConversationRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\ChangePasswordRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\NotificationServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\UpdatePatientProfileRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\PatientHealthMetricService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\SystemConfigResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\PatientProfileResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\CreateUserRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\security\JwtAuthenticationFilter.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\CreateDoctorRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\DoctorAppointmentController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\PatientPrescriptionResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\LoginRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\repository\SystemConfigRepository.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\Prescription.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\PrescriptionStatsResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\PatientProfileServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\ClinicDashboardController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\PrescriptionServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\request\SendMessageRequest.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\MedicalServiceService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\ClinicPatientResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\PatientDashboardService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\AiChatService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\RiskAlertController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\NotificationController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\AuditLog.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\DoctorService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\mapper\UserMapper.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\controller\MedicalServiceController.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AdminReportsResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\exception\GlobalExceptionHandler.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\ClinicDoctorService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\ClinicDashboardResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\HealthMetric.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\PrescriptionResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\entity\Appointment.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\SupportTicketServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\ClinicAppointmentResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\HealthMetricResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\ClinicDashboardService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\AuditService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\ClinicalAnalyticsService.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\service\impl\AdminClinicServiceImpl.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\MessageResponse.java
+C:\Projects\chronic-disease-management\backend\src\main\java\com\project\dto\response\AdminClinicResponse.java

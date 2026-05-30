@@ -27,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,6 +54,8 @@ public class AdminControllerTest {
 
         @Autowired
         private MockMvc mockMvc;
+         @MockBean
+        private JdbcTemplate jdbcTemplate;
 
         @Autowired
         private ObjectMapper objectMapper;

@@ -62,7 +62,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'         # Cache npm để không install lại mỗi lần
 
       - name: Install Newman & HTML Reporter
         run: |
