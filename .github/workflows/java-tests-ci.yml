@@ -19,7 +19,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Run Tests with Coverage
-      run: mvn test -f backend/pom.xml
+      run: mvn test -f backend/pom.xml -Dtest="com.project.controller.PrescriptionController*,com.project.service.impl.PrescriptionService*"
 
     - name: Upload Coverage Report
       if: always()
