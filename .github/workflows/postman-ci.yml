@@ -69,25 +69,32 @@ jobs:
         name: Complete-Postman-Test-Reports
         path: postman-reports/
 
-    # ==========================================
-    # BƯỚC ĐĂNG NHẬP JIRA TRƯỚC KHI TẠO BUG (ĐÃ SỬA LỖI CONFIG.YML)
+   # ==========================================
+    # BƯỚC ĐĂNG NHẬP JIRA (Đã điền chuẩn URL của bạn)
     # ==========================================
     - name: Login to Jira
-      if: failure()
+      if: failure() # Chỉ kích hoạt khi có bài kiểm thử Newman bị báo lỗi đỏ
       uses: atlassian/gajira-login@v3
       env:
-        JIRA_BASE_URL: https://kcpm99.atlassian.net
+        JIRA_BASE_URL: https://ayemqh-1766052090391.atlassian.net
         JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
         JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
+    # ==========================================
+    # BƯỚC TẠO BUG TRÊN BẢNG KANBAN KCPM
+    # ==========================================
     - name: Create Bug Ticket on Jira
-      if: failure()
+      if: failure() # Chạy khi bước đăng nhập trên thành công và hệ thống có lỗi test
       uses: atlassian/gajira-create@v3
       with:
-        project: 'KCPM' 
+        project: 'KCPM' # Trùng khít với mã dự án trên link của bạn
         issuetype: 'Bug'
         summary: '❌ [CI/CD] Kiểm thử API tự động bị sập'
         description: |
           Hệ thống kiểm thử tự động Newman trên GitHub Actions phát hiện có API bị lỗi.
-          Vui lòng kiểm tra file báo cáo trong mục Artifacts của lượt chạy này để xem chi tiết.
+          
+          *Thông tin chi tiết:*
+          - **Người kích hoạt:** ${{ github.actor }}
+          - **Nhánh code:** ${{ github.ref_name }}
+          - **Hướng dẫn xử lý:** Vui lòng truy cập tab Actions trên GitHub hoặc tải file báo cáo HTML trong mục Artifacts để xem chi tiết response bị lỗi.
         fields: '{"priority": {"name": "High"}}'
