@@ -28,7 +28,7 @@ jobs:
       run: mkdir -p postman-reports
 
     # =======================================================================
-    # CHẠY TEST BẰNG FILE OFFLINE (Thêm cờ suppress để lấy toàn bộ kết quả JSON)
+    # CHẠY TEST BẰNG FILE OFFLINE (Giữ nguyên cấu hình cây thư mục của bạn)
     # =======================================================================
     - name: Run Admin API Tests
       run: |
@@ -63,15 +63,14 @@ jobs:
           --suppress-exit-code
 
     # =======================================================================
-    # SCRIPT THÔNG MINH: ĐỌC FILE JSON ĐỂ TRÍCH XUẤT NỘI DUNG LỖI CHI TIẾT
+    # SCRIPT THÔNG MINH: ĐÃ ĐƯỢC SỬA LỖI TRUYỀN BIẾN ĐA DÒNG (EOF)
     # =======================================================================
     - name: Parse Newman JSON Reports for Failures
       id: parse_errors
       run: |
         node -e '
         const fs = require("fs");
-        const path = require("path");
-        let jiraDescription = "Hệ thống CI/CD phát hiện các ca kiểm thử API sau đây bị gãy:\\n\\n";
+        let jiraDescription = "Hệ thống CI/CD phát hiện các ca kiểm thử API sau đây bị gãy:\n\n";
         let hasErrors = false;
         
         const files = [
@@ -86,20 +85,22 @@ jobs:
             const data = JSON.parse(fs.readFileSync(item.file, "utf8"));
             if (data.run && data.run.failures && data.run.failures.length > 0) {
               hasErrors = true;
-              jiraDescription += `📌 *Bộ kịch bản: ${item.name}*\\n`;
+              jiraDescription += `📌 *Bộ kịch bản: ${item.name}*\n`;
               data.run.failures.forEach((fail, index) => {
                 const apiName = fail.source ? fail.source.name : "Không rõ API";
-                const assertionError = fail.error ? fail.error.message : "Lỗi Assert";
-                jiraDescription += `${index + 1}. API: _${apiName}_  ->  ❌ Lỗi: \`${assertionError}\`\\n`;
+                let assertionError = fail.error ? fail.error.message : "Lỗi Assert";
+                // Loại bỏ các ký tự có khả năng phá vỡ định dạng chuỗi
+                assertionError = assertionError.replace(/[\r\n]+/g, " ");
+                jiraDescription += `${index + 1}. API: _${apiName}_  ->  ❌ Lỗi: ${assertionError}\n`;
               });
-              jiraDescription += "\\n";
+              jiraDescription += "\n";
             }
           }
         });
         
         if (hasErrors) {
-          // Ghi chuỗi lỗi vào file môi trường của GitHub Actions để bước sau sử dụng
-          fs.appendFileSync(process.env.GITHUB_ENV, `JIRA_ERROR_DETAILS=${jiraDescription}\n`);
+          // Sử dụng cú pháp EOF để truyền chuỗi đa dòng an toàn vào GITHUB_ENV
+          fs.appendFileSync(process.env.GITHUB_ENV, "JIRA_ERROR_DETAILS<<EOF\n" + jiraDescription + "\nEOF\n");
           fs.appendFileSync(process.env.GITHUB_ENV, "SHOULD_CREATE_JIRA_BUG=true\n");
         } else {
           fs.appendFileSync(process.env.GITHUB_ENV, "SHOULD_CREATE_JIRA_BUG=false\n");
@@ -120,7 +121,7 @@ jobs:
     # ĐĂNG NHẬP JIRA
     # ==========================================
     - name: Login to Jira
-      if: env.SHOULD_CREATE_JIRA_BUG == 'true' # Chỉ chạy khi script bên trên quét ra có lỗi thật
+      if: env.SHOULD_CREATE_JIRA_BUG == 'true'
       uses: atlassian/gajira-login@v3
       env:
         JIRA_BASE_URL: https://ayemqh-1766052090391.atlassian.net
@@ -128,7 +129,7 @@ jobs:
         JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
     # ==========================================
-    # TẠO TICKET VỚI NỘI DUNG LỖI CHI TIẾT TỰ ĐỘNG BẮN VÀO DESCRIPTION
+    # TẠO TICKET VỚI CHI TIẾT LỖI TỰ ĐỘNG BẮN VÀO DESCRIPTION
     # ==========================================
     - name: Create Bug Ticket on Jira
       if: env.SHOULD_CREATE_JIRA_BUG == 'true'
