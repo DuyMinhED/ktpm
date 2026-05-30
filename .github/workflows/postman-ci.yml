@@ -1,4 +1,4 @@
-name: Automated API Verification & Multi-Ticket Jira Logging
+name: Automated API Verification & Round-Robin Jira Logging
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
       run: mkdir -p postman-reports
 
     # =======================================================================
-    # CHẠY TEST BẰNG FILE OFFLINE
+    # CHẠY TEST BẰNG FILE OFFLINE (Giữ nguyên cấu hình cây thư mục của bạn)
     # =======================================================================
     - name: Run Admin API Tests
       run: |
@@ -63,9 +63,9 @@ jobs:
           --suppress-exit-code
 
     # =======================================================================
-    # SCRIPT VÒNG LẶP: DUYỆT TỪNG LỖI VÀ GỌI API JIRA ĐỂ TẠO MỖI LỖI 1 THẺ RIÊNG
+    # SCRIPT TỐI ƯU: XOAY VÒNG CHO 5 THÀNH VIÊN & LỌC TRÙNG LỖI TUYỆT ĐỐI
     # =======================================================================
-    - name: Parse Failures and Create Individual Jira Tickets
+    - name: Parse Failures and Assign Round-Robin to 5 Members
       env:
         JIRA_BASE_URL: https://ayemqh-1766052090391.atlassian.net
         JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
@@ -85,63 +85,91 @@ jobs:
           { name: "Patient API", file: "./postman-reports/summary-patient.json" }
         ];
         
-        // Tạo chuỗi chứng thực Base64 để gọi API Jira trực tiếp
-        const auth = Buffer.from(`${process.env.JIRA_USER_EMAIL}:${process.env.JIRA_API_TOKEN}`).toString("base64");
+        // 🌟 ĐÃ NẠP CHÍNH XÁC 5 MÃ ACCOUNT ID JIRA CỦA NHÓM BẠN
+        const members = [
+          "712020:da4a7c51-9bb8-4022-b0a6-698b8fb78315",
+          "712020:c79c7014-81e9-4ddb-a7d1-f3679f96d55c",
+          "712020:fcf34ed4-07e4-4a6b-9f74-addf47f032f1",
+          "712020:0bd697e4-f5b4-4767-b9f5-fae031ed3398",
+          "712020:7fde86b6-fe0a-4823-b86c-0ddeca871b90"
+        ];
         
+        const auth = Buffer.from(`${process.env.JIRA_USER_EMAIL}:${process.env.JIRA_API_TOKEN}`).toString("base64");
+        let totalBugCount = 0;
+        
+        // Sử dụng Set để tránh ghi nhận lặp lại một lỗi trong cùng lượt chạy
+        const uniqueErrors = new Set();
+        const failuresToProcess = [];
+        
+        // Bước 1: Quét và gom các lỗi duy nhất
         files.forEach(item => {
           if (fs.existsSync(item.file)) {
             const data = JSON.parse(fs.readFileSync(item.file, "utf8"));
             if (data.run && data.run.failures && data.run.failures.length > 0) {
-              
-              // Vòng lặp quét qua từng lỗi đơn lẻ
               data.run.failures.forEach((fail) => {
                 const apiName = fail.source ? fail.source.name : "Không rõ API";
                 let assertionError = fail.error ? fail.error.message : "Lỗi Assert";
-                assertionError = assertionError.replace(/[\r\n\"]+/g, " "); // Làm sạch chuỗi
                 
-                // Cấu hình tiêu đề và mô tả riêng cho từng chiếc thẻ Bug
-                const summary = `❌ [CI/CD] Lỗi API: ${apiName} (${item.name})`;
-                const description = `Hệ thống kiểm thử tự động phát hiện ca assert này bị gãy:\n\n` +
-                                    `* Bộ kịch bản: ${item.name}\n` +
-                                    `* Tên API: ${apiName}\n` +
-                                    `* Chi tiết lỗi: {color:red}${assertionError}{color}\n\n` +
-                                    `---\n` +
-                                    `* Người kích hoạt: ${process.env.ACTOR}\n` +
-                                    `* Nhánh code: ${process.env.BRANCH}\n` +
-                                    `* Chi tiết đồ thị: Tải file báo cáo HTML trong mục Artifacts trên GitHub.`;
+                // Làm sạch kỹ chuỗi lỗi tránh vỡ cấu trúc JSON khi gọi curl
+                assertionError = assertionError.replace(/[\r\n\"]+/g, " ");
                 
-                // Khối dữ liệu JSON gửi sang Jira theo đúng cấu thức Atlassian API v2
-                const jiraData = {
-                  fields: {
-                    project: { key: process.env.PROJECT_KEY },
-                    summary: summary,
-                    description: description,
-                    issuetype: { name: "Bug" },
-                    priority: { name: "High" }
-                  }
-                };
+                const errorKey = `${item.name}|||${apiName}|||${assertionError}`;
                 
-                // Tiến hành bắn API tạo thẻ ngay lập tức bằng lệnh curl
-                try {
-                  const curlCommand = `curl -s -X POST -H "Authorization: Basic ${auth}" ` +
-                                      `-H "Content-Type: application/json" ` +
-                                      `-d @- "${process.env.JIRA_BASE_URL}/rest/api/2/issue"`;
-                  
-                  const response = execSync(curlCommand, { input: JSON.stringify(jiraData), encoding: "utf8" });
-                  const resJson = JSON.parse(response);
-                  console.log(`✅ Đã tạo riêng thẻ thành công cho lỗi [${apiName}] -> Mã ticket: ${resJson.key}`);
-                } catch (error) {
-                  console.error(`❌ Không thể tạo thẻ cho lỗi [${apiName}]:`, error.message);
+                if (!uniqueErrors.has(errorKey)) {
+                  uniqueErrors.add(errorKey);
+                  failuresToProcess.push({
+                    moduleName: item.name,
+                    apiName: apiName,
+                    errorMsg: assertionError
+                  });
                 }
               });
-              
             }
+          }
+        });
+        
+        // Bước 2: Chạy vòng lặp bắn API sang Jira tạo thẻ lỗi đơn lẻ và gán xoay vòng
+        failuresToProcess.forEach((bug) => {
+          const assigneeId = members[totalBugCount % members.length];
+          totalBugCount++;
+          
+          const summary = `❌ [CI/CD] Lỗi API: ${bug.apiName} (${bug.moduleName})`;
+          const description = `Hệ thống kiểm thử tự động phát hiện ca assert này bị gãy:\n\n` +
+                              `* Bộ kịch bản: ${bug.moduleName}\n` +
+                              `* Tên API: ${bug.apiName}\n` +
+                              `* Chi tiết lỗi: {color:red}${bug.errorMsg}{color}\n\n` +
+                              `---\n` +
+                              `* Người kích hoạt build: ${process.env.ACTOR}\n` +
+                              `* Nhánh code: ${process.env.BRANCH}\n` +
+                              `* Chi tiết đồ thị: Tải file báo cáo HTML trong mục Artifacts trên GitHub.`;
+          
+          const jiraData = {
+            fields: {
+              project: { key: process.env.PROJECT_KEY },
+              summary: summary,
+              description: description,
+              issuetype: { name: "Bug" },
+              priority: { name: "High" },
+              assignee: { id: assigneeId }
+            }
+          };
+          
+          try {
+            const curlCommand = `curl -s -X POST -H "Authorization: Basic ${auth}" ` +
+                                `-H "Content-Type: application/json" ` +
+                                `-d @- "${process.env.JIRA_BASE_URL}/rest/api/2/issue"`;
+            
+            const response = execSync(curlCommand, { input: JSON.stringify(jiraData), encoding: "utf8" });
+            const resJson = JSON.parse(response);
+            console.log(`✅ Đã tạo Bug [${bug.apiName}] -> Gán xoay vòng cho Thành viên [${assigneeId}] (${resJson.key})`);
+          } catch (error) {
+            console.error(`❌ Lỗi tạo thẻ cho API [${bug.apiName}]:`, error.message);
           }
         });
         '
 
     # ==========================================
-    # ĐẨY BÁO CÁO LÊN ARTIFACTS
+    # ĐẨY BÁO CÁO LÊN ARTIFACTS (Vẫn luôn chạy để lưu trữ)
     # ==========================================
     - name: Upload Test Reports Artifacts
       uses: actions/upload-artifact@v4
