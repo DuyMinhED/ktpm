@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ "main", "develop" ]
 
-# Hủy run cũ nếu có run mới hơn trên cùng nhánh (tiết kiệm tài nguyên)
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -55,24 +54,21 @@ jobs:
       - name: Checkout Repository Code
         uses: actions/checkout@v4
 
-      # ----------------------------------------------------------
-      # BƯỚC 1: CÀI ĐẶT NODE.JS VỚI CACHE
-      # ----------------------------------------------------------
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install Newman & HTML Reporter
-        run: |
-          npm install -g newman newman-reporter-htmlextra
+        run: npm install -g newman newman-reporter-htmlextra
 
       - name: Create Reports Directory
         run: mkdir -p postman-reports
 
       # ----------------------------------------------------------
-      # BƯỚC 2: CHẠY NEWMAN (bỏ --suppress-exit-code, dùng || true
-      #          để pipeline không dừng nhưng vẫn ghi nhận exit code)
+      # BƯỚC 2: CHẠY NEWMAN
+      # || true để pipeline không dừng khi test fail,
+      # nhưng vẫn tiếp tục sang bước tạo Jira ticket
       # ----------------------------------------------------------
       - name: Run Admin API Tests
         run: |
@@ -82,7 +78,7 @@ jobs:
             --reporter-htmlextra-export ./postman-reports/report-admin.html \
             --reporter-json-export ./postman-reports/summary-admin.json \
             --reporter-htmlextra-title "Admin API Test Report" \
-            || echo "NEWMAN_FAILED=true" >> $GITHUB_ENV
+            || true
 
       - name: Run Clinic API Tests
         run: |
@@ -92,7 +88,7 @@ jobs:
             --reporter-htmlextra-export ./postman-reports/report-clinic.html \
             --reporter-json-export ./postman-reports/summary-clinic.json \
             --reporter-htmlextra-title "Clinic API Test Report" \
-            || echo "NEWMAN_FAILED=true" >> $GITHUB_ENV
+            || true
 
       - name: Run Doctor API Tests
         run: |
@@ -102,7 +98,7 @@ jobs:
             --reporter-htmlextra-export ./postman-reports/report-doctor.html \
             --reporter-json-export ./postman-reports/summary-doctor.json \
             --reporter-htmlextra-title "Doctor API Test Report" \
-            || echo "NEWMAN_FAILED=true" >> $GITHUB_ENV
+            || true
 
       - name: Run Patient API Tests
         run: |
@@ -112,134 +108,158 @@ jobs:
             --reporter-htmlextra-export ./postman-reports/report-patient.html \
             --reporter-json-export ./postman-reports/summary-patient.json \
             --reporter-htmlextra-title "Patient API Test Report" \
-            || echo "NEWMAN_FAILED=true" >> $GITHUB_ENV
+            || true
 
       # ----------------------------------------------------------
-      # BƯỚC 3: PARSE LỖI VÀ TẠO JIRA TICKET
-      #   - Chỉ chạy trên nhánh main (tránh spam ticket khi dev)
-      #   - Dùng https native thay vì execSync + curl
-      #   - Member IDs lấy từ Secrets
-      #   - Description dùng plain text (tương thích Jira Cloud ADF)
+      # BƯỚC 3: PARSE LỖI → CHECK TRÙNG → TẠO MỚI HOẶC COMMENT
+      #
+      # Logic:
+      #   1. Thu thập lỗi duy nhất từ các summary JSON.
+      #   2. Với mỗi lỗi, search Jira (JQL exact summary + chưa Done).
+      #      - Search thất bại (network/auth) → fail-open: vẫn tạo mới,
+      #        không bỏ sót bug.
+      #   3. Nếu đã tồn tại → thêm comment cảnh báo vào ticket gốc.
+      #   4. Nếu chưa có   → tạo ticket Bug mới, gán round-robin.
+      #   5. assigneeIndex chỉ tăng khi tạo mới (không bị lệch do skip).
       # ----------------------------------------------------------
-      - name: Parse Failures & Create Jira Bugs (Round-Robin)
+      - name: Parse Failures & Sync to Jira
         if: always() && github.ref == 'refs/heads/main'
         env:
           JIRA_BASE_URL: https://ayemqh-1766052090391.atlassian.net
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          JIRA_MEMBER_IDS: ${{ secrets.JIRA_MEMBER_IDS }}   # JSON array string lưu trong Secrets
+          JIRA_MEMBER_IDS: ${{ secrets.JIRA_MEMBER_IDS }}
           PROJECT_KEY: 'KCPM'
           ACTOR: ${{ github.actor }}
           BRANCH: ${{ github.ref_name }}
         run: |
           node << 'EOF'
-          const fs   = require("fs");
+          const fs    = require("fs");
           const https = require("https");
 
-          // ── Đọc member IDs từ Secret (JSON array) ──────────────────────
-          // Secret JIRA_MEMBER_IDS có dạng:
-          // ["712020:da4a7c51-...","712020:c79c7014-...","712020:fcf34ed4-...","712020:0bd697e4-...","712020:7fde86b6-..."]
+          // ── Đọc member IDs từ Secret ────────────────────────────────────
+          // JIRA_MEMBER_IDS dạng JSON array:
+          // ["712020:da4a7c51-...","712020:c79c7014-...","712020:fcf34ed4-..."]
           let members;
           try {
             members = JSON.parse(process.env.JIRA_MEMBER_IDS);
-            if (!Array.isArray(members) || members.length === 0) throw new Error("Empty");
+            if (!Array.isArray(members) || members.length === 0) throw new Error();
           } catch {
-            console.error("❌ JIRA_MEMBER_IDS không hợp lệ. Vui lòng kiểm tra Secret.");
+            console.error("❌ JIRA_MEMBER_IDS không hợp lệ — kiểm tra lại Secret.");
             process.exit(1);
           }
 
-          // ── Hàm tạo Jira ticket qua https (không dùng curl) ────────────
-          function createJiraIssue(payload) {
-            return new Promise((resolve, reject) => {
-              const auth = Buffer.from(
-                `${process.env.JIRA_USER_EMAIL}:${process.env.JIRA_API_TOKEN}`
-              ).toString("base64");
+          const BASE_URL = process.env.JIRA_BASE_URL;
+          const AUTH     = Buffer.from(
+            `${process.env.JIRA_USER_EMAIL}:${process.env.JIRA_API_TOKEN}`
+          ).toString("base64");
 
-              const body = JSON.stringify(payload);
-              const url  = new URL(`${process.env.JIRA_BASE_URL}/rest/api/3/issue`);
+          // ── Hàm gọi Jira REST API ───────────────────────────────────────
+          // Trả về { status, body } để caller phân biệt được 2xx vs 4xx/5xx.
+          function jiraRequest(method, path, body = null) {
+            return new Promise((resolve, reject) => {
+              const bodyStr = body ? JSON.stringify(body) : null;
+              const url     = new URL(`${BASE_URL}${path}`);
+              const headers = {
+                "Authorization": `Basic ${AUTH}`,
+                "Accept":        "application/json",
+                "Content-Type":  "application/json",
+              };
+              if (bodyStr) headers["Content-Length"] = Buffer.byteLength(bodyStr);
 
               const req = https.request(
-                {
-                  hostname: url.hostname,
-                  path:     url.pathname,
-                  method:   "POST",
-                  headers: {
-                    "Authorization": `Basic ${auth}`,
-                    "Content-Type":  "application/json",
-                    "Content-Length": Buffer.byteLength(body),
-                  },
-                },
+                { hostname: url.hostname, path: url.pathname + url.search, method, headers },
                 (res) => {
                   let data = "";
                   res.on("data", (chunk) => (data += chunk));
                   res.on("end", () => {
-                    try { resolve(JSON.parse(data)); }
-                    catch { resolve({ error: data }); }
+                    try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
+                    catch { resolve({ status: res.statusCode, body: data }); }
                   });
                 }
               );
               req.on("error", reject);
-              req.write(body);
+              if (bodyStr) req.write(bodyStr);
               req.end();
             });
           }
 
-          // ── Thu thập lỗi duy nhất từ tất cả summary files ─────────────
-          const files = [
-            { name: "Admin API",   file: "./postman-reports/summary-admin.json"   },
-            { name: "Clinic API",  file: "./postman-reports/summary-clinic.json"  },
-            { name: "Doctor API",  file: "./postman-reports/summary-doctor.json"  },
-            { name: "Patient API", file: "./postman-reports/summary-patient.json" },
-          ];
+          // ── Tìm ticket trùng trên Jira ──────────────────────────────────
+          // Dùng exact-match summary (= thay vì ~) để tránh false-positive.
+          // Chỉ tìm trong ticket chưa Done — bug đã fix mà tái phát sẽ tạo ticket mới.
+          // Nếu Search API lỗi → fail-open (trả về null) để caller tạo mới,
+          // không bỏ sót bug vì sự cố mạng hay auth tạm thời.
+          async function findExistingIssue(summary) {
+            const escJql = (s) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+            const jql    = `project = "${process.env.PROJECT_KEY}" AND summary = "${escJql(summary)}" AND statusCategory != Done`;
 
-          const uniqueErrors      = new Set();
-          const failuresToProcess = [];
-
-          files.forEach((item) => {
-            if (!fs.existsSync(item.file)) return;
-            const data = JSON.parse(fs.readFileSync(item.file, "utf8"));
-            (data?.run?.failures ?? []).forEach((fail) => {
-              const apiName  = fail?.source?.name ?? "Không rõ API";
-              const errorMsg = (fail?.error?.message ?? "Lỗi Assert")
-                .replace(/[\r\n"]+/g, " ")
-                .trim();
-
-              const key = `${item.name}|||${apiName}|||${errorMsg}`;
-              if (!uniqueErrors.has(key)) {
-                uniqueErrors.add(key);
-                failuresToProcess.push({ moduleName: item.name, apiName, errorMsg });
+            try {
+              const res = await jiraRequest(
+                "GET",
+                `/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=1&fields=summary,status`
+              );
+              if (res.status !== 200) {
+                console.warn(`⚠️  Search API trả về HTTP ${res.status} — bỏ qua check trùng, sẽ tạo mới.`);
+                return null; // fail-open
               }
-            });
-          });
-
-          if (failuresToProcess.length === 0) {
-            console.log("✅ Không có lỗi nào cần tạo ticket.");
-            process.exit(0);
+              return res.body?.issues?.[0] ?? null;
+            } catch (err) {
+              console.warn(`⚠️  Search API lỗi kết nối (${err.message}) — bỏ qua check trùng, sẽ tạo mới.`);
+              return null; // fail-open
+            }
           }
 
-          console.log(`📋 Tổng lỗi duy nhất cần xử lý: ${failuresToProcess.length}`);
+          // ── Thêm comment cảnh báo vào ticket đã tồn tại ────────────────
+          async function addWarningComment(issueKey) {
+            const payload = {
+              body: {
+                type: "doc", version: 1,
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [
+                      { type: "text", text: "⚠️ [CI/CD cảnh báo] ", marks: [{ type: "strong" }] },
+                      { type: "text", text: "Lỗi này tái phát trong lượt chạy pipeline mới nhất!" },
+                    ]
+                  },
+                  {
+                    type: "bulletList",
+                    content: [
+                      { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Người kích hoạt build: ${process.env.ACTOR}` }] }] },
+                      { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Nhánh code: ${process.env.BRANCH}` }] }] },
+                    ]
+                  },
+                  {
+                    type: "paragraph",
+                    content: [{ type: "text", text: "Xem báo cáo chi tiết tại mục Artifacts trên GitHub Actions." }]
+                  }
+                ]
+              }
+            };
 
-          // ── Tạo ticket song song (Promise.all) ────────────────────────
-          const tasks = failuresToProcess.map((bug, idx) => {
-            const assigneeId = members[idx % members.length];
+            const res = await jiraRequest("POST", `/rest/api/3/issue/${issueKey}/comment`, payload);
+            if (res.status === 201) {
+              console.log(`💬 Đã thêm comment cảnh báo vào ${issueKey}.`);
+            } else {
+              console.error(`❌ Thêm comment vào ${issueKey} thất bại (HTTP ${res.status}).`);
+            }
+          }
 
-            // Dùng Atlassian Document Format (ADF) — tương thích Jira Cloud
+          // ── Tạo ticket Bug mới ──────────────────────────────────────────
+          async function createIssue(bug, summary, assigneeId) {
             const payload = {
               fields: {
-                project:     { key: process.env.PROJECT_KEY },
-                summary:     `[CI/CD] Lỗi API: ${bug.apiName} (${bug.moduleName})`,
-                issuetype:   { name: "Bug" },
-                priority:    { name: "High" },
-                assignee:    { id: assigneeId },
+                project:   { key: process.env.PROJECT_KEY },
+                summary,
+                issuetype: { name: "Bug" },
+                priority:  { name: "High" },
+                assignee:  { id: assigneeId },
                 description: {
-                  type:    "doc",
-                  version: 1,
+                  type: "doc", version: 1,
                   content: [
                     {
                       type: "paragraph",
-                      content: [
-                        { type: "text", text: "Hệ thống CI/CD phát hiện assertion bị gãy:" }
-                      ]
+                      content: [{ type: "text", text: "Hệ thống CI/CD phát hiện assertion bị gãy:" }]
                     },
                     {
                       type: "bulletList",
@@ -253,25 +273,82 @@ jobs:
                     },
                     {
                       type: "paragraph",
-                      content: [
-                        { type: "text", text: "Xem báo cáo chi tiết tại mục Artifacts trên GitHub Actions." }
-                      ]
+                      content: [{ type: "text", text: "Xem báo cáo chi tiết tại mục Artifacts trên GitHub Actions." }]
                     }
                   ]
                 }
               }
             };
 
-            return createJiraIssue(payload).then((res) => {
-              if (res.key) {
-                console.log(`✅ [${bug.apiName}] → ${res.key} (gán cho member index ${idx % members.length})`);
-              } else {
-                console.error(`❌ [${bug.apiName}] → Tạo ticket thất bại:`, JSON.stringify(res));
-              }
-            });
-          });
+            const res = await jiraRequest("POST", "/rest/api/3/issue", payload);
+            return res.body;
+          }
 
-          Promise.all(tasks).then(() => console.log("🏁 Hoàn tất tạo Jira tickets."));
+          // ── Thu thập lỗi duy nhất từ tất cả summary files ─────────────
+          const REPORT_FILES = [
+            { name: "Admin API",   file: "./postman-reports/summary-admin.json"   },
+            { name: "Clinic API",  file: "./postman-reports/summary-clinic.json"  },
+            { name: "Doctor API",  file: "./postman-reports/summary-doctor.json"  },
+            { name: "Patient API", file: "./postman-reports/summary-patient.json" },
+          ];
+
+          const seen     = new Set();
+          const failures = [];
+
+          for (const item of REPORT_FILES) {
+            if (!fs.existsSync(item.file)) continue;
+            const data = JSON.parse(fs.readFileSync(item.file, "utf8"));
+            for (const fail of data?.run?.failures ?? []) {
+              const apiName  = fail?.source?.name ?? "Không rõ API";
+              const errorMsg = (fail?.error?.message ?? "Lỗi Assert")
+                .replace(/[\r\n"]+/g, " ").trim();
+              const key = `${item.name}|||${apiName}|||${errorMsg}`;
+              if (!seen.has(key)) {
+                seen.add(key);
+                failures.push({ moduleName: item.name, apiName, errorMsg });
+              }
+            }
+          }
+
+          if (failures.length === 0) {
+            console.log("✅ Không có lỗi nào — không cần xử lý Jira.");
+            process.exit(0);
+          }
+
+          console.log(`📋 Tổng lỗi duy nhất phát hiện: ${failures.length}\n`);
+
+          // ── Xử lý tuần tự: check trùng → tạo mới hoặc comment ──────────
+          // Tuần tự (không dùng Promise.all) để tránh rate limit Jira Search API.
+          // assigneeIndex chỉ tăng khi tạo mới — round-robin không bị lệch
+          // do các ticket bị skip.
+          let created      = 0;
+          let commented    = 0;
+          let assigneeIdx  = 0;
+
+          for (const bug of failures) {
+            const summary  = `[CI/CD] Lỗi API: ${bug.apiName} (${bug.moduleName})`;
+            const existing = await findExistingIssue(summary);
+
+            if (existing) {
+              // Ticket đã tồn tại → comment cảnh báo tái phát
+              console.log(`🔍 Trùng lặp: ${existing.key} (${existing.fields?.status?.name}) — "${summary}"`);
+              await addWarningComment(existing.key);
+              commented++;
+            } else {
+              // Chưa có → tạo mới và gán round-robin
+              const assigneeId = members[assigneeIdx % members.length];
+              const result     = await createIssue(bug, summary, assigneeId);
+              if (result?.key) {
+                console.log(`✅ Tạo mới: ${result.key} — "${summary}" → gán index ${assigneeIdx % members.length}`);
+                assigneeIdx++;
+                created++;
+              } else {
+                console.error(`❌ Tạo thất bại: "${summary}"`, JSON.stringify(result));
+              }
+            }
+          }
+
+          console.log(`\n🏁 Hoàn tất — Tạo mới: ${created} | Comment tái phát: ${commented} | Tổng: ${failures.length}`);
           EOF
 
       # ----------------------------------------------------------
@@ -283,4 +360,4 @@ jobs:
         with:
           name: Complete-Postman-Test-Reports
           path: postman-reports/
-          retention-days: 14    # Tự xóa sau 14 ngày, tiết kiệm storage
+          retention-days: 14
