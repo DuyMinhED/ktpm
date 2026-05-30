@@ -1,4 +1,4 @@
-name: Automated API Verification (Local JSON) & Jira Logging
+name: Automated API Verification & Smart Jira Logging
 
 on:
   push:
@@ -28,69 +28,120 @@ jobs:
       run: mkdir -p postman-reports
 
     # =======================================================================
-    # CHẠY TEST BẰNG FILE OFFLINE THEO ĐÚNG CÂY THƯ MỤC THỰC TẾ
+    # CHẠY TEST BẰNG FILE OFFLINE (Thêm cờ suppress để lấy toàn bộ kết quả JSON)
     # =======================================================================
     - name: Run Admin API Tests
       run: |
         newman run "./test/resources/Admin API.postman_collection.json" \
           -r htmlextra,json \
           --reporter-htmlextra-export ./postman-reports/report-admin.html \
-          --reporter-json-export ./postman-reports/summary-admin.json
+          --reporter-json-export ./postman-reports/summary-admin.json \
+          --suppress-exit-code
 
     - name: Run Clinic API Tests
       run: |
         newman run "./test/resources/Clinic API.postman_collection.json" \
           -r htmlextra,json \
           --reporter-htmlextra-export ./postman-reports/report-clinic.html \
-          --reporter-json-export ./postman-reports/summary-clinic.json
+          --reporter-json-export ./postman-reports/summary-clinic.json \
+          --suppress-exit-code
 
     - name: Run Doctor API Tests
       run: |
         newman run "./test/resources/Doctor API.postman_collection.json" \
           -r htmlextra,json \
           --reporter-htmlextra-export ./postman-reports/report-doctor.html \
-          --reporter-json-export ./postman-reports/summary-doctor.json
+          --reporter-json-export ./postman-reports/summary-doctor.json \
+          --suppress-exit-code
 
     - name: Run Patient API Tests
       run: |
         newman run "./test/resources/Patient API.postman_collection.json" \
           -r htmlextra,json \
           --reporter-htmlextra-export ./postman-reports/report-patient.html \
-          --reporter-json-export ./postman-reports/summary-patient.json
+          --reporter-json-export ./postman-reports/summary-patient.json \
+          --suppress-exit-code
+
+    # =======================================================================
+    # SCRIPT THÔNG MINH: ĐỌC FILE JSON ĐỂ TRÍCH XUẤT NỘI DUNG LỖI CHI TIẾT
+    # =======================================================================
+    - name: Parse Newman JSON Reports for Failures
+      id: parse_errors
+      run: |
+        node -e '
+        const fs = require("fs");
+        const path = require("path");
+        let jiraDescription = "Hệ thống CI/CD phát hiện các ca kiểm thử API sau đây bị gãy:\\n\\n";
+        let hasErrors = false;
+        
+        const files = [
+          { name: "Admin API", file: "./postman-reports/summary-admin.json" },
+          { name: "Clinic API", file: "./postman-reports/summary-clinic.json" },
+          { name: "Doctor API", file: "./postman-reports/summary-doctor.json" },
+          { name: "Patient API", file: "./postman-reports/summary-patient.json" }
+        ];
+        
+        files.forEach(item => {
+          if (fs.existsSync(item.file)) {
+            const data = JSON.parse(fs.readFileSync(item.file, "utf8"));
+            if (data.run && data.run.failures && data.run.failures.length > 0) {
+              hasErrors = true;
+              jiraDescription += `📌 *Bộ kịch bản: ${item.name}*\\n`;
+              data.run.failures.forEach((fail, index) => {
+                const apiName = fail.source ? fail.source.name : "Không rõ API";
+                const assertionError = fail.error ? fail.error.message : "Lỗi Assert";
+                jiraDescription += `${index + 1}. API: _${apiName}_  ->  ❌ Lỗi: \`${assertionError}\`\\n`;
+              });
+              jiraDescription += "\\n";
+            }
+          }
+        });
+        
+        if (hasErrors) {
+          // Ghi chuỗi lỗi vào file môi trường của GitHub Actions để bước sau sử dụng
+          fs.appendFileSync(process.env.GITHUB_ENV, `JIRA_ERROR_DETAILS=${jiraDescription}\n`);
+          fs.appendFileSync(process.env.GITHUB_ENV, "SHOULD_CREATE_JIRA_BUG=true\n");
+        } else {
+          fs.appendFileSync(process.env.GITHUB_ENV, "SHOULD_CREATE_JIRA_BUG=false\n");
+        }
+        '
 
     # ==========================================
     # ĐẨY BÁO CÁO LÊN ARTIFACTS
     # ==========================================
     - name: Upload Test Reports Artifacts
       uses: actions/upload-artifact@v4
-      if: always() # Luôn chạy để nhóm có file HTML tải về xem đồ thị kết quả
+      if: always()
       with:
         name: Complete-Postman-Test-Reports
         path: postman-reports/
 
     # ==========================================
-    # TỰ ĐỘNG ĐĂNG NHẬP & TẠO BUG TRÊN JIRA KHI TEST FAIL
+    # ĐĂNG NHẬP JIRA
     # ==========================================
     - name: Login to Jira
-      if: failure() # Chỉ kích hoạt khi có ít nhất 1 bước test phía trên bị lỗi đỏ
+      if: env.SHOULD_CREATE_JIRA_BUG == 'true' # Chỉ chạy khi script bên trên quét ra có lỗi thật
       uses: atlassian/gajira-login@v3
       env:
         JIRA_BASE_URL: https://ayemqh-1766052090391.atlassian.net
         JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
         JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
+    # ==========================================
+    # TẠO TICKET VỚI NỘI DUNG LỖI CHI TIẾT TỰ ĐỘNG BẮN VÀO DESCRIPTION
+    # ==========================================
     - name: Create Bug Ticket on Jira
-      if: failure()
+      if: env.SHOULD_CREATE_JIRA_BUG == 'true'
       uses: atlassian/gajira-create@v3
       with:
         project: 'KCPM' 
         issuetype: 'Bug'
-        summary: '❌ [CI/CD] Kiểm thử API tự động phát hiện lỗi hệ thống'
+        summary: '❌ [CI/CD] Phát hiện lỗi Assert API tự động'
         description: |
-          Hệ thống kiểm thử tự động Newman trên GitHub Actions phát hiện có kịch bản API bị lỗi (Fail).
+          ${{ env.JIRA_ERROR_DETAILS }}
           
-          *Thông tin chi tiết:*
-          - **Người kích hoạt:** ${{ github.actor }}
-          - **Nhánh code:** ${{ github.ref_name }}
-          - **Cách kiểm tra chi tiết:** Vui lòng tải file báo cáo HTML trong mục **Artifacts** của lượt chạy này trên GitHub về để kiểm tra các hàm assert bị gãy.
+          *Thông tin kiểm thử:*
+          - Người kích hoạt: ${{ github.actor }}
+          - Nhánh code: ${{ github.ref_name }}
+          - Xem biểu đồ chi tiết: Vui lòng tải file report HTML trong mục Artifacts của GitHub Actions.
         fields: '{"priority": {"name": "High"}}'
