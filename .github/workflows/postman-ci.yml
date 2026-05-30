@@ -1,53 +1,92 @@
-name: CI Automated API Testing (Render Cloud BE - Collection Variables)
+name: Automated API Verification & Jira Bug Logging
 
-# Tự động kích hoạt khi có Pull Request vào nhánh develop hoặc main
 on:
+  push:
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "develop", "main" ]
+    branches: [ "main", "develop" ]
 
 jobs:
   api-verification:
-    runs-on: ubuntu-latest # Chạy trên máy chủ ảo Ubuntu của GitHub
+    runs-on: ubuntu-latest
 
     steps:
-    # Bước 1: Tải mã nguồn của dự án từ GitHub về máy ảo
-    - name: Checkout Code
+    - name: Checkout Repository Code
       uses: actions/checkout@v4
 
-    # Bước 2: Cài đặt Node.js để chạy công cụ Newman (Postman)
-    - name: Setup Node.js
+    - name: Setup Node.js Environment
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-with-version: '20'
 
-    # Bước 3: Cài đặt Newman và thư viện xuất báo cáo htmlextra đẹp mắt
-    - name: Install Newman & Reporter
-      run: npm install -g newman newman-reporter-htmlextra
-
-    # Bước 4: Chạy lần lượt từng Collection bằng Postman API Key
-    # Cấu hình KHÔNG cần tham số -e vì toàn bộ biến (baseUrl, token) đã nằm sẵn trong Collection Variables
-    - name: Execute All Postman Collections via API Key
+    - name: Install Newman and HTML Extra Reporter
       run: |
-        echo "--- Running Patient API Tests ---"
-        newman run "https://api.getpostman.com/collections/${{ secrets.COLLECTION_PATIENT_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
-        -r cli,htmlextra --reporter-htmlextra-export ./report-patient.html
+        npm install -g newman
+        npm install -g newman-reporter-htmlextra
 
-        echo "--- Running Doctor API Tests ---"
-        newman run "https://api.getpostman.com/collections/${{ secrets.COLLECTION_DOCTOR_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
-        -r cli,htmlextra --reporter-htmlextra-export ./report-doctor.html
+    - name: Create Reports Directory
+      run: mkdir -p postman-reports
 
-        echo "--- Running Clinic API Tests ---"
-        newman run "https://api.getpostman.com/collections/${{ secrets.COLLECTION_CLINIC_ID }}?apikey=${{ secrets.POSTMAN_API_KEY }}" \
-        -r cli,htmlextra --reporter-htmlextra-export ./report-clinic.html
+    # ==========================================
+    # CHẠY TEST & XUẤT ĐỒNG THỜI FILE HTML + JSON
+    # ==========================================
+    - name: Run Patient API Tests
+      run: |
+        newman run "./Patient API.postman_collection.json" \
+          -r htmlextra,json \
+          --reporter-htmlextra-export ./postman-reports/report-patient.html \
+          --reporter-json-export ./postman-reports/summary-patient.json
 
-    # Bước 5: Luôn lưu trữ và gom 3 file báo cáo kết quả HTML lên GitHub Artifacts
-    # Kể cả khi test Pass hay Fail, bước này vẫn luôn chạy để nhóm dễ dàng tải về kiểm tra xem lỗi ở đâu
-    - name: Upload All Test Reports
-      if: always() 
+    - name: Run Doctor API Tests
+      run: |
+        newman run "./Doctor API.postman_collection.json" \
+          -r htmlextra,json \
+          --reporter-htmlextra-export ./postman-reports/report-doctor.html \
+          --reporter-json-export ./postman-reports/summary-doctor.json
+
+    - name: Run Clinic API Tests
+      run: |
+        newman run "./Clinic API.postman_collection.json" \
+          -r htmlextra,json \
+          --reporter-htmlextra-export ./postman-reports/report-clinic.html \
+          --reporter-json-export ./postman-reports/summary-clinic.json
+
+    - name: Run Admin API Tests
+      run: |
+        newman run "./Admin API.postman_collection.json" \
+          -r htmlextra,json \
+          --reporter-htmlextra-export ./postman-reports/report-admin.html \
+          --reporter-json-export ./postman-reports/summary-admin.json
+
+    # ==========================================
+    # ĐẨY BÁO CÁO LÊN ARTIFACTS ĐỂ TẢI VỀ MÁY
+    # ==========================================
+    - name: Upload Test Reports Artifacts
       uses: actions/upload-artifact@v4
+      if: always() # Luôn luôn chạy kể cả test Pass hay Fail để lấy file báo cáo
       with:
-        name: postman-html-reports
-        path: |
-          ./report-patient.html
-          ./report-doctor.html
-          ./report-clinic.html
+        name: Complete-Postman-Test-Reports
+        path: postman-reports/
+
+    # ==========================================
+    # TỰ ĐỘNG LOG BUG LÊN JIRA KHI CÓ ĐOẠN TEST FAIL
+    # ==========================================
+    - name: Login to Jira & Create Bug Ticket
+      if: failure() # CHỈ KÍCH HOẠT KHI CÓ ÍT NHẤT 1 MODULE BỊ ĐỎ (FAIL)
+      uses: atlassian/gajira-create@v3
+      with:
+        project: 'KCPM' # Thay bằng Mã Project (Project Key) viết hoa trên Jira của nhóm bạn
+        issuetype: 'Bug'
+        summary: '❌ [CI/CD] Kiểm thử API tự động bị sập - Phát hiện lỗi hệ thống'
+        description: |
+          Hệ thống kiểm thử tự động Newman trên GitHub Actions phát hiện có API không trả về trạng thái 200 OK thành công.
+          
+          *Thông tin chi tiết:*
+          - **Người thực hiện:** ${{ github.actor }}
+          - **Nhánh Code:** ${{ github.ref_name }}
+          - **Chi tiết log lỗi:** Vui lòng truy cập tab Actions trên GitHub hoặc tải file `Complete-Postman-Test-Reports` trong mục Artifacts để xem biểu đồ HTML chi tiết.
+        fields: '{"priority": {"name": "High"}}'
+      env:
+        JIRA_BASE_URL: https://kcpm99.atlassian.net # Thay bằng đường dẫn trang Jira của nhóm bạn
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
