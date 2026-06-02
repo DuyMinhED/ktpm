@@ -1,14 +1,29 @@
 name: Java Backend & API Test Automation Pipeline
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main", "develop" ]
+    paths:
+      - "backend/**"
+      - "test/resources/**"
+      - ".github/workflows/**"
+      - ".github/scripts/**"
   pull_request:
     branches: [ "main", "develop" ]
+    paths:
+      - "backend/**"
+      - "test/resources/**"
+      - ".github/workflows/**"
+      - ".github/scripts/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
 
 jobs:
   backend-build:
@@ -33,7 +48,7 @@ jobs:
           mvn clean package -DskipTests --batch-mode --no-transfer-progress
 
   # ============================================================
-  # JOB 1: JAVA UNIT TEST (chạy độc lập, song song với job 2)
+  # JOB 1: JAVA UNIT TEST
   # ============================================================
   java-unit-tests:
     name: Java Unit & Integration Tests
@@ -55,23 +70,88 @@ jobs:
       - name: Run Maven Tests
         run: |
           cd backend
-          mvn test --batch-mode --no-transfer-progress
+          mvn clean verify --batch-mode --no-transfer-progress
 
-      - name: Upload Surefire Reports
+      - name: Publish Java Test Results
+        uses: mikepenz/action-junit-report@v5
+        if: always()
+        with:
+          report_paths: |
+            backend/target/surefire-reports/*.xml
+            backend/target/failsafe-reports/*.xml
+
+      - name: Upload Java Test Reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Java-Surefire-Reports
-          path: backend/target/surefire-reports/
+          name: Java-Test-Reports
+          path: |
+            backend/target/surefire-reports/
+            backend/target/failsafe-reports/
+          if-no-files-found: warn
+
+      - name: Add JaCoCo Coverage Summary
+        if: always()
+        run: |
+          if [ ! -f backend/target/site/jacoco/jacoco.csv ]; then
+            echo "JaCoCo CSV report not found; skipping coverage summary."
+            exit 0
+          fi
+
+          node --input-type=commonjs << 'EOF'
+          const fs = require("fs");
+
+          const csvPath = "backend/target/site/jacoco/jacoco.csv";
+          const rows = fs.readFileSync(csvPath, "utf8").trim().split(/\r?\n/);
+          const totals = rows.slice(1).reduce(
+            (acc, row) => {
+              const columns = row.split(",");
+              acc.instructionMissed += Number(columns[3] || 0);
+              acc.instructionCovered += Number(columns[4] || 0);
+              acc.branchMissed += Number(columns[5] || 0);
+              acc.branchCovered += Number(columns[6] || 0);
+              return acc;
+            },
+            { instructionMissed: 0, instructionCovered: 0, branchMissed: 0, branchCovered: 0 }
+          );
+
+          function percent(covered, missed) {
+            const total = covered + missed;
+            return total === 0 ? "N/A" : `${((covered / total) * 100).toFixed(2)}%`;
+          }
+
+          const summary = [
+            "## Java Coverage",
+            "",
+            "| Metric | Coverage | Covered | Missed |",
+            "| --- | ---: | ---: | ---: |",
+            `| Instructions | ${percent(totals.instructionCovered, totals.instructionMissed)} | ${totals.instructionCovered} | ${totals.instructionMissed} |`,
+            `| Branches | ${percent(totals.branchCovered, totals.branchMissed)} | ${totals.branchCovered} | ${totals.branchMissed} |`,
+            "",
+          ].join("\n");
+
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+          EOF
+
+      - name: Upload JaCoCo Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Java-JaCoCo-Coverage
+          path: backend/target/site/jacoco/
+          if-no-files-found: warn
 
   # ============================================================
-  # JOB 2: NEWMAN API TEST + TẠO JIRA TICKET
+  # JOB 2: NEWMAN API TEST + JIRA BUG SYNC
+  # Runs only after Java tests pass and only for push to main.
   # ============================================================
   api-tests-and-jira:
     name: Newman API Tests & Jira Bug Creation
-    needs: backend-build
+    needs:
+      - java-unit-tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
 
     steps:
       - name: Checkout Repository Code
@@ -99,28 +179,140 @@ jobs:
           echo "Using API base URL: $BASE_URL"
 
       - name: Wait for Deployed Backend
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: wait_render_deploy
+        continue-on-error: true
         env:
-          BACKEND_DEPLOY_WAIT_SECONDS: ${{ vars.BACKEND_DEPLOY_WAIT_SECONDS }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_DEPLOY_TIMEOUT_SECONDS: ${{ vars.RENDER_DEPLOY_TIMEOUT_SECONDS }}
+        run: |
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_SERVICE_ID" ]; then
+            echo "Missing RENDER_API_KEY or RENDER_SERVICE_ID secret."
+            echo "Create both GitHub Actions secrets so this workflow can wait for the real Render deploy."
+            exit 1
+          fi
+
+          node --input-type=module << 'EOF'
+          import https from "https";
+
+          const apiKey = process.env.RENDER_API_KEY;
+          const serviceId = process.env.RENDER_SERVICE_ID;
+          const commitSha = process.env.GITHUB_SHA;
+          const timeoutSeconds = Number(process.env.RENDER_DEPLOY_TIMEOUT_SECONDS || 900);
+          const pollIntervalMs = 15000;
+          const failedStatuses = new Set([
+            "build_failed",
+            "update_failed",
+            "pre_deploy_failed",
+            "canceled",
+            "deactivated",
+          ]);
+
+          function sleep(ms) {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+          }
+
+          function requestJson(path) {
+            return new Promise((resolve, reject) => {
+              const req = https.request(
+                {
+                  hostname: "api.render.com",
+                  path,
+                  method: "GET",
+                  headers: {
+                    Authorization: `Bearer ${apiKey}`,
+                    Accept: "application/json",
+                  },
+                },
+                (res) => {
+                  let data = "";
+                  res.on("data", (chunk) => (data += chunk));
+                  res.on("end", () => {
+                    if (res.statusCode < 200 || res.statusCode >= 300) {
+                      reject(new Error(`Render API HTTP ${res.statusCode}: ${data}`));
+                      return;
+                    }
+                    try {
+                      resolve(JSON.parse(data));
+                    } catch (err) {
+                      reject(new Error(`Invalid Render API JSON: ${err.message}`));
+                    }
+                  });
+                }
+              );
+              req.on("error", reject);
+              req.end();
+            });
+          }
+
+          function unwrapDeploy(item) {
+            return item?.deploy ?? item;
+          }
+
+          function getCommitId(deploy) {
+            const commit = deploy?.commit;
+            if (typeof commit === "string") return commit;
+            return (
+              commit?.id ||
+              commit?.sha ||
+              deploy?.commitId ||
+              deploy?.commitSHA ||
+              deploy?.commitSha ||
+              ""
+            );
+          }
+
+          function isCurrentCommit(deploy) {
+            const deployedCommit = getCommitId(deploy);
+            return Boolean(
+              deployedCommit &&
+              (commitSha.startsWith(deployedCommit) || deployedCommit.startsWith(commitSha))
+            );
+          }
+
+          const deadline = Date.now() + timeoutSeconds * 1000;
+          let lastStatus = "not-found";
+
+          console.log(`Waiting for Render service ${serviceId} to deploy commit ${commitSha}...`);
+
+          while (Date.now() < deadline) {
+            const data = await requestJson(`/v1/services/${serviceId}/deploys?limit=20`);
+            const deploys = Array.isArray(data) ? data.map(unwrapDeploy) : [];
+            const currentDeploy = deploys.find(isCurrentCommit);
+
+            if (!currentDeploy) {
+              console.log("Current commit deploy has not appeared on Render yet.");
+              await sleep(pollIntervalMs);
+              continue;
+            }
+
+            lastStatus = currentDeploy.status || "unknown";
+            console.log(`Render deploy ${currentDeploy.id || "(unknown id)"} status: ${lastStatus}`);
+
+            if (lastStatus === "live") {
+              console.log("Render deploy is live.");
+              process.exit(0);
+            }
+
+            if (failedStatuses.has(lastStatus)) {
+              throw new Error(`Render deploy failed with status: ${lastStatus}`);
+            }
+
+            await sleep(pollIntervalMs);
+          }
+
+          throw new Error(`Timed out waiting for Render deploy. Last status: ${lastStatus}`);
+          EOF
+
+      - name: Verify Deployed Backend Health
+        id: health_check
+        continue-on-error: true
         run: |
           HEALTH_URL="${API_BASE_URL_NORMALIZED}/api/v1/auth/health"
-          WAIT_SECONDS="${BACKEND_DEPLOY_WAIT_SECONDS:-120}"
-          echo "Waiting ${WAIT_SECONDS}s for Render to build and promote the latest backend deploy..."
-          sleep "$WAIT_SECONDS"
-          echo "Waiting for deployed backend: $HEALTH_URL"
-          for i in {1..30}; do
-            STATUS="$(curl -s -o /tmp/backend-health.json -w "%{http_code}" "$HEALTH_URL" || true)"
-            if [ "$STATUS" = "200" ]; then
-              echo "Backend is healthy."
-              cat /tmp/backend-health.json
-              exit 0
-            fi
-            echo "Attempt $i/30 failed with HTTP $STATUS. Retrying in 10 seconds..."
-            sleep 10
-          done
-          echo "Backend did not become healthy in time."
+          echo "Verifying deployed backend health: $HEALTH_URL"
+          STATUS="$(curl -s -o /tmp/backend-health.json -w "%{http_code}" "$HEALTH_URL" || true)"
           cat /tmp/backend-health.json || true
-          exit 1
+          test "$STATUS" = "200"
 
       # ----------------------------------------------------------
       # BƯỚC 2: CHẠY NEWMAN
@@ -128,6 +320,7 @@ jobs:
       # nhưng vẫn tiếp tục sang bước tạo Jira ticket
       # ----------------------------------------------------------
       - name: Run Admin API Tests
+        if: steps.wait_render_deploy.outcome == 'success' && steps.health_check.outcome == 'success'
         run: |
           newman run "./test/resources/Admin API.postman_collection.json" \
             --env-var "baseUrl=${API_BASE_URL_NORMALIZED}" \
@@ -138,6 +331,7 @@ jobs:
             || true
 
       - name: Run Clinic API Tests
+        if: steps.wait_render_deploy.outcome == 'success' && steps.health_check.outcome == 'success'
         run: |
           newman run "./test/resources/Clinic API.postman_collection.json" \
             --env-var "baseUrl=${API_BASE_URL_NORMALIZED}" \
@@ -148,6 +342,7 @@ jobs:
             || true
 
       - name: Run Doctor API Tests
+        if: steps.wait_render_deploy.outcome == 'success' && steps.health_check.outcome == 'success'
         run: |
           newman run "./test/resources/Doctor API.postman_collection.json" \
             --env-var "baseUrl=${API_BASE_URL_NORMALIZED}" \
@@ -158,6 +353,7 @@ jobs:
             || true
 
       - name: Run Patient API Tests
+        if: steps.wait_render_deploy.outcome == 'success' && steps.health_check.outcome == 'success'
         run: |
           newman run "./test/resources/Patient API.postman_collection.json" \
             --env-var "baseUrl=${API_BASE_URL_NORMALIZED}" \
@@ -167,237 +363,6 @@ jobs:
             --reporter-htmlextra-title "Patient API Test Report" \
             || true
 
-      # ----------------------------------------------------------
-      # BƯỚC 3: PARSE LỖI → CHECK TRÙNG → TẠO MỚI HOẶC COMMENT
-      # ----------------------------------------------------------
-      - name: Parse Failures & Sync to Jira
-        if: always() && github.ref == 'refs/heads/main'
-        env:
-          JIRA_BASE_URL: https://ayemqh-1766052090391.atlassian.net
-          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          JIRA_MEMBER_IDS: ${{ secrets.JIRA_MEMBER_IDS }}
-          PROJECT_KEY: 'KCPM'
-          ACTOR: ${{ github.actor }}
-          BRANCH: ${{ github.ref_name }}
-        run: |
-          node --input-type=commonjs << 'EOF'
-          const fs     = require("fs");
-          const https  = require("https");
-          const crypto = require("crypto");
-
-          // ── Đọc member IDs từ Secret ────────────────────────────────────
-          let members;
-          try {
-            members = JSON.parse(process.env.JIRA_MEMBER_IDS);
-            if (!Array.isArray(members) || members.length === 0) throw new Error();
-          } catch {
-            console.error("❌ JIRA_MEMBER_IDS không hợp lệ — kiểm tra lại Secret.");
-            process.exit(1);
-          }
-
-          const BASE_URL = process.env.JIRA_BASE_URL;
-          const AUTH     = Buffer.from(
-            `${process.env.JIRA_USER_EMAIL}:${process.env.JIRA_API_TOKEN}`
-          ).toString("base64");
-
-          function makeFingerprint(moduleName, apiName) {
-            const raw = `${moduleName}::${apiName}`.toLowerCase().trim();
-            return "fp-" + crypto.createHash("sha1").update(raw).digest("hex").slice(0, 10);
-          }
-
-          function jiraRequest(method, path, body = null) {
-            return new Promise((resolve, reject) => {
-              const bodyStr = body ? JSON.stringify(body) : null;
-              const url     = new URL(`${BASE_URL}${path}`);
-              const headers = {
-                "Authorization": `Basic ${AUTH}`,
-                "Accept":        "application/json",
-                "Content-Type":  "application/json",
-              };
-              if (bodyStr) headers["Content-Length"] = Buffer.byteLength(bodyStr);
-
-              const req = https.request(
-                { hostname: url.hostname, path: url.pathname + url.search, method, headers },
-                (res) => {
-                  let data = "";
-                  res.on("data", (chunk) => (data += chunk));
-                  res.on("end", () => {
-                    try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
-                    catch { resolve({ status: res.statusCode, body: data }); }
-                  });
-                }
-              );
-              req.on("error", reject);
-              if (bodyStr) req.write(bodyStr);
-              req.end();
-            });
-          }
-
-          async function findExistingIssue(fingerprint) {
-            const jql = `project = "${process.env.PROJECT_KEY}" AND labels = "${fingerprint}" AND statusCategory != Done`;
-          
-            try {
-              const res = await jiraRequest(
-                "POST",                          // ← đổi GET thành POST
-                "/rest/api/3/search/jql",            // ✅ ĐÃ CẬP NHẬT: Đổi từ /issue/search thành /search/jql
-                {                                // ← truyền body thay vì query string
-                  jql,
-                  maxResults: 1,
-                  fields: ["summary", "status"]
-                }
-              );
-              if (res.status !== 200) {
-                console.warn(`⚠️  Search API trả về HTTP ${res.status} — bỏ qua check trùng, sẽ tạo mới.`);
-                return null;
-              }
-              return res.body?.issues?.[0] ?? null;
-            } catch (err) {
-              console.warn(`⚠️  Search API lỗi kết nối (${err.message}) — bỏ qua check trùng, sẽ tạo mới.`);
-              return null;
-            }
-          }
-
-          async function addWarningComment(issueKey) {
-            const payload = {
-              body: {
-                type: "doc", version: 1,
-                content: [
-                  {
-                    type: "paragraph",
-                    content: [
-                      { type: "text", text: "⚠️ [CI/CD cảnh báo] ", marks: [{ type: "strong" }] },
-                      { type: "text", text: "Lỗi này tái phát trong lượt chạy pipeline mới nhất!" },
-                    ]
-                  },
-                  {
-                    type: "bulletList",
-                    content: [
-                      { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Người kích hoạt build: ${process.env.ACTOR}` }] }] },
-                      { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Nhánh code: ${process.env.BRANCH}` }] }] },
-                    ]
-                  },
-                  {
-                    type: "paragraph",
-                    content: [{ type: "text", text: "Xem báo cáo chi tiết tại mục Artifacts trên GitHub Actions." }]
-                  }
-                ]
-              }
-            };
-
-            const res = await jiraRequest("POST", `/rest/api/3/issue/${issueKey}/comment`, payload);
-            if (res.status === 201) {
-              console.log(`💬 Đã thêm comment cảnh báo vào ${issueKey}.`);
-            } else {
-              console.error(`❌ Thêm comment vào ${issueKey} thất bại (HTTP ${res.status}).`);
-            }
-          }
-
-          async function createIssue(bug, summary, assigneeId, fingerprint) {
-            const payload = {
-              fields: {
-                project:   { key: process.env.PROJECT_KEY },
-                summary,
-                issuetype: { name: "Bug" },
-                priority:  { name: "High" },
-                assignee:  { id: assigneeId },
-                labels:    [fingerprint, "auto-created"],
-                description: {
-                  type: "doc", version: 1,
-                  content: [
-                    {
-                      type: "paragraph",
-                      content: [{ type: "text", text: "Hệ thống CI/CD phát hiện assertion bị gãy:" }]
-                    },
-                    {
-                      type: "bulletList",
-                      content: [
-                        { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Bộ kịch bản: ${bug.moduleName}` }] }] },
-                        { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Tên API: ${bug.apiName}` }] }] },
-                        { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Chi tiết lỗi: ${bug.errorMsg}`, marks: [{ type: "strong" }] }] }] },
-                        { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Fingerprint: ${fingerprint}` }] }] },
-                        { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Người kích hoạt build: ${process.env.ACTOR}` }] }] },
-                        { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Nhánh code: ${process.env.BRANCH}` }] }] },
-                      ]
-                    },
-                    {
-                      type: "paragraph",
-                      content: [{ type: "text", text: "Xem báo cáo chi tiết tại mục Artifacts trên GitHub Actions." }]
-                    }
-                  ]
-                }
-              }
-            };
-
-            const res = await jiraRequest("POST", "/rest/api/3/issue", payload);
-            return res.body;
-          }
-
-          const REPORT_FILES = [
-            { name: "Admin API",   file: "./postman-reports/summary-admin.json"   },
-            { name: "Clinic API",  file: "./postman-reports/summary-clinic.json"  },
-            { name: "Doctor API",  file: "./postman-reports/summary-doctor.json"  },
-            { name: "Patient API", file: "./postman-reports/summary-patient.json" },
-          ];
-
-          const seen     = new Set();
-          const failures = [];
-
-          for (const item of REPORT_FILES) {
-            if (!fs.existsSync(item.file)) continue;
-            const data = JSON.parse(fs.readFileSync(item.file, "utf8"));
-            for (const fail of data?.run?.failures ?? []) {
-              const apiName  = fail?.source?.name ?? "Không rõ API";
-              const errorMsg = (fail?.error?.message ?? "Lỗi Assert")
-                .replace(/[\r\n"]+/g, " ").trim();
-              const key = `${item.name}|||${apiName}`;
-              if (!seen.has(key)) {
-                seen.add(key);
-                failures.push({ moduleName: item.name, apiName, errorMsg });
-              }
-            }
-          }
-
-          async function main() {
-            if (failures.length === 0) {
-              console.log("✅ Không có lỗi nào — không cần xử lý Jira.");
-              process.exit(0);
-            }
-
-            console.log(`📋 Tổng lỗi duy nhất phát hiện: ${failures.length}\n`);
-
-            let created     = 0;
-            let commented   = 0;
-            let assigneeIdx = 0;
-
-            for (const bug of failures) {
-              const fingerprint = makeFingerprint(bug.moduleName, bug.apiName);
-              const summary     = `[CI/CD] Lỗi API: ${bug.apiName} (${bug.moduleName})`;
-              const existing    = await findExistingIssue(fingerprint);
-
-              if (existing) {
-                console.log(`🔍 Trùng lặp: ${existing.key} (${existing.fields?.status?.name}) — "${summary}" [${fingerprint}]`);
-                await addWarningComment(existing.key);
-                commented++;
-              } else {
-                const assigneeId = members[assigneeIdx % members.length];
-                const result     = await createIssue(bug, summary, assigneeId, fingerprint);
-                if (result?.key) {
-                  console.log(`✅ Tạo mới: ${result.key} — "${summary}" [${fingerprint}] → gán index ${assigneeIdx % members.length}`);
-                  assigneeIdx++;
-                  created++;
-                } else {
-                  console.error(`❌ Tạo thất bại: "${summary}"`, JSON.stringify(result));
-                }
-              }
-            }
-
-            console.log(`\n🏁 Hoàn tất — Tạo mới: ${created} | Comment tái phát: ${commented} | Tổng: ${failures.length}`);
-          }
-
-          main().catch((err) => { console.error("❌ Lỗi không mong đợi:", err); process.exit(1); });
-          EOF
-
       - name: Upload Test Reports Artifacts
         uses: actions/upload-artifact@v4
         if: always()
@@ -405,3 +370,28 @@ jobs:
           name: Complete-Postman-Test-Reports
           path: postman-reports/
           retention-days: 14
+          if-no-files-found: warn
+
+      # ----------------------------------------------------------
+      # BƯỚC 3: PARSE LỖI → CHECK TRÙNG → TẠO MỚI HOẶC COMMENT
+      # ----------------------------------------------------------
+      - name: Parse Failures & Sync to Jira
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_MEMBER_IDS: ${{ secrets.JIRA_MEMBER_IDS }}
+          PROJECT_KEY: 'KCPM'
+          ACTOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          DEPLOY_STEP_OUTCOME: ${{ steps.wait_render_deploy.outcome }}
+          HEALTH_STEP_OUTCOME: ${{ steps.health_check.outcome }}
+        run: node .github/scripts/sync-jira-failures.js
+
+      - name: Fail Pipeline if API or Runtime Checks Failed
+        if: always()
+        env:
+          DEPLOY_STEP_OUTCOME: ${{ steps.wait_render_deploy.outcome }}
+          HEALTH_STEP_OUTCOME: ${{ steps.health_check.outcome }}
+        run: node .github/scripts/fail-on-api-or-runtime-failures.js
