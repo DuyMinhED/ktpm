@@ -183,7 +183,7 @@ jobs:
             try {
               const res = await jiraRequest(
                 "POST",                          // ← đổi GET thành POST
-                "/rest/api/3/search",            // ✅ ĐÃ CẬP NHẬT: Đổi từ /issue/search thành /search
+                "/rest/api/3/search/jql",            // ✅ ĐÃ CẬP NHẬT: Đổi từ /issue/search thành /search/jql
                 {                                // ← truyền body thay vì query string
                   jql,
                   maxResults: 1,
