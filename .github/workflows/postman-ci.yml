@@ -113,14 +113,16 @@ jobs:
       # ----------------------------------------------------------
       # BƯỚC 3: PARSE LỖI → CHECK TRÙNG → TẠO MỚI HOẶC COMMENT
       #
-      # Logic:
+      # Logic deduplication:
       #   1. Thu thập lỗi duy nhất từ các summary JSON.
-      #   2. Với mỗi lỗi, search Jira (JQL exact summary + chưa Done).
-      #      - Search thất bại (network/auth) → fail-open: vẫn tạo mới,
-      #        không bỏ sót bug.
-      #   3. Nếu đã tồn tại → thêm comment cảnh báo vào ticket gốc.
-      #   4. Nếu chưa có   → tạo ticket Bug mới, gán round-robin.
-      #   5. assigneeIndex chỉ tăng khi tạo mới (không bị lệch do skip).
+      #   2. Sinh fingerprint = SHA1(moduleName::apiName) — KHÔNG dùng
+      #      errorMsg vì message có thể chứa giá trị động (timestamp,
+      #      số dòng) thay đổi mỗi build, khiến fingerprint không ổn định.
+      #   3. Tìm ticket Jira theo label = fingerprint (chưa Done).
+      #      - Tìm thấy  → thêm comment cảnh báo tái phát, KHÔNG tạo mới.
+      #      - Không thấy → tạo ticket mới, gắn label fingerprint.
+      #      - Search lỗi → fail-open: vẫn tạo mới, không bỏ sót bug.
+      #   4. assigneeIndex chỉ tăng khi tạo mới (round-robin không lệch).
       # ----------------------------------------------------------
       - name: Parse Failures & Sync to Jira
         if: always() && github.ref == 'refs/heads/main'
@@ -134,8 +136,9 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         run: |
           node --input-type=commonjs << 'EOF'
-          const fs    = require("fs");
-          const https = require("https");
+          const fs     = require("fs");
+          const https  = require("https");
+          const crypto = require("crypto");
 
           // ── Đọc member IDs từ Secret ────────────────────────────────────
           // JIRA_MEMBER_IDS dạng JSON array:
@@ -153,6 +156,15 @@ jobs:
           const AUTH     = Buffer.from(
             `${process.env.JIRA_USER_EMAIL}:${process.env.JIRA_API_TOKEN}`
           ).toString("base64");
+
+          // ── Tạo fingerprint ổn định cho mỗi lỗi ────────────────────────
+          // Chỉ hash moduleName + apiName — cả hai đều cố định, không phụ
+          // thuộc vào nội dung response hay số dòng code.
+          // Kết quả: "fp-" + 10 ký tự hex, ví dụ "fp-3a9b1c2d4e"
+          function makeFingerprint(moduleName, apiName) {
+            const raw = `${moduleName}::${apiName}`.toLowerCase().trim();
+            return "fp-" + crypto.createHash("sha1").update(raw).digest("hex").slice(0, 10);
+          }
 
           // ── Hàm gọi Jira REST API ───────────────────────────────────────
           // Trả về { status, body } để caller phân biệt được 2xx vs 4xx/5xx.
@@ -184,14 +196,15 @@ jobs:
             });
           }
 
-          // ── Tìm ticket trùng trên Jira ──────────────────────────────────
-          // Dùng exact-match summary (= thay vì ~) để tránh false-positive.
-          // Chỉ tìm trong ticket chưa Done — bug đã fix mà tái phát sẽ tạo ticket mới.
-          // Nếu Search API lỗi → fail-open (trả về null) để caller tạo mới,
-          // không bỏ sót bug vì sự cố mạng hay auth tạm thời.
-          async function findExistingIssue(summary) {
-            const escJql = (s) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-            const jql    = `project = "${process.env.PROJECT_KEY}" AND summary = "${escJql(summary)}" AND statusCategory != Done`;
+          // ── Tìm ticket trùng theo fingerprint label ─────────────────────
+          // Tìm bằng label thay vì summary — ổn định dù summary thay đổi
+          // format hay có thêm ký tự đặc biệt.
+          // Chỉ tìm ticket chưa Done — nếu ticket đã Done mà lỗi tái phát
+          // thì coi là regression, tạo ticket mới.
+          // Fail-open: lỗi mạng / auth tạm thời → trả null để tạo mới,
+          // không bỏ sót bug vì sự cố hạ tầng.
+          async function findExistingIssue(fingerprint) {
+            const jql = `project = "${process.env.PROJECT_KEY}" AND labels = "${fingerprint}" AND statusCategory != Done`;
 
             try {
               const res = await jiraRequest(
@@ -200,12 +213,12 @@ jobs:
               );
               if (res.status !== 200) {
                 console.warn(`⚠️  Search API trả về HTTP ${res.status} — bỏ qua check trùng, sẽ tạo mới.`);
-                return null; // fail-open
+                return null;
               }
               return res.body?.issues?.[0] ?? null;
             } catch (err) {
               console.warn(`⚠️  Search API lỗi kết nối (${err.message}) — bỏ qua check trùng, sẽ tạo mới.`);
-              return null; // fail-open
+              return null;
             }
           }
 
@@ -246,7 +259,8 @@ jobs:
           }
 
           // ── Tạo ticket Bug mới ──────────────────────────────────────────
-          async function createIssue(bug, summary, assigneeId) {
+          // Gắn fingerprint vào labels để các lần build sau tìm được ticket này.
+          async function createIssue(bug, summary, assigneeId, fingerprint) {
             const payload = {
               fields: {
                 project:   { key: process.env.PROJECT_KEY },
@@ -254,6 +268,7 @@ jobs:
                 issuetype: { name: "Bug" },
                 priority:  { name: "High" },
                 assignee:  { id: assigneeId },
+                labels:    [fingerprint, "auto-created"],
                 description: {
                   type: "doc", version: 1,
                   content: [
@@ -267,6 +282,7 @@ jobs:
                         { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Bộ kịch bản: ${bug.moduleName}` }] }] },
                         { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Tên API: ${bug.apiName}` }] }] },
                         { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Chi tiết lỗi: ${bug.errorMsg}`, marks: [{ type: "strong" }] }] }] },
+                        { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Fingerprint: ${fingerprint}` }] }] },
                         { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Người kích hoạt build: ${process.env.ACTOR}` }] }] },
                         { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: `Nhánh code: ${process.env.BRANCH}` }] }] },
                       ]
@@ -302,7 +318,9 @@ jobs:
               const apiName  = fail?.source?.name ?? "Không rõ API";
               const errorMsg = (fail?.error?.message ?? "Lỗi Assert")
                 .replace(/[\r\n"]+/g, " ").trim();
-              const key = `${item.name}|||${apiName}|||${errorMsg}`;
+              // Key dedup nội bộ: chỉ dùng moduleName + apiName (không dùng
+              // errorMsg) để gộp các lỗi cùng API dù message hơi khác nhau.
+              const key = `${item.name}|||${apiName}`;
               if (!seen.has(key)) {
                 seen.add(key);
                 failures.push({ moduleName: item.name, apiName, errorMsg });
@@ -311,7 +329,6 @@ jobs:
           }
 
           // ── Hàm main bọc toàn bộ async logic ──────────────────────────
-          // CommonJS không hỗ trợ top-level await, phải wrap vào async function.
           async function main() {
             if (failures.length === 0) {
               console.log("✅ Không có lỗi nào — không cần xử lý Jira.");
@@ -320,25 +337,24 @@ jobs:
 
             console.log(`📋 Tổng lỗi duy nhất phát hiện: ${failures.length}\n`);
 
-            // Tuần tự để tránh rate limit Jira Search API.
-            // assigneeIdx chỉ tăng khi tạo mới — round-robin không bị lệch do skip.
             let created     = 0;
             let commented   = 0;
             let assigneeIdx = 0;
 
             for (const bug of failures) {
-              const summary  = `[CI/CD] Lỗi API: ${bug.apiName} (${bug.moduleName})`;
-              const existing = await findExistingIssue(summary);
+              const fingerprint = makeFingerprint(bug.moduleName, bug.apiName);
+              const summary     = `[CI/CD] Lỗi API: ${bug.apiName} (${bug.moduleName})`;
+              const existing    = await findExistingIssue(fingerprint);
 
               if (existing) {
-                console.log(`🔍 Trùng lặp: ${existing.key} (${existing.fields?.status?.name}) — "${summary}"`);
+                console.log(`🔍 Trùng lặp: ${existing.key} (${existing.fields?.status?.name}) — "${summary}" [${fingerprint}]`);
                 await addWarningComment(existing.key);
                 commented++;
               } else {
                 const assigneeId = members[assigneeIdx % members.length];
-                const result     = await createIssue(bug, summary, assigneeId);
+                const result     = await createIssue(bug, summary, assigneeId, fingerprint);
                 if (result?.key) {
-                  console.log(`✅ Tạo mới: ${result.key} — "${summary}" → gán index ${assigneeIdx % members.length}`);
+                  console.log(`✅ Tạo mới: ${result.key} — "${summary}" [${fingerprint}] → gán index ${assigneeIdx % members.length}`);
                   assigneeIdx++;
                   created++;
                 } else {
