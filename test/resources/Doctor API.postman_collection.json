@@ -50,7 +50,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"denpto7b6@gmail.com\",\n  \"password\": \"Denyeubama1\"\n}"
+              "raw": "{\n  \"email\": \"mai.le@care.com\",\n  \"password\": \"admin123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
@@ -216,7 +216,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/doctor/patients/446",
+              "raw": "{{baseUrl}}/api/v1/doctor/patients/{{doctor_patient_id}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -225,7 +225,7 @@
                 "v1",
                 "doctor",
                 "patients",
-                "446"
+                "{{doctor_patient_id}}"
               ]
             }
           },
@@ -343,7 +343,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2024-06-01\",\n  \"appointmentTime\": \"09:00\",\n  \"type\": \"ONLINE\",\n  \"notes\": \"Khám định kỳ\",\n  \"meetingLink\": \"https://meet.google.com/abc\"\n}"
+              "raw": "{\n  \"patientId\": {{doctor_patient_id}},\n  \"appointmentDate\": \"2026-06-10\",\n  \"appointmentTime\": \"09:00\",\n  \"type\": \"ONLINE\",\n  \"notes\": \"Khám định kỳ\",\n  \"meetingLink\": \"https://meet.google.com/abc\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/doctor/appointments",
@@ -433,7 +433,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/doctor/appointments/batch-reschedule?sourceDate=2024-05-24&targetDate=2024-05-25",
+              "raw": "{{baseUrl}}/api/v1/doctor/appointments/batch-reschedule?sourceDate=2026-06-10&targetDate=2026-06-11",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -447,11 +447,11 @@
               "query": [
                 {
                   "key": "sourceDate",
-                  "value": "2024-05-24"
+                  "value": "2026-06-10"
                 },
                 {
                   "key": "targetDate",
-                  "value": "2024-05-25"
+                  "value": "2026-06-11"
                 }
               ]
             }
@@ -565,7 +565,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"patientId\": 446,\n  \"diagnosis\": \"Viêm họng mãn tính\",\n  \"notes\": \"Uống nhiều nước ấm\",\n  \"items\": [\n    {\n      \"medicationName\": \"Paracetamol 500mg\",\n      \"dosage\": \"1 viên/lần\",\n      \"usageInstructions\": \"Sáng 1 viên, tối 1 viên sau ăn\"\n    },\n    {\n      \"medicationName\": \"Vitamin C\",\n      \"dosage\": \"1 viên/ngày\",\n      \"usageInstructions\": \"Sáng 1 viên\"\n    }\n  ]\n}"
+              "raw": "{\n  \"patientId\": {{doctor_patient_id}},\n  \"diagnosis\": \"Viêm họng mãn tính\",\n  \"notes\": \"Uống nhiều nước ấm\",\n  \"items\": [\n    {\n      \"medicationName\": \"Paracetamol 500mg\",\n      \"dosage\": \"1 viên/lần\",\n      \"usageInstructions\": \"Sáng 1 viên, tối 1 viên sau ăn\"\n    },\n    {\n      \"medicationName\": \"Vitamin C\",\n      \"dosage\": \"1 viên/ngày\",\n      \"usageInstructions\": \"Sáng 1 viên\"\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/doctor/prescriptions",
@@ -690,7 +690,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"receiverId\": 2,\n  \"content\": \"Chào bạn, kết quả xét nghiệm của bạn đã ổn định nhé!\",\n  \"messageType\": \"TEXT\"\n}"
+              "raw": "{\n  \"receiverId\": {{doctor_patient_user_id}},\n  \"content\": \"Chào bạn, kết quả xét nghiệm của bạn đã ổn định nhé!\",\n  \"messageType\": \"TEXT\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/doctor/messages/send",
@@ -762,6 +762,16 @@
     {
       "key": "latest_appointment_id",
       "value": "",
+      "type": "default"
+    },
+    {
+      "key": "doctor_patient_id",
+      "value": "1",
+      "type": "default"
+    },
+    {
+      "key": "doctor_patient_user_id",
+      "value": "6",
       "type": "default"
     }
   ]

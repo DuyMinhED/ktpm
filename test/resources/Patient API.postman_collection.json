@@ -49,7 +49,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"ntpatient@gmail.com\",\n  \"password\": \"Denyeubama2\"\n}"
+              "raw": "{\n  \"email\": \"truongquocan@patient.com\",\n  \"password\": \"admin123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
@@ -324,7 +324,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"metricType\": \"BLOOD_PRESSURE\",\n  \"value\": 120,\n  \"valueSecondary\": 80,\n  \"unit\": \"mmHg\",\n  \"notes\": \"Test\",\n  \"measuredAt\": \"2024-05-24T08:00:00\"\n}"
+              "raw": "{\n  \"metricType\": \"BLOOD_PRESSURE\",\n  \"value\": 120,\n  \"valueSecondary\": 80,\n  \"unit\": \"mmHg\",\n  \"notes\": \"Test\",\n  \"measuredAt\": \"2026-06-02T08:00:00\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patient/health-metrics",
