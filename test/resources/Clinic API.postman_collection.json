@@ -596,7 +596,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/v1/clinics/{{clinicId}}/reports?period=30d",
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/reports?period=30d",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -698,7 +698,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://chronic-disease-management.onrender.com"
+      "value": "https://health-management-backend-d1gk.onrender.com"
     },
     {
       "key": "token",
