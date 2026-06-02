@@ -112,17 +112,6 @@ jobs:
 
       # ----------------------------------------------------------
       # BƯỚC 3: PARSE LỖI → CHECK TRÙNG → TẠO MỚI HOẶC COMMENT
-      #
-      # Logic deduplication:
-      #   1. Thu thập lỗi duy nhất từ các summary JSON.
-      #   2. Sinh fingerprint = SHA1(moduleName::apiName) — KHÔNG dùng
-      #      errorMsg vì message có thể chứa giá trị động (timestamp,
-      #      số dòng) thay đổi mỗi build, khiến fingerprint không ổn định.
-      #   3. Tìm ticket Jira theo label = fingerprint (chưa Done).
-      #      - Tìm thấy  → thêm comment cảnh báo tái phát, KHÔNG tạo mới.
-      #      - Không thấy → tạo ticket mới, gắn label fingerprint.
-      #      - Search lỗi → fail-open: vẫn tạo mới, không bỏ sót bug.
-      #   4. assigneeIndex chỉ tăng khi tạo mới (round-robin không lệch).
       # ----------------------------------------------------------
       - name: Parse Failures & Sync to Jira
         if: always() && github.ref == 'refs/heads/main'
@@ -141,8 +130,6 @@ jobs:
           const crypto = require("crypto");
 
           // ── Đọc member IDs từ Secret ────────────────────────────────────
-          // JIRA_MEMBER_IDS dạng JSON array:
-          // ["712020:da4a7c51-...","712020:c79c7014-...","712020:fcf34ed4-..."]
           let members;
           try {
             members = JSON.parse(process.env.JIRA_MEMBER_IDS);
@@ -157,17 +144,11 @@ jobs:
             `${process.env.JIRA_USER_EMAIL}:${process.env.JIRA_API_TOKEN}`
           ).toString("base64");
 
-          // ── Tạo fingerprint ổn định cho mỗi lỗi ────────────────────────
-          // Chỉ hash moduleName + apiName — cả hai đều cố định, không phụ
-          // thuộc vào nội dung response hay số dòng code.
-          // Kết quả: "fp-" + 10 ký tự hex, ví dụ "fp-3a9b1c2d4e"
           function makeFingerprint(moduleName, apiName) {
             const raw = `${moduleName}::${apiName}`.toLowerCase().trim();
             return "fp-" + crypto.createHash("sha1").update(raw).digest("hex").slice(0, 10);
           }
 
-          // ── Hàm gọi Jira REST API ───────────────────────────────────────
-          // Trả về { status, body } để caller phân biệt được 2xx vs 4xx/5xx.
           function jiraRequest(method, path, body = null) {
             return new Promise((resolve, reject) => {
               const bodyStr = body ? JSON.stringify(body) : null;
@@ -196,20 +177,13 @@ jobs:
             });
           }
 
-          // ── Tìm ticket trùng theo fingerprint label ─────────────────────
-          // Tìm bằng label thay vì summary — ổn định dù summary thay đổi
-          // format hay có thêm ký tự đặc biệt.
-          // Chỉ tìm ticket chưa Done — nếu ticket đã Done mà lỗi tái phát
-          // thì coi là regression, tạo ticket mới.
-          // Fail-open: lỗi mạng / auth tạm thời → trả null để tạo mới,
-          // không bỏ sót bug vì sự cố hạ tầng.
           async function findExistingIssue(fingerprint) {
             const jql = `project = "${process.env.PROJECT_KEY}" AND labels = "${fingerprint}" AND statusCategory != Done`;
           
             try {
               const res = await jiraRequest(
                 "POST",                          // ← đổi GET thành POST
-                "/rest/api/3/issue/search",      // ← đổi path, bỏ query string
+                "/rest/api/3/search",            // ✅ ĐÃ CẬP NHẬT: Đổi từ /issue/search thành /search
                 {                                // ← truyền body thay vì query string
                   jql,
                   maxResults: 1,
@@ -227,7 +201,6 @@ jobs:
             }
           }
 
-          // ── Thêm comment cảnh báo vào ticket đã tồn tại ────────────────
           async function addWarningComment(issueKey) {
             const payload = {
               body: {
@@ -263,8 +236,6 @@ jobs:
             }
           }
 
-          // ── Tạo ticket Bug mới ──────────────────────────────────────────
-          // Gắn fingerprint vào labels để các lần build sau tìm được ticket này.
           async function createIssue(bug, summary, assigneeId, fingerprint) {
             const payload = {
               fields: {
@@ -305,7 +276,6 @@ jobs:
             return res.body;
           }
 
-          // ── Thu thập lỗi duy nhất từ tất cả summary files ─────────────
           const REPORT_FILES = [
             { name: "Admin API",   file: "./postman-reports/summary-admin.json"   },
             { name: "Clinic API",  file: "./postman-reports/summary-clinic.json"  },
@@ -323,8 +293,6 @@ jobs:
               const apiName  = fail?.source?.name ?? "Không rõ API";
               const errorMsg = (fail?.error?.message ?? "Lỗi Assert")
                 .replace(/[\r\n"]+/g, " ").trim();
-              // Key dedup nội bộ: chỉ dùng moduleName + apiName (không dùng
-              // errorMsg) để gộp các lỗi cùng API dù message hơi khác nhau.
               const key = `${item.name}|||${apiName}`;
               if (!seen.has(key)) {
                 seen.add(key);
@@ -333,7 +301,6 @@ jobs:
             }
           }
 
-          // ── Hàm main bọc toàn bộ async logic ──────────────────────────
           async function main() {
             if (failures.length === 0) {
               console.log("✅ Không có lỗi nào — không cần xử lý Jira.");
@@ -374,9 +341,6 @@ jobs:
           main().catch((err) => { console.error("❌ Lỗi không mong đợi:", err); process.exit(1); });
           EOF
 
-      # ----------------------------------------------------------
-      # BƯỚC 4: UPLOAD ARTIFACTS (luôn chạy dù test fail)
-      # ----------------------------------------------------------
       - name: Upload Test Reports Artifacts
         uses: actions/upload-artifact@v4
         if: always()
