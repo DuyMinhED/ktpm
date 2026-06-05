@@ -1,0 +1,27 @@
+# Target directories (Java/Maven)
+**/target/
+target/
+*.class
+
+# Node / Frontend dependencies & build output
+**/node_modules/
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+
+# Postman reports
+reporters/
+postman-reports/
+*.log
+
+# IDEs & System files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+.env.local
+.env.*.local
