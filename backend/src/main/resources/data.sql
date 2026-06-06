@@ -67,7 +67,7 @@ WHERE NOT EXISTS (SELECT 1 FROM clinics WHERE id = 1);
 INSERT INTO appointments (doctor_id, patient_id, appointment_time, end_time, status, type, location, meeting_link, reason, diagnosis_summary, doctor_name, doctor_specialty, doctor_avatar_url, reminder_enabled, is_deleted, created_at)
 SELECT 
   (SELECT id FROM users WHERE email = 'mai.le@care.com' LIMIT 1),
-  (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1),
+  (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1),
   CURRENT_TIMESTAMP + INTERVAL '3 days',
   CURRENT_TIMESTAMP + INTERVAL '3 days' + INTERVAL '30 minutes',
   'SCHEDULED', 'ONLINE', 'Phòng khám trực tuyến', 'https://meet.google.com/abc-xyz-123',
@@ -76,13 +76,13 @@ SELECT
 WHERE NOT EXISTS (
   SELECT 1 FROM appointments a 
   JOIN patients p ON a.patient_id = p.id 
-  WHERE p.email = 'truongquocan@patient.com' AND a.status = 'SCHEDULED'
+  WHERE p.patient_code = 'BN-DUC-001' AND a.status = 'SCHEDULED'
 );
 
 INSERT INTO appointments (doctor_id, patient_id, appointment_time, end_time, status, type, location, meeting_link, reason, diagnosis_summary, doctor_name, doctor_specialty, doctor_avatar_url, reminder_enabled, is_deleted, created_at)
 SELECT 
   (SELECT id FROM users WHERE email = 'mai.le@care.com' LIMIT 1),
-  (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1),
+  (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1),
   CURRENT_TIMESTAMP - INTERVAL '14 days',
   CURRENT_TIMESTAMP - INTERVAL '14 days' + INTERVAL '30 minutes',
   'COMPLETED', 'IN_PERSON', 'Phòng 201 - Khu A', NULL,
@@ -91,13 +91,13 @@ SELECT
 WHERE NOT EXISTS (
   SELECT 1 FROM appointments a 
   JOIN patients p ON a.patient_id = p.id 
-  WHERE p.email = 'truongquocan@patient.com' AND a.status = 'COMPLETED'
+  WHERE p.patient_code = 'BN-DUC-001' AND a.status = 'COMPLETED'
 );
 
 INSERT INTO appointments (doctor_id, patient_id, appointment_time, end_time, status, type, location, meeting_link, reason, diagnosis_summary, doctor_name, doctor_specialty, doctor_avatar_url, reminder_enabled, is_deleted, created_at)
 SELECT 
   (SELECT id FROM users WHERE email = 'hung.nguyen@care.com' LIMIT 1),
-  (SELECT id FROM patients WHERE email = 'truonghue@patient.com' LIMIT 1),
+  (SELECT id FROM patients WHERE patient_code = 'BN-DUC-002' LIMIT 1),
   CURRENT_TIMESTAMP + INTERVAL '5 days',
   CURRENT_TIMESTAMP + INTERVAL '5 days' + INTERVAL '30 minutes',
   'SCHEDULED', 'IN_PERSON', 'Phòng 102 - Khu B', NULL,
@@ -106,13 +106,13 @@ SELECT
 WHERE NOT EXISTS (
   SELECT 1 FROM appointments a 
   JOIN patients p ON a.patient_id = p.id 
-  WHERE p.email = 'truonghue@patient.com' AND a.status = 'SCHEDULED'
+  WHERE p.patient_code = 'BN-DUC-002' AND a.status = 'SCHEDULED'
 );
 
 INSERT INTO appointments (doctor_id, patient_id, appointment_time, end_time, status, type, location, meeting_link, reason, diagnosis_summary, doctor_name, doctor_specialty, doctor_avatar_url, reminder_enabled, is_deleted, created_at)
 SELECT 
   (SELECT id FROM users WHERE email = 'van.tran@care.com' LIMIT 1),
-  (SELECT id FROM patients WHERE email = 'tolam@gmail.com' LIMIT 1),
+  (SELECT id FROM patients WHERE patient_code = 'BN-DUC-003' LIMIT 1),
   CURRENT_TIMESTAMP - INTERVAL '7 days',
   CURRENT_TIMESTAMP - INTERVAL '7 days' + INTERVAL '30 minutes',
   'COMPLETED', 'IN_PERSON', 'Phòng 305 - Khu C', NULL,
@@ -121,76 +121,76 @@ SELECT
 WHERE NOT EXISTS (
   SELECT 1 FROM appointments a 
   JOIN patients p ON a.patient_id = p.id 
-  WHERE p.email = 'tolam@gmail.com' AND a.status = 'COMPLETED'
+  WHERE p.patient_code = 'BN-DUC-003' AND a.status = 'COMPLETED'
 );
 
 -- 5. Create Sample Health Metrics (for charts and dashboards)
 -- Patient: Trương Quốc An (truongquocan@patient.com) - BLOOD_SUGAR
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'BLOOD_SUGAR', 115.00, NULL, 'mg/dL', 'NORMAL', 'Đo lúc đói buổi sáng.', CURRENT_TIMESTAMP - INTERVAL '3 days', FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '3 days' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '3 days' + INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 115.00, NULL, 'mg/dL', 'NORMAL', 'Đo lúc đói buổi sáng.', CURRENT_TIMESTAMP - INTERVAL '3 days', FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '3 days' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '3 days' + INTERVAL '1 hour');
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'BLOOD_SUGAR', 145.00, NULL, 'mg/dL', 'HIGH', 'Đo sau bữa ăn tối nhiều tinh bột.', CURRENT_TIMESTAMP - INTERVAL '2 days', FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '2 days' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '2 days' + INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 145.00, NULL, 'mg/dL', 'HIGH', 'Đo sau bữa ăn tối nhiều tinh bột.', CURRENT_TIMESTAMP - INTERVAL '2 days', FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '2 days' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '2 days' + INTERVAL '1 hour');
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'BLOOD_SUGAR', 130.00, NULL, 'mg/dL', 'NORMAL', 'Đo trước khi đi ngủ.', CURRENT_TIMESTAMP - INTERVAL '1 day', FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 day' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '1 day' + INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 130.00, NULL, 'mg/dL', 'NORMAL', 'Đo trước khi đi ngủ.', CURRENT_TIMESTAMP - INTERVAL '1 day', FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 day' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '1 day' + INTERVAL '1 hour');
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'BLOOD_SUGAR', 122.00, NULL, 'mg/dL', 'NORMAL', 'Đo lúc đói buổi sáng.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 122.00, NULL, 'mg/dL', 'NORMAL', 'Đo lúc đói buổi sáng.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 hour');
 
 -- Patient: Trương Quốc An (truongquocan@patient.com) - BLOOD_PRESSURE
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'BLOOD_PRESSURE', 135.00, 85.00, 'mmHg', 'BORDERLINE_HIGH', 'Huyết áp hơi tăng nhẹ sau tập thể dục.', CURRENT_TIMESTAMP - INTERVAL '3 days', FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'BLOOD_PRESSURE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '3 days' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '3 days' + INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_PRESSURE', 135.00, 85.00, 'mmHg', 'BORDERLINE_HIGH', 'Huyết áp hơi tăng nhẹ sau tập thể dục.', CURRENT_TIMESTAMP - INTERVAL '3 days', FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_PRESSURE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '3 days' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '3 days' + INTERVAL '1 hour');
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'BLOOD_PRESSURE', 140.00, 90.00, 'mmHg', 'HIGH', 'Cảm thấy hơi chóng mặt, đau đầu nhẹ.', CURRENT_TIMESTAMP - INTERVAL '2 days', FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'BLOOD_PRESSURE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '2 days' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '2 days' + INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_PRESSURE', 140.00, 90.00, 'mmHg', 'HIGH', 'Cảm thấy hơi chóng mặt, đau đầu nhẹ.', CURRENT_TIMESTAMP - INTERVAL '2 days', FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_PRESSURE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '2 days' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '2 days' + INTERVAL '1 hour');
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'BLOOD_PRESSURE', 125.00, 80.00, 'mmHg', 'NORMAL', 'Nghỉ ngơi yên tĩnh trước khi đo.', CURRENT_TIMESTAMP - INTERVAL '1 day', FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'BLOOD_PRESSURE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 day' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '1 day' + INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_PRESSURE', 125.00, 80.00, 'mmHg', 'NORMAL', 'Nghỉ ngơi yên tĩnh trước khi đo.', CURRENT_TIMESTAMP - INTERVAL '1 day', FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_PRESSURE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 day' - INTERVAL '1 hour' AND measured_at < CURRENT_TIMESTAMP - INTERVAL '1 day' + INTERVAL '1 hour');
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'BLOOD_PRESSURE', 120.00, 80.00, 'mmHg', 'NORMAL', 'Chỉ số huyết áp lý tưởng.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'BLOOD_PRESSURE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_PRESSURE', 120.00, 80.00, 'mmHg', 'NORMAL', 'Chỉ số huyết áp lý tưởng.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_PRESSURE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 hour');
 
 -- SpO2 and Heart Rate for Trương Quốc An
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'SPO2', 98.00, NULL, '%', 'NORMAL', 'Độ bão hòa oxy tốt.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'SPO2' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'SPO2', 98.00, NULL, '%', 'NORMAL', 'Độ bão hòa oxy tốt.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'SPO2' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 hour');
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1), 'HEART_RATE', 72.00, NULL, 'bpm', 'NORMAL', 'Nhịp tim lúc nghỉ ngơi.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND metric_type = 'HEART_RATE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 hour');
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'HEART_RATE', 72.00, NULL, 'bpm', 'NORMAL', 'Nhịp tim lúc nghỉ ngơi.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'HEART_RATE' AND measured_at > CURRENT_TIMESTAMP - INTERVAL '1 hour');
 
 -- 6. Create Sample Medication Schedules
 INSERT INTO medication_schedules (patient_id, medication_name, dosage, scheduled_time, frequency, instructions, start_date, end_date, is_active, is_deleted, created_at)
 SELECT 
-  (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1),
+  (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1),
   'Metformin', '500mg', '08:00:00', 'Hàng ngày', 'Uống ngay sau bữa ăn sáng.', CURRENT_DATE - INTERVAL '30 days', NULL, TRUE, FALSE, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (
-  SELECT 1 FROM medication_schedules WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND medication_name = 'Metformin'
+  SELECT 1 FROM medication_schedules WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND medication_name = 'Metformin'
 );
 
 INSERT INTO medication_schedules (patient_id, medication_name, dosage, scheduled_time, frequency, instructions, start_date, end_date, is_active, is_deleted, created_at)
 SELECT 
-  (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1),
+  (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1),
   'Amlodipine', '5mg', '20:00:00', 'Hàng ngày', 'Uống trước khi đi ngủ, cố định khung giờ.', CURRENT_DATE - INTERVAL '30 days', NULL, TRUE, FALSE, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (
-  SELECT 1 FROM medication_schedules WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND medication_name = 'Amlodipine'
+  SELECT 1 FROM medication_schedules WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND medication_name = 'Amlodipine'
 );
 
 -- 7. Create Sample Patient Alerts
 INSERT INTO patient_alerts (patient_id, alert_type, severity, title, message, is_read, is_dismissed, created_at)
 SELECT 
-  (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1),
+  (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1),
   'BLOOD_SUGAR', 'HIGH', 'Chỉ số Đường Huyết Vượt Ngưỡng Bình Thường', 'Hệ thống ghi nhận chỉ số đường huyết của bạn tăng lên mức 145 mg/dL vào tối qua. Vui lòng theo dõi thêm và hạn chế tinh bột.', FALSE, FALSE, CURRENT_TIMESTAMP - INTERVAL '2 days'
 WHERE NOT EXISTS (
-  SELECT 1 FROM patient_alerts WHERE patient_id = (SELECT id FROM patients WHERE email = 'truongquocan@patient.com' LIMIT 1) AND alert_type = 'BLOOD_SUGAR' AND severity = 'HIGH'
+  SELECT 1 FROM patient_alerts WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND alert_type = 'BLOOD_SUGAR' AND severity = 'HIGH'
 );
 
