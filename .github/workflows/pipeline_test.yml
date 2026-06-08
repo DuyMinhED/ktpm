@@ -1,0 +1,397 @@
+name: Java Backend & API Test Automation Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - "backend/**"
+      - "test/resources/**"
+      - ".github/workflows/**"
+      - ".github/scripts/**"
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths:
+      - "backend/**"
+      - "test/resources/**"
+      - ".github/workflows/**"
+      - ".github/scripts/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  backend-build:
+    name: Backend Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build Backend Package
+        run: |
+          cd backend
+          mvn clean package -DskipTests --batch-mode --no-transfer-progress
+
+  # ============================================================
+  # JOB 1: JAVA UNIT TEST
+  # ============================================================
+  java-unit-tests:
+    name: Java Unit & Integration Tests
+    needs: backend-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Maven Tests
+        run: |
+          cd backend
+          mvn clean verify --batch-mode --no-transfer-progress
+
+      - name: Publish Java Test Results
+        uses: mikepenz/action-junit-report@v5
+        if: always()
+        with:
+          report_paths: |
+            backend/target/surefire-reports/*.xml
+            backend/target/failsafe-reports/*.xml
+
+      - name: Upload Java Test Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Java-Test-Reports
+          path: |
+            backend/target/surefire-reports/
+            backend/target/failsafe-reports/
+          if-no-files-found: warn
+
+      - name: Add JaCoCo Coverage Summary
+        if: always()
+        run: |
+          if [ ! -f backend/target/site/jacoco/jacoco.csv ]; then
+            echo "JaCoCo CSV report not found; skipping coverage summary."
+            exit 0
+          fi
+
+          node --input-type=commonjs << 'EOF'
+          const fs = require("fs");
+
+          const csvPath = "backend/target/site/jacoco/jacoco.csv";
+          const rows = fs.readFileSync(csvPath, "utf8").trim().split(/\r?\n/);
+          const totals = rows.slice(1).reduce(
+            (acc, row) => {
+              const columns = row.split(",");
+              acc.instructionMissed += Number(columns[3] || 0);
+              acc.instructionCovered += Number(columns[4] || 0);
+              acc.branchMissed += Number(columns[5] || 0);
+              acc.branchCovered += Number(columns[6] || 0);
+              return acc;
+            },
+            { instructionMissed: 0, instructionCovered: 0, branchMissed: 0, branchCovered: 0 }
+          );
+
+          function percent(covered, missed) {
+            const total = covered + missed;
+            return total === 0 ? "N/A" : `${((covered / total) * 100).toFixed(2)}%`;
+          }
+
+          const summary = [
+            "## Java Coverage",
+            "",
+            "| Metric | Coverage | Covered | Missed |",
+            "| --- | ---: | ---: | ---: |",
+            `| Instructions | ${percent(totals.instructionCovered, totals.instructionMissed)} | ${totals.instructionCovered} | ${totals.instructionMissed} |`,
+            `| Branches | ${percent(totals.branchCovered, totals.branchMissed)} | ${totals.branchCovered} | ${totals.branchMissed} |`,
+            "",
+          ].join("\n");
+
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+          EOF
+
+      - name: Upload JaCoCo Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Java-JaCoCo-Coverage
+          path: backend/target/site/jacoco/
+          if-no-files-found: warn
+
+  # ============================================================
+  # JOB 2: NEWMAN API TEST + JIRA BUG SYNC
+  # Runs only after Java tests pass and only for push to main.
+  # ============================================================
+  api-tests-and-jira:
+    name: Newman API Tests & Jira Bug Creation
+    needs:
+      - java-unit-tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman & HTML Reporter
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Create Reports Directory
+        run: mkdir -p postman-reports
+
+      - name: Resolve API Base URL
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          BASE_URL="${API_BASE_URL:-https://health-management-backend-d1gk.onrender.com}"
+          BASE_URL="${BASE_URL%/}"
+          BASE_URL="${BASE_URL%/api}"
+          echo "API_BASE_URL_NORMALIZED=$BASE_URL" >> "$GITHUB_ENV"
+          echo "Using API base URL: $BASE_URL"
+
+      - name: Wait for Deployed Backend
+        id: wait_render_deploy
+        continue-on-error: true
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_DEPLOY_TIMEOUT_SECONDS: ${{ vars.RENDER_DEPLOY_TIMEOUT_SECONDS }}
+        run: |
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_SERVICE_ID" ]; then
+            echo "Missing RENDER_API_KEY or RENDER_SERVICE_ID secret."
+            echo "Create both GitHub Actions secrets so this workflow can wait for the real Render deploy."
+            exit 1
+          fi
+
+          node --input-type=module << 'EOF'
+          import https from "https";
+
+          const apiKey = process.env.RENDER_API_KEY;
+          const serviceId = process.env.RENDER_SERVICE_ID;
+          const commitSha = process.env.GITHUB_SHA;
+          const timeoutSeconds = Number(process.env.RENDER_DEPLOY_TIMEOUT_SECONDS || 900);
+          const pollIntervalMs = 15000;
+          const failedStatuses = new Set([
+            "build_failed",
+            "update_failed",
+            "pre_deploy_failed",
+            "canceled",
+            "deactivated",
+          ]);
+
+          function sleep(ms) {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+          }
+
+          function requestJson(path) {
+            return new Promise((resolve, reject) => {
+              const req = https.request(
+                {
+                  hostname: "api.render.com",
+                  path,
+                  method: "GET",
+                  headers: {
+                    Authorization: `Bearer ${apiKey}`,
+                    Accept: "application/json",
+                  },
+                },
+                (res) => {
+                  let data = "";
+                  res.on("data", (chunk) => (data += chunk));
+                  res.on("end", () => {
+                    if (res.statusCode < 200 || res.statusCode >= 300) {
+                      reject(new Error(`Render API HTTP ${res.statusCode}: ${data}`));
+                      return;
+                    }
+                    try {
+                      resolve(JSON.parse(data));
+                    } catch (err) {
+                      reject(new Error(`Invalid Render API JSON: ${err.message}`));
+                    }
+                  });
+                }
+              );
+              req.on("error", reject);
+              req.end();
+            });
+          }
+
+          function unwrapDeploy(item) {
+            return item?.deploy ?? item;
+          }
+
+          function getCommitId(deploy) {
+            const commit = deploy?.commit;
+            if (typeof commit === "string") return commit;
+            return (
+              commit?.id ||
+              commit?.sha ||
+              deploy?.commitId ||
+              deploy?.commitSHA ||
+              deploy?.commitSha ||
+              ""
+            );
+          }
+
+          function isCurrentCommit(deploy) {
+            const deployedCommit = getCommitId(deploy);
+            return Boolean(
+              deployedCommit &&
+              (commitSha.startsWith(deployedCommit) || deployedCommit.startsWith(commitSha))
+            );
+          }
+
+          const deadline = Date.now() + timeoutSeconds * 1000;
+          let lastStatus = "not-found";
+
+          console.log(`Waiting for Render service ${serviceId} to deploy commit ${commitSha}...`);
+
+          while (Date.now() < deadline) {
+            const data = await requestJson(`/v1/services/${serviceId}/deploys?limit=20`);
+            const deploys = Array.isArray(data) ? data.map(unwrapDeploy) : [];
+            const currentDeploy = deploys.find(isCurrentCommit);
+
+            if (!currentDeploy) {
+              console.log("Current commit deploy has not appeared on Render yet.");
+              await sleep(pollIntervalMs);
+              continue;
+            }
+
+            lastStatus = currentDeploy.status || "unknown";
+            console.log(`Render deploy ${currentDeploy.id || "(unknown id)"} status: ${lastStatus}`);
+
+            if (lastStatus === "live") {
+              console.log("Render deploy is live.");
+              process.exit(0);
+            }
+
+            if (failedStatuses.has(lastStatus)) {
+              throw new Error(`Render deploy failed with status: ${lastStatus}`);
+            }
+
+            await sleep(pollIntervalMs);
+          }
+
+          throw new Error(`Timed out waiting for Render deploy. Last status: ${lastStatus}`);
+          EOF
+
+      - name: Verify Deployed Backend Health
+        id: health_check
+        continue-on-error: true
+        run: |
+          HEALTH_URL="${API_BASE_URL_NORMALIZED}/api/v1/auth/health"
+          echo "Verifying deployed backend health: $HEALTH_URL"
+          STATUS="$(curl -s -o /tmp/backend-health.json -w "%{http_code}" "$HEALTH_URL" || true)"
+          cat /tmp/backend-health.json || true
+          test "$STATUS" = "200"
+
+      # ----------------------------------------------------------
+      # BƯỚC 2: CHẠY NEWMAN
+      # || true để pipeline không dừng khi test fail,
+      # nhưng vẫn tiếp tục sang bước tạo Jira ticket
+      # ----------------------------------------------------------
+      - name: Run Admin API Tests
+        if: steps.wait_render_deploy.outcome == 'success' && steps.health_check.outcome == 'success'
+        run: |
+          newman run "./test/resources/Admin API.postman_collection.json" \
+            --env-var "baseUrl=${API_BASE_URL_NORMALIZED}" \
+            -r htmlextra,json \
+            --reporter-htmlextra-export ./postman-reports/report-admin.html \
+            --reporter-json-export ./postman-reports/summary-admin.json \
+            --reporter-htmlextra-title "Admin API Test Report" \
+            || true
+
+      - name: Run Clinic API Tests
+        if: steps.wait_render_deploy.outcome == 'success' && steps.health_check.outcome == 'success'
+        run: |
+          newman run "./test/resources/Clinic API.postman_collection.json" \
+            --env-var "baseUrl=${API_BASE_URL_NORMALIZED}" \
+            -r htmlextra,json \
+            --reporter-htmlextra-export ./postman-reports/report-clinic.html \
+            --reporter-json-export ./postman-reports/summary-clinic.json \
+            --reporter-htmlextra-title "Clinic API Test Report" \
+            || true
+
+      - name: Run Doctor API Tests
+        if: steps.wait_render_deploy.outcome == 'success' && steps.health_check.outcome == 'success'
+        run: |
+          newman run "./test/resources/Doctor API.postman_collection.json" \
+            --env-var "baseUrl=${API_BASE_URL_NORMALIZED}" \
+            -r htmlextra,json \
+            --reporter-htmlextra-export ./postman-reports/report-doctor.html \
+            --reporter-json-export ./postman-reports/summary-doctor.json \
+            --reporter-htmlextra-title "Doctor API Test Report" \
+            || true
+
+      - name: Run Patient API Tests
+        if: steps.wait_render_deploy.outcome == 'success' && steps.health_check.outcome == 'success'
+        run: |
+          newman run "./test/resources/Patient API.postman_collection.json" \
+            --env-var "baseUrl=${API_BASE_URL_NORMALIZED}" \
+            -r htmlextra,json \
+            --reporter-htmlextra-export ./postman-reports/report-patient.html \
+            --reporter-json-export ./postman-reports/summary-patient.json \
+            --reporter-htmlextra-title "Patient API Test Report" \
+            || true
+
+      - name: Upload Test Reports Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Complete-Postman-Test-Reports
+          path: postman-reports/
+          retention-days: 14
+          if-no-files-found: warn
+
+      # ----------------------------------------------------------
+      # BƯỚC 3: PARSE LỖI → CHECK TRÙNG → TẠO MỚI HOẶC COMMENT
+      # ----------------------------------------------------------
+      - name: Parse Failures & Sync to Jira
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_MEMBER_IDS: ${{ secrets.JIRA_MEMBER_IDS }}
+          PROJECT_KEY: 'KCPM'
+          ACTOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          DEPLOY_STEP_OUTCOME: ${{ steps.wait_render_deploy.outcome }}
+          HEALTH_STEP_OUTCOME: ${{ steps.health_check.outcome }}
+        run: node .github/scripts/sync-jira-failures.js
+
+      - name: Fail Pipeline if API or Runtime Checks Failed
+        if: always()
+        env:
+          DEPLOY_STEP_OUTCOME: ${{ steps.wait_render_deploy.outcome }}
+          HEALTH_STEP_OUTCOME: ${{ steps.health_check.outcome }}
+        run: node .github/scripts/fail-on-api-or-runtime-failures.js

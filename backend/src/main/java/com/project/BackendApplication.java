@@ -7,7 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.beans.factory.annotation.Value;
 
 @SpringBootApplication
@@ -24,13 +24,14 @@ public class BackendApplication {
     }
 
     @Bean
-    public CommandLineRunner initSchema(JdbcTemplate jdbcTemplate, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner initSchema(JdbcTemplate jdbcTemplate) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         return args -> {
             try {
                 String email = "admin@care.com";
                 String password = (adminDefaultPassword != null && !adminDefaultPassword.isBlank())
                         ? adminDefaultPassword
-                        : "password";
+                        : "admin123";
                 String hashedPwd = passwordEncoder.encode(password);
                 
                 log.info("Checking data for user: {}", email);
@@ -42,7 +43,22 @@ public class BackendApplication {
                     jdbcTemplate.update("INSERT INTO users (email, password, role, full_name, status, created_at, is_deleted) VALUES (?, ?, 'ADMIN', 'System Admin', 'ACTIVE', NOW(), false)", 
                         email, hashedPwd);
                 } else {
-                    log.info("Admin user already exists. Skipping password update.");
+                    log.info("Admin user already exists. Updating password to ensure sync...");
+                    jdbcTemplate.update("UPDATE users SET password = ? WHERE email = ?", hashedPwd, email);
+                }
+
+                // Sync all seeded test users' passwords to make sure they match the new password format
+                java.util.List<String> seededEmails = java.util.Arrays.asList(
+                    "manager@care.com",
+                    "mai.le@care.com",
+                    "hung.nguyen@care.com",
+                    "van.tran@care.com",
+                    "truongquocan@patient.com",
+                    "truonghue@patient.com",
+                    "tolam@gmail.com"
+                );
+                for (String seededEmail : seededEmails) {
+                    jdbcTemplate.update("UPDATE users SET password = ? WHERE email = ?", hashedPwd, seededEmail.toLowerCase());
                 }
 
                 // Check if patient exists
