@@ -124,6 +124,20 @@ public class DoctorServiceImplTest {
     }
 
     @Test
+    void createDoctor_nullPassword_success() {
+        sampleRequest.setPassword(null);
+        when(userRepository.findByEmail("doctor@example.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("DefaultPassword123")).thenReturn("hashedDefaultPassword");
+        when(userRepository.save(any(User.class))).thenReturn(sampleDoctor);
+
+        DoctorResponse result = doctorService.createDoctor(sampleRequest);
+
+        assertNotNull(result);
+        verify(passwordEncoder, times(1)).encode("DefaultPassword123");
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
     void createDoctor_duplicateEmail() {
         when(userRepository.findByEmail("doctor@example.com")).thenReturn(Optional.of(sampleDoctor));
 
@@ -152,6 +166,77 @@ public class DoctorServiceImplTest {
     }
 
     @Test
+    void updateDoctor_deletedDoctor_shouldThrowException() {
+        sampleDoctor.setDeleted(true);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleDoctor));
+
+        assertThrows(RuntimeException.class, () -> doctorService.updateDoctor(1L, sampleRequest));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateDoctor_wrongRole_shouldThrowException() {
+        sampleDoctor.setRole(UserRole.PATIENT);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleDoctor));
+
+        assertThrows(RuntimeException.class, () -> doctorService.updateDoctor(1L, sampleRequest));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateDoctor_withAllOptionalFields_success() {
+        sampleRequest.setAvatarUrl("http://avatar.url");
+        sampleRequest.setLicenseImageUrl("http://license.url");
+        sampleRequest.setBio("Experienced doctor");
+        sampleRequest.setPassword("newSecurePassword");
+        sampleRequest.setStatus("INACTIVE");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleDoctor));
+        when(passwordEncoder.encode("newSecurePassword")).thenReturn("hashedNewPassword");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        DoctorResponse result = doctorService.updateDoctor(1L, sampleRequest);
+
+        assertNotNull(result);
+        verify(passwordEncoder, times(1)).encode("newSecurePassword");
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void updateDoctor_withEmptyOptionalFields_success() {
+        sampleRequest.setAvatarUrl("");
+        sampleRequest.setLicenseImageUrl("");
+        sampleRequest.setBio(null);
+        sampleRequest.setPassword("");
+        sampleRequest.setStatus(null);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleDoctor));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        DoctorResponse result = doctorService.updateDoctor(1L, sampleRequest);
+
+        assertNotNull(result);
+        verify(passwordEncoder, never()).encode(anyString());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void getDoctorById_deletedDoctor_shouldThrowException() {
+        sampleDoctor.setDeleted(true);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleDoctor));
+
+        assertThrows(RuntimeException.class, () -> doctorService.getDoctorById(1L));
+    }
+
+    @Test
+    void getDoctorById_wrongRole_shouldThrowException() {
+        sampleDoctor.setRole(UserRole.ADMIN);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleDoctor));
+
+        assertThrows(RuntimeException.class, () -> doctorService.getDoctorById(1L));
+    }
+
+    @Test
     void deleteDoctor_success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(sampleDoctor));
         when(userRepository.save(any(User.class))).thenReturn(sampleDoctor);
@@ -169,4 +254,23 @@ public class DoctorServiceImplTest {
         assertThrows(RuntimeException.class, () -> doctorService.deleteDoctor(99L));
         verify(userRepository, never()).save(any(User.class));
     }
+
+    @Test
+    void deleteDoctor_deletedDoctor_shouldThrowException() {
+        sampleDoctor.setDeleted(true);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleDoctor));
+
+        assertThrows(RuntimeException.class, () -> doctorService.deleteDoctor(1L));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void deleteDoctor_wrongRole_shouldThrowException() {
+        sampleDoctor.setRole(UserRole.CLINIC_MANAGER);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleDoctor));
+
+        assertThrows(RuntimeException.class, () -> doctorService.deleteDoctor(1L));
+        verify(userRepository, never()).save(any(User.class));
+    }
 }
+
