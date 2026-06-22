@@ -61,6 +61,9 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Transactional
     public AdminUserResponse createUser(CreateUserRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
+        }
         validatePasswordPolicy(request.getPassword());
         User user = User.builder()
                 .fullName(request.getFullName()).email(request.getEmail())

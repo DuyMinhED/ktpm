@@ -155,6 +155,7 @@ public class AdminUserServiceImplTest {
         request.setRole("PATIENT");
         request.setClinicId(10L);
 
+        when(userRepository.findByEmail("patient@example.com")).thenReturn(Optional.empty());
         when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(mockConfig));
         when(passwordEncoder.encode(anyString())).thenReturn("encoded_pass");
         when(userRepository.save(any(User.class))).thenReturn(sampleUser);
@@ -192,11 +193,100 @@ public class AdminUserServiceImplTest {
         request.setPassword("Password123"); // No special character
         request.setRole("PATIENT");
 
+        when(userRepository.findByEmail("patient@example.com")).thenReturn(Optional.empty());
         when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(mockConfig));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> adminUserService.createUser(request));
         assertTrue(exception.getMessage().contains("ký tự đặc biệt"));
     }
+
+    @Test
+    void createUser_missingUpperNumber_shouldThrowException() {
+        CreateUserRequest request = new CreateUserRequest();
+        request.setFullName("Test Patient");
+        request.setEmail("patient@example.com");
+        request.setPassword("p@ssword"); // No uppercase or digit
+        request.setRole("PATIENT");
+
+        when(userRepository.findByEmail("patient@example.com")).thenReturn(Optional.empty());
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(mockConfig));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> adminUserService.createUser(request));
+        assertTrue(exception.getMessage().contains("chữ hoa và một chữ số"));
+    }
+
+    @Test
+    void createUser_success_configNull() {
+        CreateUserRequest request = new CreateUserRequest();
+        request.setFullName("Test Patient");
+        request.setEmail("patient@example.com");
+        request.setPassword("123456"); // Simple password allowed when config is null
+        request.setRole("PATIENT");
+
+        when(userRepository.findByEmail("patient@example.com")).thenReturn(Optional.empty());
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded_pass");
+        when(userRepository.save(any(User.class))).thenReturn(sampleUser);
+        when(patientRepository.save(any(Patient.class))).thenReturn(new Patient());
+
+        AdminUserResponse response = AdminUserResponse.builder()
+                .id(1L)
+                .email("test@example.com")
+                .build();
+        when(userMapper.toAdminUserResponse(any(User.class))).thenReturn(response);
+
+        AdminUserResponse result = adminUserService.createUser(request);
+
+        assertNotNull(result);
+        verify(patientRepository, times(1)).save(any(Patient.class));
+    }
+
+    @Test
+    void createUser_success_doctor() {
+        CreateUserRequest request = new CreateUserRequest();
+        request.setFullName("Test Doctor");
+        request.setEmail("doctor@example.com");
+        request.setPassword("P@ssword123");
+        request.setRole("DOCTOR");
+
+        User doctorUser = User.builder()
+                .id(2L)
+                .email("doctor@example.com")
+                .role(UserRole.DOCTOR)
+                .build();
+
+        when(userRepository.findByEmail("doctor@example.com")).thenReturn(Optional.empty());
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(mockConfig));
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded_pass");
+        when(userRepository.save(any(User.class))).thenReturn(doctorUser);
+
+        AdminUserResponse response = AdminUserResponse.builder()
+                .id(2L)
+                .email("doctor@example.com")
+                .build();
+        when(userMapper.toAdminUserResponse(any(User.class))).thenReturn(response);
+
+        AdminUserResponse result = adminUserService.createUser(request);
+
+        assertNotNull(result);
+        verify(patientRepository, never()).save(any(Patient.class));
+        verify(auditService, times(1)).recordActivity(eq("Tạo mới"), eq("Quản lý người dùng"), anyString(), eq("success"));
+    }
+
+    @Test
+    void createUser_duplicateEmail_shouldThrowException() {
+        CreateUserRequest request = new CreateUserRequest();
+        request.setFullName("Test Patient");
+        request.setEmail("patient@example.com");
+        request.setPassword("P@ssword123");
+        request.setRole("PATIENT");
+
+        when(userRepository.findByEmail("patient@example.com")).thenReturn(Optional.of(sampleUser));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> adminUserService.createUser(request));
+        assertTrue(exception.getMessage().contains("Email already exists"));
+    }
+
 
     @Test
     void updateUser_success() {
