@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "ca73ae8a-899b-47c0-a96a-492a511df11a",
+    "_postman_id": "e6e61fc6-41d4-423e-af86-bce6ae31cdf3",
     "name": "Doctor API",
     "description": "Bộ script test tự động siêu chi tiết dành cho tất cả API của Doctor. Được cấu hình để trỏ thẳng tới Render server.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "42986888",
-    "_collection_link": "https://go.postman.co/collection/42986888-ca73ae8a-899b-47c0-a96a-492a511df11a?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/42986888-e6e61fc6-41d4-423e-af86-bce6ae31cdf3?source=collection_link"
   },
   "item": [
     {
@@ -773,6 +773,10 @@
       "key": "doctor_patient_user_id",
       "value": "6",
       "type": "default"
+    },
+    {
+      "key": "doctor_token",
+      "value": ""
     }
   ]
 }

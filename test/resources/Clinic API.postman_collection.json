@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "1d4dfcae-0398-480b-826d-dc4e2174b56f",
+    "_postman_id": "88c9fefe-0417-49ee-a818-a8b17a1cc785",
     "name": "Clinic API",
     "description": "Bộ script test tự động thông minh dành cho Quản lý phòng khám (Clinic Manager). Tự động trích xuất clinicId từ lúc đăng nhập.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "42986888",
-    "_collection_link": "https://go.postman.co/collection/42986888-1d4dfcae-0398-480b-826d-dc4e2174b56f?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/42986888-88c9fefe-0417-49ee-a818-a8b17a1cc785?source=collection_link"
   },
   "item": [
     {

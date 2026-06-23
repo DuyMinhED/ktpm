@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "399f7570-036e-4096-b1f7-887c48c1176b",
+    "_postman_id": "67bd7b9a-fea2-4fab-bf45-30df558176e2",
     "name": "Admin API",
     "description": "Bộ script test tự động chuyên nghiệp dành cho System Admin. Quản lý toàn bộ hệ thống, phòng khám và người dùng.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "42986888",
-    "_collection_link": "https://go.postman.co/collection/42986888-399f7570-036e-4096-b1f7-887c48c1176b?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/42986888-67bd7b9a-fea2-4fab-bf45-30df558176e2?source=collection_link"
   },
   "item": [
     {
@@ -314,16 +314,6 @@
             }
           ],
           "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJlLmNvbSIsImlhdCI6MTc3OTU5NjY5NywiZXhwIjoxNzc5NjgzMDk3LCJpZCI6OX0.xVzgD3EfVIWrX7RWblW66aCmAGkqDnJGjHQHgbXQERY",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "POST",
             "header": [
               {
@@ -535,16 +525,6 @@
             }
           ],
           "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJlLmNvbSIsImlhdCI6MTc3OTU5NjA5MywiZXhwIjoxNzc5NjgyNDkzLCJpZCI6OX0.GT_YbrUWhezah4R0jx8j0i6vnI0x5hYX5i2GfE-3UqU",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "POST",
             "header": [
               {

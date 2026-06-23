@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "7969074f-d1a3-45d1-98c8-ed3eded2ef3e",
+    "_postman_id": "532903ca-f32e-468a-90be-f6f09dc3d2c1",
     "name": "Patient API",
     "description": "Bộ test script tự động siêu chi tiết dành cho tất cả API của Patient. Được cấu hình để trỏ thẳng tới Render server.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "42986888",
-    "_collection_link": "https://go.postman.co/collection/42986888-7969074f-d1a3-45d1-98c8-ed3eded2ef3e?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/42986888-532903ca-f32e-468a-90be-f6f09dc3d2c1?source=collection_link"
   },
   "item": [
     {
