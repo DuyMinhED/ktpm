@@ -52,7 +52,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         List<Object[]> countNewBookingsByClinicNative(@org.springframework.data.repository.query.Param("since") LocalDateTime since);
 
         @Query(value = "SELECT u.clinic_id, " +
-                       "CAST(SUM(CASE WHEN a.status = 'COMPLETED' THEN 1 ELSE 0 END) AS DOUBLE PRECISION) * 100.0 / NULLIF(COUNT(a.id), 0) " +
+                       "SUM(CASE WHEN a.status = 'COMPLETED' THEN 1.0 ELSE 0.0 END) * 100.0 / NULLIF(COUNT(a.id), 0) " +
                        "FROM appointments a JOIN users u ON a.doctor_id = u.id " +
                        "WHERE a.is_deleted = false AND a.status != 'CANCELLED' GROUP BY u.clinic_id", nativeQuery = true)
         List<Object[]> calculateComplianceRateByClinicNative();
@@ -87,19 +87,20 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                "WHERE u.clinicId = :clinicId AND a.patient.id = :patientId AND a.status = 'SCHEDULED' " +
                "AND a.isDeleted = false ORDER BY a.appointmentTime ASC")
         List<Appointment> findNextAppointmentsByPatient(@org.springframework.data.repository.query.Param("clinicId") Long clinicId, @org.springframework.data.repository.query.Param("patientId") Long patientId, Pageable pageable);
+
         @Query(value = "SELECT CAST(created_at AS DATE) as d, COUNT(*) FROM appointments " +
                       "WHERE is_deleted = false AND created_at >= :startDate " +
                       "GROUP BY CAST(created_at AS DATE) ORDER BY d ASC", nativeQuery = true)
         List<Object[]> countAllAppointmentsByDayNative(@org.springframework.data.repository.query.Param("startDate") LocalDateTime startDate);
 
-        @Query(value = "SELECT DATE_TRUNC('month', created_at) as m, COUNT(*) FROM appointments " +
-                      "WHERE is_deleted = false AND created_at >= :startDate " +
-                      "GROUP BY m ORDER BY m ASC", nativeQuery = true)
+        @Query(value = "SELECT DATE_FORMAT(created_at, '%Y-%m-01') as m, COUNT(*) FROM appointments " +
+                       "WHERE is_deleted = false AND created_at >= :startDate " +
+                       "GROUP BY m ORDER BY m ASC", nativeQuery = true)
         List<Object[]> countAllAppointmentsByMonthNative(@org.springframework.data.repository.query.Param("startDate") LocalDateTime startDate);
 
-        @Query(value = "SELECT DATE_TRUNC('year', created_at) as y, COUNT(*) FROM appointments " +
-                      "WHERE is_deleted = false AND created_at >= :startDate " +
-                      "GROUP BY y ORDER BY y ASC", nativeQuery = true)
+        @Query(value = "SELECT DATE_FORMAT(created_at, '%Y-01-01') as y, COUNT(*) FROM appointments " +
+                       "WHERE is_deleted = false AND created_at >= :startDate " +
+                       "GROUP BY y ORDER BY y ASC", nativeQuery = true)
         List<Object[]> countAllAppointmentsByYearNative(@org.springframework.data.repository.query.Param("startDate") LocalDateTime startDate);
 
         @Query("SELECT COUNT(a) FROM Appointment a JOIN User u ON a.doctorId = u.id WHERE u.clinicId = :clinicId AND a.isDeleted = false")
@@ -134,16 +135,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         @Query(value = "SELECT COUNT(DISTINCT a.patient_id) FROM appointments a WHERE a.status = 'COMPLETED' AND a.is_deleted = false AND a.appointment_time >= :since", nativeQuery = true)
         long countPatientsWithRecentCompletedAppointments(@org.springframework.data.repository.query.Param("since") LocalDateTime since);
 
-        @Query(value = "SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (a.end_time - a.appointment_time)) / 60), 0.0) " +
+        @Query(value = "SELECT COALESCE(AVG(TIMESTAMPDIFF(SECOND, a.appointment_time, a.end_time) / 60.0), 0.0) " +
                        "FROM appointments a WHERE a.status = 'COMPLETED' AND a.end_time IS NOT NULL AND a.is_deleted = false", nativeQuery = true)
         double calculateAverageConsultationTime();
 
-        @Query(value = "SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (a.end_time - a.appointment_time)) / 60), 0.0) " +
+        @Query(value = "SELECT COALESCE(AVG(TIMESTAMPDIFF(SECOND, a.appointment_time, a.end_time) / 60.0), 0.0) " +
                        "FROM appointments a JOIN users u ON a.doctor_id = u.id " +
                        "WHERE u.clinic_id = :clinicId AND a.status = 'COMPLETED' AND a.end_time IS NOT NULL AND a.is_deleted = false", nativeQuery = true)
         double calculateAverageConsultationTimeByClinic(@org.springframework.data.repository.query.Param("clinicId") Long clinicId);
 
-        @Query(value = "SELECT COALESCE(CAST(SUM(CASE WHEN a.status = 'COMPLETED' THEN 1 ELSE 0 END) AS DOUBLE PRECISION) / NULLIF(COUNT(a.id), 0), 0.0) " +
+        @Query(value = "SELECT COALESCE(SUM(CASE WHEN a.status = 'COMPLETED' THEN 1.0 ELSE 0.0 END) / NULLIF(COUNT(a.id), 0), 0.0) " +
                        "FROM appointments a JOIN users u ON a.doctor_id = u.id " +
                        "WHERE u.clinic_id = :clinicId AND a.is_deleted = false", nativeQuery = true)
         double calculateAdherenceRateByClinic(@org.springframework.data.repository.query.Param("clinicId") Long clinicId);

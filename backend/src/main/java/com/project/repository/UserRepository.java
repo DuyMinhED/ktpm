@@ -43,12 +43,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
                      "GROUP BY CAST(created_at AS DATE) ORDER BY d ASC", nativeQuery = true)
        java.util.List<Object[]> countNewPatientsByDayNative(@Param("startDate") java.time.LocalDateTime startDate);
 
-       @Query(value = "SELECT DATE_TRUNC('month', created_at) as m, COUNT(*) FROM users " +
+       @Query(value = "SELECT DATE_FORMAT(created_at, '%Y-%m-01') as m, COUNT(*) FROM users " +
                      "WHERE is_deleted = false AND role = 'PATIENT' AND created_at >= :startDate " +
                      "GROUP BY m ORDER BY m ASC", nativeQuery = true)
        java.util.List<Object[]> countNewPatientsByMonthNative(@Param("startDate") java.time.LocalDateTime startDate);
 
-       @Query(value = "SELECT DATE_TRUNC('year', created_at) as y, COUNT(*) FROM users " +
+       @Query(value = "SELECT DATE_FORMAT(created_at, '%Y-01-01') as y, COUNT(*) FROM users " +
                      "WHERE is_deleted = false AND role = 'PATIENT' AND created_at >= :startDate " +
                      "GROUP BY y ORDER BY y ASC", nativeQuery = true)
        java.util.List<Object[]> countNewPatientsByYearNative(@Param("startDate") java.time.LocalDateTime startDate);
