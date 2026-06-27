@@ -25,6 +25,15 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.List;
+import java.util.Collections;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.LocalDateTime;
+import com.project.dto.response.PatientPrescriptionResponse;
+import com.project.dto.response.MedicationScheduleResponse;
+import com.project.entity.PrescriptionItem;
+import com.project.entity.MedicationLog;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -194,5 +203,142 @@ class PatientPrescriptionServiceImplTest {
         assertTrue(savedNotification.getMessage().contains("Nguyen Van A"));
         assertTrue(savedNotification.getMessage().contains("#RX-5678"));
         assertEquals("/doctor/patients/100", savedNotification.getTargetUrl());
+    }
+
+    // --- getActivePrescriptions ---
+
+    @Test
+    void getActivePrescriptions_unauthenticated_throwsException() {
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> patientPrescriptionService.getActivePrescriptions());
+    }
+
+    @Test
+    void getActivePrescriptions_patientProfileNotFound_throwsException() {
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> patientPrescriptionService.getActivePrescriptions());
+    }
+
+    @Test
+    void getActivePrescriptions_success() {
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.of(currentPatient));
+
+        PrescriptionItem item = PrescriptionItem.builder()
+                .id(1L)
+                .medicationName("Amlodipine")
+                .dosage("5mg")
+                .usageInstructions("Uong buoi sang")
+                .build();
+        prescription.setItems(List.of(item));
+
+        when(prescriptionRepository.findByPatientIdAndStatus(100L, PrescriptionStatus.ACTIVE))
+                .thenReturn(List.of(prescription));
+
+        List<PatientPrescriptionResponse> responses = patientPrescriptionService.getActivePrescriptions();
+
+        assertNotNull(responses);
+        assertEquals(1, responses.size());
+        PatientPrescriptionResponse res = responses.get(0);
+        assertEquals("#RX-5678", res.getPrescriptionCode());
+        assertEquals("ACTIVE", res.getStatus());
+        assertEquals(1, res.getItems().size());
+        assertEquals("Amlodipine", res.getItems().get(0).getMedicationName());
+    }
+
+    // --- getPrescriptionHistory ---
+
+    @Test
+    void getPrescriptionHistory_success() {
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.of(currentPatient));
+
+        prescription.setStatus(PrescriptionStatus.COMPLETED);
+        prescription.setItems(Collections.emptyList());
+
+        when(prescriptionRepository.findByPatientIdAndStatusNot(100L, PrescriptionStatus.ACTIVE))
+                .thenReturn(List.of(prescription));
+
+        List<PatientPrescriptionResponse> responses = patientPrescriptionService.getPrescriptionHistory();
+
+        assertNotNull(responses);
+        assertEquals(1, responses.size());
+        assertEquals("COMPLETED", responses.get(0).getStatus());
+    }
+
+    // --- getTodaySchedule ---
+
+    @Test
+    void getTodaySchedule_upcoming_status() {
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.of(currentPatient));
+
+        schedule.setScheduledTime(LocalTime.now().plusHours(2));
+        schedule.setEndDate(LocalDate.now().plusDays(5));
+
+        when(medicationScheduleRepository.findByPatientIdAndIsActiveTrueOrderByScheduledTimeAsc(100L))
+                .thenReturn(List.of(schedule));
+        when(medicationLogRepository.findByPatientIdAndCreatedAtBetween(eq(100L), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        List<MedicationScheduleResponse> responses = patientPrescriptionService.getTodaySchedule();
+
+        assertNotNull(responses);
+        assertEquals(1, responses.size());
+        MedicationScheduleResponse res = responses.get(0);
+        assertEquals("UPCOMING", res.getTodayStatus());
+        assertEquals(5, res.getRemainingDays());
+        assertNull(res.getTakenAt());
+    }
+
+    @Test
+    void getTodaySchedule_taken_status() {
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.of(currentPatient));
+
+        schedule.setScheduledTime(LocalTime.now().minusHours(1));
+
+        MedicationLog log = MedicationLog.builder()
+                .id(1L)
+                .schedule(schedule)
+                .status("TAKEN")
+                .takenAt(LocalDateTime.now())
+                .build();
+
+        when(medicationScheduleRepository.findByPatientIdAndIsActiveTrueOrderByScheduledTimeAsc(100L))
+                .thenReturn(List.of(schedule));
+        when(medicationLogRepository.findByPatientIdAndCreatedAtBetween(eq(100L), any(), any()))
+                .thenReturn(List.of(log));
+
+        List<MedicationScheduleResponse> responses = patientPrescriptionService.getTodaySchedule();
+
+        assertNotNull(responses);
+        assertEquals(1, responses.size());
+        MedicationScheduleResponse res = responses.get(0);
+        assertEquals("TAKEN", res.getTodayStatus());
+        assertNotNull(res.getTakenAt());
+    }
+
+    @Test
+    void getTodaySchedule_pending_status() {
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.of(currentPatient));
+
+        schedule.setScheduledTime(LocalTime.now().minusHours(1));
+
+        when(medicationScheduleRepository.findByPatientIdAndIsActiveTrueOrderByScheduledTimeAsc(100L))
+                .thenReturn(List.of(schedule));
+        when(medicationLogRepository.findByPatientIdAndCreatedAtBetween(eq(100L), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        List<MedicationScheduleResponse> responses = patientPrescriptionService.getTodaySchedule();
+
+        assertNotNull(responses);
+        assertEquals(1, responses.size());
+        MedicationScheduleResponse res = responses.get(0);
+        assertEquals("PENDING", res.getTodayStatus());
     }
 }
