@@ -4,11 +4,13 @@ export default function() {
     
     // Một hàm đăng nhập tuỳ chỉnh để tái sử dụng ở nhiều kịch bản test khác nhau
     login: function(email, password) {
-      this.amOnPage('/login');
+      this.amOnPage('/');
+      this.waitForElement('button', 5);
+      this.click('Begin Journey');
       this.waitForElement('form', 5); // Chờ form đăng nhập xuất hiện trong tối đa 5s
-      this.fillField('Email', email); // Hoặc điền id/name của field, vd: this.fillField('#email', email)
-      this.fillField('Password', password);
-      this.click('Login'); // Hoặc id của nút đăng nhập
+      this.fillField('input[placeholder="Email hoặc Số điện thoại"]', email);
+      this.fillField('input[placeholder="••••••••"]', password);
+      this.click('Đăng Nhập');
     }
   });
 }
