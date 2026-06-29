@@ -20,7 +20,7 @@ public class JiraBugSyncExtension implements TestWatcher {
         String testMethodName = context.getRequiredTestMethod().getName();
         String errorMessage = cause.getMessage() != null ? cause.getMessage() : cause.toString();
 
-        System.out.println(">>> JUnit BVA Failure Detected in " + testClassName + "." + testMethodName + "!");
+        System.out.println(">>> JUnit EP Failure Detected in " + testClassName + "." + testMethodName + "!");
         System.out.println(">>> Failure Reason: " + errorMessage);
         System.out.println(">>> Syncing bug ticket to Jira...");
 
@@ -38,8 +38,8 @@ public class JiraBugSyncExtension implements TestWatcher {
             String baseUrl = jiraBaseUrl.replaceAll("/$", "");
             String auth = Base64.getEncoder().encodeToString((jiraEmail + ":" + jiraToken).getBytes(StandardCharsets.UTF_8));
 
-            String summary = "[BVA-FAIL] Threshold Mismatch: " + testMethodName + " (" + testClassName + ")";
-            String description = "Java BVA test failed because the codebase does not match the SRS requirements.\n\n"
+            String summary = "[EP-FAIL] Equivalence Partitioning Mismatch: " + testMethodName + " (" + testClassName + ")";
+            String description = "Java EP test failed because the codebase does not match the SRS requirements.\n\n"
                     + "* Test Class: " + context.getRequiredTestClass().getName() + "\n"
                     + "* Test Method: " + testMethodName + "\n"
                     + "* Error Details: " + errorMessage;
@@ -57,7 +57,7 @@ public class JiraBugSyncExtension implements TestWatcher {
                     "    \"priority\": {\n" +
                     "      \"name\": \"High\"\n" +
                     "    },\n" +
-                    "    \"labels\": [\"bva-fail\", \"bug\", \"auto-created\"],\n" +
+                    "    \"labels\": [\"ep-fail\", \"bug\", \"auto-created\"],\n" +
                     "    \"description\": {\n" +
                     "      \"type\": \"doc\",\n" +
                     "      \"version\": 1,\n" +

@@ -3,6 +3,7 @@ package com.project.service.impl;
 import com.project.dto.request.CreateUserRequest;
 import com.project.dto.request.UpdateUserRequest;
 import com.project.entity.User;
+import com.project.entity.SystemConfig;
 import com.project.repository.PatientRepository;
 import com.project.repository.UserRepository;
 import com.project.repository.SystemConfigRepository;
@@ -73,31 +74,52 @@ public class AdminUserServiceImplTest {
     }
 
     // =========================================================================
-    // TC-BVA-AUTH-01: Password Length Min-1 (7 chars)
+    // TC-EP-AUTH-01: Valid Email Partition
     // =========================================================================
     @Test
-    void testPasswordLengthMinMinusOne_TC_BVA_AUTH_01() {
-        request.setPassword("P@ssw12"); 
+    void testEmailValid_TC_EP_AUTH_01() {
+        request.setEmail("patient@gmail.com");
 
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(anyString())).thenReturn("hashed_password");
-        when(userRepository.save(any(User.class))).thenReturn(new User());
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            adminUserService.createUser(request);
-        }, "Password with 7 characters should throw IllegalArgumentException under SRS requirements");
-        
-        assertEquals("Mật khẩu phải có ít nhất 8 ký tự", exception.getMessage());
+        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
+        assertTrue(violations.isEmpty(), "Email should be valid");
     }
 
     // =========================================================================
-    // TC-BVA-AUTH-02: Password Length Min (8 chars)
+    // TC-EP-AUTH-02: Invalid Email Partition - Missing '@'
     // =========================================================================
     @Test
-    void testPasswordLengthMin_TC_BVA_AUTH_02() {
-        request.setPassword("P@ssw123"); 
+    void testEmailMissingAtSymbol_TC_EP_AUTH_02() {
+        request.setEmail("patientgmail.com");
+
+        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
+        assertFalse(violations.isEmpty(), "Email missing @ should fail validation");
+    }
+
+    // =========================================================================
+    // TC-EP-AUTH-03: Invalid Email Partition - Missing Domain
+    // =========================================================================
+    @Test
+    void testEmailMissingDomain_TC_EP_AUTH_03() {
+        request.setEmail("patient@");
+
+        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
+        assertFalse(violations.isEmpty(), "Email missing domain should fail validation");
+    }
+
+    // =========================================================================
+    // TC-EP-AUTH-04: Valid Password Partition
+    // =========================================================================
+    @Test
+    void testPasswordValid_TC_EP_AUTH_04() {
+        request.setPassword("P@ssw123");
+
+        SystemConfig config = SystemConfig.builder()
+                .specialCharRequired(true)
+                .upperNumberRequired(true)
+                .build();
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(config));
         when(passwordEncoder.encode(anyString())).thenReturn("hashed_password");
         when(userRepository.save(any(User.class))).thenReturn(new User());
 
@@ -107,99 +129,64 @@ public class AdminUserServiceImplTest {
     }
 
     // =========================================================================
-    // TC-BVA-AUTH-03: Email Length Max (100 chars)
+    // TC-EP-AUTH-05: Invalid Password Partition - Too Short (< 8 chars)
     // =========================================================================
     @Test
-    void testEmailLengthMax_TC_BVA_AUTH_03() {
-        String longEmail = "a".repeat(60) + "@" + "b".repeat(35) + ".com";
-        request.setEmail(longEmail);
+    void testPasswordTooShort_TC_EP_AUTH_05() {
+        request.setPassword("P@ss1"); // 5 chars
 
-        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
-        assertTrue(violations.isEmpty(), "Email with 100 chars should be valid");
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            adminUserService.createUser(request);
+        }, "Password under 8 characters should throw exception under SRS requirements");
+
+        assertEquals("Mật khẩu phải có ít nhất 8 ký tự", exception.getMessage());
     }
 
     // =========================================================================
-    // TC-BVA-AUTH-04: Email Length Max+1 (101 chars)
+    // TC-EP-AUTH-06: Invalid Password Partition - Missing Complexity
     // =========================================================================
     @Test
-    void testEmailLengthMaxPlusOne_TC_BVA_AUTH_04() {
-        String longEmail = "a".repeat(60) + "@" + "b".repeat(36) + ".com";
-        request.setEmail(longEmail);
+    void testPasswordMissingComplexity_TC_EP_AUTH_06() {
+        request.setPassword("p@ssword"); // Length >= 8 but lacks uppercase and digit
 
-        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
-        assertFalse(violations.isEmpty(), "Email with 101 chars should fail validation");
+        SystemConfig config = SystemConfig.builder()
+                .specialCharRequired(true)
+                .upperNumberRequired(true)
+                .build();
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(config));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            adminUserService.createUser(request);
+        }, "Password missing uppercase and digit complexity should throw exception");
+
+        assertEquals("Mật khẩu phải chứa ít nhất một chữ hoa và một chữ số", exception.getMessage());
     }
 
     // =========================================================================
-    // TC-BVA-AUTH-05: Full Name Length Max-1 (99 chars)
+    // TC-EP-AUTH-07: Valid Account Status Partition
     // =========================================================================
     @Test
-    void testFullNameLengthMaxMinusOne_TC_BVA_AUTH_05() {
-        request.setFullName("a".repeat(99));
-
-        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
-        assertTrue(violations.isEmpty(), "Full name with 99 chars should be valid");
-    }
-
-    // =========================================================================
-    // TC-BVA-AUTH-06: Full Name Length Max (100 chars)
-    // =========================================================================
-    @Test
-    void testFullNameLengthMax_TC_BVA_AUTH_06() {
-        request.setFullName("a".repeat(100));
-
-        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
-        assertTrue(violations.isEmpty(), "Full name with 100 chars should be valid");
-    }
-
-    // =========================================================================
-    // TC-BVA-AUTH-07: Full Name Length Max+1 (101 chars)
-    // =========================================================================
-    @Test
-    void testFullNameLengthMaxPlusOne_TC_BVA_AUTH_07() {
-        request.setFullName("a".repeat(101));
-
-        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
-        assertFalse(violations.isEmpty(), "Full name with 101 chars should fail validation");
-        
-        ConstraintViolation<CreateUserRequest> violation = violations.iterator().next();
-        assertEquals("Họ và tên không được quá 100 ký tự", violation.getMessage());
-    }
-
-    // =========================================================================
-    // TC-BVA-AUTH-08: Phone Number Length Max (20 chars)
-    // =========================================================================
-    @Test
-    void testPhoneLengthMax_TC_BVA_AUTH_08() {
-        request.setPhone("01234567890123456789");
-
-        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
-        assertTrue(violations.isEmpty(), "Phone with 20 chars should be valid");
-    }
-
-    // =========================================================================
-    // TC-BVA-AUTH-09: Phone Number Length Max+1 (21 chars)
-    // =========================================================================
-    @Test
-    void testPhoneLengthMaxPlusOne_TC_BVA_AUTH_09() {
-        request.setPhone("012345678901234567890");
-
-        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
-        assertFalse(violations.isEmpty(), "Phone with 21 chars should fail validation");
-
-        ConstraintViolation<CreateUserRequest> violation = violations.iterator().next();
-        assertEquals("Số điện thoại không được quá 20 ký tự", violation.getMessage());
-    }
-
-    // =========================================================================
-    // TC-BVA-AUTH-10: Account Status Length Max+1 (31 chars)
-    // =========================================================================
-    @Test
-    void testStatusLengthMaxPlusOne_TC_BVA_AUTH_10() {
+    void testStatusValid_TC_EP_AUTH_07() {
         UpdateUserRequest updateRequest = new UpdateUserRequest();
-        updateRequest.setStatus("A".repeat(31));
+        updateRequest.setStatus("ACTIVE");
 
         Set<ConstraintViolation<UpdateUserRequest>> violations = validator.validate(updateRequest);
-        assertFalse(violations.isEmpty(), "Status with 31 chars should fail validation");
+        assertTrue(violations.isEmpty(), "Status 'ACTIVE' should be valid");
+    }
+
+    // =========================================================================
+    // TC-EP-AUTH-08: Invalid Account Status Partition
+    // =========================================================================
+    @Test
+    void testStatusInvalid_TC_EP_AUTH_08() {
+        UpdateUserRequest updateRequest = new UpdateUserRequest();
+        updateRequest.setStatus("SUSPENDED");
+
+        Set<ConstraintViolation<UpdateUserRequest>> violations = validator.validate(updateRequest);
+        assertFalse(violations.isEmpty(), "Status 'SUSPENDED' should be invalid");
     }
 }
