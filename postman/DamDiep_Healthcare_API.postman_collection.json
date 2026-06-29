@@ -1,0 +1,3727 @@
+{
+  "info": {
+    "name": "DamDiep Healthcare API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clinicId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Auth",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@damdiep.com\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "  pm.collectionVariables.set('token', jsonData.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02. Admin - Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard?timeRange=DAY&metric=Lượng bệnh nhân",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard?timeRange=DAY&metric=Lượng bệnh nhân"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/reports?reportType=CLINIC&performanceFilter=ALL",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "reports?reportType=CLINIC&performanceFilter=ALL"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/audit-logs?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "audit-logs?page=0&size=10"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Admin - Clinics",
+      "item": [
+        {
+          "name": "Get Clinic Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/clinics/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "clinics",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Clinics List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/clinics?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "clinics?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Clinic By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/clinics/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "clinics",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Clinic",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/clinics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "clinics"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Phòng khám mới\",\n  \"clinicCode\": \"PK001\",\n  \"address\": \"123 Đường ABC\",\n  \"phone\": \"0901234567\",\n  \"imageUrl\": \"\",\n  \"adminFullName\": \"Nguyễn Văn A\",\n  \"adminEmail\": \"manager@clinic.com\",\n  \"adminPassword\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Clinic",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/clinics/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "clinics",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Phòng khám cập nhật\",\n  \"address\": \"456 Đường XYZ\",\n  \"phone\": \"0907654321\",\n  \"email\": \"clinic@email.com\",\n  \"description\": \"Mô tả\",\n  \"imageUrl\": \"\",\n  \"managerId\": 1,\n  \"adminFullName\": \"Trần B\",\n  \"adminEmail\": \"b@email.com\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Toggle Clinic Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/clinics/1/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "clinics",
+                "1",
+                "toggle-status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Admin - Users",
+      "item": [
+        {
+          "name": "Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Users List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Users By Role",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users?role=DOCTOR&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users?role=DOCTOR&page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Bác sĩ Mới\",\n  \"email\": \"doctor@new.com\",\n  \"password\": \"123456\",\n  \"phone\": \"0901111111\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Tiến sĩ\",\n  \"bio\": \"Chuyên gia\",\n  \"licenseImageUrl\": \"\",\n  \"specialization\": \"Nội khoa\",\n  \"experience\": \"5 năm\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Cập nhật tên\",\n  \"email\": \"updated@email.com\",\n  \"phone\": \"0902222222\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"status\": \"ACTIVE\",\n  \"password\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Thạc sĩ\",\n  \"bio\": \"Bio mới\",\n  \"specialization\": \"Tim mạch\",\n  \"experience\": \"10 năm\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Toggle User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/1/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "1",
+                "toggle-status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Admin - Config",
+      "item": [
+        {
+          "name": "Get System Config",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "config"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update System Config",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "config"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"language\": \"vi\",\n  \"timezone\": \"Asia/Ho_Chi_Minh\",\n  \"maintenanceMode\": false,\n  \"security\": {\n    \"sessionTimeout\": 30,\n    \"maxLoginAttempts\": 5\n  },\n  \"thresholds\": {},\n  \"notifications\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Regenerate API Key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/config/regenerate-key",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "config",
+                "regenerate-key"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Clinic - Dashboard",
+      "item": [
+        {
+          "name": "Get Clinic Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/dashboard?period=6m",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "dashboard?period=6m"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Clinic Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Clinic Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tên phòng khám\",\n  \"address\": \"Địa chỉ mới\",\n  \"phone\": \"0901234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Conditions List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/conditions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "conditions"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Clinic - Patients",
+      "item": [
+        {
+          "name": "Get Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "patients?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Patients With Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients?keyword=Nguyen&condition=Tiểu đường&riskLevel=HIGH&status=ACTIVE&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "patients?keyword=Nguyen&condition=Tiểu đường&riskLevel=HIGH&status=ACTIVE&page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Patient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "patients"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn B\",\n  \"age\": \"45\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0903333333\",\n  \"doctorId\": 1,\n  \"email\": \"patient@email.com\",\n  \"address\": \"Địa chỉ\",\n  \"condition\": \"Tiểu đường\",\n  \"primaryCondition\": \"Tiểu đường type 2\",\n  \"riskLevel\": \"MEDIUM\",\n  \"notes\": \"Ghi chú\",\n  \"password\": \"123456\",\n  \"identityCard\": \"012345678901\",\n  \"occupation\": \"Nhân viên\",\n  \"ethnicity\": \"Kinh\",\n  \"healthInsuranceNumber\": \"BH001\",\n  \"dateOfBirth\": \"1980-01-01\",\n  \"treatmentStatus\": \"ACTIVE\",\n  \"weightKg\": 70,\n  \"heightCm\": 170,\n  \"bloodType\": \"A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Patient",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "patients",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn B Updated\",\n  \"age\": \"46\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0903333334\",\n  \"doctorId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Patient",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "patients",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Notify Patient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients/1/notify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "patients",
+                "1",
+                "notify"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Nhắc nhở khám định kỳ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Record Patient Health Metric",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients/1/health-metrics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "patients",
+                "1",
+                "health-metrics"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 120,\n  \"unit\": \"mg/dL\",\n  \"notes\": \"Đo tại phòng khám\",\n  \"measuredAt\": \"2026-06-27T10:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Clinic - Doctors",
+      "item": [
+        {
+          "name": "Get Doctors",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/doctors?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "doctors?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Doctors With Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/doctors?keyword=Tran&status=ACTIVE&specialty=Nội khoa&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "doctors?keyword=Tran&status=ACTIVE&specialty=Nội khoa&page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Available Doctors",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/doctors/available",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "doctors",
+                "available"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Doctor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/doctors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "doctors"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Trần Văn C\",\n  \"email\": \"bsc@clinic.com\",\n  \"phone\": \"0904444444\",\n  \"specialty\": \"Tim mạch\",\n  \"licenseNumber\": \"BS002\",\n  \"degree\": \"Tiến sĩ\",\n  \"experience\": \"10 năm\",\n  \"bio\": \"Chuyên gia tim mạch\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Doctor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/doctors/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "doctors",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Trần Văn C Updated\",\n  \"email\": \"bsc@clinic.com\",\n  \"phone\": \"0904444445\",\n  \"specialty\": \"Tim mạch\",\n  \"licenseNumber\": \"BS002\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Doctor",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/doctors/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "doctors",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Clinic - Appointments",
+      "item": [
+        {
+          "name": "Get Appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/appointments?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "appointments?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-01\",\n  \"appointmentTime\": \"09:00\",\n  \"type\": \"OFFLINE\",\n  \"notes\": \"Khám định kỳ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Appointment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/appointments/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "appointments",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-02\",\n  \"appointmentTime\": \"10:00\",\n  \"type\": \"ONLINE\",\n  \"notes\": \"Đổi lịch\",\n  \"meetingLink\": \"https://meet.google.com/abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Appointment Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/appointments/1/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "appointments",
+                "1",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Batch Reschedule",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/appointments/batch-reschedule?sourceDate=2026-07-01&targetDate=2026-07-02",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "appointments",
+                "batch-reschedule?sourceDate=2026-07-01&targetDate=2026-07-02"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Clinic - Reports",
+      "item": [
+        {
+          "name": "Get Clinic Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/clinics/{{clinicId}}/reports?period=30d",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "reports?period=30d"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Disease Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/clinics/{{clinicId}}/reports/disease-detail?condition=Tiểu đường",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "reports",
+                "disease-detail?condition=Tiểu đường"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Clinic - Risk Alerts",
+      "item": [
+        {
+          "name": "Get Risk Alert Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "risk-alerts",
+                "dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get High Risk Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/high-risk-patients?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "risk-alerts",
+                "high-risk-patients?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Alert As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/alerts/1/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "risk-alerts",
+                "alerts",
+                "1",
+                "read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dismiss Alert",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/alerts/1/dismiss",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "risk-alerts",
+                "alerts",
+                "1",
+                "dismiss"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Doctor - Dashboard",
+      "item": [
+        {
+          "name": "Get Doctor Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "dashboard"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Doctor - Appointments",
+      "item": [
+        {
+          "name": "Get All Appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "appointments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Upcoming Appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/appointments/upcoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "appointments",
+                "upcoming"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-01\",\n  \"appointmentTime\": \"09:00\",\n  \"type\": \"OFFLINE\",\n  \"notes\": \"Tái khám\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Appointment Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/appointments/1/status?status=COMPLETED&diagnosisSummary=Ổn định",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "appointments",
+                "1",
+                "status?status=COMPLETED&diagnosisSummary=Ổn định"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reschedule Appointment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/appointments/1/reschedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "appointments",
+                "1",
+                "reschedule"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-03\",\n  \"appointmentTime\": \"14:00\",\n  \"type\": \"ONLINE\",\n  \"meetingLink\": \"https://meet.google.com/xyz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Batch Reschedule",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/appointments/batch-reschedule?sourceDate=2026-07-01&targetDate=2026-07-05",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "appointments",
+                "batch-reschedule?sourceDate=2026-07-01&targetDate=2026-07-05"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Doctor - Patients",
+      "item": [
+        {
+          "name": "Get My Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/patients?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "patients?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Patients With Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/patients?search=Nguyen&condition=Tiểu đường&riskLevel=HIGH&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "patients?search=Nguyen&condition=Tiểu đường&riskLevel=HIGH&page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Patient Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/patients/stats?days=7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "patients",
+                "stats?days=7"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Patient Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/patients/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "patients",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Doctor - Messages",
+      "item": [
+        {
+          "name": "Get Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/messages/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "messages",
+                "conversations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Messages In Conversation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/messages/conversations/1/messages?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "messages",
+                "conversations",
+                "1",
+                "messages?page=0&size=20"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/messages/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "messages",
+                "send"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversationId\": 1,\n  \"receiverId\": 2,\n  \"content\": \"Xin chào bệnh nhân\",\n  \"messageType\": \"TEXT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mark As Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/messages/conversations/1/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "messages",
+                "conversations",
+                "1",
+                "read"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Doctor - Prescriptions",
+      "item": [
+        {
+          "name": "Get Prescriptions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/prescriptions?page=0&size=10&sortBy=id&direction=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "prescriptions?page=0&size=10&sortBy=id&direction=desc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Prescriptions With Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/prescriptions?search=Nguyen&status=ACTIVE&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "prescriptions?search=Nguyen&status=ACTIVE&page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Prescription Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/prescriptions/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "prescriptions",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Prescription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor/prescriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctor",
+                "prescriptions"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"diagnosis\": \"Tiểu đường type 2\",\n  \"notes\": \"Uống thuốc đều đặn\",\n  \"items\": [\n    {\n      \"medicationName\": \"Metformin 500mg\",\n      \"dosage\": \"2 viên/ngày\",\n      \"usageInstructions\": \"Uống sau ăn sáng và tối\"\n    },\n    {\n      \"medicationName\": \"Gliclazide 30mg\",\n      \"dosage\": \"1 viên/ngày\",\n      \"usageInstructions\": \"Uống trước ăn sáng\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Patient - Dashboard",
+      "item": [
+        {
+          "name": "Get Patient Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Patient Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/dashboard/alerts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "dashboard",
+                "alerts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dismiss Alert",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/dashboard/alerts/1/dismiss",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "dashboard",
+                "alerts",
+                "1",
+                "dismiss"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. Patient - Appointments",
+      "item": [
+        {
+          "name": "Get Upcoming Appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/appointments/upcoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "appointments",
+                "upcoming"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Appointment History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/appointments/history?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "appointments",
+                "history?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Available Doctors",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/appointments/doctors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "appointments",
+                "doctors"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Book Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorId\": 1,\n  \"appointmentTime\": \"2026-07-01T09:00:00\",\n  \"endTime\": \"2026-07-01T09:30:00\",\n  \"appointmentType\": \"IN_PERSON\",\n  \"location\": \"Phòng khám ABC\",\n  \"reason\": \"Khám định kỳ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cancel Appointment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/appointments/1/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "appointments",
+                "1",
+                "cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Reminder",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/appointments/1/reminder?enabled=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "appointments",
+                "1",
+                "reminder?enabled=true"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. Patient - Health Metrics",
+      "item": [
+        {
+          "name": "Record Health Metric",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/health-metrics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "health-metrics"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 110,\n  \"unit\": \"mg/dL\",\n  \"notes\": \"Đo buổi sáng\",\n  \"measuredAt\": \"2026-06-27T07:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Metrics Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/health-metrics/summary?period=WEEK",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "health-metrics",
+                "summary?period=WEEK"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Chart Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/health-metrics/chart?metricType=BLOOD_SUGAR&period=WEEK",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "health-metrics",
+                "chart?metricType=BLOOD_SUGAR&period=WEEK"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Metrics History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/health-metrics/history?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "health-metrics",
+                "history?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Health Metric",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/health-metrics/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "health-metrics",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "20. Patient - Messages",
+      "item": [
+        {
+          "name": "Get Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/messages/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "messages",
+                "conversations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Messages In Conversation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/messages/conversations/1/messages?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "messages",
+                "conversations",
+                "1",
+                "messages?page=0&size=20"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/messages/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "messages",
+                "send"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversationId\": 1,\n  \"receiverId\": 3,\n  \"content\": \"Xin chào bác sĩ\",\n  \"messageType\": \"TEXT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mark As Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/messages/conversations/1/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "messages",
+                "conversations",
+                "1",
+                "read"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "21. Patient - Prescriptions",
+      "item": [
+        {
+          "name": "Get Active Prescriptions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "active"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Prescription History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "history"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Today Schedule",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/today-schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "today-schedule"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Log Medication",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/log-medication",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "log-medication"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": 1,\n  \"status\": \"TAKEN\",\n  \"notes\": \"Đã uống đúng giờ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Request Refill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/1/request-refill",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "1",
+                "request-refill"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "22. Patient - Profile",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyễn Văn D\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0905555555\",\n  \"email\": \"patient@email.com\",\n  \"address\": \"123 Đường DEF\",\n  \"bloodType\": \"O\",\n  \"heightCm\": 170,\n  \"weightKg\": 65,\n  \"identityCard\": \"012345678901\",\n  \"occupation\": \"Kỹ sư\",\n  \"ethnicity\": \"Kinh\",\n  \"healthInsuranceNumber\": \"BH002\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"medicalHistory\": \"Tiểu đường\",\n  \"allergies\": \"Penicillin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Emergency Contacts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/profile/emergency-contacts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "profile",
+                "emergency-contacts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Emergency Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/profile/emergency-contacts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "profile",
+                "emergency-contacts"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactName\": \"Nguyễn Thị E\",\n  \"relationship\": \"Vợ\",\n  \"phone\": \"0906666666\",\n  \"isPrimary\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Emergency Contact",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/profile/emergency-contacts/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "profile",
+                "emergency-contacts",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactName\": \"Nguyễn Thị E\",\n  \"relationship\": \"Vợ\",\n  \"phone\": \"0906666667\",\n  \"isPrimary\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Download Health Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/profile/download-report",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "profile",
+                "download-report"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "23. Notifications",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "unread-count"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark As Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/1/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "1",
+                "read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark All As Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "read-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "24. User Profile",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "change-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"123456\",\n  \"newPassword\": \"654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "25. AI Chat",
+      "item": [
+        {
+          "name": "Chat With AI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/chat",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "chat"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Tôi bị đau đầu và mệt mỏi\",\n  \"history\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Xin chào\"\n    },\n    {\n      \"role\": \"assistant\",\n      \"content\": \"Xin chào! Tôi có thể giúp gì cho bạn?\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "26. Doctor Management (Public)",
+      "item": [
+        {
+          "name": "Get Doctors List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "doctors?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Doctors By Specialty",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors?specialty=Tim mạch&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "doctors?specialty=Tim mạch&page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Doctor By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "doctors",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Doctor (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "doctors"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Lê Văn F\",\n  \"email\": \"bsf@hospital.com\",\n  \"phone\": \"0907777777\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS003\",\n  \"degree\": \"Phó giáo sư\",\n  \"experience\": \"15 năm\",\n  \"bio\": \"Chuyên gia thần kinh\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Doctor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "doctors",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Lê Văn F Updated\",\n  \"email\": \"bsf@hospital.com\",\n  \"phone\": \"0907777778\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS003\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Doctor (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "doctors",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "27. Medical Services",
+      "item": [
+        {
+          "name": "Get All Services",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/medical-services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "medical-services"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Services By Clinic",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/medical-services?clinicId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "medical-services?clinicId=1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Service By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/medical-services/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "medical-services",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Service Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/medical-services/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "medical-services",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Service",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/medical-services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "medical-services"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Khám tổng quát\",\n  \"description\": \"Dịch vụ khám tổng quát\",\n  \"price\": 500000,\n  \"clinicId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Service",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/medical-services/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "medical-services",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Khám tổng quát VIP\",\n  \"description\": \"Dịch vụ khám VIP\",\n  \"price\": 1000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Toggle Service Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/medical-services/1/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "medical-services",
+                "1",
+                "toggle-status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Service",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/medical-services/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "medical-services",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "28. Support Tickets",
+      "item": [
+        {
+          "name": "Create Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Lỗi hệ thống\",\n  \"description\": \"Không thể đăng nhập\",\n  \"priority\": \"HIGH\",\n  \"clinicId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get All Tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Tickets With Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets?status=OPEN&priority=HIGH&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets?status=OPEN&priority=HIGH&page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Tickets By Clinic",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets/clinic/1?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets",
+                "clinic",
+                "1?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Tickets By Creator",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets/creator/1?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets",
+                "creator",
+                "1?page=0&size=10"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket By Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets/code/TK-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets",
+                "code",
+                "TK-001"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Ticket Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets/1/status?status=RESOLVED&adminNote=Đã xử lý",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets",
+                "1",
+                "status?status=RESOLVED&adminNote=Đã xử lý"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Ticket",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
