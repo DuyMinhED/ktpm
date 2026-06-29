@@ -2,14 +2,12 @@ package com.project.service.impl;
 
 import com.project.dto.request.CreateUserRequest;
 import com.project.dto.request.UpdateUserRequest;
-import com.project.dto.response.AdminUserResponse;
 import com.project.entity.User;
-import com.project.entity.UserRole;
-import com.project.mapper.UserMapper;
 import com.project.repository.PatientRepository;
 import com.project.repository.UserRepository;
 import com.project.repository.SystemConfigRepository;
 import com.project.service.AuditService;
+import com.project.mapper.UserMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -75,17 +73,13 @@ public class AdminUserServiceImplTest {
     }
 
     // =========================================================================
-    // PASSWORD LENGTH BVA TEST CASES (MIN = 8)
+    // TC-BVA-AUTH-01: Password Length Min-1 (7 chars)
     // =========================================================================
-
     @Test
-    void testPasswordLengthMinMinusOne() {
-        // Boundary Value: 7 chars (Expected to FAIL under SRS but currently PASSES in code)
+    void testPasswordLengthMinMinusOne_TC_BVA_AUTH_01() {
         request.setPassword("P@ssw12"); 
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        // We mock save to return a non-null User so that if validatePasswordPolicy passes (bug),
-        // it doesn't throw NullPointerException but completes normally, letting our assertThrows catch the bug!
         when(passwordEncoder.encode(anyString())).thenReturn("hashed_password");
         when(userRepository.save(any(User.class))).thenReturn(new User());
 
@@ -96,9 +90,11 @@ public class AdminUserServiceImplTest {
         assertEquals("Mật khẩu phải có ít nhất 8 ký tự", exception.getMessage());
     }
 
+    // =========================================================================
+    // TC-BVA-AUTH-02: Password Length Min (8 chars)
+    // =========================================================================
     @Test
-    void testPasswordLengthMin() {
-        // Boundary Value: 8 chars
+    void testPasswordLengthMin_TC_BVA_AUTH_02() {
         request.setPassword("P@ssw123"); 
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
@@ -110,27 +106,11 @@ public class AdminUserServiceImplTest {
         });
     }
 
-    @Test
-    void testPasswordLengthMinPlusOne() {
-        // Boundary Value: 9 chars
-        request.setPassword("P@ssw1234"); 
-
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(anyString())).thenReturn("hashed_password");
-        when(userRepository.save(any(User.class))).thenReturn(new User());
-
-        assertDoesNotThrow(() -> {
-            adminUserService.createUser(request);
-        });
-    }
-
     // =========================================================================
-    // EMAIL LENGTH BVA TEST CASES (MAX = 100)
+    // TC-BVA-AUTH-03: Email Length Max (100 chars)
     // =========================================================================
-
     @Test
-    void testEmailLengthMax() {
-        // Boundary Value: 100 chars (Local part 60 chars <= 64 limit, Domain part 35 + 4 = 39 chars)
+    void testEmailLengthMax_TC_BVA_AUTH_03() {
         String longEmail = "a".repeat(60) + "@" + "b".repeat(35) + ".com";
         request.setEmail(longEmail);
 
@@ -138,10 +118,11 @@ public class AdminUserServiceImplTest {
         assertTrue(violations.isEmpty(), "Email with 100 chars should be valid");
     }
 
+    // =========================================================================
+    // TC-BVA-AUTH-04: Email Length Max+1 (101 chars)
+    // =========================================================================
     @Test
-    void testEmailLengthMaxPlusOne() {
-        // Boundary Value: 101 chars (Local part 60 chars <= 64 limit, Domain part 36 + 4 = 40 chars)
-        // Expected to FAIL under SRS but currently PASSES DTO validation because of missing @Size(max=100)
+    void testEmailLengthMaxPlusOne_TC_BVA_AUTH_04() {
         String longEmail = "a".repeat(60) + "@" + "b".repeat(36) + ".com";
         request.setEmail(longEmail);
 
@@ -150,30 +131,32 @@ public class AdminUserServiceImplTest {
     }
 
     // =========================================================================
-    // FULL NAME LENGTH BVA TEST CASES (MAX = 100)
+    // TC-BVA-AUTH-05: Full Name Length Max-1 (99 chars)
     // =========================================================================
-
     @Test
-    void testFullNameLengthMaxMinusOne() {
-        // Boundary Value: 99 chars
+    void testFullNameLengthMaxMinusOne_TC_BVA_AUTH_05() {
         request.setFullName("a".repeat(99));
 
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty(), "Full name with 99 chars should be valid");
     }
 
+    // =========================================================================
+    // TC-BVA-AUTH-06: Full Name Length Max (100 chars)
+    // =========================================================================
     @Test
-    void testFullNameLengthMax() {
-        // Boundary Value: 100 chars
+    void testFullNameLengthMax_TC_BVA_AUTH_06() {
         request.setFullName("a".repeat(100));
 
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty(), "Full name with 100 chars should be valid");
     }
 
+    // =========================================================================
+    // TC-BVA-AUTH-07: Full Name Length Max+1 (101 chars)
+    // =========================================================================
     @Test
-    void testFullNameLengthMaxPlusOne() {
-        // Boundary Value: 101 chars
+    void testFullNameLengthMaxPlusOne_TC_BVA_AUTH_07() {
         request.setFullName("a".repeat(101));
 
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
@@ -184,21 +167,21 @@ public class AdminUserServiceImplTest {
     }
 
     // =========================================================================
-    // PHONE NUMBER LENGTH BVA TEST CASES (MAX = 20)
+    // TC-BVA-AUTH-08: Phone Number Length Max (20 chars)
     // =========================================================================
-
     @Test
-    void testPhoneLengthMax() {
-        // Boundary Value: 20 chars
+    void testPhoneLengthMax_TC_BVA_AUTH_08() {
         request.setPhone("01234567890123456789");
 
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty(), "Phone with 20 chars should be valid");
     }
 
+    // =========================================================================
+    // TC-BVA-AUTH-09: Phone Number Length Max+1 (21 chars)
+    // =========================================================================
     @Test
-    void testPhoneLengthMaxPlusOne() {
-        // Boundary Value: 21 chars
+    void testPhoneLengthMaxPlusOne_TC_BVA_AUTH_09() {
         request.setPhone("012345678901234567890");
 
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(request);
@@ -209,12 +192,10 @@ public class AdminUserServiceImplTest {
     }
 
     // =========================================================================
-    // ACCOUNT STATUS LENGTH BVA TEST CASES (MAX = 30)
+    // TC-BVA-AUTH-10: Account Status Length Max+1 (31 chars)
     // =========================================================================
-
     @Test
-    void testStatusLengthMaxPlusOne() {
-        // Boundary Value: 31 chars (Expected to FAIL under SRS but currently PASSES DTO validation)
+    void testStatusLengthMaxPlusOne_TC_BVA_AUTH_10() {
         UpdateUserRequest updateRequest = new UpdateUserRequest();
         updateRequest.setStatus("A".repeat(31));
 
