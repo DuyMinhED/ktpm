@@ -25,3 +25,7 @@ postman-reports/
 .DS_Store
 .env.local
 .env.*.local
+
+# Steam local files
+steam/
+
