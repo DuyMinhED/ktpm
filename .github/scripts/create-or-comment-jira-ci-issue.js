@@ -13,12 +13,37 @@ const jobResults = {
   "docker-build": env.DOCKER_RESULT || "unknown",
 };
 
-const categoryOrder = [
-  ["backend-test", "backend-test-failed"],
-  ["frontend-test", "frontend-build-failed"],
-  ["postman-test", "postman-api-test-failed"],
-  ["e2e-test", "e2e-test-failed"],
-  ["docker-build", "docker-build-failed"],
+const failureDefinitions = [
+  {
+    result: env.BACKEND_RESULT,
+    jobName: "backend-test",
+    category: "backend-test-failed",
+    summaryFile: "backend.txt",
+  },
+  {
+    result: env.FRONTEND_RESULT,
+    jobName: "frontend-test",
+    category: "frontend-build-failed",
+    summaryFile: "frontend.txt",
+  },
+  {
+    result: env.POSTMAN_RESULT,
+    jobName: "postman-test",
+    category: "postman-api-test-failed",
+    summaryFile: "postman.txt",
+  },
+  {
+    result: env.E2E_RESULT,
+    jobName: "e2e-test",
+    category: "e2e-test-failed",
+    summaryFile: "e2e.txt",
+  },
+  {
+    result: env.DOCKER_RESULT,
+    jobName: "docker-build",
+    category: "docker-build-failed",
+    summaryFile: "docker.txt",
+  },
 ];
 
 function required(name, value) {
@@ -45,26 +70,6 @@ const actor = env.GITHUB_ACTOR || "unknown-actor";
 const runId = env.GITHUB_RUN_ID || "";
 const runUrl = runId ? `https://github.com/${repository}/actions/runs/${runId}` : "unknown-run-url";
 
-function failureCategory() {
-  const failed = categoryOrder.filter(([job]) => jobResults[job] === "failure");
-  if (failed.length > 1) return "multiple-ci-failures";
-  if (failed.length === 1) return failed[0][1];
-
-  const cancelled = categoryOrder.find(([job]) => jobResults[job] === "cancelled");
-  if (cancelled) return `${cancelled[0]}-cancelled`;
-
-  return "unknown-ci-failed";
-}
-
-const category = failureCategory();
-const fingerprintSource = `${repository}|${workflow}|${branch}|${category}`;
-const fingerprintHash = crypto.createHash("sha256").update(fingerprintSource).digest("hex").slice(0, 10);
-const fingerprintLabel = `ci-fingerprint-${fingerprintHash}`;
-
-function authHeader() {
-  return `Basic ${Buffer.from(`${jiraEmail}:${jiraApiToken}`).toString("base64")}`;
-}
-
 function parseMemberIds(raw) {
   if (!raw.trim()) return [];
 
@@ -80,11 +85,41 @@ function parseMemberIds(raw) {
   return raw.split(",").map((item) => item.trim()).filter(Boolean);
 }
 
-function selectedAssignee() {
+function buildFailureItems() {
+  const items = failureDefinitions
+    .filter((definition) => definition.result === "failure")
+    .map(({ jobName, category, summaryFile }) => ({ jobName, category, summaryFile }));
+
+  if (items.length > 0) return items;
+
+  return [
+    {
+      jobName: "unknown",
+      category: "unknown-ci-failed",
+      summaryFile: null,
+    },
+  ];
+}
+
+function createFingerprint(category) {
+  const source = `${repository}|${workflow}|${branch}|${category}`;
+  const hash = crypto.createHash("sha256").update(source).digest("hex").slice(0, 10);
+
+  return {
+    hash,
+    label: `ci-fingerprint-${hash}`,
+  };
+}
+
+function selectedAssignee(fingerprintHash) {
   if (jiraMemberIds.length === 0) return null;
 
   const idx = parseInt(fingerprintHash.slice(0, 8), 16) % jiraMemberIds.length;
   return jiraMemberIds[idx];
+}
+
+function authHeader() {
+  return `Basic ${Buffer.from(`${jiraEmail}:${jiraApiToken}`).toString("base64")}`;
 }
 
 function request(method, path, body) {
@@ -145,52 +180,36 @@ function jobResultsText() {
     .join("\n");
 }
 
-function readFailureSummaries() {
+function readFailureSummaryForFile(summaryFile) {
+  if (!summaryFile) {
+    return "No detailed failure summary found for this job. Check GitHub Actions logs.";
+  }
+
   const dir = env.CI_FAILURE_SUMMARY_DIR || "ci-failure-summaries";
+  const fullPath = nodePath.join(dir, summaryFile);
 
-  if (!fs.existsSync(dir)) {
-    return "No detailed CI failure summary artifacts were found. Check GitHub Actions logs.";
+  if (!fs.existsSync(fullPath)) {
+    return "No detailed failure summary found for this job. Check GitHub Actions logs.";
   }
 
-  const files = fs
-    .readdirSync(dir)
-    .filter((name) => name.endsWith(".txt"))
-    .sort();
+  let content = fs.readFileSync(fullPath, "utf8");
 
-  if (!files.length) {
-    return "No detailed CI failure summary files were found. Check GitHub Actions logs.";
+  if (content.length > 6000) {
+    content = `${content.slice(0, 6000)}\n... truncated ...`;
   }
 
-  const parts = [];
-
-  for (const file of files) {
-    const fullPath = nodePath.join(dir, file);
-    let content = fs.readFileSync(fullPath, "utf8");
-
-    if (content.length > 4000) {
-      content = `${content.slice(0, 4000)}\n... truncated ...`;
-    }
-
-    parts.push(`----- ${file} -----\n${content}`);
-  }
-
-  const combined = parts.join("\n\n");
-
-  if (combined.length > 10000) {
-    return `${combined.slice(0, 10000)}\n... combined failure summary truncated ...`;
-  }
-
-  return combined;
+  return content;
 }
 
-function issueDescription() {
+function issueDescription(item, fingerprintLabel) {
   return [
     `Repository: ${repository}`,
     `Workflow: ${workflow}`,
     `Branch: ${branch}`,
     `Commit SHA: ${sha}`,
     `Actor: ${actor}`,
-    `Failure category: ${category}`,
+    `Failed job: ${item.jobName}`,
+    `Failure category: ${item.category}`,
     `Fingerprint: ${fingerprintLabel}`,
     `GitHub Actions run URL: ${runUrl}`,
     "",
@@ -198,29 +217,24 @@ function issueDescription() {
     jobResultsText(),
     "",
     "Failure details:",
-    readFailureSummaries(),
+    readFailureSummaryForFile(item.summaryFile),
     "",
     "Expected result:",
-    "- Backend tests pass",
-    "- Frontend build/lint pass",
-    "- Postman/Newman pass",
-    "- E2E pass",
-    "- Docker build pass",
+    "- This CI job should pass.",
     "",
     "Actual result:",
-    "- CI failed in one or more jobs.",
+    "- This CI job failed.",
     "",
     "Suggested action:",
     "- Open GitHub Actions run URL",
-    "- Check failed job log",
-    "- Download artifact if needed",
+    "- Check artifact/log for this job",
     "- Reproduce locally",
     "- Fix code/test/config",
     "- Push again to verify",
   ].join("\n");
 }
 
-function repeatFailureComment() {
+function repeatFailureComment(item, fingerprintLabel) {
   return [
     "CI failed again with the same fingerprint.",
     "",
@@ -228,22 +242,20 @@ function repeatFailureComment() {
     `Branch: ${branch}`,
     `Commit: ${sha}`,
     `Actor: ${actor}`,
-    `Failure category: ${category}`,
+    `Failed job: ${item.jobName}`,
+    `Failure category: ${item.category}`,
     `Fingerprint: ${fingerprintLabel}`,
     `GitHub Actions run: ${runUrl}`,
     "",
-    "Job results:",
-    jobResultsText(),
-    "",
     "Failure details from this run:",
-    readFailureSummaries(),
+    readFailureSummaryForFile(item.summaryFile),
     "",
     "Note:",
     "This failure matches an existing open Jira issue, so no duplicate issue was created.",
   ].join("\n");
 }
 
-async function findExistingIssue() {
+async function findExistingIssue(fingerprintLabel) {
   const jql = `project = ${jiraProjectKey} AND labels = "${fingerprintLabel}" AND statusCategory != Done`;
   const response = await request("POST", "/rest/api/3/search/jql", {
     jql,
@@ -260,9 +272,9 @@ async function findExistingIssue() {
   return response.body && response.body.issues && response.body.issues[0];
 }
 
-async function addComment(issueKey) {
+async function addComment(issueKey, item, fingerprintLabel) {
   const response = await request("POST", `/rest/api/3/issue/${issueKey}/comment`, {
-    body: adfText(repeatFailureComment()),
+    body: adfText(repeatFailureComment(item, fingerprintLabel)),
   });
 
   if (response.status !== 201) {
@@ -274,34 +286,30 @@ async function addComment(issueKey) {
   console.log(`Commented on existing Jira issue: ${issueKey}`);
 }
 
-async function createIssue(issueType) {
-  const assigneeId = selectedAssignee();
+async function createIssue(issueType, item, fingerprint) {
+  const assigneeId = selectedAssignee(fingerprint.hash);
   const labels = [
     "ci",
     "github-actions",
     "auto-bug",
     jiraProjectKey.toLowerCase(),
-    category,
-    fingerprintLabel,
+    item.category,
+    fingerprint.label,
   ];
 
   const fields = {
     project: { key: jiraProjectKey },
-    summary: `[CI FAILED] ${category} - ${repository} - ${branch} - ${shortSha}`,
+    summary: `[CI FAILED] ${item.category} - ${repository} - ${branch} - ${shortSha}`,
     issuetype: { name: issueType },
     labels,
-    description: adfText(issueDescription()),
+    description: adfText(issueDescription(item, fingerprint.label)),
   };
 
   if (assigneeId) {
     fields.assignee = { id: assigneeId };
   }
 
-  const response = await request("POST", "/rest/api/3/issue", {
-    fields: {
-      ...fields,
-    },
-  });
+  const response = await request("POST", "/rest/api/3/issue", { fields });
 
   if (response.status === 201 && response.body && response.body.key) {
     console.log(`Created Jira issue: ${response.body.key}`);
@@ -310,7 +318,7 @@ async function createIssue(issueType) {
 
   if (issueType !== "Task") {
     console.warn(`Create issue with type ${issueType} failed with HTTP ${response.status}; retrying with Task.`);
-    return createIssue("Task");
+    return createIssue("Task", item, fingerprint);
   }
 
   console.error(`Failed to create Jira issue. HTTP ${response.status}.`);
@@ -318,17 +326,27 @@ async function createIssue(issueType) {
   process.exit(1);
 }
 
-async function main() {
-  console.log(`Failure category: ${category}`);
-  console.log(`Fingerprint: ${fingerprintLabel}`);
+async function processFailureItem(item) {
+  const fingerprint = createFingerprint(item.category);
 
-  const existing = await findExistingIssue();
+  console.log(`Processing failure item: ${item.category}`);
+  console.log(`Fingerprint: ${fingerprint.label}`);
+
+  const existing = await findExistingIssue(fingerprint.label);
   if (existing && existing.key) {
-    await addComment(existing.key);
+    await addComment(existing.key, item, fingerprint.label);
     return;
   }
 
-  await createIssue(configuredIssueType);
+  await createIssue(configuredIssueType, item, fingerprint);
+}
+
+async function main() {
+  const failureItems = buildFailureItems();
+
+  for (const item of failureItems) {
+    await processFailureItem(item);
+  }
 }
 
 main().catch((error) => {
