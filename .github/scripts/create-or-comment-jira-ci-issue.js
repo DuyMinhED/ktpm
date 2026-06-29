@@ -1,5 +1,7 @@
 const crypto = require("crypto");
+const fs = require("fs");
 const https = require("https");
+const nodePath = require("path");
 
 const env = process.env;
 
@@ -143,6 +145,44 @@ function jobResultsText() {
     .join("\n");
 }
 
+function readFailureSummaries() {
+  const dir = env.CI_FAILURE_SUMMARY_DIR || "ci-failure-summaries";
+
+  if (!fs.existsSync(dir)) {
+    return "No detailed CI failure summary artifacts were found. Check GitHub Actions logs.";
+  }
+
+  const files = fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith(".txt"))
+    .sort();
+
+  if (!files.length) {
+    return "No detailed CI failure summary files were found. Check GitHub Actions logs.";
+  }
+
+  const parts = [];
+
+  for (const file of files) {
+    const fullPath = nodePath.join(dir, file);
+    let content = fs.readFileSync(fullPath, "utf8");
+
+    if (content.length > 4000) {
+      content = `${content.slice(0, 4000)}\n... truncated ...`;
+    }
+
+    parts.push(`----- ${file} -----\n${content}`);
+  }
+
+  const combined = parts.join("\n\n");
+
+  if (combined.length > 10000) {
+    return `${combined.slice(0, 10000)}\n... combined failure summary truncated ...`;
+  }
+
+  return combined;
+}
+
 function issueDescription() {
   return [
     `Repository: ${repository}`,
@@ -156,6 +196,9 @@ function issueDescription() {
     "",
     "Job results:",
     jobResultsText(),
+    "",
+    "Failure details:",
+    readFailureSummaries(),
     "",
     "Expected result:",
     "- Backend tests pass",
@@ -192,6 +235,9 @@ function repeatFailureComment() {
     "Job results:",
     jobResultsText(),
     "",
+    "Failure details from this run:",
+    readFailureSummaries(),
+    "",
     "Note:",
     "This failure matches an existing open Jira issue, so no duplicate issue was created.",
   ].join("\n");
@@ -199,8 +245,11 @@ function repeatFailureComment() {
 
 async function findExistingIssue() {
   const jql = `project = ${jiraProjectKey} AND labels = "${fingerprintLabel}" AND statusCategory != Done`;
-  const path = `/rest/api/3/search/jql?jql=${encodeURIComponent(jql)}&maxResults=1&fields=summary,status`;
-  const response = await request("GET", path);
+  const response = await request("POST", "/rest/api/3/search/jql", {
+    jql,
+    maxResults: 1,
+    fields: ["summary", "status"],
+  });
 
   if (response.status !== 200) {
     console.error(`Jira search failed with HTTP ${response.status}.`);

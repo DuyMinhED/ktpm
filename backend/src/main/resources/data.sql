@@ -1,4 +1,16 @@
 -- SEED DATA for Patient Portal
+--
+-- Hard-coded test login accounts for local/CI/Postman/E2E.
+-- Plain-text password for every seeded account below: admin123
+-- Stored value is BCrypt(admin123). This is classroom/test seed data only.
+--
+-- ADMIN:          admin@care.com / admin123
+-- CLINIC_MANAGER: manager@care.com / admin123
+-- DOCTOR:         mai.le@care.com / admin123
+-- PATIENT:        truongquocan@patient.com / admin123
+--
+-- Extra seeded users also use admin123:
+-- hung.nguyen@care.com, van.tran@care.com, truonghue@patient.com, tolam@gmail.com
 
 -- 1. Create Sample Users (Admin, Manager, Doctors, Patients)
 INSERT INTO users (email, password, full_name, phone, role, status, clinic_id, is_deleted, created_at)
@@ -15,6 +27,8 @@ ON DUPLICATE KEY UPDATE
     password = VALUES(password),
     role = VALUES(role),
     full_name = VALUES(full_name),
+    phone = VALUES(phone),
+    clinic_id = VALUES(clinic_id),
     is_deleted = VALUES(is_deleted),
     status = VALUES(status);
 

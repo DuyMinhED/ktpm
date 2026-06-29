@@ -15,7 +15,7 @@ on:
       - "postman/**"
       - "test/resource/**"
       - ".github/workflows/**"
-      - ".githu~pts/**"
+      - ".github/scripts/**"
 
   pull_request:
     branches:
@@ -77,6 +77,50 @@ jobs:
             mvn clean verify --batch-mode --no-transfer-progress -Dspring.profiles.active=test
           fi
 
+      - name: Summarize backend failure
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p ci-failure-summary
+
+          {
+            echo "Backend failure summary"
+            echo "======================="
+            echo ""
+            echo "Job: backend-test"
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo ""
+
+            if ls backend/target/surefire-reports/*.txt >/dev/null 2>&1; then
+              echo "Surefire failure lines:"
+              grep -R -n -E "FAILURE|ERROR|AssertionFailedError|expected:|but was:|Expected|Tests run:|<<< FAILURE!|<<< ERROR!" backend/target/surefire-reports/*.txt | head -n 160 || true
+            else
+              echo "No Surefire .txt reports found."
+            fi
+
+            echo ""
+
+            if ls backend/target/failsafe-reports/*.txt >/dev/null 2>&1; then
+              echo "Failsafe failure lines:"
+              grep -R -n -E "FAILURE|ERROR|AssertionFailedError|expected:|but was:|Expected|Tests run:|<<< FAILURE!|<<< ERROR!" backend/target/failsafe-reports/*.txt | head -n 160 || true
+            else
+              echo "No Failsafe .txt reports found."
+            fi
+
+            echo ""
+            echo "Note:"
+            echo "Open backend-test artifact for full Surefire/Failsafe reports."
+          } > ci-failure-summary/backend.txt
+
+      - name: Upload backend failure summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-failure-summary-backend-test
+          path: ci-failure-summary/
+          if-no-files-found: ignore
+
       - name: Upload backend reports
         uses: actions/upload-artifact@v4
         if: always()
@@ -111,15 +155,77 @@ jobs:
 
       - name: Run frontend lint
         working-directory: frontend
-        run: npm run lint --if-present
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run lint --if-present 2>&1 | tee ../frontend-lint.log
 
       - name: Run frontend typecheck
         working-directory: frontend
-        run: npm run typecheck --if-present
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run typecheck --if-present 2>&1 | tee ../frontend-typecheck.log
 
       - name: Build frontend
         working-directory: frontend
-        run: npm run build
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee ../frontend-build.log
+
+      - name: Summarize frontend failure
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p ci-failure-summary
+
+          {
+            echo "Frontend failure summary"
+            echo "========================"
+            echo ""
+            echo "Job: frontend-test"
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo ""
+
+            if [ -f frontend-lint.log ]; then
+              echo "ESLint errors/warnings:"
+              grep -n -E "error|warning|Unexpected any|no-explicit-any|no-unused-vars|react-hooks|Cannot call impure function|setState|Fast refresh" frontend-lint.log | head -n 220 || true
+              echo ""
+            else
+              echo "No frontend-lint.log found."
+              echo ""
+            fi
+
+            if [ -f frontend-typecheck.log ]; then
+              echo "TypeScript errors:"
+              grep -n -E "error TS|TS[0-9]+|error" frontend-typecheck.log | head -n 160 || true
+              echo ""
+            else
+              echo "No frontend-typecheck.log found."
+              echo ""
+            fi
+
+            if [ -f frontend-build.log ]; then
+              echo "Build errors:"
+              grep -n -E "error|failed|Error|Cannot|Module not found|Rollup|Vite|vite" frontend-build.log | head -n 160 || true
+            else
+              echo "No frontend-build.log found."
+            fi
+
+            echo ""
+            echo "Note:"
+            echo "Open frontend-test artifact for full lint/typecheck/build logs."
+          } > ci-failure-summary/frontend.txt
+
+      - name: Upload frontend failure summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-failure-summary-frontend-test
+          path: ci-failure-summary/
+          if-no-files-found: ignore
 
       - name: Upload frontend build output
         uses: actions/upload-artifact@v4
@@ -128,6 +234,9 @@ jobs:
           name: frontend-build-output
           path: |
             frontend/dist/
+            frontend-lint.log
+            frontend-typecheck.log
+            frontend-build.log
             ~/.npm/_logs/
           if-no-files-found: warn
 
@@ -175,6 +284,61 @@ jobs:
             --reporter-json-export postman-newman-report.json \
             --reporter-junit-export postman-newman-report.xml
 
+      - name: Summarize Postman failure
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p ci-failure-summary
+
+          {
+            echo "Postman/Newman failure summary"
+            echo "=============================="
+            echo ""
+            echo "Job: postman-test"
+            echo "Base URL: ${API_BASE_URL:-${DEFAULT_API_BASE_URL}}"
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo ""
+
+            if [ -f postman-newman-report.json ]; then
+              echo "Newman failures:"
+              node - <<'NODE'
+          const fs = require("fs");
+
+          const file = "postman-newman-report.json";
+          const data = JSON.parse(fs.readFileSync(file, "utf8"));
+          const failures = data.run && data.run.failures ? data.run.failures : [];
+
+          if (!failures.length) {
+            console.log("No assertion failures found in JSON report. Check runtime/network errors.");
+          } else {
+            for (const f of failures.slice(0, 40)) {
+              const requestName = f.source && f.source.name ? f.source.name : "Unknown request";
+              const errorMessage = f.error && f.error.message ? f.error.message : "Unknown error";
+              const testName = f.error && f.error.test ? f.error.test : "";
+              console.log(`- Request: ${requestName}`);
+              if (testName) console.log(`  Test: ${testName}`);
+              console.log(`  Error: ${errorMessage}`);
+            }
+          }
+          NODE
+            else
+              echo "No Newman JSON report found."
+            fi
+
+            echo ""
+            echo "Note:"
+            echo "Open postman-newman-reports artifact for full Newman JSON/JUnit reports."
+          } > ci-failure-summary/postman.txt
+
+      - name: Upload Postman failure summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-failure-summary-postman-test
+          path: ci-failure-summary/
+          if-no-files-found: ignore
+
       - name: Upload Postman reports
         uses: actions/upload-artifact@v4
         if: always()
@@ -221,11 +385,61 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps
 
-      - name: Run E2E tests
+      - name: Run CodeceptJS E2E
         working-directory: frontend
+        shell: bash
         run: |
+          set -o pipefail
           E2E_TEST_URL="${E2E_TEST_URL:-${DEFAULT_E2E_TEST_URL}}"
-          HEADLESS=true TEST_URL="${E2E_TEST_URL}" npm run test:e2e
+          HEADLESS=true TEST_URL="${E2E_TEST_URL}" npm run test:e2e 2>&1 | tee ../e2e.log
+
+      - name: Summarize E2E failure
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p ci-failure-summary
+
+          {
+            echo "E2E failure summary"
+            echo "==================="
+            echo ""
+            echo "Job: e2e-test"
+            echo "TEST_URL: ${E2E_TEST_URL}"
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo ""
+
+            if [ -f e2e.log ]; then
+              echo "E2E log failure lines:"
+              grep -n -E "Error|Failed|FAIL|Timeout|locator|expected|Actual|Scenario|not found|Cannot" e2e.log | head -n 220 || true
+            else
+              echo "No e2e.log found."
+            fi
+
+            echo ""
+
+            if [ -d frontend/output ]; then
+              echo "CodeceptJS output files:"
+              find frontend/output -maxdepth 2 -type f | head -n 80
+            elif [ -d frontend/e2e_tests/output ]; then
+              echo "CodeceptJS e2e_tests output files:"
+              find frontend/e2e_tests/output -maxdepth 2 -type f | head -n 80
+            else
+              echo "No CodeceptJS output directory found."
+            fi
+
+            echo ""
+            echo "Note:"
+            echo "Open e2e-codeceptjs-reports artifact for screenshots/output files."
+          } > ci-failure-summary/e2e.txt
+
+      - name: Upload E2E failure summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-failure-summary-e2e-test
+          path: ci-failure-summary/
+          if-no-files-found: ignore
 
       - name: Upload E2E reports
         uses: actions/upload-artifact@v4
@@ -233,6 +447,7 @@ jobs:
         with:
           name: e2e-codeceptjs-reports
           path: |
+            e2e.log
             frontend/output/
             frontend/tests/output/
             frontend/e2e_tests/output/
@@ -250,7 +465,45 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build backend Docker image
-        run: docker build -t kcpm-backend-ci:${{ github.sha }} ./backend
+        shell: bash
+        run: |
+          set -o pipefail
+          docker build -t kcpm-backend-ci:${{ github.sha }} ./backend 2>&1 | tee docker-build.log
+
+      - name: Summarize Docker failure
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p ci-failure-summary
+
+          {
+            echo "Docker build failure summary"
+            echo "============================"
+            echo ""
+            echo "Job: docker-build"
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo ""
+
+            if [ -f docker-build.log ]; then
+              echo "Docker build errors:"
+              grep -n -E "ERROR|Error|error|failed|FAIL|Cannot|not found|no such file|denied" docker-build.log | head -n 180 || true
+            else
+              echo "No docker-build.log found."
+            fi
+
+            echo ""
+            echo "Note:"
+            echo "Open docker-build job logs for full Docker output."
+          } > ci-failure-summary/docker.txt
+
+      - name: Upload Docker failure summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-failure-summary-docker-build
+          path: ci-failure-summary/
+          if-no-files-found: ignore
 
   create-jira-bug-on-failure:
     name: Jira - Create or Comment CI Failure
@@ -273,6 +526,13 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Download CI failure summaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ci-failure-summary-*
+          path: ci-failure-summaries
+          merge-multiple: true
+
       - name: Create or comment Jira issue
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
@@ -286,4 +546,5 @@ jobs:
           POSTMAN_RESULT: ${{ needs.postman-test.result }}
           E2E_RESULT: ${{ needs.e2e-test.result }}
           DOCKER_RESULT: ${{ needs.docker-build.result }}
+          CI_FAILURE_SUMMARY_DIR: ci-failure-summaries
         run: node .github/scripts/create-or-comment-jira-ci-issue.js
