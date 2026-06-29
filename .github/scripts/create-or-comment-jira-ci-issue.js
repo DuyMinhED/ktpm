@@ -199,7 +199,7 @@ function repeatFailureComment() {
 
 async function findExistingIssue() {
   const jql = `project = ${jiraProjectKey} AND labels = "${fingerprintLabel}" AND statusCategory != Done`;
-  const path = `/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=1&fields=summary,status`;
+  const path = `/rest/api/3/search/jql?jql=${encodeURIComponent(jql)}&maxResults=1&fields=summary,status`;
   const response = await request("GET", path);
 
   if (response.status !== 200) {
