@@ -90,18 +90,6 @@ jobs:
             backend/target/failsafe-reports/
           if-no-files-found: warn
 
-      - name: Sync Java Test Failures to Jira
-        if: failure()
-        env:
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          JIRA_MEMBER_IDS: ${{ secrets.JIRA_MEMBER_IDS }}
-          PROJECT_KEY: 'KCPM'
-          ACTOR: ${{ github.actor }}
-          BRANCH: ${{ github.ref_name }}
-        run: node .github/scripts/sync-java-failures.js
-
       - name: Add JaCoCo Coverage Summary
         if: always()
         run: |
