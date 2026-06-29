@@ -1,0 +1,289 @@
+name: Production CI
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+      - "KCPM-*"
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "postman/**"
+      - "test/resource/**"
+      - ".github/workflows/**"
+      - ".githu~pts/**"
+
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "postman/**"
+      - "test/resource/**"
+      - ".github/workflows/**"
+      - ".github/scripts/**"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: production-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEFAULT_API_BASE_URL: https://health-management-backend-d1gk.onrender.com
+  DEFAULT_E2E_TEST_URL: https://ktpm-ruby.vercel.app/
+  TEST_ADMIN_EMAIL: admin@care.com
+  TEST_ADMIN_PASSWORD: admin123
+  TEST_MANAGER_EMAIL: manager@care.com
+  TEST_MANAGER_PASSWORD: admin123
+  TEST_DOCTOR_EMAIL: mai.le@care.com
+  TEST_DOCTOR_PASSWORD: admin123
+  TEST_PATIENT_EMAIL: truongquocan@patient.com
+  TEST_PATIENT_PASSWORD: admin123
+  TEST_CLINIC_ID: "1"
+
+jobs:
+  backend-test:
+    name: Backend - Maven Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Run backend tests
+        working-directory: backend
+        run: |
+          if [ -f "./mvnw" ]; then
+            chmod +x ./mvnw
+            ./mvnw clean verify --batch-mode --no-transfer-progress -Dspring.profiles.active=test
+          else
+            mvn clean verify --batch-mode --no-transfer-progress -Dspring.profiles.active=test
+          fi
+
+      - name: Upload backend reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-reports
+          path: |
+            backend/target/surefire-reports/
+            backend/target/failsafe-reports/
+            backend/target/site/jacoco/
+            backend/target/*.log
+          if-no-files-found: warn
+
+  frontend-test:
+    name: Frontend - Build and Static Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend lint
+        working-directory: frontend
+        run: npm run lint --if-present
+
+      - name: Run frontend typecheck
+        working-directory: frontend
+        run: npm run typecheck --if-present
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Upload frontend build output
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-build-output
+          path: |
+            frontend/dist/
+            ~/.npm/_logs/
+          if-no-files-found: warn
+
+  postman-test:
+    name: Postman - Newman API Test
+    runs-on: ubuntu-latest
+    needs:
+      - backend-test
+    timeout-minutes: 20
+    env:
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run Postman collection
+        run: |
+          COLLECTION_PATH="test/resource/DamDiep_Healthcare_API.postman_collection.json"
+          test -f "${COLLECTION_PATH}" || (echo "Postman collection not found: ${COLLECTION_PATH}" && exit 1)
+
+          API_BASE_URL="${API_BASE_URL:-${DEFAULT_API_BASE_URL}}"
+
+          newman run "${COLLECTION_PATH}" \
+            --env-var "baseUrl=${API_BASE_URL}" \
+            --env-var "adminEmail=${TEST_ADMIN_EMAIL}" \
+            --env-var "adminPassword=${TEST_ADMIN_PASSWORD}" \
+            --env-var "managerEmail=${TEST_MANAGER_EMAIL}" \
+            --env-var "managerPassword=${TEST_MANAGER_PASSWORD}" \
+            --env-var "doctorEmail=${TEST_DOCTOR_EMAIL}" \
+            --env-var "doctorPassword=${TEST_DOCTOR_PASSWORD}" \
+            --env-var "patientEmail=${TEST_PATIENT_EMAIL}" \
+            --env-var "patientPassword=${TEST_PATIENT_PASSWORD}" \
+            --env-var "clinicId=${TEST_CLINIC_ID}" \
+            --timeout-request 30000 \
+            --reporters cli,json,junit \
+            --reporter-json-export postman-newman-report.json \
+            --reporter-junit-export postman-newman-report.xml
+
+      - name: Upload Postman reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: postman-newman-reports
+          path: |
+            postman-newman-report.json
+            postman-newman-report.xml
+          if-no-files-found: warn
+
+  e2e-test:
+    name: E2E - CodeceptJS Playwright
+    runs-on: ubuntu-latest
+    needs:
+      - frontend-test
+    timeout-minutes: 30
+    env:
+      E2E_TEST_URL: https://ktpm-ruby.vercel.app/
+      E2E_ADMIN_EMAIL: admin@care.com
+      E2E_ADMIN_PASSWORD: admin123
+      E2E_MANAGER_EMAIL: manager@care.com
+      E2E_MANAGER_PASSWORD: admin123
+      E2E_DOCTOR_EMAIL: mai.le@care.com
+      E2E_DOCTOR_PASSWORD: admin123
+      E2E_PATIENT_EMAIL: truongquocan@patient.com
+      E2E_PATIENT_PASSWORD: admin123
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        working-directory: frontend
+        run: |
+          E2E_TEST_URL="${E2E_TEST_URL:-${DEFAULT_E2E_TEST_URL}}"
+          HEADLESS=true TEST_URL="${E2E_TEST_URL}" npm run test:e2e
+
+      - name: Upload E2E reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-codeceptjs-reports
+          path: |
+            frontend/output/
+            frontend/tests/output/
+            frontend/e2e_tests/output/
+          if-no-files-found: warn
+
+  docker-build:
+    name: Docker - Backend Build
+    runs-on: ubuntu-latest
+    needs:
+      - backend-test
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Build backend Docker image
+        run: docker build -t kcpm-backend-ci:${{ github.sha }} ./backend
+
+  create-jira-bug-on-failure:
+    name: Jira - Create or Comment CI Failure
+    runs-on: ubuntu-latest
+    needs:
+      - backend-test
+      - frontend-test
+      - postman-test
+      - e2e-test
+      - docker-build
+    if: always() && (github.ref_name == 'main' || github.ref_name == 'develop') && (needs.backend-test.result == 'failure' || needs.frontend-test.result == 'failure' || needs.postman-test.result == 'failure' || needs.e2e-test.result == 'failure' || needs.docker-build.result == 'failure')
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Create or comment Jira issue
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_MEMBER_IDS: ${{ secrets.JIRA_MEMBER_IDS }}
+          JIRA_PROJECT_KEY: KCPM
+          JIRA_ISSUE_TYPE: Bug
+          BACKEND_RESULT: ${{ needs.backend-test.result }}
+          FRONTEND_RESULT: ${{ needs.frontend-test.result }}
+          POSTMAN_RESULT: ${{ needs.postman-test.result }}
+          E2E_RESULT: ${{ needs.e2e-test.result }}
+          DOCKER_RESULT: ${{ needs.docker-build.result }}
+        run: node .github/scripts/create-or-comment-jira-ci-issue.js
