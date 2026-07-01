@@ -109,19 +109,19 @@ WHERE NOT EXISTS (
 -- 5. Create Sample Health Metrics (for charts and dashboards)
 -- Patient: Trương Quốc An (truongquocan@patient.com) - BLOOD_SUGAR
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 115.00, NULL, 'mg/dL', 'NORMAL', 'Đo lúc đói buổi sáng.', CURRENT_TIMESTAMP - INTERVAL 3 DAY, FALSE, CURRENT_TIMESTAMP
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 5.80, NULL, 'mmol/L', 'NORMAL', 'Đo lúc đói buổi sáng.', CURRENT_TIMESTAMP - INTERVAL 3 DAY, FALSE, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL 3 DAY - INTERVAL 1 HOUR AND measured_at < CURRENT_TIMESTAMP - INTERVAL 3 DAY + INTERVAL 1 HOUR);
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 145.00, NULL, 'mg/dL', 'HIGH', 'Đo sau bữa ăn tối nhiều tinh bột.', CURRENT_TIMESTAMP - INTERVAL 2 DAY, FALSE, CURRENT_TIMESTAMP
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 7.30, NULL, 'mmol/L', 'HIGH', 'Đo sau bữa ăn tối nhiều tinh bột.', CURRENT_TIMESTAMP - INTERVAL 2 DAY, FALSE, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL 2 DAY - INTERVAL 1 HOUR AND measured_at < CURRENT_TIMESTAMP - INTERVAL 2 DAY + INTERVAL 1 HOUR);
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 130.00, NULL, 'mg/dL', 'NORMAL', 'Đo trước khi đi ngủ.', CURRENT_TIMESTAMP - INTERVAL 1 DAY, FALSE, CURRENT_TIMESTAMP
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 5.60, NULL, 'mmol/L', 'NORMAL', 'Đo trước khi đi ngủ.', CURRENT_TIMESTAMP - INTERVAL 1 DAY, FALSE, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL 1 DAY - INTERVAL 1 HOUR AND measured_at < CURRENT_TIMESTAMP - INTERVAL 1 DAY + INTERVAL 1 HOUR);
 
 INSERT INTO health_metrics (patient_id, metric_type, value, value_secondary, unit, status, notes, measured_at, is_deleted, created_at)
-SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 122.00, NULL, 'mg/dL', 'NORMAL', 'Đo lúc đói buổi sáng.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
+SELECT (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1), 'BLOOD_SUGAR', 5.90, NULL, 'mmol/L', 'NORMAL', 'Đo lúc đói buổi sáng.', CURRENT_TIMESTAMP, FALSE, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM health_metrics WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND metric_type = 'BLOOD_SUGAR' AND measured_at > CURRENT_TIMESTAMP - INTERVAL 1 HOUR);
 
 -- Patient: Trương Quốc An (truongquocan@patient.com) - BLOOD_PRESSURE
@@ -171,7 +171,7 @@ WHERE NOT EXISTS (
 INSERT INTO patient_alerts (patient_id, alert_type, severity, title, message, is_read, is_dismissed, created_at)
 SELECT 
   (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1),
-  'BLOOD_SUGAR', 'HIGH', 'Chỉ số Đường Huyết Vượt Ngưỡng Bình Thường', 'Hệ thống ghi nhận chỉ số đường huyết của bạn tăng lên mức 145 mg/dL vào tối qua. Vui lòng theo dõi thêm và hạn chế tinh bột.', FALSE, FALSE, CURRENT_TIMESTAMP - INTERVAL 2 DAY
+  'BLOOD_SUGAR', 'HIGH', 'Chỉ số Đường Huyết Vượt Ngưỡng Bình Thường', 'Hệ thống ghi nhận chỉ số đường huyết của bạn tăng lên mức 7.3 mmol/L vào tối qua. Vui lòng theo dõi thêm và hạn chế tinh bột.', FALSE, FALSE, CURRENT_TIMESTAMP - INTERVAL 2 DAY
 WHERE NOT EXISTS (
   SELECT 1 FROM patient_alerts WHERE patient_id = (SELECT id FROM patients WHERE patient_code = 'BN-DUC-001' LIMIT 1) AND alert_type = 'BLOOD_SUGAR' AND severity = 'HIGH'
 );

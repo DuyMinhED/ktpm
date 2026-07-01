@@ -84,10 +84,10 @@ public class PatientHealthMetricServiceImplTest {
     void recordMetric_bloodSugar_lowBoundary() {
         setupMockSaving();
 
-        // EP: LOW (<3.9) | BVA: 3.8
+        // EP: LOW (<4.0) | BVA: 3.9
         CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
                 .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("3.8"))
+                .value(new BigDecimal("3.9"))
                 .unit("mmol/L")
                 .build();
 
@@ -102,10 +102,10 @@ public class PatientHealthMetricServiceImplTest {
     void recordMetric_bloodSugar_normalBoundaryMin() {
         setupMockSaving();
 
-        // EP: NORMAL (3.9 - 6.1) | BVA: 3.9 (min)
+        // EP: NORMAL (4.0 - 6.0) | BVA: 4.0 (min)
         CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
                 .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("3.9"))
+                .value(new BigDecimal("4.0"))
                 .unit("mmol/L")
                 .build();
 
@@ -118,10 +118,10 @@ public class PatientHealthMetricServiceImplTest {
     void recordMetric_bloodSugar_normalBoundaryMax() {
         setupMockSaving();
 
-        // EP: NORMAL (3.9 - 6.1) | BVA: 6.1 (max)
+        // EP: NORMAL (4.0 - 6.0) | BVA: 6.0 (max)
         CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
                 .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("6.1"))
+                .value(new BigDecimal("6.0"))
                 .unit("mmol/L")
                 .build();
 
@@ -134,10 +134,10 @@ public class PatientHealthMetricServiceImplTest {
     void recordMetric_bloodSugar_borderlineHighBoundaryMin() {
         setupMockSaving();
 
-        // EP: BORDERLINE_HIGH (6.1 < v <= 7.0) | BVA: 6.2
+        // EP: BORDERLINE_HIGH (6.0 < v <= 7.2) | BVA: 6.1
         CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
                 .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("6.2"))
+                .value(new BigDecimal("6.1"))
                 .unit("mmol/L")
                 .build();
 
@@ -150,10 +150,10 @@ public class PatientHealthMetricServiceImplTest {
     void recordMetric_bloodSugar_borderlineHighBoundaryMax() {
         setupMockSaving();
 
-        // EP: BORDERLINE_HIGH (6.1 < v <= 7.0) | BVA: 7.0
+        // EP: BORDERLINE_HIGH (6.0 < v <= 7.2) | BVA: 7.2
         CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
                 .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("7.0"))
+                .value(new BigDecimal("7.2"))
                 .unit("mmol/L")
                 .build();
 
@@ -166,10 +166,10 @@ public class PatientHealthMetricServiceImplTest {
     void recordMetric_bloodSugar_highBoundary() {
         setupMockSaving();
 
-        // EP: HIGH (>7.0) | BVA: 7.1
+        // EP: HIGH (>7.2) | BVA: 7.3
         CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
                 .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("7.1"))
+                .value(new BigDecimal("7.3"))
                 .unit("mmol/L")
                 .build();
 

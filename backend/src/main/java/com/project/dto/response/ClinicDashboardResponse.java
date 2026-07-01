@@ -59,7 +59,7 @@ public class ClinicDashboardResponse {
     public static class DiseaseAnalysisDto {
         private String diseaseName;
         private int totalCases;
-        private String averageIndex; // e.g., "126 mg/dL"
+        private String averageIndex; // e.g., "5.8 mmol/L"
         private String riskVariation; // e.g., "-4.2%"
         private String assessment; // e.g., "Ổn định"
         private String statusColor;

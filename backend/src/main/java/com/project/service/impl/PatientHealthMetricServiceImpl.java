@@ -261,9 +261,9 @@ public class PatientHealthMetricServiceImpl implements PatientHealthMetricServic
         return switch (type) {
             case BLOOD_SUGAR -> {
                 double v = value.doubleValue();
-                if (v < 3.9) yield "LOW";
-                else if (v <= 6.1) yield "NORMAL";
-                else if (v <= 7.0) yield "BORDERLINE_HIGH";
+                if (v < 4.0) yield "LOW";
+                else if (v <= 6.0) yield "NORMAL";
+                else if (v <= 7.2) yield "BORDERLINE_HIGH";
                 else yield "HIGH";
             }
             case BLOOD_PRESSURE -> {

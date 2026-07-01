@@ -525,7 +525,7 @@ export default function CreatePatientModal({
                                     </h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                         <div className="space-y-1.5">
-                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Đường huyết (mg/dL)</label>
+                                            <label className="text-[14px] font-medium text-slate-500 ml-1">Đường huyết (mmol/L)</label>
                                             <div className="relative">
                                                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-slate-400 z-10 pointer-events-none">glucose</span>
                                                 <input
