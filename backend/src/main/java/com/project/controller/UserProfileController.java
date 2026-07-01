@@ -60,8 +60,8 @@ public class UserProfileController {
                     }
 
                     // Validate new password
-                    if (request.getNewPassword() == null || request.getNewPassword().length() < 6) {
-                        return ApiResponse.<String>error("Mật khẩu mới phải có ít nhất 6 ký tự", null);
+                    if (request.getNewPassword() == null || request.getNewPassword().length() < 8) {
+                        return ApiResponse.<String>error("Mật khẩu mới phải có ít nhất 8 ký tự", null);
                     }
 
                     user.setPassword(passwordEncoder.encode(request.getNewPassword()));

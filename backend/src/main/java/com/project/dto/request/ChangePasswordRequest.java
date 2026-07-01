@@ -10,6 +10,6 @@ public class ChangePasswordRequest {
     private String currentPassword;
 
     @NotBlank(message = "Mật khẩu mới không được để trống")
-    @Size(min = 6, max = 100, message = "Mật khẩu mới phải có từ 6 đến 100 ký tự")
+    @Size(min = 8, max = 100, message = "Mật khẩu mới phải có từ 8 đến 100 ký tự")
     private String newPassword;
 }
