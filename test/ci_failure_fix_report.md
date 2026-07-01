@@ -1,7 +1,7 @@
 # BÁO CÁO KHẮC PHỤC LỖI TÍCH HỢP CI (CI FAILURE FIX REPORT)
 
-**Mã Ticket Jira:** KCPM-831  
-**Người thực hiện (Assignee):** Nguyễn Duy Minh  
+**Mã Ticket Jira:** KCPM-831, KCPM-839  
+**Người thực hiện (Assignee):** Hồ Văn Duy  
 **Mã số Sinh viên:** 054205001151  
 **Công cụ kiểm tra:** Maven 3.9.9, JUnit 5, Mockito framework  
 
@@ -57,7 +57,7 @@ mvn test
 ---
 
 ## 4. Danh sách các tệp tin sửa đổi (Git Changes)
-Các tệp đã sửa đổi và được đẩy lên nhánh `feature/KCPM-831-fix-ci-backend-test`:
+Các tệp đã sửa đổi và được đẩy lên nhánh `KCPM-839` (và `feature/KCPM-831-fix-ci-backend-test`):
 1. `backend/src/main/java/com/project/dto/request/CreateUserRequest.java`
 2. `backend/src/main/java/com/project/dto/request/UpdateUserRequest.java`
 3. `backend/src/main/java/com/project/dto/request/ChangePasswordRequest.java`
