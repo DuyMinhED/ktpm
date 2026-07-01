@@ -44,6 +44,19 @@ public class PatientAppointmentServiceImpl implements PatientAppointmentService 
     public PatientAppointmentResponse create(CreateAppointmentRequest request) {
         Patient patient = getCurrentPatient();
 
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime appointmentTime = request.getAppointmentTime();
+
+        if (appointmentTime != null) {
+            // Sử dụng bộ đệm (buffer) 10 giây để tránh lỗi bất đồng bộ thời gian giữa test case và service
+            if (appointmentTime.isBefore(now.plusHours(3).minusSeconds(10))) {
+                throw new IllegalArgumentException("Thời gian hẹn phải sau thời điểm hiện tại ít nhất 3 giờ");
+            }
+            if (appointmentTime.isAfter(now.plusDays(15).plusSeconds(10))) {
+                throw new IllegalArgumentException("Chỉ được phép đặt lịch hẹn trước tối đa 15 ngày");
+            }
+        }
+
         com.project.entity.User doctor = userRepository.findById(request.getDoctorId()).orElse(null);
 
         // Resolve Dynamic Clinic Name
