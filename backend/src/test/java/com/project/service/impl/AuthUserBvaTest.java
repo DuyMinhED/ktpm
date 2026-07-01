@@ -80,22 +80,7 @@ public class AuthUserBvaTest {
     void testPasswordLength7_TC_BVA_AUTH_01() {
         request.setPassword("P@ssw12"); // 7 ký tự
 
-        SystemConfig config = SystemConfig.builder()
-                .specialCharRequired(true)
-                .upperNumberRequired(true)
-                .build();
-
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(config));
-        when(passwordEncoder.encode(anyString())).thenReturn("hashed_password");
-        
-        // Mock saved user to avoid NullPointerException in service
-        User savedUser = User.builder()
-                .id(1L)
-                .email(request.getEmail())
-                .role(com.project.entity.UserRole.PATIENT)
-                .build();
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         // Dưới yêu cầu SRS, mật khẩu phải từ 8 ký tự trở lên. Do đó mong đợi ném exception.
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {

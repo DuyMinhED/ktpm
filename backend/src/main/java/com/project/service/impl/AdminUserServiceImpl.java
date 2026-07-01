@@ -147,8 +147,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     private void validatePasswordPolicy(String password) {
-        if (password == null || password.length() < 6) {
-            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự");
+        if (password == null || password.length() < 8) {
+            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 8 ký tự");
         }
 
         com.project.entity.SystemConfig config = systemConfigRepository.findFirstByOrderByIdAsc().orElse(null);
