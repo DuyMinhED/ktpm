@@ -36,16 +36,29 @@
           "response": []
         },
         {
-          "name": "Login",
+          "name": "Login - Admin",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.data && jsonData.data.token) {",
-                  "  pm.collectionVariables.set('token', jsonData.data.token);",
+                  "pm.test(\"Admin login returns success or auth error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Admin login response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    var token = jsonData.token || jsonData.accessToken || (jsonData.data && (jsonData.data.token || jsonData.data.accessToken));",
+                  "    pm.test(\"Admin login returns JWT token\", function () {",
+                  "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"adminToken\", token);",
                   "}"
                 ]
               }
@@ -61,7 +74,190 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@damdiep.com\",\n  \"password\": \"123456\"\n}",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{seedPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Clinic Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Clinic manager login returns success or auth error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Clinic manager login response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    var token = jsonData.token || jsonData.accessToken || (jsonData.data && (jsonData.data.token || jsonData.data.accessToken));",
+                  "    pm.test(\"Clinic manager login returns JWT token\", function () {",
+                  "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"clinicManagerToken\", token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{clinicManagerEmail}}\",\n  \"password\": \"{{seedPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Doctor login returns success or auth error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Doctor login response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    var token = jsonData.token || jsonData.accessToken || (jsonData.data && (jsonData.data.token || jsonData.data.accessToken));",
+                  "    pm.test(\"Doctor login returns JWT token\", function () {",
+                  "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"doctorToken\", token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{doctorEmail}}\",\n  \"password\": \"{{seedPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Patient login returns success or auth error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Patient login response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    var token = jsonData.token || jsonData.accessToken || (jsonData.data && (jsonData.data.token || jsonData.data.accessToken));",
+                  "    pm.test(\"Patient login returns JWT token\", function () {",
+                  "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"patientToken\", token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{patientEmail}}\",\n  \"password\": \"{{seedPassword}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -200,6 +396,60 @@
       "item": [
         {
           "name": "Get Clinic Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid clinic stats or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var stats = response.data;",
+                  "    pm.expect(stats).to.be.an(\"object\");",
+                  "    pm.expect(Object.keys(stats).length).to.be.above(0);",
+                  "    Object.keys(stats).forEach(function (key) {",
+                  "        pm.expect(stats[key], key).to.satisfy(function (value) {",
+                  "            return typeof value === \"number\" || value === null;",
+                  "        });",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -226,6 +476,65 @@
         },
         {
           "name": "Get Clinics List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid paged clinics list or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var page = response.data;",
+                  "    pm.expect(page).to.be.an(\"object\");",
+                  "    pm.expect(page).to.have.property(\"content\");",
+                  "    pm.expect(page.content).to.be.an(\"array\");",
+                  "    pm.expect(page).to.include.keys(\"totalElements\", \"totalPages\");",
+                  "",
+                  "    if (page.content.length > 0) {",
+                  "        var clinic = page.content[0];",
+                  "        pm.expect(clinic).to.be.an(\"object\");",
+                  "        pm.expect(clinic).to.include.keys(\"id\", \"name\");",
+                  "        pm.expect(clinic.id).to.be.a(\"number\");",
+                  "        pm.expect(clinic.name).to.be.a(\"string\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -261,6 +570,57 @@
         },
         {
           "name": "Get Clinic By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success, not found, or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid clinic detail or error body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var clinic = response.data;",
+                  "    pm.expect(clinic).to.be.an(\"object\");",
+                  "    pm.expect(clinic).to.include.keys(\"id\", \"name\");",
+                  "    pm.expect(clinic.id).to.eql(1);",
+                  "    pm.expect(clinic.name).to.be.a(\"string\").and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -287,6 +647,60 @@
         },
         {
           "name": "Create Clinic",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is create success or validation/auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create clinic response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var clinic = response.data;",
+                  "    pm.expect(clinic).to.be.an(\"object\");",
+                  "    pm.expect(clinic).to.include.keys(\"id\", \"name\");",
+                  "    pm.expect(clinic.id).to.be.a(\"number\");",
+                  "    pm.expect(clinic.name).to.be.a(\"string\").and.not.empty;",
+                  "    if (clinic.clinicCode) {",
+                  "        pm.expect(clinic.clinicCode).to.be.a(\"string\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -321,6 +735,60 @@
         },
         {
           "name": "Update Clinic",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is update success or validation/auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update clinic response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var clinic = response.data;",
+                  "    pm.expect(clinic).to.be.an(\"object\");",
+                  "    pm.expect(clinic).to.include.keys(\"id\", \"name\");",
+                  "    pm.expect(clinic.id).to.eql(1);",
+                  "    pm.expect(clinic.name).to.be.a(\"string\").and.not.empty;",
+                  "    if (clinic.status) {",
+                  "        pm.expect(clinic.status).to.be.oneOf([\"ACTIVE\", \"INACTIVE\", \"SUSPENDED\"]);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -4397,7 +4865,27 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          ""
+          "var rawUrl = pm.request.url ? pm.request.url.toString() : \"\";",
+          "var roleTokenKey = null;",
+          "",
+          "if (rawUrl.indexOf(\"/api/v1/admin/\") !== -1 || rawUrl.indexOf(\"/api/v1/admin\") !== -1) {",
+          "    roleTokenKey = \"adminToken\";",
+          "} else if (rawUrl.indexOf(\"/api/v1/clinics/\") !== -1 || rawUrl.indexOf(\"/api/v1/clinics\") !== -1) {",
+          "    roleTokenKey = \"clinicManagerToken\";",
+          "} else if (rawUrl.indexOf(\"/api/v1/doctor/\") !== -1 || rawUrl.indexOf(\"/api/v1/doctor\") !== -1) {",
+          "    roleTokenKey = \"doctorToken\";",
+          "} else if (rawUrl.indexOf(\"/api/v1/patient/\") !== -1 || rawUrl.indexOf(\"/api/v1/patient\") !== -1) {",
+          "    roleTokenKey = \"patientToken\";",
+          "} else if (rawUrl.indexOf(\"/api/v1/support-tickets\") !== -1 || rawUrl.indexOf(\"/api/v1/medical-services\") !== -1) {",
+          "    roleTokenKey = \"adminToken\";",
+          "}",
+          "",
+          "if (roleTokenKey) {",
+          "    var roleToken = pm.collectionVariables.get(roleTokenKey);",
+          "    if (roleToken) {",
+          "        pm.collectionVariables.set(\"token\", roleToken);",
+          "    }",
+          "}"
         ]
       }
     }
@@ -4405,11 +4893,56 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080",
+      "value": "https://health-management-backend-d1gk.onrender.com",
       "type": "string"
     },
     {
       "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "seedPassword",
+      "value": "admin123",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@care.com",
+      "type": "string"
+    },
+    {
+      "key": "clinicManagerEmail",
+      "value": "manager@care.com",
+      "type": "string"
+    },
+    {
+      "key": "doctorEmail",
+      "value": "mai.le@care.com",
+      "type": "string"
+    },
+    {
+      "key": "patientEmail",
+      "value": "truongquocan@patient.com",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clinicManagerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doctorToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patientToken",
       "value": "",
       "type": "string"
     },
