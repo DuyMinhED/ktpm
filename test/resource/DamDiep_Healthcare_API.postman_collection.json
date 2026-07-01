@@ -6,7 +6,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080",
+      "value": "https://health-management-backend-d1gk.onrender.com",
       "type": "string"
     },
     {
