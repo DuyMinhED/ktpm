@@ -5761,18 +5761,55 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/doctors/1",
+              "raw": "{{baseUrl}}/api/doctors/{{publicDoctorId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "doctors",
-                "1"
+                "{{publicDoctorId}}"
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 404 Not Found\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid doctor details or error payload\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Doctor details fetched successfully\");",
+                  "        ",
+                  "        var doc = response.data;",
+                  "        pm.expect(doc).to.be.an(\"object\");",
+                  "        pm.expect(doc).to.include.keys(\"id\", \"email\", \"fullName\", \"specialization\", \"status\");",
+                  "        pm.expect(doc.fullName).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Doctor (Admin)",
@@ -5786,7 +5823,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"BS. Lê Văn F\",\n  \"email\": \"bsf@hospital.com\",\n  \"phone\": \"0907777777\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS003\",\n  \"degree\": \"Phó giáo sư\",\n  \"experience\": \"15 năm\",\n  \"bio\": \"Chuyên gia thần kinh\",\n  \"password\": \"123456\"\n}",
+              "raw": "{\n  \"name\": \"BS. Lê Văn F {{$randomInt}}\",\n  \"email\": \"bsf{{$randomInt}}@hospital.com\",\n  \"phone\": \"0907{{$randomInt}}\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS{{$randomInt}}\",\n  \"degree\": \"Phó giáo sư\",\n  \"experience\": \"15 năm\",\n  \"bio\": \"Chuyên gia thần kinh\",\n  \"password\": \"123456\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5802,9 +5839,56 @@
                 "api",
                 "doctors"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 201 Created\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json\", function () {",
+                  "    pm.response.to.have.header(\"Content-Type\");",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "pm.test(\"Create Doctor response has valid schema\", function () {",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Doctor created successfully\");",
+                  "    ",
+                  "    var doc = response.data;",
+                  "    pm.expect(doc).to.be.an(\"object\");",
+                  "    pm.expect(doc).to.include.keys(\"id\", \"email\", \"fullName\", \"specialization\", \"status\");",
+                  "    pm.expect(doc.id).to.be.a(\"number\");",
+                  "    pm.expect(doc.fullName).to.be.a(\"string\").and.not.empty;",
+                  "    ",
+                  "    // Save ID for subsequent tests",
+                  "    pm.collectionVariables.set(\"publicDoctorId\", doc.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Doctor",
@@ -5818,7 +5902,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"BS. Lê Văn F Updated\",\n  \"email\": \"bsf@hospital.com\",\n  \"phone\": \"0907777778\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS003\"\n}",
+              "raw": "{\n  \"name\": \"BS. Lê Văn F Updated {{$randomInt}}\",\n  \"email\": \"bsf_up{{$randomInt}}@hospital.com\",\n  \"phone\": \"0907{{$randomInt}}\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS{{$randomInt}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5826,18 +5910,65 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/doctors/1",
+              "raw": "{{baseUrl}}/api/doctors/{{publicDoctorId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "doctors",
-                "1"
+                "{{publicDoctorId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or handled validation/auth error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Doctor response has valid body\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Doctor updated successfully\");",
+                  "        ",
+                  "        var doc = response.data;",
+                  "        pm.expect(doc).to.be.an(\"object\");",
+                  "        pm.expect(doc).to.include.keys(\"id\", \"email\", \"fullName\", \"specialization\", \"status\");",
+                  "        pm.expect(doc.fullName).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete Doctor (Admin)",
@@ -5850,18 +5981,61 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/doctors/1",
+              "raw": "{{baseUrl}}/api/doctors/{{publicDoctorId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "doctors",
-                "1"
+                "{{publicDoctorId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or auth/forbidden guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Doctor response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Doctor deleted successfully\");",
+                  "        pm.expect(response.data).to.be.null;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -6529,6 +6703,11 @@
     {
       "key": "JIRA_BASE_URL",
       "value": "https://ayemqh-1766052090391.atlassian.net"
+    },
+    {
+      "key": "publicDoctorId",
+      "value": "1",
+      "type": "string"
     }
   ]
 }
