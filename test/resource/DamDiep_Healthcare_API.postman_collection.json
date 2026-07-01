@@ -1,46 +1,11 @@
 {
   "info": {
+    "_postman_id": "859fb18d-1c81-4433-9e9b-958f2397acc9",
     "name": "DamDiep Healthcare API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55225055",
+    "_collection_link": "https://go.postman.co/collection/42986888-859fb18d-1c81-4433-9e9b-958f2397acc9?source=collection_link"
   },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "https://health-management-backend-d1gk.onrender.com",
-      "type": "string"
-    },
-    {
-      "key": "token",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "clinicId",
-      "value": "1",
-      "type": "string"
-    }
-  ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{token}}",
-        "type": "string"
-      }
-    ]
-  },
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          ""
-        ]
-      }
-    }
-  ],
   "item": [
     {
       "name": "01. Auth",
@@ -67,10 +32,38 @@
                 "health"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Login",
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Admin login returns success or auth error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Admin login response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    var token = jsonData.token || jsonData.accessToken || (jsonData.data && (jsonData.data.token || jsonData.data.accessToken));",
+                  "    pm.test(\"Admin login returns JWT token\", function () {",
+                  "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"adminToken\", token);",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -79,6 +72,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{seedPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
               "host": [
@@ -90,31 +92,192 @@
                 "auth",
                 "login"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@damdiep.com\",\n  \"password\": \"123456\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
           },
+          "response": []
+        },
+        {
+          "name": "Login - Clinic Manager",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.data && jsonData.data.token) {",
-                  "  pm.collectionVariables.set('token', jsonData.data.token);",
+                  "pm.test(\"Clinic manager login returns success or auth error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Clinic manager login response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    var token = jsonData.token || jsonData.accessToken || (jsonData.data && (jsonData.data.token || jsonData.data.accessToken));",
+                  "    pm.test(\"Clinic manager login returns JWT token\", function () {",
+                  "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"clinicManagerToken\", token);",
                   "}"
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{clinicManagerEmail}}\",\n  \"password\": \"{{seedPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Doctor login returns success or auth error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Doctor login response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    var token = jsonData.token || jsonData.accessToken || (jsonData.data && (jsonData.data.token || jsonData.data.accessToken));",
+                  "    pm.test(\"Doctor login returns JWT token\", function () {",
+                  "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"doctorToken\", token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{doctorEmail}}\",\n  \"password\": \"{{seedPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Patient login returns success or auth error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Patient login response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    var token = jsonData.token || jsonData.accessToken || (jsonData.data && (jsonData.data.token || jsonData.data.accessToken));",
+                  "    pm.test(\"Patient login returns JWT token\", function () {",
+                  "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"patientToken\", token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{patientEmail}}\",\n  \"password\": \"{{seedPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -140,10 +303,21 @@
                 "api",
                 "v1",
                 "admin",
-                "dashboard?timeRange=DAY&metric=Lượng bệnh nhân"
+                "dashboard"
+              ],
+              "query": [
+                {
+                  "key": "timeRange",
+                  "value": "DAY"
+                },
+                {
+                  "key": "metric",
+                  "value": "Lượng bệnh nhân"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Reports",
@@ -164,10 +338,21 @@
                 "api",
                 "v1",
                 "admin",
-                "reports?reportType=CLINIC&performanceFilter=ALL"
+                "reports"
+              ],
+              "query": [
+                {
+                  "key": "reportType",
+                  "value": "CLINIC"
+                },
+                {
+                  "key": "performanceFilter",
+                  "value": "ALL"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Audit Logs",
@@ -188,10 +373,21 @@
                 "api",
                 "v1",
                 "admin",
-                "audit-logs?page=0&size=10"
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -200,6 +396,62 @@
       "item": [
         {
           "name": "Get Clinic Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid clinic stats or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var stats = response.data;",
+                  "    pm.expect(stats).to.be.an(\"object\");",
+                  "    pm.expect(Object.keys(stats).length).to.be.above(0);",
+                  "    Object.keys(stats).forEach(function (key) {",
+                  "        pm.expect(stats[key], key).to.satisfy(function (value) {",
+                  "            return typeof value === \"number\" || value === null;",
+                  "        });",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -221,10 +473,70 @@
                 "stats"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Clinics List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid paged clinics list or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var page = response.data;",
+                  "    pm.expect(page).to.be.an(\"object\");",
+                  "    pm.expect(page).to.have.property(\"content\");",
+                  "    pm.expect(page.content).to.be.an(\"array\");",
+                  "    pm.expect(page).to.include.keys(\"totalElements\", \"totalPages\");",
+                  "",
+                  "    if (page.content.length > 0) {",
+                  "        var clinic = page.content[0];",
+                  "        pm.expect(clinic).to.be.an(\"object\");",
+                  "        pm.expect(clinic).to.include.keys(\"id\", \"name\");",
+                  "        pm.expect(clinic.id).to.be.a(\"number\");",
+                  "        pm.expect(clinic.name).to.be.a(\"string\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -242,13 +554,75 @@
                 "api",
                 "v1",
                 "admin",
-                "clinics?page=0&size=10"
+                "clinics"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Clinic By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success, not found, or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid clinic detail or error body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var clinic = response.data;",
+                  "    pm.expect(clinic).to.be.an(\"object\");",
+                  "    pm.expect(clinic).to.include.keys(\"id\", \"name\");",
+                  "    pm.expect(clinic.id).to.eql(1);",
+                  "    pm.expect(clinic.name).to.be.a(\"string\").and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -270,10 +644,65 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Create Clinic",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is create success or validation/auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create clinic response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var clinic = response.data;",
+                  "    pm.expect(clinic).to.be.an(\"object\");",
+                  "    pm.expect(clinic).to.include.keys(\"id\", \"name\");",
+                  "    pm.expect(clinic.id).to.be.a(\"number\");",
+                  "    pm.expect(clinic.name).to.be.a(\"string\").and.not.empty;",
+                  "    if (clinic.clinicCode) {",
+                  "        pm.expect(clinic.clinicCode).to.be.a(\"string\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -282,6 +711,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Phòng khám mới\",\n  \"clinicCode\": \"PK001\",\n  \"address\": \"123 Đường ABC\",\n  \"phone\": \"0901234567\",\n  \"imageUrl\": \"\",\n  \"adminFullName\": \"Nguyễn Văn A\",\n  \"adminEmail\": \"manager@clinic.com\",\n  \"adminPassword\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/clinics",
               "host": [
@@ -293,20 +731,66 @@
                 "admin",
                 "clinics"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Phòng khám mới\",\n  \"clinicCode\": \"PK001\",\n  \"address\": \"123 Đường ABC\",\n  \"phone\": \"0901234567\",\n  \"imageUrl\": \"\",\n  \"adminFullName\": \"Nguyễn Văn A\",\n  \"adminEmail\": \"manager@clinic.com\",\n  \"adminPassword\": \"123456\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Clinic",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is update success or validation/auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update clinic response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "",
+                  "    var clinic = response.data;",
+                  "    pm.expect(clinic).to.be.an(\"object\");",
+                  "    pm.expect(clinic).to.include.keys(\"id\", \"name\");",
+                  "    pm.expect(clinic.id).to.eql(1);",
+                  "    pm.expect(clinic.name).to.be.a(\"string\").and.not.empty;",
+                  "    if (clinic.status) {",
+                  "        pm.expect(clinic.status).to.be.oneOf([\"ACTIVE\", \"INACTIVE\", \"SUSPENDED\"]);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -315,6 +799,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Phòng khám cập nhật\",\n  \"address\": \"456 Đường XYZ\",\n  \"phone\": \"0907654321\",\n  \"email\": \"clinic@email.com\",\n  \"description\": \"Mô tả\",\n  \"imageUrl\": \"\",\n  \"managerId\": 1,\n  \"adminFullName\": \"Trần B\",\n  \"adminEmail\": \"b@email.com\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/clinics/1",
               "host": [
@@ -327,17 +820,9 @@
                 "clinics",
                 "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Phòng khám cập nhật\",\n  \"address\": \"456 Đường XYZ\",\n  \"phone\": \"0907654321\",\n  \"email\": \"clinic@email.com\",\n  \"description\": \"Mô tả\",\n  \"imageUrl\": \"\",\n  \"managerId\": 1,\n  \"adminFullName\": \"Trần B\",\n  \"adminEmail\": \"b@email.com\",\n  \"status\": \"ACTIVE\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Toggle Clinic Status",
@@ -363,7 +848,8 @@
                 "toggle-status"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -393,10 +879,54 @@
                 "stats"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Users List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 500ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response matches paginated Users List schema\", function () {\r",
+                  "    var response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "    pm.expect(response.message).to.equal(\"Users fetched successfully\");\r",
+                  "    \r",
+                  "    var data = response.data;\r",
+                  "    pm.expect(data).to.be.an(\"object\");\r",
+                  "    pm.expect(data.content).to.be.an(\"array\");\r",
+                  "    pm.expect(data.totalPages).to.be.a(\"number\");\r",
+                  "    pm.expect(data.totalElements).to.be.a(\"number\");\r",
+                  "    pm.expect(data.size).to.be.a(\"number\");\r",
+                  "    pm.expect(data.number).to.be.a(\"number\");\r",
+                  "    \r",
+                  "    if (data.content.length > 0) {\r",
+                  "        var user = data.content[0];\r",
+                  "        pm.expect(user.id).to.be.a(\"number\");\r",
+                  "        pm.expect(user.fullName).to.be.a(\"string\");\r",
+                  "        pm.expect(user.email).to.be.a(\"string\");\r",
+                  "        pm.expect(user.role).to.be.a(\"string\");\r",
+                  "        pm.expect(user.status).to.be.a(\"string\");\r",
+                  "    }\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -414,10 +944,21 @@
                 "api",
                 "v1",
                 "admin",
-                "users?page=0&size=10"
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Users By Role",
@@ -438,13 +979,62 @@
                 "api",
                 "v1",
                 "admin",
-                "users?role=DOCTOR&page=0&size=10"
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "DOCTOR"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get User By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 500ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response matches AdminUserResponse details schema\", function () {\r",
+                  "    var response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "    pm.expect(response.message).to.equal(\"User details fetched successfully\");\r",
+                  "    \r",
+                  "    var data = response.data;\r",
+                  "    pm.expect(data).to.be.an(\"object\");\r",
+                  "    pm.expect(data.id).to.be.a(\"number\");\r",
+                  "    pm.expect(data.fullName).to.be.a(\"string\");\r",
+                  "    pm.expect(data.email).to.be.a(\"string\");\r",
+                  "    pm.expect(data.role).to.be.a(\"string\");\r",
+                  "    pm.expect(data.status).to.be.a(\"string\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -466,7 +1056,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Create User",
@@ -478,6 +1069,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Bác sĩ Mới\",\n  \"email\": \"doctor@new.com\",\n  \"password\": \"123456\",\n  \"phone\": \"0901111111\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Tiến sĩ\",\n  \"bio\": \"Chuyên gia\",\n  \"licenseImageUrl\": \"\",\n  \"specialization\": \"Nội khoa\",\n  \"experience\": \"5 năm\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/users",
               "host": [
@@ -489,17 +1089,9 @@
                 "admin",
                 "users"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Bác sĩ Mới\",\n  \"email\": \"doctor@new.com\",\n  \"password\": \"123456\",\n  \"phone\": \"0901111111\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Tiến sĩ\",\n  \"bio\": \"Chuyên gia\",\n  \"licenseImageUrl\": \"\",\n  \"specialization\": \"Nội khoa\",\n  \"experience\": \"5 năm\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update User",
@@ -511,6 +1103,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Cập nhật tên\",\n  \"email\": \"updated@email.com\",\n  \"phone\": \"0902222222\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"status\": \"ACTIVE\",\n  \"password\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Thạc sĩ\",\n  \"bio\": \"Bio mới\",\n  \"specialization\": \"Tim mạch\",\n  \"experience\": \"10 năm\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/users/1",
               "host": [
@@ -523,17 +1124,9 @@
                 "users",
                 "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Cập nhật tên\",\n  \"email\": \"updated@email.com\",\n  \"phone\": \"0902222222\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"status\": \"ACTIVE\",\n  \"password\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Thạc sĩ\",\n  \"bio\": \"Bio mới\",\n  \"specialization\": \"Tim mạch\",\n  \"experience\": \"10 năm\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Toggle User Status",
@@ -559,7 +1152,8 @@
                 "toggle-status"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete User",
@@ -584,7 +1178,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -613,7 +1208,8 @@
                 "config"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update System Config",
@@ -625,6 +1221,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"language\": \"vi\",\n  \"timezone\": \"Asia/Ho_Chi_Minh\",\n  \"maintenanceMode\": false,\n  \"security\": {\n    \"sessionTimeout\": 30,\n    \"maxLoginAttempts\": 5\n  },\n  \"thresholds\": {},\n  \"notifications\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/config",
               "host": [
@@ -636,17 +1241,9 @@
                 "admin",
                 "config"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"language\": \"vi\",\n  \"timezone\": \"Asia/Ho_Chi_Minh\",\n  \"maintenanceMode\": false,\n  \"security\": {\n    \"sessionTimeout\": 30,\n    \"maxLoginAttempts\": 5\n  },\n  \"thresholds\": {},\n  \"notifications\": {}\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Regenerate API Key",
@@ -671,7 +1268,8 @@
                 "regenerate-key"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -698,10 +1296,17 @@
                 "v1",
                 "clinics",
                 "{{clinicId}}",
-                "dashboard?period=6m"
+                "dashboard"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "6m"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Clinic Profile",
@@ -726,7 +1331,8 @@
                 "profile"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Clinic Profile",
@@ -738,6 +1344,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tên phòng khám\",\n  \"address\": \"Địa chỉ mới\",\n  \"phone\": \"0901234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/profile",
               "host": [
@@ -750,17 +1365,9 @@
                 "{{clinicId}}",
                 "profile"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Tên phòng khám\",\n  \"address\": \"Địa chỉ mới\",\n  \"phone\": \"0901234567\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Conditions List",
@@ -785,7 +1392,8 @@
                 "conditions"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -794,6 +1402,70 @@
       "item": [
         {
           "name": "Get Patients",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid patients page or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "",
+                  "    var page = response.data;",
+                  "    var patients = Array.isArray(page) ? page : page.content;",
+                  "    pm.expect(patients).to.be.an(\"array\");",
+                  "    if (!Array.isArray(page)) {",
+                  "        pm.expect(page).to.include.keys(\"content\", \"totalElements\", \"totalPages\");",
+                  "    }",
+                  "",
+                  "    if (patients.length > 0) {",
+                  "        var patient = patients[0];",
+                  "        pm.expect(patient).to.be.an(\"object\");",
+                  "        pm.expect(patient).to.satisfy(function (item) {",
+                  "            return item.id !== undefined || item.patientId !== undefined;",
+                  "        });",
+                  "        pm.expect(patient).to.satisfy(function (item) {",
+                  "            return item.fullName || item.name || item.email || item.phone;",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -812,13 +1484,90 @@
                 "v1",
                 "clinics",
                 "{{clinicId}}",
-                "patients?page=0&size=10"
+                "patients"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Patients With Filters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Filtered patients response has valid page or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "",
+                  "    var page = response.data;",
+                  "    var patients = Array.isArray(page) ? page : page.content;",
+                  "    pm.expect(patients).to.be.an(\"array\");",
+                  "    if (!Array.isArray(page)) {",
+                  "        pm.expect(page).to.include.keys(\"content\", \"totalElements\", \"totalPages\");",
+                  "    }",
+                  "",
+                  "    patients.forEach(function (patient) {",
+                  "        pm.expect(patient).to.be.an(\"object\");",
+                  "        if (patient.riskLevel) {",
+                  "            pm.expect(patient.riskLevel).to.be.a(\"string\");",
+                  "        }",
+                  "        if (patient.status) {",
+                  "            pm.expect(patient.status).to.be.a(\"string\");",
+                  "        }",
+                  "        if (patient.fullName || patient.name) {",
+                  "            pm.expect(patient.fullName || patient.name).to.be.a(\"string\");",
+                  "        }",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -828,7 +1577,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients?keyword=Nguyen&condition=Tiểu đường&riskLevel=HIGH&status=ACTIVE&page=0&size=10",
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients?keyword=Nguyen&condition=Diabetes&riskLevel=HIGH&status=ACTIVE&page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -837,13 +1586,104 @@
                 "v1",
                 "clinics",
                 "{{clinicId}}",
-                "patients?keyword=Nguyen&condition=Tiểu đường&riskLevel=HIGH&status=ACTIVE&page=0&size=10"
+                "patients"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "Nguyen"
+                },
+                {
+                  "key": "condition",
+                  "value": "Diabetes"
+                },
+                {
+                  "key": "riskLevel",
+                  "value": "HIGH"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Create Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is create success or handled failure\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create patient response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    if (response.data === null) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.success === true || body.message;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    var patient = response.data;",
+                  "    pm.expect(patient).to.be.an(\"object\");",
+                  "    pm.expect(patient).to.satisfy(function (item) {",
+                  "        return item.id !== undefined || item.patientId !== undefined;",
+                  "    });",
+                  "    pm.expect(patient).to.satisfy(function (item) {",
+                  "        return item.fullName || item.name || item.email || item.phone;",
+                  "    });",
+                  "    if (patient.email) {",
+                  "        pm.expect(patient.email).to.include(\"@\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -852,6 +1692,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn B\",\n  \"age\": \"45\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0903333333\",\n  \"doctorId\": 1,\n  \"email\": \"patient{{$timestamp}}@email.com\",\n  \"address\": \"Địa chỉ\",\n  \"condition\": \"Tiểu đường\",\n  \"primaryCondition\": \"Tiểu đường type 2\",\n  \"riskLevel\": \"MEDIUM\",\n  \"notes\": \"Ghi chú\",\n  \"password\": \"123456\",\n  \"identityCard\": \"{{$timestamp}}\",\n  \"occupation\": \"Nhân viên\",\n  \"ethnicity\": \"Kinh\",\n  \"healthInsuranceNumber\": \"BH{{$timestamp}}\",\n  \"dateOfBirth\": \"1980-01-01\",\n  \"treatmentStatus\": \"ACTIVE\",\n  \"weightKg\": 70,\n  \"heightCm\": 170,\n  \"bloodType\": \"A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients",
               "host": [
@@ -864,17 +1713,9 @@
                 "{{clinicId}}",
                 "patients"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Nguyễn Văn B\",\n  \"age\": \"45\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0903333333\",\n  \"doctorId\": 1,\n  \"email\": \"patient@email.com\",\n  \"address\": \"Địa chỉ\",\n  \"condition\": \"Tiểu đường\",\n  \"primaryCondition\": \"Tiểu đường type 2\",\n  \"riskLevel\": \"MEDIUM\",\n  \"notes\": \"Ghi chú\",\n  \"password\": \"123456\",\n  \"identityCard\": \"012345678901\",\n  \"occupation\": \"Nhân viên\",\n  \"ethnicity\": \"Kinh\",\n  \"healthInsuranceNumber\": \"BH001\",\n  \"dateOfBirth\": \"1980-01-01\",\n  \"treatmentStatus\": \"ACTIVE\",\n  \"weightKg\": 70,\n  \"heightCm\": 170,\n  \"bloodType\": \"A\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Patient",
@@ -886,6 +1727,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn B Updated\",\n  \"age\": \"46\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0903333334\",\n  \"doctorId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients/1",
               "host": [
@@ -899,17 +1749,42 @@
                 "patients",
                 "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Nguyễn Văn B Updated\",\n  \"age\": \"46\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0903333334\",\n  \"doctorId\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Patient response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Patient updated successfully\");",
+                  "        pm.expect(response.data).to.be.null;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
-          }
+          ]
         },
         {
           "name": "Delete Patient",
@@ -935,7 +1810,41 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Patient response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Patient deleted successfully\");",
+                  "        pm.expect(response.data).to.be.null;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Notify Patient",
@@ -947,6 +1856,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Nhắc nhở khám định kỳ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients/1/notify",
               "host": [
@@ -961,17 +1879,42 @@
                 "1",
                 "notify"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"message\": \"Nhắc nhở khám định kỳ\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Notify Patient response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Notification sent\");",
+                  "        pm.expect(response.data).to.be.null;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
-          }
+          ]
         },
         {
           "name": "Record Patient Health Metric",
@@ -983,6 +1926,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 120,\n  \"unit\": \"mg/dL\",\n  \"notes\": \"Đo tại phòng khám\",\n  \"measuredAt\": \"2026-06-27T10:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/patients/1/health-metrics",
               "host": [
@@ -997,17 +1949,49 @@
                 "1",
                 "health-metrics"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 5.8,\n  \"unit\": \"mmol/L\",\n  \"notes\": \"Đo tại phòng khám\",\n  \"measuredAt\": \"2026-06-27T10:00:00\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Record Patient Health Metric response has valid body\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Health metric recorded successfully\");",
+                  "        ",
+                  "        var metric = response.data;",
+                  "        pm.expect(metric).to.be.an(\"object\");",
+                  "        pm.expect(metric).to.include.keys(\"id\", \"metricType\", \"value\", \"unit\", \"measuredAt\");",
+                  "        pm.expect(metric.id).to.be.a(\"number\");",
+                  "        pm.expect(metric.metricType).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(metric.value).to.be.a(\"number\");",
+                  "        pm.expect(metric.unit).to.be.a(\"string\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
-          }
+          ]
         }
       ]
     },
@@ -1034,10 +2018,21 @@
                 "v1",
                 "clinics",
                 "{{clinicId}}",
-                "doctors?page=0&size=10"
+                "doctors"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Doctors With Filters",
@@ -1059,10 +2054,33 @@
                 "v1",
                 "clinics",
                 "{{clinicId}}",
-                "doctors?keyword=Tran&status=ACTIVE&specialty=Nội khoa&page=0&size=10"
+                "doctors"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "Tran"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                },
+                {
+                  "key": "specialty",
+                  "value": "Nội khoa"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Available Doctors",
@@ -1088,7 +2106,8 @@
                 "available"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Create Doctor",
@@ -1100,6 +2119,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Trần Văn C\",\n  \"email\": \"bsc@clinic.com\",\n  \"phone\": \"0904444444\",\n  \"specialty\": \"Tim mạch\",\n  \"licenseNumber\": \"BS002\",\n  \"degree\": \"Tiến sĩ\",\n  \"experience\": \"10 năm\",\n  \"bio\": \"Chuyên gia tim mạch\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/doctors",
               "host": [
@@ -1112,17 +2140,9 @@
                 "{{clinicId}}",
                 "doctors"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"BS. Trần Văn C\",\n  \"email\": \"bsc@clinic.com\",\n  \"phone\": \"0904444444\",\n  \"specialty\": \"Tim mạch\",\n  \"licenseNumber\": \"BS002\",\n  \"degree\": \"Tiến sĩ\",\n  \"experience\": \"10 năm\",\n  \"bio\": \"Chuyên gia tim mạch\",\n  \"password\": \"123456\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Doctor",
@@ -1134,6 +2154,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Trần Văn C Updated\",\n  \"email\": \"bsc@clinic.com\",\n  \"phone\": \"0904444445\",\n  \"specialty\": \"Tim mạch\",\n  \"licenseNumber\": \"BS002\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/doctors/1",
               "host": [
@@ -1147,17 +2176,9 @@
                 "doctors",
                 "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"BS. Trần Văn C Updated\",\n  \"email\": \"bsc@clinic.com\",\n  \"phone\": \"0904444445\",\n  \"specialty\": \"Tim mạch\",\n  \"licenseNumber\": \"BS002\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete Doctor",
@@ -1183,7 +2204,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -1210,10 +2232,21 @@
                 "v1",
                 "clinics",
                 "{{clinicId}}",
-                "appointments?page=0&size=10"
+                "appointments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Create Appointment",
@@ -1225,6 +2258,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-01\",\n  \"appointmentTime\": \"09:00\",\n  \"type\": \"OFFLINE\",\n  \"notes\": \"Khám định kỳ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/appointments",
               "host": [
@@ -1237,17 +2279,9 @@
                 "{{clinicId}}",
                 "appointments"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-01\",\n  \"appointmentTime\": \"09:00\",\n  \"type\": \"OFFLINE\",\n  \"notes\": \"Khám định kỳ\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Appointment",
@@ -1259,6 +2293,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-02\",\n  \"appointmentTime\": \"10:00\",\n  \"type\": \"ONLINE\",\n  \"notes\": \"Đổi lịch\",\n  \"meetingLink\": \"https://meet.google.com/abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/appointments/1",
               "host": [
@@ -1272,20 +2315,64 @@
                 "appointments",
                 "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-02\",\n  \"appointmentTime\": \"10:00\",\n  \"type\": \"ONLINE\",\n  \"notes\": \"Đổi lịch\",\n  \"meetingLink\": \"https://meet.google.com/abc\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Appointment Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is update success or handled failure\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update appointment status response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"data\") && response.data) {",
+                  "        pm.expect(response.data).to.be.an(\"object\");",
+                  "        if (response.data.status) {",
+                  "            pm.expect(response.data.status).to.be.a(\"string\");",
+                  "        }",
+                  "    } else {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.success === true;",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PATCH",
             "header": [
@@ -1294,6 +2381,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/appointments/1/status",
               "host": [
@@ -1308,20 +2404,57 @@
                 "1",
                 "status"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"COMPLETED\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Batch Reschedule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is reschedule success or handled failure\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Batch reschedule response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1341,10 +2474,21 @@
                 "clinics",
                 "{{clinicId}}",
                 "appointments",
-                "batch-reschedule?sourceDate=2026-07-01&targetDate=2026-07-02"
+                "batch-reschedule"
+              ],
+              "query": [
+                {
+                  "key": "sourceDate",
+                  "value": "2026-07-01"
+                },
+                {
+                  "key": "targetDate",
+                  "value": "2026-07-02"
+                }
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -1353,6 +2497,51 @@
       "item": [
         {
           "name": "Get Clinic Report",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Clinic report response has valid schema or error body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403, 404]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.be.an(\"object\");",
+                  "    pm.expect(Object.keys(response.data).length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1370,13 +2559,66 @@
                 "v1",
                 "clinics",
                 "{{clinicId}}",
-                "reports?period=30d"
+                "reports"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Disease Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Disease detail response has valid schema or error body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403, 404]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.satisfy(function (data) {",
+                  "        return Array.isArray(data) || (data && typeof data === \"object\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1386,7 +2628,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/v1/clinics/{{clinicId}}/reports/disease-detail?condition=Tiểu đường",
+              "raw": "{{baseUrl}}/v1/clinics/{{clinicId}}/reports/disease-detail?condition=Diabetes",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1395,10 +2637,17 @@
                 "clinics",
                 "{{clinicId}}",
                 "reports",
-                "disease-detail?condition=Tiểu đường"
+                "disease-detail"
+              ],
+              "query": [
+                {
+                  "key": "condition",
+                  "value": "Diabetes"
+                }
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -1429,7 +2678,8 @@
                 "dashboard"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get High Risk Patients",
@@ -1452,10 +2702,21 @@
                 "clinics",
                 "{{clinicId}}",
                 "risk-alerts",
-                "high-risk-patients?page=0&size=10"
+                "high-risk-patients"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Mark Alert As Read",
@@ -1483,7 +2744,8 @@
                 "read"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Dismiss Alert",
@@ -1511,7 +2773,8 @@
                 "dismiss"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -1540,7 +2803,8 @@
                 "dashboard"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -1569,7 +2833,8 @@
                 "appointments"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Upcoming Appointments",
@@ -1594,7 +2859,8 @@
                 "upcoming"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Create Appointment",
@@ -1606,6 +2872,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-01\",\n  \"appointmentTime\": \"09:00\",\n  \"type\": \"OFFLINE\",\n  \"notes\": \"Tái khám\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/doctor/appointments",
               "host": [
@@ -1617,17 +2892,9 @@
                 "doctor",
                 "appointments"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-01\",\n  \"appointmentTime\": \"09:00\",\n  \"type\": \"OFFLINE\",\n  \"notes\": \"Tái khám\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Appointment Status",
@@ -1650,10 +2917,21 @@
                 "doctor",
                 "appointments",
                 "1",
-                "status?status=COMPLETED&diagnosisSummary=Ổn định"
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "COMPLETED"
+                },
+                {
+                  "key": "diagnosisSummary",
+                  "value": "Ổn định"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Reschedule Appointment",
@@ -1665,6 +2943,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-03\",\n  \"appointmentTime\": \"14:00\",\n  \"type\": \"ONLINE\",\n  \"meetingLink\": \"https://meet.google.com/xyz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/doctor/appointments/1/reschedule",
               "host": [
@@ -1678,17 +2965,9 @@
                 "1",
                 "reschedule"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"patientId\": 1,\n  \"appointmentDate\": \"2026-07-03\",\n  \"appointmentTime\": \"14:00\",\n  \"type\": \"ONLINE\",\n  \"meetingLink\": \"https://meet.google.com/xyz\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Batch Reschedule",
@@ -1710,10 +2989,21 @@
                 "v1",
                 "doctor",
                 "appointments",
-                "batch-reschedule?sourceDate=2026-07-01&targetDate=2026-07-05"
+                "batch-reschedule"
+              ],
+              "query": [
+                {
+                  "key": "sourceDate",
+                  "value": "2026-07-01"
+                },
+                {
+                  "key": "targetDate",
+                  "value": "2026-07-05"
+                }
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -1739,10 +3029,21 @@
                 "api",
                 "v1",
                 "doctor",
-                "patients?page=0&size=10"
+                "patients"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Patients With Filters",
@@ -1763,10 +3064,33 @@
                 "api",
                 "v1",
                 "doctor",
-                "patients?search=Nguyen&condition=Tiểu đường&riskLevel=HIGH&page=0&size=10"
+                "patients"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Nguyen"
+                },
+                {
+                  "key": "condition",
+                  "value": "Tiểu đường"
+                },
+                {
+                  "key": "riskLevel",
+                  "value": "HIGH"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Patient Stats",
@@ -1788,13 +3112,71 @@
                 "v1",
                 "doctor",
                 "patients",
-                "stats?days=7"
+                "stats"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "7"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Patient Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success, not found, or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Patient detail response has valid schema or error body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403, 404]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var patient = response.data.profile || response.data;",
+                  "    pm.expect(patient).to.be.an(\"object\");",
+                  "    pm.expect(patient).to.satisfy(function (item) {",
+                  "        return item.id !== undefined || item.patientId !== undefined;",
+                  "    });",
+                  "    pm.expect(patient).to.satisfy(function (item) {",
+                  "        return item.fullName || item.name || item.email || item.phone;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1816,7 +3198,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -1825,6 +3208,57 @@
       "item": [
         {
           "name": "Get Conversations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Conversations response has valid schema or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var conversations = Array.isArray(response.data) ? response.data : response.data.content;",
+                  "    pm.expect(conversations).to.be.an(\"array\");",
+                  "    if (conversations.length > 0) {",
+                  "        pm.expect(conversations[0]).to.be.an(\"object\");",
+                  "        pm.expect(conversations[0]).to.satisfy(function (item) {",
+                  "            return item.id !== undefined || item.conversationId !== undefined;",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1846,10 +3280,65 @@
                 "conversations"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Messages In Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success, not found, or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Messages response has valid schema or error body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403, 404]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var messages = Array.isArray(response.data) ? response.data : response.data.content;",
+                  "    pm.expect(messages).to.be.an(\"array\");",
+                  "    if (messages.length > 0) {",
+                  "        pm.expect(messages[0]).to.be.an(\"object\");",
+                  "        pm.expect(messages[0]).to.satisfy(function (item) {",
+                  "            return item.id !== undefined || item.messageId !== undefined;",
+                  "        });",
+                  "        if (messages[0].content) {",
+                  "            pm.expect(messages[0].content).to.be.a(\"string\");",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1870,13 +3359,75 @@
                 "messages",
                 "conversations",
                 "1",
-                "messages?page=0&size=20"
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Send Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is send success or handled failure\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Send message response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "    if (response.data) {",
+                  "        pm.expect(response.data).to.be.an(\"object\");",
+                  "        if (response.data.content) {",
+                  "            pm.expect(response.data.content).to.be.a(\"string\");",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1885,6 +3436,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversationId\": 1,\n  \"receiverId\": 2,\n  \"content\": \"Xin chào bệnh nhân\",\n  \"messageType\": \"TEXT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/doctor/messages/send",
               "host": [
@@ -1897,20 +3457,57 @@
                 "messages",
                 "send"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"conversationId\": 1,\n  \"receiverId\": 2,\n  \"content\": \"Xin chào bệnh nhân\",\n  \"messageType\": \"TEXT\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Mark As Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is mark-read success or handled failure\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Mark as read response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([204, 401, 403, 404]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1934,7 +3531,8 @@
                 "read"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -1943,6 +3541,44 @@
       "item": [
         {
           "name": "Get Prescriptions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Kiểm tra mã trạng thái phản hồi là 200 OK\r",
+                  "pm.test(\"Status code is 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Kiểm tra thời gian phản hồi nhanh (< 500ms)\r",
+                  "pm.test(\"Response time is less than 500ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Kiểm tra tiêu đề Content-Type là JSON\r",
+                  "pm.test(\"Content-Type is application/json\", function () {\r",
+                  "    pm.response.to.have.header(\"Content-Type\");\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "// 4. Kiểm tra cấu trúc phân trang của danh sách đơn thuốc\r",
+                  "pm.test(\"Response body matches page structure\", function () {\r",
+                  "    var response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "    pm.expect(response.data).to.have.property(\"content\");\r",
+                  "    pm.expect(response.data.content).to.be.an(\"array\");\r",
+                  "    pm.expect(response.data).to.have.property(\"totalPages\");\r",
+                  "    pm.expect(response.data).to.have.property(\"totalElements\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1960,13 +3596,67 @@
                 "api",
                 "v1",
                 "doctor",
-                "prescriptions?page=0&size=10&sortBy=id&direction=desc"
+                "prescriptions"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "id"
+                },
+                {
+                  "key": "direction",
+                  "value": "desc"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Prescriptions With Filters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Kiểm tra mã trạng thái phản hồi là 200 OK\r",
+                  "pm.test(\"Status code is 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Kiểm tra thời gian phản hồi nhanh (< 500ms)\r",
+                  "pm.test(\"Response time is less than 500ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Kiểm tra tiêu đề Content-Type là JSON\r",
+                  "pm.test(\"Content-Type is application/json\", function () {\r",
+                  "    pm.response.to.have.header(\"Content-Type\");\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "// 4. Kiểm tra danh sách trả về khớp cấu trúc và không trống\r",
+                  "pm.test(\"Filtered prescriptions contain data\", function () {\r",
+                  "    var response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "    pm.expect(response.data.content).to.be.an(\"array\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1984,13 +3674,67 @@
                 "api",
                 "v1",
                 "doctor",
-                "prescriptions?search=Nguyen&status=ACTIVE&page=0&size=10"
+                "prescriptions"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Nguyen"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Prescription Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Kiểm tra mã trạng thái phản hồi là 200 OK\r",
+                  "pm.test(\"Status code is 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Kiểm tra thời gian phản hồi nhanh (< 500ms)\r",
+                  "pm.test(\"Response time is less than 500ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "// 4. Kiểm tra cấu trúc thống kê đơn thuốc của Bác sĩ\r",
+                  "pm.test(\"Response contains valid prescription stats\", function () {\r",
+                  "    var response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "    pm.expect(response.message).to.equal(\"Stats fetched successfully\");\r",
+                  "    \r",
+                  "    var stats = response.data;\r",
+                  "    pm.expect(stats).to.have.property(\"totalPrescriptions\");\r",
+                  "    pm.expect(stats).to.have.property(\"activePrescriptions\");\r",
+                  "    pm.expect(stats).to.have.property(\"completedPrescriptions\");\r",
+                  "    pm.expect(stats).to.have.property(\"cancelledPrescriptions\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2012,10 +3756,41 @@
                 "stats"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Create Prescription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Kiểm tra mã trạng thái phản hồi là 200 OK\r",
+                  "pm.test(\"Status code is 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Kiểm tra thời gian phản hồi nhanh (< 600ms do ghi CSDL)\r",
+                  "pm.test(\"Response time is less than 600ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(600);\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Kiểm tra thông điệp tạo đơn thuốc thành công\r",
+                  "pm.test(\"Prescription created successfully\", function () {\r",
+                  "    var response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "    pm.expect(response.message).to.equal(\"Prescription created successfully\");\r",
+                  "    pm.expect(response.data).to.have.property(\"id\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -2024,6 +3799,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"diagnosis\": \"Tiểu đường type 2\",\n  \"notes\": \"Uống thuốc đều đặn\",\n  \"items\": [\n    {\n      \"medicationName\": \"Metformin 500mg\",\n      \"dosage\": \"2 viên/ngày\",\n      \"usageInstructions\": \"Uống sau ăn sáng và tối\"\n    },\n    {\n      \"medicationName\": \"Gliclazide 30mg\",\n      \"dosage\": \"1 viên/ngày\",\n      \"usageInstructions\": \"Uống trước ăn sáng\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/doctor/prescriptions",
               "host": [
@@ -2035,17 +3819,9 @@
                 "doctor",
                 "prescriptions"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"patientId\": 1,\n  \"diagnosis\": \"Tiểu đường type 2\",\n  \"notes\": \"Uống thuốc đều đặn\",\n  \"items\": [\n    {\n      \"medicationName\": \"Metformin 500mg\",\n      \"dosage\": \"2 viên/ngày\",\n      \"usageInstructions\": \"Uống sau ăn sáng và tối\"\n    },\n    {\n      \"medicationName\": \"Gliclazide 30mg\",\n      \"dosage\": \"1 viên/ngày\",\n      \"usageInstructions\": \"Uống trước ăn sáng\"\n    }\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -2074,7 +3850,8 @@
                 "dashboard"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Patient Alerts",
@@ -2099,7 +3876,8 @@
                 "alerts"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Dismiss Alert",
@@ -2126,7 +3904,8 @@
                 "dismiss"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -2156,7 +3935,8 @@
                 "upcoming"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Appointment History",
@@ -2178,10 +3958,21 @@
                 "v1",
                 "patient",
                 "appointments",
-                "history?page=0&size=10"
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Available Doctors",
@@ -2206,7 +3997,8 @@
                 "doctors"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Book Appointment",
@@ -2218,6 +4010,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorId\": 1,\n  \"appointmentTime\": \"2026-07-01T09:00:00\",\n  \"endTime\": \"2026-07-01T09:30:00\",\n  \"appointmentType\": \"IN_PERSON\",\n  \"location\": \"Phòng khám ABC\",\n  \"reason\": \"Khám định kỳ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patient/appointments",
               "host": [
@@ -2229,17 +4030,9 @@
                 "patient",
                 "appointments"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"doctorId\": 1,\n  \"appointmentTime\": \"2026-07-01T09:00:00\",\n  \"endTime\": \"2026-07-01T09:30:00\",\n  \"appointmentType\": \"IN_PERSON\",\n  \"location\": \"Phòng khám ABC\",\n  \"reason\": \"Khám định kỳ\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Cancel Appointment",
@@ -2265,7 +4058,8 @@
                 "cancel"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Toggle Reminder",
@@ -2288,10 +4082,17 @@
                 "patient",
                 "appointments",
                 "1",
-                "reminder?enabled=true"
+                "reminder"
+              ],
+              "query": [
+                {
+                  "key": "enabled",
+                  "value": "true"
+                }
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -2308,6 +4109,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 110,\n  \"unit\": \"mg/dL\",\n  \"notes\": \"Đo buổi sáng\",\n  \"measuredAt\": \"2026-06-27T07:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patient/health-metrics",
               "host": [
@@ -2319,17 +4129,9 @@
                 "patient",
                 "health-metrics"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 5.5,\n  \"unit\": \"mmol/L\",\n  \"notes\": \"Đo buổi sáng\",\n  \"measuredAt\": \"2026-06-27T07:00:00\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Metrics Summary",
@@ -2351,10 +4153,17 @@
                 "v1",
                 "patient",
                 "health-metrics",
-                "summary?period=WEEK"
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "WEEK"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Chart Data",
@@ -2376,10 +4185,21 @@
                 "v1",
                 "patient",
                 "health-metrics",
-                "chart?metricType=BLOOD_SUGAR&period=WEEK"
+                "chart"
+              ],
+              "query": [
+                {
+                  "key": "metricType",
+                  "value": "BLOOD_SUGAR"
+                },
+                {
+                  "key": "period",
+                  "value": "WEEK"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Metrics History",
@@ -2401,10 +4221,21 @@
                 "v1",
                 "patient",
                 "health-metrics",
-                "history?page=0&size=10"
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete Health Metric",
@@ -2429,7 +4260,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -2438,6 +4270,57 @@
       "item": [
         {
           "name": "Get Conversations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Patient conversations response has valid schema or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var conversations = Array.isArray(response.data) ? response.data : response.data.content;",
+                  "    pm.expect(conversations).to.be.an(\"array\");",
+                  "    if (conversations.length > 0) {",
+                  "        pm.expect(conversations[0]).to.be.an(\"object\");",
+                  "        pm.expect(conversations[0]).to.satisfy(function (item) {",
+                  "            return item.id !== undefined || item.conversationId !== undefined;",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2459,10 +4342,65 @@
                 "conversations"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Messages In Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success, not found, or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Patient messages response has valid schema or error body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403, 404]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var messages = Array.isArray(response.data) ? response.data : response.data.content;",
+                  "    pm.expect(messages).to.be.an(\"array\");",
+                  "    if (messages.length > 0) {",
+                  "        pm.expect(messages[0]).to.be.an(\"object\");",
+                  "        pm.expect(messages[0]).to.satisfy(function (item) {",
+                  "            return item.id !== undefined || item.messageId !== undefined;",
+                  "        });",
+                  "        if (messages[0].content) {",
+                  "            pm.expect(messages[0].content).to.be.a(\"string\");",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2483,13 +4421,75 @@
                 "messages",
                 "conversations",
                 "1",
-                "messages?page=0&size=20"
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Send Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is send success or handled failure\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Patient send message response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "    if (response.data) {",
+                  "        pm.expect(response.data).to.be.an(\"object\");",
+                  "        if (response.data.content) {",
+                  "            pm.expect(response.data.content).to.be.a(\"string\");",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -2498,6 +4498,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversationId\": 1,\n  \"receiverId\": 3,\n  \"content\": \"Xin chào bác sĩ\",\n  \"messageType\": \"TEXT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patient/messages/send",
               "host": [
@@ -2510,20 +4519,57 @@
                 "messages",
                 "send"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"conversationId\": 1,\n  \"receiverId\": 3,\n  \"content\": \"Xin chào bác sĩ\",\n  \"messageType\": \"TEXT\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Mark As Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is mark-read success or handled failure\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Patient mark as read response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([204, 401, 403, 404]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -2547,7 +4593,8 @@
                 "read"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -2577,7 +4624,8 @@
                 "active"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Prescription History",
@@ -2602,7 +4650,8 @@
                 "history"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Today Schedule",
@@ -2627,7 +4676,8 @@
                 "today-schedule"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Log Medication",
@@ -2639,6 +4689,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": 1,\n  \"status\": \"TAKEN\",\n  \"notes\": \"Đã uống đúng giờ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patient/prescriptions/log-medication",
               "host": [
@@ -2651,17 +4710,9 @@
                 "prescriptions",
                 "log-medication"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"scheduleId\": 1,\n  \"status\": \"TAKEN\",\n  \"notes\": \"Đã uống đúng giờ\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Request Refill",
@@ -2687,7 +4738,8 @@
                 "request-refill"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -2716,7 +4768,8 @@
                 "profile"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Profile",
@@ -2728,6 +4781,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyễn Văn D\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0905555555\",\n  \"email\": \"patient@email.com\",\n  \"address\": \"123 Đường DEF\",\n  \"bloodType\": \"O\",\n  \"heightCm\": 170,\n  \"weightKg\": 65,\n  \"identityCard\": \"012345678901\",\n  \"occupation\": \"Kỹ sư\",\n  \"ethnicity\": \"Kinh\",\n  \"healthInsuranceNumber\": \"BH002\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"medicalHistory\": \"Tiểu đường\",\n  \"allergies\": \"Penicillin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patient/profile",
               "host": [
@@ -2739,17 +4801,9 @@
                 "patient",
                 "profile"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Nguyễn Văn D\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0905555555\",\n  \"email\": \"patient@email.com\",\n  \"address\": \"123 Đường DEF\",\n  \"bloodType\": \"O\",\n  \"heightCm\": 170,\n  \"weightKg\": 65,\n  \"identityCard\": \"012345678901\",\n  \"occupation\": \"Kỹ sư\",\n  \"ethnicity\": \"Kinh\",\n  \"healthInsuranceNumber\": \"BH002\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"medicalHistory\": \"Tiểu đường\",\n  \"allergies\": \"Penicillin\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Emergency Contacts",
@@ -2774,7 +4828,8 @@
                 "emergency-contacts"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Add Emergency Contact",
@@ -2786,6 +4841,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactName\": \"Nguyễn Thị E\",\n  \"relationship\": \"Vợ\",\n  \"phone\": \"0906666666\",\n  \"isPrimary\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patient/profile/emergency-contacts",
               "host": [
@@ -2798,17 +4862,9 @@
                 "profile",
                 "emergency-contacts"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"contactName\": \"Nguyễn Thị E\",\n  \"relationship\": \"Vợ\",\n  \"phone\": \"0906666666\",\n  \"isPrimary\": true\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Emergency Contact",
@@ -2820,6 +4876,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactName\": \"Nguyễn Thị E\",\n  \"relationship\": \"Vợ\",\n  \"phone\": \"0906666667\",\n  \"isPrimary\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patient/profile/emergency-contacts/1",
               "host": [
@@ -2833,17 +4898,9 @@
                 "emergency-contacts",
                 "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"contactName\": \"Nguyễn Thị E\",\n  \"relationship\": \"Vợ\",\n  \"phone\": \"0906666667\",\n  \"isPrimary\": true\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Download Health Report",
@@ -2868,7 +4925,8 @@
                 "download-report"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -2896,7 +4954,8 @@
                 "notifications"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Unread Count",
@@ -2920,7 +4979,8 @@
                 "unread-count"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Mark As Read",
@@ -2945,10 +5005,56 @@
                 "read"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Mark All As Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is mark-all success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 15000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(15000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Mark all as read response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([204, 401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -2969,10 +5075,56 @@
                 "read-all"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete Notification",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is delete success, not found, or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete notification response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([204, 401, 403, 404]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -2993,7 +5145,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -3002,6 +5155,57 @@
       "item": [
         {
           "name": "Get Current User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Current user response has valid schema or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var user = response.data;",
+                  "    pm.expect(user).to.be.an(\"object\");",
+                  "    pm.expect(user).to.satisfy(function (item) {",
+                  "        return item.id !== undefined || item.userId !== undefined;",
+                  "    });",
+                  "    pm.expect(user).to.satisfy(function (item) {",
+                  "        return item.email || item.fullName || item.name || item.role;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -3022,10 +5226,56 @@
                 "me"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Change Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is change success or handled failure\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Change password response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403].includes(pm.response.code) || response.success === false) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -3034,6 +5284,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"wrong-password\",\n  \"newPassword\": \"{{seedPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/change-password",
               "host": [
@@ -3045,17 +5304,9 @@
                 "users",
                 "change-password"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"123456\",\n  \"newPassword\": \"654321\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -3072,6 +5323,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Tôi bị đau đầu và mệt mỏi\",\n  \"history\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Xin chào\"\n    },\n    {\n      \"role\": \"assistant\",\n      \"content\": \"Xin chào! Tôi có thể giúp gì cho bạn?\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/ai/chat",
               "host": [
@@ -3083,17 +5343,9 @@
                 "ai",
                 "chat"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"message\": \"Tôi bị đau đầu và mệt mỏi\",\n  \"history\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Xin chào\"\n    },\n    {\n      \"role\": \"assistant\",\n      \"content\": \"Xin chào! Tôi có thể giúp gì cho bạn?\"\n    }\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -3117,10 +5369,21 @@
               ],
               "path": [
                 "api",
-                "doctors?page=0&size=10"
+                "doctors"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Doctors By Specialty",
@@ -3139,10 +5402,25 @@
               ],
               "path": [
                 "api",
-                "doctors?specialty=Tim mạch&page=0&size=10"
+                "doctors"
+              ],
+              "query": [
+                {
+                  "key": "specialty",
+                  "value": "Tim mạch"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Doctor By ID",
@@ -3165,7 +5443,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Create Doctor (Admin)",
@@ -3177,6 +5456,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Lê Văn F\",\n  \"email\": \"bsf@hospital.com\",\n  \"phone\": \"0907777777\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS003\",\n  \"degree\": \"Phó giáo sư\",\n  \"experience\": \"15 năm\",\n  \"bio\": \"Chuyên gia thần kinh\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/doctors",
               "host": [
@@ -3186,17 +5474,9 @@
                 "api",
                 "doctors"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"BS. Lê Văn F\",\n  \"email\": \"bsf@hospital.com\",\n  \"phone\": \"0907777777\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS003\",\n  \"degree\": \"Phó giáo sư\",\n  \"experience\": \"15 năm\",\n  \"bio\": \"Chuyên gia thần kinh\",\n  \"password\": \"123456\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Doctor",
@@ -3208,6 +5488,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Lê Văn F Updated\",\n  \"email\": \"bsf@hospital.com\",\n  \"phone\": \"0907777778\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS003\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/doctors/1",
               "host": [
@@ -3218,17 +5507,9 @@
                 "doctors",
                 "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"BS. Lê Văn F Updated\",\n  \"email\": \"bsf@hospital.com\",\n  \"phone\": \"0907777778\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS003\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete Doctor (Admin)",
@@ -3251,7 +5532,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -3279,7 +5561,8 @@
                 "medical-services"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Services By Clinic",
@@ -3299,10 +5582,17 @@
               "path": [
                 "api",
                 "v1",
-                "medical-services?clinicId=1"
+                "medical-services"
+              ],
+              "query": [
+                {
+                  "key": "clinicId",
+                  "value": "1"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Service By ID",
@@ -3326,7 +5616,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Service Stats (Admin)",
@@ -3350,7 +5641,8 @@
                 "stats"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Create Service",
@@ -3362,6 +5654,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Khám tổng quát\",\n  \"description\": \"Dịch vụ khám tổng quát\",\n  \"price\": 500000,\n  \"clinicId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/medical-services",
               "host": [
@@ -3372,17 +5673,9 @@
                 "v1",
                 "medical-services"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Khám tổng quát\",\n  \"description\": \"Dịch vụ khám tổng quát\",\n  \"price\": 500000,\n  \"clinicId\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Service",
@@ -3394,6 +5687,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Khám tổng quát VIP\",\n  \"description\": \"Dịch vụ khám VIP\",\n  \"price\": 1000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/medical-services/1",
               "host": [
@@ -3405,17 +5707,9 @@
                 "medical-services",
                 "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Khám tổng quát VIP\",\n  \"description\": \"Dịch vụ khám VIP\",\n  \"price\": 1000000\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Toggle Service Status",
@@ -3440,7 +5734,8 @@
                 "toggle-status"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete Service",
@@ -3464,7 +5759,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -3481,6 +5777,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Lỗi hệ thống\",\n  \"description\": \"Không thể đăng nhập\",\n  \"priority\": \"HIGH\",\n  \"clinicId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/support-tickets",
               "host": [
@@ -3491,17 +5796,9 @@
                 "v1",
                 "support-tickets"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"subject\": \"Lỗi hệ thống\",\n  \"description\": \"Không thể đăng nhập\",\n  \"priority\": \"HIGH\",\n  \"clinicId\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get All Tickets",
@@ -3521,10 +5818,21 @@
               "path": [
                 "api",
                 "v1",
-                "support-tickets?page=0&size=10"
+                "support-tickets"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Tickets With Filters",
@@ -3544,10 +5852,29 @@
               "path": [
                 "api",
                 "v1",
-                "support-tickets?status=OPEN&priority=HIGH&page=0&size=10"
+                "support-tickets"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "OPEN"
+                },
+                {
+                  "key": "priority",
+                  "value": "HIGH"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Tickets By Clinic",
@@ -3569,10 +5896,21 @@
                 "v1",
                 "support-tickets",
                 "clinic",
-                "1?page=0&size=10"
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Tickets By Creator",
@@ -3594,10 +5932,21 @@
                 "v1",
                 "support-tickets",
                 "creator",
-                "1?page=0&size=10"
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Ticket By ID",
@@ -3621,7 +5970,8 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Ticket By Code",
@@ -3646,7 +5996,8 @@
                 "TK-001"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Ticket Status",
@@ -3668,10 +6019,21 @@
                 "v1",
                 "support-tickets",
                 "1",
-                "status?status=RESOLVED&adminNote=Đã xử lý"
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "RESOLVED"
+                },
+                {
+                  "key": "adminNote",
+                  "value": "Đã xử lý"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Ticket Stats",
@@ -3695,7 +6057,8 @@
                 "stats"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete Ticket",
@@ -3719,9 +6082,125 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          "var rawUrl = pm.request.url ? pm.request.url.toString() : \"\";",
+          "var roleTokenKey = null;",
+          "",
+          "if (rawUrl.indexOf(\"/api/v1/admin/\") !== -1 || rawUrl.indexOf(\"/api/v1/admin\") !== -1) {",
+          "    roleTokenKey = \"adminToken\";",
+          "} else if (rawUrl.indexOf(\"/api/v1/clinics/\") !== -1 || rawUrl.indexOf(\"/api/v1/clinics\") !== -1 || rawUrl.indexOf(\"/v1/clinics/\") !== -1 || rawUrl.indexOf(\"/v1/clinics\") !== -1) {",
+          "    roleTokenKey = \"clinicManagerToken\";",
+          "} else if (rawUrl.indexOf(\"/api/v1/doctor/\") !== -1 || rawUrl.indexOf(\"/api/v1/doctor\") !== -1) {",
+          "    roleTokenKey = \"doctorToken\";",
+          "} else if (rawUrl.indexOf(\"/api/v1/patient/\") !== -1 || rawUrl.indexOf(\"/api/v1/patient\") !== -1) {",
+          "    roleTokenKey = \"patientToken\";",
+          "} else if (rawUrl.indexOf(\"/api/v1/support-tickets\") !== -1 || rawUrl.indexOf(\"/api/v1/medical-services\") !== -1) {",
+          "    roleTokenKey = \"adminToken\";",
+          "}",
+          "",
+          "if (roleTokenKey) {",
+          "    var roleToken = pm.collectionVariables.get(roleTokenKey);",
+          "    if (roleToken) {",
+          "        pm.collectionVariables.set(\"token\", roleToken);",
+          "    }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://health-management-backend-d1gk.onrender.com"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "seedPassword",
+      "value": "admin123"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@care.com"
+    },
+    {
+      "key": "clinicManagerEmail",
+      "value": "manager@care.com"
+    },
+    {
+      "key": "doctorEmail",
+      "value": "mai.le@care.com"
+    },
+    {
+      "key": "patientEmail",
+      "value": "truongquocan@patient.com"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "clinicManagerToken",
+      "value": ""
+    },
+    {
+      "key": "doctorToken",
+      "value": ""
+    },
+    {
+      "key": "patientToken",
+      "value": ""
+    },
+    {
+      "key": "clinicId",
+      "value": "1"
+    },
+    {
+      "key": "JIRA_API_TOKEN",
+      "value": ""
+    },
+    {
+      "key": "JIRA_USER_EMAIL",
+      "value": "hungnp1272@ut.edu.vn"
+    },
+    {
+      "key": "JIRA_BASE_URL",
+      "value": "https://ayemqh-1766052090391.atlassian.net"
     }
   ]
 }
