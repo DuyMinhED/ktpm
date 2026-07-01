@@ -4826,9 +4826,63 @@
                 "prescriptions",
                 "active"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{patientToken}}",
+                  "type": "string"
+                }
+              ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid active prescriptions list or error\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Active prescriptions retrieved\");",
+                  "        ",
+                  "        var list = response.data;",
+                  "        pm.expect(list).to.be.an(\"array\");",
+                  "        if (list.length > 0) {",
+                  "            var p = list[0];",
+                  "            pm.expect(p).to.be.an(\"object\");",
+                  "            pm.expect(p).to.include.keys(\"id\", \"prescriptionCode\", \"doctorName\", \"diagnosis\", \"status\");",
+                  "            pm.expect(p.id).to.be.a(\"number\");",
+                  "            ",
+                  "            // Extract a prescription ID to request refill later",
+                  "            pm.collectionVariables.set(\"refillPrescriptionId\", p.id);",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Prescription History",
@@ -4852,9 +4906,60 @@
                 "prescriptions",
                 "history"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{patientToken}}",
+                  "type": "string"
+                }
+              ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid prescription history list or error\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Prescription history retrieved\");",
+                  "        ",
+                  "        var list = response.data;",
+                  "        pm.expect(list).to.be.an(\"array\");",
+                  "        if (list.length > 0) {",
+                  "            var p = list[0];",
+                  "            pm.expect(p).to.be.an(\"object\");",
+                  "            pm.expect(p).to.include.keys(\"id\", \"prescriptionCode\", \"doctorName\", \"status\");",
+                  "            pm.expect(p.id).to.be.a(\"number\");",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Today Schedule",
@@ -4878,9 +4983,63 @@
                 "prescriptions",
                 "today-schedule"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{patientToken}}",
+                  "type": "string"
+                }
+              ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid today schedule list or error\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Today's schedule retrieved\");",
+                  "        ",
+                  "        var list = response.data;",
+                  "        pm.expect(list).to.be.an(\"array\");",
+                  "        if (list.length > 0) {",
+                  "            var s = list[0];",
+                  "            pm.expect(s).to.be.an(\"object\");",
+                  "            pm.expect(s).to.include.keys(\"id\", \"medicationName\", \"dosage\", \"todayStatus\");",
+                  "            pm.expect(s.id).to.be.a(\"number\");",
+                  "            ",
+                  "            // Extract schedule ID to log medication intake later",
+                  "            pm.collectionVariables.set(\"medicationScheduleId\", s.id);",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Log Medication",
@@ -4894,7 +5053,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"scheduleId\": 1,\n  \"status\": \"TAKEN\",\n  \"notes\": \"Đã uống đúng giờ\"\n}",
+              "raw": "{\n  \"scheduleId\": \"{{medicationScheduleId}}\",\n  \"status\": \"TAKEN\",\n  \"notes\": \"Đã uống đúng giờ\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4913,9 +5072,52 @@
                 "prescriptions",
                 "log-medication"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{patientToken}}",
+                  "type": "string"
+                }
+              ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Log Medication response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Medication logged successfully\");",
+                  "        pm.expect(response.data).to.be.null;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Request Refill",
@@ -4928,7 +5130,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/1/request-refill",
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/{{refillPrescriptionId}}/request-refill",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4937,12 +5139,55 @@
                 "v1",
                 "patient",
                 "prescriptions",
-                "1",
+                "{{refillPrescriptionId}}",
                 "request-refill"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{patientToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Request Refill response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.message).to.equal(\"Refill requested successfully\");",
+                  "        pm.expect(response.data).to.be.null;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -6706,6 +6951,16 @@
     },
     {
       "key": "publicDoctorId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "refillPrescriptionId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "medicationScheduleId",
       "value": "1",
       "type": "string"
     }
