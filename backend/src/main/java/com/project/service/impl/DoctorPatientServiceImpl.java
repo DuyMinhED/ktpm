@@ -291,7 +291,7 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
                 return new String[]{"Đang cải thiện", "text-emerald-500"};
             } else {
                 // Check if stable at an unhealthy level
-                if (latest > 7.0) {
+                if (latest > 7.2) {
                     return new String[]{"Duy trì mức cao", "text-amber-600"};
                 }
                 return new String[]{"Ổn định", "text-sky-500"};

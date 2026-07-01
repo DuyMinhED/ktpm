@@ -1750,7 +1750,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 120,\n  \"unit\": \"mg/dL\",\n  \"notes\": \"Đo tại phòng khám\",\n  \"measuredAt\": \"2026-06-27T10:00:00\"\n}",
+              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 5.8,\n  \"unit\": \"mmol/L\",\n  \"notes\": \"Đo tại phòng khám\",\n  \"measuredAt\": \"2026-06-27T10:00:00\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3893,7 +3893,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 110,\n  \"unit\": \"mg/dL\",\n  \"notes\": \"Đo buổi sáng\",\n  \"measuredAt\": \"2026-06-27T07:00:00\"\n}",
+              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 5.5,\n  \"unit\": \"mmol/L\",\n  \"notes\": \"Đo buổi sáng\",\n  \"measuredAt\": \"2026-06-27T07:00:00\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

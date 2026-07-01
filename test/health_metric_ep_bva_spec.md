@@ -30,10 +30,10 @@ Dưới đây là bảng phân hoạch các lớp tương đương cho 5 chỉ s
 
 | Chỉ số | Lớp tương đương hợp lệ | Tag | Trạng thái đầu ra mong đợi |
 | :--- | :--- | :--- | :--- |
-| **BLOOD_SUGAR** | $v < 3.9$ | BS_EP1 | `LOW` |
-| | $3.9 \le v \le 6.1$ | BS_EP2 | `NORMAL` |
-| | $6.1 < v \le 7.0$ | BS_EP3 | `BORDERLINE_HIGH` |
-| | $v > 7.0$ | BS_EP4 | `HIGH` |
+| **BLOOD_SUGAR** | $v < 4.0$ | BS_EP1 | `LOW` |
+| | $4.0 \le v \le 6.0$ | BS_EP2 | `NORMAL` |
+| | $6.0 < v \le 7.2$ | BS_EP3 | `BORDERLINE_HIGH` |
+| | $v > 7.2$ | BS_EP4 | `HIGH` |
 | **HBA1C** | $v < 5.7$ | HB_EP1 | `NORMAL` |
 | | $5.7 \le v \le 6.4$ | HB_EP2 | `BORDERLINE_HIGH` |
 | | $v > 6.4$ | HB_EP3 | `HIGH` |
@@ -55,9 +55,9 @@ Dưới đây là bảng phân hoạch các lớp tương đương cho 5 chỉ s
 
 | Chỉ số | Điểm biên | Giá trị biên dưới ($min$) | Giá trị lân cận biên dưới ($min+$) | Giá trị biên trên ($max$) | Giá trị lân cận biên trên ($max-$) | Tag bao phủ |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **BLOOD_SUGAR** | $3.9$ | $3.9$ (NORMAL) | $4.0$ (NORMAL) | | $3.8$ (LOW) | BS_B1, BS_B2, BS_B3 |
-| | $6.1$ | | $6.2$ (BORDERLINE_HIGH)| $6.1$ (NORMAL) | $6.0$ (NORMAL) | BS_B4, BS_B5, BS_B6 |
-| | $7.0$ | | $7.1$ (HIGH) | $7.0$ (BORDERLINE_HIGH)| $6.9$ (BORDERLINE_HIGH) | BS_B7, BS_B8, BS_B9 |
+| **BLOOD_SUGAR** | $4.0$ | $4.0$ (NORMAL) | $4.1$ (NORMAL) | | $3.9$ (LOW) | BS_B1, BS_B2, BS_B3 |
+| | $6.0$ | | $6.1$ (BORDERLINE_HIGH)| $6.0$ (NORMAL) | $5.9$ (NORMAL) | BS_B4, BS_B5, BS_B6 |
+| | $7.2$ | | $7.3$ (HIGH) | $7.2$ (BORDERLINE_HIGH)| $7.1$ (BORDERLINE_HIGH) | BS_B7, BS_B8, BS_B9 |
 | **HBA1C** | $5.7$ | $5.7$ (BORDERLINE_HIGH) | $5.8$ (BORDERLINE_HIGH) | | $5.6$ (NORMAL) | HB_B1, HB_B2, HB_B3 |
 | | $6.4$ | | $6.5$ (HIGH) | $6.4$ (BORDERLINE_HIGH)| $6.3$ (BORDERLINE_HIGH) | HB_B4, HB_B5, HB_B6 |
 | **HEART_RATE** | $60$ | $60$ (NORMAL) | $61$ (NORMAL) | | $59$ (LOW) | HR_B1, HR_B2, HR_B3 |
@@ -75,12 +75,12 @@ Dưới đây là bảng thiết kế **23 test cases** phủ toàn bộ các kh
 
 | STT | Mã TC | Chỉ số | Giá trị Sys / Value | Giá trị Dia / ValueSecondary | Kết quả mong đợi | Tag bao phủ |
 | :--- | :--- | :--- | :---: | :---: | :--- | :--- |
-| 1 | TC-BS-01 | BLOOD_SUGAR | 3.8 | | `LOW` | BS_EP1, BS_B1 |
-| 2 | TC-BS-02 | BLOOD_SUGAR | 3.9 | | `NORMAL` | BS_EP2, BS_B2 |
-| 3 | TC-BS-03 | BLOOD_SUGAR | 6.1 | | `NORMAL` | BS_EP2, BS_B5 |
-| 4 | TC-BS-04 | BLOOD_SUGAR | 6.2 | | `BORDERLINE_HIGH` | BS_EP3, BS_B6 |
-| 5 | TC-BS-05 | BLOOD_SUGAR | 7.0 | | `BORDERLINE_HIGH` | BS_EP3, BS_B8 |
-| 6 | TC-BS-06 | BLOOD_SUGAR | 7.1 | | `HIGH` | BS_EP4, BS_B9 |
+| 1 | TC-BS-01 | BLOOD_SUGAR | 3.9 | | `LOW` | BS_EP1, BS_B1 |
+| 2 | TC-BS-02 | BLOOD_SUGAR | 4.0 | | `NORMAL` | BS_EP2, BS_B2 |
+| 3 | TC-BS-03 | BLOOD_SUGAR | 6.0 | | `NORMAL` | BS_EP2, BS_B5 |
+| 4 | TC-BS-04 | BLOOD_SUGAR | 6.1 | | `BORDERLINE_HIGH` | BS_EP3, BS_B6 |
+| 5 | TC-BS-05 | BLOOD_SUGAR | 7.2 | | `BORDERLINE_HIGH` | BS_EP3, BS_B8 |
+| 6 | TC-BS-06 | BLOOD_SUGAR | 7.3 | | `HIGH` | BS_EP4, BS_B9 |
 | 7 | TC-HB-01 | HBA1C | 5.6 | | `NORMAL` | HB_EP1, HB_B3 |
 | 8 | TC-HB-02 | HBA1C | 5.7 | | `BORDERLINE_HIGH` | HB_EP2, HB_B1 |
 | 9 | TC-HB-03 | HBA1C | 6.4 | | `BORDERLINE_HIGH` | HB_EP2, HB_B5 |

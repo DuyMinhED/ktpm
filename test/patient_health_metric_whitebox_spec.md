@@ -89,10 +89,10 @@ Kỹ thuật hộp trắng được áp dụng theo source code của service:
 
 | MetricType | Điều kiện chính trong code | Status trả về | Test case đại diện |
 |---|---|---|---|
-| `BLOOD_SUGAR` | `value < 3.9` | `LOW` | TC-WB-HM-06 |
-| `BLOOD_SUGAR` | `3.9 <= value <= 6.1` | `NORMAL` | TC-WB-HM-10 |
-| `BLOOD_SUGAR` | `6.1 < value <= 7.0` | `BORDERLINE_HIGH` | TC-WB-HM-08 |
-| `BLOOD_SUGAR` | `value > 7.0` | `HIGH` | TC-WB-HM-05 |
+| `BLOOD_SUGAR` | `value < 4.0` | `LOW` | TC-WB-HM-06 |
+| `BLOOD_SUGAR` | `4.0 <= value <= 6.0` | `NORMAL` | TC-WB-HM-10 |
+| `BLOOD_SUGAR` | `6.0 < value <= 7.2` | `BORDERLINE_HIGH` | TC-WB-HM-08 |
+| `BLOOD_SUGAR` | `value > 7.2` | `HIGH` | TC-WB-HM-05 |
 | `BLOOD_PRESSURE` | `systolic < 120 && diastolic < 80` | `NORMAL` | TC-WB-HM-11 |
 | `BLOOD_PRESSURE` | `systolic <= threshold && diastolic <= threshold` | `BORDERLINE_HIGH` | TC-WB-HM-12 |
 | `BLOOD_PRESSURE` | Ngoài các khoảng trên | `HIGH` | TC-WB-HM-13 |
@@ -270,7 +270,7 @@ Kiểm tra đối chiếu: CFG history có 2 decision chính, nên `V(G) = 2 + 1
 | TC-WB-HM-02 | Record khi không có patient profile | Current user id tồn tại; `patientRepository.findByUserId` empty | Gọi `create(request)` | Request hợp lệ bất kỳ | Ném `ResourceNotFoundException`; không save metric | PR2, D2-F |
 | TC-WB-HM-03 | Record với `metricType` không hợp lệ | Patient tồn tại | Gọi `create(request)` | `{ metricType: "BMI", value: 22, unit: "kg/m2" }` | Ném `IllegalArgumentException`; không save metric | PR3, D3-F |
 | TC-WB-HM-04 | Record borderline không tạo cảnh báo | Patient tồn tại, risk `STABLE` | Gọi `create(request)` | `{ metricType: "BLOOD_SUGAR", value: 6.5, unit: "mmol/L", measuredAt: fixedTime }` | Save metric status `BORDERLINE_HIGH`; không đổi risk; không gửi notification | PR4 |
-| TC-WB-HM-05 | Record HIGH nhưng patient không có doctor | Patient tồn tại, `doctorId = null` | Gọi `create(request)` | `{ metricType: "BLOOD_SUGAR", value: 7.2, unit: null, measuredAt: null }` | Save metric status `HIGH`; set `HIGH_RISK`; không gửi notification/alert vì không có doctor | PR5, D4-F, D5-F, D6-T, D7-F |
+| TC-WB-HM-05 | Record HIGH nhưng patient không có doctor | Patient tồn tại, `doctorId = null` | Gọi `create(request)` | `{ metricType: "BLOOD_SUGAR", value: 7.3, unit: null, measuredAt: null }` | Save metric status `HIGH`; set `HIGH_RISK`; không gửi notification/alert vì không có doctor | PR5, D4-F, D5-F, D6-T, D7-F |
 | TC-WB-HM-06 | Record LOW có doctor nhưng không tìm được clinic | Patient có doctor, `clinicRepository.findById` empty | Gọi `create(request)` | `{ metricType: "SPO2", value: 88, unit: "%", measuredAt: null }` | Save metric status `LOW`; gửi doctor notification; save patient alert; không gửi manager notification | PR6, D8-F |
 | TC-WB-HM-07 | Record HIGH có clinic nhưng không có manager | Patient có doctor/clinic; clinic `managerId = null` | Gọi `create(request)` | `{ metricType: "HEART_RATE", value: 120, unit: "bpm", measuredAt: fixedTime }` | Save metric status `HIGH`; gửi doctor notification; không gửi manager notification; save alert | PR7, D9-F |
 | TC-WB-HM-08 | Record HIGH gửi đủ cảnh báo | Patient có doctor/clinic; clinic có manager | Gọi `create(request)` | `{ metricType: "BLOOD_PRESSURE", value: 150, valueSecondary: 95, unit: "mmHg" }` | Save metric; set `HIGH_RISK`; gửi notification cho doctor và manager; save patient alert | PR8, D6-T, D7-T, D8-T, D9-T |
