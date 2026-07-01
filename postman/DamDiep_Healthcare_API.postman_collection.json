@@ -4792,6 +4792,51 @@
         },
         {
           "name": "Mark All As Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is mark-all success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 15000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(15000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Mark all as read response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([204, 401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -4817,6 +4862,51 @@
         },
         {
           "name": "Delete Notification",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is delete success, not found, or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete notification response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([204, 401, 403, 404]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -4847,6 +4937,57 @@
       "item": [
         {
           "name": "Get Current User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Current user response has valid schema or auth error\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var user = response.data;",
+                  "    pm.expect(user).to.be.an(\"object\");",
+                  "    pm.expect(user).to.satisfy(function (item) {",
+                  "        return item.id !== undefined || item.userId !== undefined;",
+                  "    });",
+                  "    pm.expect(user).to.satisfy(function (item) {",
+                  "        return item.email || item.fullName || item.name || item.role;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4872,6 +5013,51 @@
         },
         {
           "name": "Change Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is change success or handled failure\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Change password response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403].includes(pm.response.code) || response.success === false) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -4882,7 +5068,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"123456\",\n  \"newPassword\": \"654321\"\n}",
+              "raw": "{\n  \"currentPassword\": \"wrong-password\",\n  \"newPassword\": \"{{seedPassword}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
