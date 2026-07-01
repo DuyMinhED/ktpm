@@ -6526,7 +6526,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"subject\": \"Lỗi hệ thống\",\n  \"description\": \"Không thể đăng nhập\",\n  \"priority\": \"HIGH\",\n  \"clinicId\": 1\n}",
+              "raw": "{\n  \"subject\": \"Lỗi hệ thống {{$randomInt}}\",\n  \"category\": \"Kỹ thuật\",\n  \"priority\": \"Khẩn cấp\",\n  \"message\": \"Không thể đăng nhập vào ứng dụng\",\n  \"clinicId\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
