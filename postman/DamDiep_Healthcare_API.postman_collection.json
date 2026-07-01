@@ -5548,7 +5548,47 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"AI Chat response has valid schema\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response).to.be.an(\"object\");",
+                  "        pm.expect(response).to.include.keys(\"success\", \"reply\");",
+                  "        pm.expect(response.success).to.be.a(\"boolean\");",
+                  "        if (response.success) {",
+                  "            pm.expect(response.reply).to.be.a(\"string\").and.not.empty;",
+                  "            pm.expect(response.error).to.be.null;",
+                  "        } else {",
+                  "            pm.expect(response.error).to.be.a(\"string\").and.not.empty;",
+                  "            pm.expect(response.reply).to.be.null;",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -5586,7 +5626,49 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json\", function () {",
+                  "    pm.response.to.have.header(\"Content-Type\");",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid paged doctors list\", function () {",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Doctors fetched successfully\");",
+                  "    ",
+                  "    var page = response.data;",
+                  "    pm.expect(page).to.be.an(\"object\");",
+                  "    pm.expect(page.content).to.be.an(\"array\");",
+                  "    pm.expect(page.totalPages).to.be.a(\"number\");",
+                  "    pm.expect(page.totalElements).to.be.a(\"number\");",
+                  "    ",
+                  "    if (page.content.length > 0) {",
+                  "        var doc = page.content[0];",
+                  "        pm.expect(doc).to.be.an(\"object\");",
+                  "        pm.expect(doc).to.include.keys(\"id\", \"email\", \"fullName\", \"specialization\", \"status\");",
+                  "        pm.expect(doc.id).to.be.a(\"number\");",
+                  "        pm.expect(doc.fullName).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Doctors By Specialty",
@@ -5623,7 +5705,50 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json\", function () {",
+                  "    pm.response.to.have.header(\"Content-Type\");",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid filtered paged doctors list\", function () {",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Doctors fetched successfully\");",
+                  "    ",
+                  "    var page = response.data;",
+                  "    pm.expect(page).to.be.an(\"object\");",
+                  "    pm.expect(page.content).to.be.an(\"array\");",
+                  "    ",
+                  "    if (page.content.length > 0) {",
+                  "        var doc = page.content[0];",
+                  "        pm.expect(doc).to.be.an(\"object\");",
+                  "        pm.expect(doc).to.include.keys(\"id\", \"fullName\", \"specialization\");",
+                  "        page.content.forEach(function (d) {",
+                  "            if (d.specialization) {",
+                  "                pm.expect(d.specialization).to.be.a(\"string\");",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Doctor By ID",
