@@ -6526,7 +6526,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"subject\": \"Lỗi hệ thống\",\n  \"description\": \"Không thể đăng nhập\",\n  \"priority\": \"HIGH\",\n  \"clinicId\": 1\n}",
+              "raw": "{\n  \"subject\": \"Lỗi hệ thống {{$randomInt}}\",\n  \"category\": \"Kỹ thuật\",\n  \"priority\": \"Khẩn cấp\",\n  \"message\": \"Không thể đăng nhập vào ứng dụng\",\n  \"clinicId\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6545,7 +6545,26 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 201 Created\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    var response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"supportTicketId\", response.id);",
+                  "    pm.collectionVariables.set(\"supportTicketCode\", response.ticketCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get All Tickets",
@@ -6706,7 +6725,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/support-tickets/1",
+              "raw": "{{baseUrl}}/api/v1/support-tickets/{{supportTicketId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6714,11 +6733,45 @@
                 "api",
                 "v1",
                 "support-tickets",
-                "1"
+                "{{supportTicketId}}"
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 404 Not Found\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Ticket By ID response has valid schema\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response).to.be.an(\"object\");",
+                  "        pm.expect(response).to.include.keys(\"id\", \"ticketCode\", \"subject\", \"category\", \"priority\", \"status\");",
+                  "        pm.expect(response.id).to.be.a(\"number\");",
+                  "        pm.expect(response.ticketCode).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Ticket By Code",
@@ -6731,7 +6784,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/support-tickets/code/TK-001",
+              "raw": "{{baseUrl}}/api/v1/support-tickets/code/{{supportTicketCode}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6740,11 +6793,44 @@
                 "v1",
                 "support-tickets",
                 "code",
-                "TK-001"
+                "{{supportTicketCode}}"
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 404 Not Found\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Ticket By Code response has valid schema\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response).to.be.an(\"object\");",
+                  "        pm.expect(response).to.include.keys(\"id\", \"ticketCode\", \"subject\", \"category\", \"priority\", \"status\");",
+                  "        pm.expect(response.ticketCode).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Ticket Status",
@@ -6757,7 +6843,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/support-tickets/1/status?status=RESOLVED&adminNote=Đã xử lý",
+              "raw": "{{baseUrl}}/api/v1/support-tickets/{{supportTicketId}}/status?status=RESOLVED&adminNote=Đã xử lý",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6765,7 +6851,7 @@
                 "api",
                 "v1",
                 "support-tickets",
-                "1",
+                "{{supportTicketId}}",
                 "status"
               ],
               "query": [
@@ -6780,7 +6866,40 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Ticket Status response has valid schema\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response).to.be.an(\"object\");",
+                  "        pm.expect(response).to.include.keys(\"id\", \"ticketCode\", \"status\", \"adminNote\");",
+                  "        pm.expect(response.status).to.equal(\"RESOLVED\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Ticket Stats",
@@ -6805,7 +6924,41 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Ticket Stats response is a valid map\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var response = pm.response.json();",
+                  "        pm.expect(response).to.be.an(\"object\");",
+                  "        Object.keys(response).forEach(function (key) {",
+                  "            pm.expect(response[key]).to.be.a(\"number\");",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete Ticket",
@@ -6818,7 +6971,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/support-tickets/1",
+              "raw": "{{baseUrl}}/api/v1/support-tickets/{{supportTicketId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6826,11 +6979,28 @@
                 "api",
                 "v1",
                 "support-tickets",
-                "1"
+                "{{supportTicketId}}"
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204 No Content or error guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     }
@@ -6962,6 +7132,16 @@
     {
       "key": "medicationScheduleId",
       "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "supportTicketId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "supportTicketCode",
+      "value": "TK-001",
       "type": "string"
     }
   ]
