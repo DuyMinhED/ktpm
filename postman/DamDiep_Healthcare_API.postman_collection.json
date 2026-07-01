@@ -5909,6 +5909,76 @@
           "}"
         ]
       }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "var hasFailed = (pm.response.code >= 400);",
+          "for (var t in tests) {",
+          "    if (tests.hasOwnProperty(t) && !tests[t]) {",
+          "        hasFailed = true;",
+          "        break;",
+          "    }",
+          "}",
+          "if (hasFailed) {",
+          "    var jiraBaseUrl = pm.collectionVariables.get('JIRA_BASE_URL') || 'https://ayemqh-1766052090391.atlassian.net';",
+          "    var jiraEmail = pm.collectionVariables.get('JIRA_USER_EMAIL') || 'hungnp1272@ut.edu.vn';",
+          "    var jiraToken = pm.collectionVariables.get('JIRA_API_TOKEN') || 'VUI_LONG_NHAP_TOKEN_O_BIEN_POSTMAN';",
+          "    var projectKey = 'KCPM';",
+          "    var authHeader = 'Basic ' + btoa(jiraEmail + ':' + jiraToken);",
+          "    var summary = '[POSTMAN-BUG] ' + pm.info.requestName + ' failed';",
+          "    var description = 'Postman test execution failed for request: ' + pm.info.requestName + '\\n' +",
+          "                      'URL: ' + pm.request.url.toString() + '\\n' +",
+          "                      'Status Code: ' + pm.response.code + '\\n\\n' +",
+          "                      'Response Body:\\n' + pm.response.text();",
+          "    var payload = {",
+          "        fields: {",
+          "            project: { key: projectKey },",
+          "            summary: summary,",
+          "            issuetype: { name: 'Bug' },",
+          "            priority: { name: 'High' },",
+          "            labels: ['postman-fail', 'bug', 'auto-created'],",
+          "            description: {",
+          "                type: 'doc',",
+          "                version: 1,",
+          "                content: [",
+          "                    {",
+          "                        type: 'paragraph',",
+          "                        content: [",
+          "                            {",
+          "                                type: 'text',",
+          "                                text: description",
+          "                            }",
+          "                        ]",
+          "                    }",
+          "                ]",
+          "            }",
+          "        }",
+          "    };",
+          "    pm.sendRequest({",
+          "        url: jiraBaseUrl + '/rest/api/3/issue',",
+          "        method: 'POST',",
+          "        header: {",
+          "            'Authorization': authHeader,",
+          "            'Content-Type': 'application/json',",
+          "            'Accept': 'application/json'",
+          "        },",
+          "        body: {",
+          "            mode: 'raw',",
+          "            raw: JSON.stringify(payload)",
+          "        }",
+          "    }, function (err, res) {",
+          "        if (err) {",
+          "            console.error('Failed to sync to Jira:', err);",
+          "        } else {",
+          "            console.log('Jira Sync Status:', res.status);",
+          "        }",
+          "    });",
+          "}"
+        ]
+      }
     }
   ],
   "variable": [
@@ -5970,6 +6040,21 @@
     {
       "key": "clinicId",
       "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "JIRA_BASE_URL",
+      "value": "https://ayemqh-1766052090391.atlassian.net",
+      "type": "string"
+    },
+    {
+      "key": "JIRA_USER_EMAIL",
+      "value": "hungnp1272@ut.edu.vn",
+      "type": "string"
+    },
+    {
+      "key": "JIRA_API_TOKEN",
+      "value": "VUI_LONG_NHAP_TOKEN_O_BIEN_POSTMAN",
       "type": "string"
     }
   ]
