@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "c1264b47-779f-4aa6-b5db-b2690fc24708",
+    "_postman_id": "859fb18d-1c81-4433-9e9b-958f2397acc9",
     "name": "DamDiep Healthcare API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "55225055",
-    "_collection_link": "https://go.postman.co/collection/42986888-c1264b47-779f-4aa6-b5db-b2690fc24708?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/42986888-859fb18d-1c81-4433-9e9b-958f2397acc9?source=collection_link"
   },
   "item": [
     {
@@ -446,7 +446,9 @@
                   "    });",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -882,6 +884,49 @@
         },
         {
           "name": "Get Users List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 500ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response matches paginated Users List schema\", function () {\r",
+                  "    var response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "    pm.expect(response.message).to.equal(\"Users fetched successfully\");\r",
+                  "    \r",
+                  "    var data = response.data;\r",
+                  "    pm.expect(data).to.be.an(\"object\");\r",
+                  "    pm.expect(data.content).to.be.an(\"array\");\r",
+                  "    pm.expect(data.totalPages).to.be.a(\"number\");\r",
+                  "    pm.expect(data.totalElements).to.be.a(\"number\");\r",
+                  "    pm.expect(data.size).to.be.a(\"number\");\r",
+                  "    pm.expect(data.number).to.be.a(\"number\");\r",
+                  "    \r",
+                  "    if (data.content.length > 0) {\r",
+                  "        var user = data.content[0];\r",
+                  "        pm.expect(user.id).to.be.a(\"number\");\r",
+                  "        pm.expect(user.fullName).to.be.a(\"string\");\r",
+                  "        pm.expect(user.email).to.be.a(\"string\");\r",
+                  "        pm.expect(user.role).to.be.a(\"string\");\r",
+                  "        pm.expect(user.status).to.be.a(\"string\");\r",
+                  "    }\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -956,6 +1001,40 @@
         },
         {
           "name": "Get User By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 500ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response matches AdminUserResponse details schema\", function () {\r",
+                  "    var response = pm.response.json();\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "    pm.expect(response.message).to.equal(\"User details fetched successfully\");\r",
+                  "    \r",
+                  "    var data = response.data;\r",
+                  "    pm.expect(data).to.be.an(\"object\");\r",
+                  "    pm.expect(data.id).to.be.a(\"number\");\r",
+                  "    pm.expect(data.fullName).to.be.a(\"string\");\r",
+                  "    pm.expect(data.email).to.be.a(\"string\");\r",
+                  "    pm.expect(data.role).to.be.a(\"string\");\r",
+                  "    pm.expect(data.status).to.be.a(\"string\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1750,7 +1829,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 5.8,\n  \"unit\": \"mmol/L\",\n  \"notes\": \"Đo tại phòng khám\",\n  \"measuredAt\": \"2026-06-27T10:00:00\"\n}",
+              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 120,\n  \"unit\": \"mg/dL\",\n  \"notes\": \"Đo tại phòng khám\",\n  \"measuredAt\": \"2026-06-27T10:00:00\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3893,7 +3972,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 5.5,\n  \"unit\": \"mmol/L\",\n  \"notes\": \"Đo buổi sáng\",\n  \"measuredAt\": \"2026-06-27T07:00:00\"\n}",
+              "raw": "{\n  \"metricType\": \"BLOOD_SUGAR\",\n  \"value\": 110,\n  \"unit\": \"mg/dL\",\n  \"notes\": \"Đo buổi sáng\",\n  \"measuredAt\": \"2026-06-27T07:00:00\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5885,6 +5964,7 @@
       "listen": "prerequest",
       "script": {
         "type": "text/javascript",
+        "requests": {},
         "exec": [
           "var rawUrl = pm.request.url ? pm.request.url.toString() : \"\";",
           "var roleTokenKey = null;",
@@ -5914,69 +5994,10 @@
       "listen": "test",
       "script": {
         "type": "text/javascript",
+        "packages": {},
+        "requests": {},
         "exec": [
-          "var hasFailed = (pm.response.code >= 400);",
-          "for (var t in tests) {",
-          "    if (tests.hasOwnProperty(t) && !tests[t]) {",
-          "        hasFailed = true;",
-          "        break;",
-          "    }",
-          "}",
-          "if (hasFailed) {",
-          "    var jiraBaseUrl = pm.collectionVariables.get('JIRA_BASE_URL') || 'https://ayemqh-1766052090391.atlassian.net';",
-          "    var jiraEmail = pm.collectionVariables.get('JIRA_USER_EMAIL') || 'hungnp1272@ut.edu.vn';",
-          "    var jiraToken = pm.collectionVariables.get('JIRA_API_TOKEN') || 'VUI_LONG_NHAP_TOKEN_O_BIEN_POSTMAN';",
-          "    var projectKey = 'KCPM';",
-          "    var authHeader = 'Basic ' + btoa(jiraEmail + ':' + jiraToken);",
-          "    var summary = '[POSTMAN-BUG] ' + pm.info.requestName + ' failed';",
-          "    var description = 'Postman test execution failed for request: ' + pm.info.requestName + '\\n' +",
-          "                      'URL: ' + pm.request.url.toString() + '\\n' +",
-          "                      'Status Code: ' + pm.response.code + '\\n\\n' +",
-          "                      'Response Body:\\n' + pm.response.text();",
-          "    var payload = {",
-          "        fields: {",
-          "            project: { key: projectKey },",
-          "            summary: summary,",
-          "            issuetype: { name: 'Bug' },",
-          "            priority: { name: 'High' },",
-          "            labels: ['postman-fail', 'bug', 'auto-created'],",
-          "            description: {",
-          "                type: 'doc',",
-          "                version: 1,",
-          "                content: [",
-          "                    {",
-          "                        type: 'paragraph',",
-          "                        content: [",
-          "                            {",
-          "                                type: 'text',",
-          "                                text: description",
-          "                            }",
-          "                        ]",
-          "                    }",
-          "                ]",
-          "            }",
-          "        }",
-          "    };",
-          "    pm.sendRequest({",
-          "        url: jiraBaseUrl + '/rest/api/3/issue',",
-          "        method: 'POST',",
-          "        header: {",
-          "            'Authorization': authHeader,",
-          "            'Content-Type': 'application/json',",
-          "            'Accept': 'application/json'",
-          "        },",
-          "        body: {",
-          "            mode: 'raw',",
-          "            raw: JSON.stringify(payload)",
-          "        }",
-          "    }, function (err, res) {",
-          "        if (err) {",
-          "            console.error('Failed to sync to Jira:', err);",
-          "        } else {",
-          "            console.log('Jira Sync Status:', res.status);",
-          "        }",
-          "    });",
-          "}"
+          ""
         ]
       }
     }
@@ -5984,78 +6005,63 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://health-management-backend-d1gk.onrender.com",
-      "type": "string"
+      "value": "https://health-management-backend-d1gk.onrender.com"
     },
     {
       "key": "token",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "seedPassword",
-      "value": "admin123",
-      "type": "string"
+      "value": "admin123"
     },
     {
       "key": "adminEmail",
-      "value": "admin@care.com",
-      "type": "string"
+      "value": "admin@care.com"
     },
     {
       "key": "clinicManagerEmail",
-      "value": "manager@care.com",
-      "type": "string"
+      "value": "manager@care.com"
     },
     {
       "key": "doctorEmail",
-      "value": "mai.le@care.com",
-      "type": "string"
+      "value": "mai.le@care.com"
     },
     {
       "key": "patientEmail",
-      "value": "truongquocan@patient.com",
-      "type": "string"
+      "value": "truongquocan@patient.com"
     },
     {
       "key": "adminToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "clinicManagerToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "doctorToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "patientToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "clinicId",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "JIRA_BASE_URL",
-      "value": "https://ayemqh-1766052090391.atlassian.net",
-      "type": "string"
-    },
-    {
-      "key": "JIRA_USER_EMAIL",
-      "value": "hungnp1272@ut.edu.vn",
-      "type": "string"
+      "value": "1"
     },
     {
       "key": "JIRA_API_TOKEN",
-      "value": "VUI_LONG_NHAP_TOKEN_O_BIEN_POSTMAN",
-      "type": "string"
+      "value": ""
+    },
+    {
+      "key": "JIRA_USER_EMAIL",
+      "value": "hungnp1272@ut.edu.vn"
+    },
+    {
+      "key": "JIRA_BASE_URL",
+      "value": "https://ayemqh-1766052090391.atlassian.net"
     }
   ]
 }
