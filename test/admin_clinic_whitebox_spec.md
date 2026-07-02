@@ -1,7 +1,7 @@
 # BÁO CÁO: KIỂM THỬ HỘP TRẮNG (WHITE-BOX TESTING) CHO DỊCH VỤ PHÒNG KHÁM (ADMINCLINICSERVICE TOGGLE/UPDATE FLOW)
 
 **Mã Ticket Jira:** KCPM-765  
-**Người thực hiện (Assignee):** Hồ Văn Duy (hungnp1272)  
+**Người thực hiện (Assignee):** Nguyễn Phạm Hùng (hungnp1272)  
 **Email:** hungnp1272@ut.edu.vn  
 **Đối tượng phân tích:** Các phương thức trong luồng đổi trạng thái và cập nhật thông tin phòng khám thuộc lớp `AdminClinicServiceImpl.java`:
 1.  `toggleClinicStatus(Long id)` - Kích hoạt/Vô hiệu hóa trạng thái phòng khám.
