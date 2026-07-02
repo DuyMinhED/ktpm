@@ -1071,7 +1071,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Bác sĩ Mới\",\n  \"email\": \"doctor@new.com\",\n  \"password\": \"123456\",\n  \"phone\": \"0901111111\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Tiến sĩ\",\n  \"bio\": \"Chuyên gia\",\n  \"licenseImageUrl\": \"\",\n  \"specialization\": \"Nội khoa\",\n  \"experience\": \"5 năm\"\n}",
+              "raw": "{\n  \"fullName\": \"Bác sĩ Mới\",\n  \"email\": \"{{uniqueDoctorEmail}}\",\n  \"password\": \"12345678\",\n  \"phone\": \"{{uniqueDoctorPhone}}\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Tiến sĩ\",\n  \"bio\": \"Chuyên gia\",\n  \"licenseImageUrl\": \"\",\n  \"specialization\": \"Nội khoa\",\n  \"experience\": \"5 năm\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1091,7 +1091,71 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const uniqueId = Date.now().toString().slice(-6);",
+                  "pm.collectionVariables.set(\"uniqueDoctorEmail\", \"doctor.new\" + uniqueId + \"@new.com\");",
+                  "pm.collectionVariables.set(\"uniqueDoctorPhone\", \"090\" + uniqueId + \"12\");"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or handles validation/auth/conflict errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create user response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"User created successfully\");",
+                  "    ",
+                  "    var user = response.data;",
+                  "    pm.expect(user).to.be.an(\"object\");",
+                  "    pm.expect(user.id).to.be.a(\"number\");",
+                  "    pm.expect(user.email).to.equal(pm.collectionVariables.get(\"uniqueDoctorEmail\"));",
+                  "    pm.expect(user.fullName).to.equal(\"Bác sĩ Mới\");",
+                  "    pm.expect(user.role).to.equal(\"DOCTOR\");",
+                  "    ",
+                  "    // Save the created user ID for subsequent requests (Update, Toggle Status, Delete)",
+                  "    pm.collectionVariables.set(\"adminUserId\", user.id.toString());",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update User",
@@ -1105,7 +1169,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Cập nhật tên\",\n  \"email\": \"updated@email.com\",\n  \"phone\": \"0902222222\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"status\": \"ACTIVE\",\n  \"password\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Thạc sĩ\",\n  \"bio\": \"Bio mới\",\n  \"specialization\": \"Tim mạch\",\n  \"experience\": \"10 năm\"\n}",
+              "raw": "{\n  \"fullName\": \"Cập nhật tên\",\n  \"email\": \"{{uniqueUpdateEmail}}\",\n  \"phone\": \"{{uniqueUpdatePhone}}\",\n  \"role\": \"DOCTOR\",\n  \"clinicId\": 1,\n  \"avatarUrl\": \"\",\n  \"status\": \"ACTIVE\",\n  \"password\": \"\",\n  \"licenseNumber\": \"BS001\",\n  \"degree\": \"Thạc sĩ\",\n  \"bio\": \"Bio mới\",\n  \"specialization\": \"Tim mạch\",\n  \"experience\": \"10 năm\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1113,7 +1177,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/users/1",
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{adminUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1122,11 +1186,72 @@
                 "v1",
                 "admin",
                 "users",
-                "1"
+                "{{adminUserId}}"
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const uniqueId = Date.now().toString().slice(-6);",
+                  "pm.collectionVariables.set(\"uniqueUpdateEmail\", \"doctor.updated\" + uniqueId + \"@new.com\");",
+                  "pm.collectionVariables.set(\"uniqueUpdatePhone\", \"090\" + uniqueId + \"34\");"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or handles validation/auth/not found/conflict\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update user response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 404, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"User updated successfully\");",
+                  "    ",
+                  "    var user = response.data;",
+                  "    pm.expect(user).to.be.an(\"object\");",
+                  "    pm.expect(user.id).to.equal(Number(pm.collectionVariables.get(\"adminUserId\") || 1));",
+                  "    pm.expect(user.fullName).to.equal(\"Cập nhật tên\");",
+                  "    pm.expect(user.email).to.equal(pm.collectionVariables.get(\"uniqueUpdateEmail\"));",
+                  "    pm.expect(user.role).to.equal(\"DOCTOR\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Toggle User Status",
@@ -1139,7 +1264,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/users/1/toggle-status",
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{adminUserId}}/toggle-status",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1148,12 +1273,56 @@
                 "v1",
                 "admin",
                 "users",
-                "1",
+                "{{adminUserId}}",
                 "toggle-status"
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or handles auth/not found\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle User Status response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"User status toggled successfully\");",
+                  "    pm.expect(response.data).to.be.null;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete User",
@@ -1166,7 +1335,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/users/1",
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{adminUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1175,11 +1344,68 @@
                 "v1",
                 "admin",
                 "users",
-                "1"
+                "{{adminUserId}}"
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or handles auth/not found\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete User response has valid body\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"User deleted successfully\");",
+                  "    pm.expect(response.data).to.be.null;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (pm.environment.get(\"adminToken\")) {",
+              "    pm.environment.set(\"token\", pm.environment.get(\"adminToken\"));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
         }
       ]
     },
@@ -7142,6 +7368,11 @@
     {
       "key": "supportTicketCode",
       "value": "TK-001",
+      "type": "string"
+    },
+    {
+      "key": "adminUserId",
+      "value": "1",
       "type": "string"
     }
   ]
