@@ -57,8 +57,8 @@
                   "    pm.test(\"Admin login returns JWT token\", function () {",
                   "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
                   "    });",
-                  "    pm.collectionVariables.set(\"token\", token);",
-                  "    pm.collectionVariables.set(\"adminToken\", token);",
+                  "    pm.environment.set(\"token\", token);",
+                  "    pm.environment.set(\"adminToken\", token);",
                   "}"
                 ]
               }
@@ -118,8 +118,8 @@
                   "    pm.test(\"Clinic manager login returns JWT token\", function () {",
                   "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
                   "    });",
-                  "    pm.collectionVariables.set(\"token\", token);",
-                  "    pm.collectionVariables.set(\"clinicManagerToken\", token);",
+                  "    pm.environment.set(\"token\", token);",
+                  "    pm.environment.set(\"clinicManagerToken\", token);",
                   "}"
                 ]
               }
@@ -179,8 +179,8 @@
                   "    pm.test(\"Doctor login returns JWT token\", function () {",
                   "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
                   "    });",
-                  "    pm.collectionVariables.set(\"token\", token);",
-                  "    pm.collectionVariables.set(\"doctorToken\", token);",
+                  "    pm.environment.set(\"token\", token);",
+                  "    pm.environment.set(\"doctorToken\", token);",
                   "}"
                 ]
               }
@@ -240,8 +240,8 @@
                   "    pm.test(\"Patient login returns JWT token\", function () {",
                   "        pm.expect(token).to.be.a(\"string\").and.not.empty;",
                   "    });",
-                  "    pm.collectionVariables.set(\"token\", token);",
-                  "    pm.collectionVariables.set(\"patientToken\", token);",
+                  "    pm.environment.set(\"token\", token);",
+                  "    pm.environment.set(\"patientToken\", token);",
                   "}"
                 ]
               }
@@ -4874,7 +4874,7 @@
                   "            pm.expect(p.id).to.be.a(\"number\");",
                   "            ",
                   "            // Extract a prescription ID to request refill later",
-                  "            pm.collectionVariables.set(\"refillPrescriptionId\", p.id);",
+                  "            pm.environment.set(\"refillPrescriptionId\", p.id);",
                   "        }",
                   "    }",
                   "});"
@@ -5031,7 +5031,7 @@
                   "            pm.expect(s.id).to.be.a(\"number\");",
                   "            ",
                   "            // Extract schedule ID to log medication intake later",
-                  "            pm.collectionVariables.set(\"medicationScheduleId\", s.id);",
+                  "            pm.environment.set(\"medicationScheduleId\", s.id);",
                   "        }",
                   "    }",
                   "});"
@@ -6127,7 +6127,7 @@
                   "    pm.expect(doc.fullName).to.be.a(\"string\").and.not.empty;",
                   "    ",
                   "    // Save ID for subsequent tests",
-                  "    pm.collectionVariables.set(\"publicDoctorId\", doc.id);",
+                  "    pm.environment.set(\"publicDoctorId\", doc.id);",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -6557,8 +6557,8 @@
                   "",
                   "if (pm.response.code === 200 || pm.response.code === 201) {",
                   "    var response = pm.response.json();",
-                  "    pm.collectionVariables.set(\"supportTicketId\", response.id);",
-                  "    pm.collectionVariables.set(\"supportTicketCode\", response.ticketCode);",
+                  "    pm.environment.set(\"supportTicketId\", response.id);",
+                  "    pm.environment.set(\"supportTicketCode\", response.ticketCode);",
                   "}"
                 ],
                 "type": "text/javascript"
