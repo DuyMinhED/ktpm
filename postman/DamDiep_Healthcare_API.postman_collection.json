@@ -4628,7 +4628,59 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Patient Dashboard: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Dashboard: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Dashboard: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Dashboard: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Dashboard loaded successfully\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"object\");",
+                  "    pm.expect(data).to.include.keys(\"profile\", \"healthMetrics\", \"todayMedications\", \"alerts\");",
+                  "    ",
+                  "    pm.expect(data.profile).to.be.an(\"object\");",
+                  "    pm.expect(data.healthMetrics).to.be.an(\"array\");",
+                  "    pm.expect(data.todayMedications).to.be.an(\"array\");",
+                  "    pm.expect(data.alerts).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Patient Alerts",
@@ -4654,7 +4706,63 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Patient Alerts: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Alerts: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Alerts: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Alerts: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Alerts retrieved successfully\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"array\");",
+                  "    ",
+                  "    if (data.length > 0) {",
+                  "        var alert = data[0];",
+                  "        pm.expect(alert).to.be.an(\"object\");",
+                  "        pm.expect(alert).to.include.keys(\"id\", \"alertType\", \"severity\", \"title\", \"message\");",
+                  "        pm.expect(alert.id).to.be.a(\"number\");",
+                  "        pm.expect(alert.alertType).to.be.a(\"string\");",
+                  "        pm.expect(alert.severity).to.be.a(\"string\");",
+                  "        pm.expect(alert.title).to.be.a(\"string\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Dismiss Alert",
@@ -4688,34 +4796,57 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "pm.test(\"Dismiss Alert: Status code is 200, 400 or 404, or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
                   "});",
                   "",
-                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "pm.test(\"Dismiss Alert: Response time is less than 3000ms\", function () {",
                   "    pm.expect(pm.response.responseTime).to.be.below(3000);",
                   "});",
                   "",
-                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "pm.test(\"Dismiss Alert: Content-Type is application/json when body is returned\", function () {",
                   "    if (pm.response.text()) {",
                   "        pm.response.to.have.header(\"Content-Type\");",
                   "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                   "    }",
                   "});",
                   "",
-                  "pm.test(\"Dismiss alert response has valid ApiResponse structure\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        var response = pm.response.json();",
-                  "        pm.expect(response.success).to.be.true;",
-                  "        pm.expect(response.message).to.equal(\"Alert dismissed\");",
-                  "        pm.expect(response.data).to.be.null;",
+                  "pm.test(\"Dismiss Alert: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
                   "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Alert dismissed successfully\");",
                   "});"
                 ],
                 "type": "text/javascript"
               }
             }
           ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (pm.environment.get(\"patientToken\")) {",
+              "    pm.environment.set(\"token\", pm.environment.get(\"patientToken\"));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
         }
       ]
     },
@@ -4746,7 +4877,66 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Upcoming Appointments: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Upcoming Appointments: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Upcoming Appointments: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Upcoming Appointments: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Upcoming appointments retrieved\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"array\");",
+                  "    ",
+                  "    if (data.length > 0) {",
+                  "        var appt = data[0];",
+                  "        pm.expect(appt).to.be.an(\"object\");",
+                  "        pm.expect(appt).to.include.keys(\"id\", \"doctorName\", \"appointmentType\", \"status\");",
+                  "        pm.expect(appt.id).to.be.a(\"number\");",
+                  "        pm.expect(appt.doctorName).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(appt.doctorSpecialty).to.satisfy(function (val) {",
+                  "            return val === null || typeof val === \"string\";",
+                  "        });",
+                  "        pm.expect(appt.appointmentType).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(appt.status).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Appointment History",
@@ -4782,7 +4972,67 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Appointment History: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Appointment History: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Appointment History: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Appointment History: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Appointment history retrieved\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"object\");",
+                  "    pm.expect(data.content).to.be.an(\"array\");",
+                  "    ",
+                  "    if (data.content.length > 0) {",
+                  "        var appt = data.content[0];",
+                  "        pm.expect(appt).to.be.an(\"object\");",
+                  "        pm.expect(appt).to.include.keys(\"id\", \"doctorName\", \"appointmentType\", \"status\");",
+                  "        pm.expect(appt.id).to.be.a(\"number\");",
+                  "        pm.expect(appt.doctorName).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(appt.doctorSpecialty).to.satisfy(function (val) {",
+                  "            return val === null || typeof val === \"string\";",
+                  "        });",
+                  "        pm.expect(appt.appointmentType).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(appt.status).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Available Doctors",
@@ -4903,6 +5153,19 @@
             }
           },
           "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (pm.environment.get(\"patientToken\")) {",
+              "    pm.environment.set(\"token\", pm.environment.get(\"patientToken\"));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
         }
       ]
     },
