@@ -6087,7 +6087,59 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Profile: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Profile: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Profile: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Profile: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Profile retrieved successfully\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"object\");",
+                  "    pm.expect(data).to.include.keys(\"id\", \"userId\", \"patientCode\", \"fullName\", \"phone\", \"email\");",
+                  "    pm.expect(data.id).to.be.a(\"number\");",
+                  "    pm.expect(data.userId).to.be.a(\"number\");",
+                  "    pm.expect(data.patientCode).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(data.fullName).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(data.email).to.be.a(\"string\").and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Profile",
@@ -6101,7 +6153,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Nguyễn Văn D\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0905555555\",\n  \"email\": \"patient@email.com\",\n  \"address\": \"123 Đường DEF\",\n  \"bloodType\": \"O\",\n  \"heightCm\": 170,\n  \"weightKg\": 65,\n  \"identityCard\": \"012345678901\",\n  \"occupation\": \"Kỹ sư\",\n  \"ethnicity\": \"Kinh\",\n  \"healthInsuranceNumber\": \"BH002\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"medicalHistory\": \"Tiểu đường\",\n  \"allergies\": \"Penicillin\"\n}",
+              "raw": "{\n  \"fullName\": \"Nguyễn Văn D\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0905555555\",\n  \"email\": \"{{patientEmail}}\",\n  \"address\": \"123 Đường DEF\",\n  \"bloodType\": \"O\",\n  \"heightCm\": 170,\n  \"weightKg\": 65,\n  \"identityCard\": \"012345678901\",\n  \"occupation\": \"Kỹ sư\",\n  \"ethnicity\": \"Kinh\",\n  \"healthInsuranceNumber\": \"BH002\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"medicalHistory\": \"Tiểu đường\",\n  \"allergies\": \"Penicillin\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6121,7 +6173,57 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Update Profile: Status code is 200 or handles auth/validation errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Profile: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Profile: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Profile: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([400, 401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Profile updated successfully\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"object\");",
+                  "    pm.expect(data.fullName).to.equal(\"Nguyễn Văn D\");",
+                  "    pm.expect(data.gender).to.equal(\"Nam\");",
+                  "    pm.expect(data.phone).to.equal(\"0905555555\");",
+                  "    pm.expect(data.email).to.equal(pm.collectionVariables.get(\"patientEmail\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Emergency Contacts",
@@ -6147,7 +6249,63 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Emergency Contacts: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Emergency Contacts: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Emergency Contacts: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Emergency Contacts: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Emergency contacts retrieved\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"array\");",
+                  "    ",
+                  "    if (data.length > 0) {",
+                  "        var contact = data[0];",
+                  "        pm.expect(contact).to.be.an(\"object\");",
+                  "        pm.expect(contact).to.include.keys(\"id\", \"contactName\", \"relationship\", \"phone\");",
+                  "        pm.expect(contact.id).to.be.a(\"number\");",
+                  "        pm.expect(contact.contactName).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(contact.relationship).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(contact.phone).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Add Emergency Contact",
@@ -6245,6 +6403,19 @@
             }
           },
           "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (pm.environment.get(\"patientToken\")) {",
+              "    pm.environment.set(\"token\", pm.environment.get(\"patientToken\"));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
         }
       ]
     },
