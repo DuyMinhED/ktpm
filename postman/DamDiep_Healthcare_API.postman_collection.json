@@ -2270,7 +2270,67 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Doctors: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctors: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctors: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctors: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Doctors fetched\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"object\");",
+                  "    pm.expect(data.content).to.be.an(\"array\");",
+                  "    ",
+                  "    if (data.content.length > 0) {",
+                  "        var doctor = data.content[0];",
+                  "        pm.expect(doctor).to.be.an(\"object\");",
+                  "        pm.expect(doctor).to.include.keys(\"dbId\", \"id\", \"name\", \"email\");",
+                  "        pm.expect(doctor.dbId).to.be.a(\"number\");",
+                  "        pm.expect(doctor.id).to.be.a(\"string\");",
+                  "        pm.expect(doctor.name).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(doctor.email).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(doctor.specialty).to.satisfy(function (val) {",
+                  "            return val === null || typeof val === \"string\";",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Doctors With Filters",
@@ -2318,7 +2378,62 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Doctors With Filters: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctors With Filters: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctors With Filters: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctors With Filters: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Doctors fetched\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"object\");",
+                  "    pm.expect(data.content).to.be.an(\"array\");",
+                  "    ",
+                  "    data.content.forEach(function (doctor) {",
+                  "        pm.expect(doctor).to.be.an(\"object\");",
+                  "        pm.expect(doctor.dbId).to.be.a(\"number\");",
+                  "        pm.expect(doctor.name).to.be.a(\"string\");",
+                  "        pm.expect(doctor.specialty).to.equal(\"Nội khoa\");",
+                  "        pm.expect(doctor.status).to.equal(\"ACTIVE\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Available Doctors",
@@ -2345,7 +2460,67 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Available Doctors: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Available Doctors: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Available Doctors: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Available Doctors: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Doctors fetched successfully\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"array\");",
+                  "    ",
+                  "    if (data.length > 0) {",
+                  "        var doctor = data[0];",
+                  "        pm.expect(doctor).to.be.an(\"object\");",
+                  "        pm.expect(doctor).to.include.keys(\"id\", \"name\");",
+                  "        pm.expect(doctor.id).to.be.a(\"number\");",
+                  "        pm.expect(doctor.name).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(doctor.specialty).to.satisfy(function (val) {",
+                  "            return val === null || typeof val === \"string\";",
+                  "        });",
+                  "        pm.expect(doctor.avatarUrl).to.satisfy(function (val) {",
+                  "            return val === null || typeof val === \"string\";",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Doctor",
@@ -2444,6 +2619,19 @@
             }
           },
           "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (pm.environment.get(\"clinicManagerToken\")) {",
+              "    pm.environment.set(\"token\", pm.environment.get(\"clinicManagerToken\"));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
         }
       ]
     },
