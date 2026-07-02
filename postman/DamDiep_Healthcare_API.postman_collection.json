@@ -3388,7 +3388,73 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Doctor Dashboard: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctor Dashboard: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctor Dashboard: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctor Dashboard: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Dashboard data fetched successfully\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"object\");",
+                  "    pm.expect(data).to.include.keys(\"stats\", \"upcomingAppointments\", \"recentPatients\", \"highRiskPatients\", \"insights\");",
+                  "    ",
+                  "    pm.expect(data.stats).to.be.an(\"object\");",
+                  "    pm.expect(data.upcomingAppointments).to.be.an(\"array\");",
+                  "    pm.expect(data.recentPatients).to.be.an(\"array\");",
+                  "    pm.expect(data.highRiskPatients).to.be.an(\"array\");",
+                  "    pm.expect(data.insights).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (pm.environment.get(\"doctorToken\")) {",
+              "    pm.environment.set(\"token\", pm.environment.get(\"doctorToken\"));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
         }
       ]
     },
@@ -3418,7 +3484,64 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get All Appointments: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get All Appointments: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get All Appointments: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get All Appointments: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"All appointments retrieved\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"array\");",
+                  "    ",
+                  "    if (data.length > 0) {",
+                  "        var appt = data[0];",
+                  "        pm.expect(appt).to.be.an(\"object\");",
+                  "        pm.expect(appt).to.include.keys(\"id\", \"patientId\", \"patientName\", \"appointmentType\", \"status\");",
+                  "        pm.expect(appt.id).to.be.a(\"number\");",
+                  "        pm.expect(appt.patientId).to.be.a(\"number\");",
+                  "        pm.expect(appt.patientName).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(appt.appointmentType).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(appt.status).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Upcoming Appointments",
@@ -3444,7 +3567,64 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Upcoming Appointments: Status code is 200 or handles auth errors\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Upcoming Appointments: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Upcoming Appointments: Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Upcoming Appointments: Response body has valid structure\", function () {",
+                  "    if (!pm.response.text()) {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "        return;",
+                  "    }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "",
+                  "    if ([401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (body) {",
+                  "            return body.message || body.error || body.errors || body.status;",
+                  "        });",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.message).to.equal(\"Upcoming appointments retrieved\");",
+                  "    ",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"array\");",
+                  "    ",
+                  "    if (data.length > 0) {",
+                  "        var appt = data[0];",
+                  "        pm.expect(appt).to.be.an(\"object\");",
+                  "        pm.expect(appt).to.include.keys(\"id\", \"patientId\", \"patientName\", \"appointmentType\", \"status\");",
+                  "        pm.expect(appt.id).to.be.a(\"number\");",
+                  "        pm.expect(appt.patientId).to.be.a(\"number\");",
+                  "        pm.expect(appt.patientName).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(appt.appointmentType).to.be.a(\"string\").and.not.empty;",
+                  "        pm.expect(appt.status).to.be.a(\"string\").and.not.empty;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Appointment",
@@ -3588,6 +3768,19 @@
             }
           },
           "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (pm.environment.get(\"doctorToken\")) {",
+              "    pm.environment.set(\"token\", pm.environment.get(\"doctorToken\"));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
         }
       ]
     },
