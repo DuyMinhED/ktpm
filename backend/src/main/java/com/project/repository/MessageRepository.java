@@ -18,7 +18,14 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     Optional<Message> findTopByConversationIdOrderBySentAtDesc(Long conversationId);
 
-    Optional<Message> findTopByConversationIdAndContentStartingWithOrderBySentAtDesc(Long conversationId, String prefix);
+    @Query("SELECT m FROM Message m WHERE m.conversation.id = :conversationId AND m.content LIKE CONCAT(:prefix, '%') ORDER BY m.sentAt DESC")
+    java.util.List<Message> findLatestByPrefix(@Param("conversationId") Long conversationId, @Param("prefix") String prefix, Pageable pageable);
+
+    default Optional<Message> findTopByConversationIdAndContentStartingWithOrderBySentAtDesc(Long conversationId, String prefix) {
+        return findLatestByPrefix(conversationId, prefix, org.springframework.data.domain.PageRequest.of(0, 1))
+                .stream()
+                .findFirst();
+    }
 
     @Modifying
     @Query("UPDATE Message m SET m.isRead = true WHERE m.conversation.id = :conversationId AND m.senderId <> :readerId")
