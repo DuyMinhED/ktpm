@@ -33,12 +33,17 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
+import org.mockito.MockedStatic;
+import org.junit.jupiter.api.AfterEach;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class, JiraBugSyncExtension.class})
 public class CoreBusinessBvaTest {
+
+    private MockedStatic<LocalDateTime> mockedLocalDateTime;
 
     @Mock
     private AppointmentRepository appointmentRepository;
@@ -83,6 +88,10 @@ public class CoreBusinessBvaTest {
 
     @BeforeEach
     void setUp() {
+        mockedLocalDateTime = mockStatic(LocalDateTime.class, CALLS_REAL_METHODS);
+        LocalDateTime fixedTime = LocalDateTime.of(2026, 7, 3, 10, 0, 0);
+        mockedLocalDateTime.when(LocalDateTime::now).thenReturn(fixedTime);
+
         patient = Patient.builder()
                 .id(1L)
                 .userId(100L)
@@ -109,6 +118,13 @@ public class CoreBusinessBvaTest {
         SecurityContext securityContext = mock(SecurityContext.class);
         lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (mockedLocalDateTime != null) {
+            mockedLocalDateTime.close();
+        }
     }
 
     // Helper for mocking appointment save
