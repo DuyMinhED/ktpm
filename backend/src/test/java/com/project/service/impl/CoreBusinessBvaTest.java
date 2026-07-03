@@ -213,6 +213,12 @@ public class CoreBusinessBvaTest {
         assertEquals(50L, response.getId());
     }
 
+    /**
+     * testAppointmentTime_MaxPlus1_TC_BVA_CORE_04
+     * JIRA Ticket: KCPM-844 (also related to KCPM-843)
+     * Verifies that scheduling an appointment 15 days + 1 minute in advance fails.
+     * Fixed clock mocking ensures t0 in test and t1 in service are perfectly aligned.
+     */
     @Test
     void testAppointmentTime_MaxPlus1_TC_BVA_CORE_04() {
         mockAppointmentDependencies();
