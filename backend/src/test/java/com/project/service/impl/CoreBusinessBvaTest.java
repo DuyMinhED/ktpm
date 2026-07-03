@@ -325,6 +325,12 @@ public class CoreBusinessBvaTest {
         assertEquals("NORMAL", response.getStatus());
     }
 
+    /**
+     * testBloodSugar_MaxPlus1_TC_BVA_CORE_10
+     * JIRA Ticket: KCPM-845 (related to KCPM-842)
+     * Verifies that blood sugar value 6.1 (max normal limit + 1) is classified as BORDERLINE_HIGH.
+     * The business rule follows SRS §6.1 where normal is <= 6.0 and borderline high starts > 6.0.
+     */
     @Test
     void testBloodSugar_MaxPlus1_TC_BVA_CORE_10() {
         mockHealthMetricDependencies();
