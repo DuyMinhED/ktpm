@@ -50,9 +50,9 @@ Dữ liệu kiểm thử mặc định được khởi tạo tự động thông
 | Vai trò (Role) | Email đăng nhập | Mật khẩu | Quyền hạn tương ứng (Permissions) | Mục đích kiểm thử |
 | :--- | :--- | :--- | :--- | :--- |
 | **ADMIN** | `admin@care.com` | `admin123` | Toàn quyền hệ thống, quản lý bác sĩ, bệnh nhân, phòng khám. | Test đăng nhập, phân quyền admin, tạo mới tài khoản bác sĩ/bệnh nhân. |
-| **DOCTOR** | `doctor@care.com` | `doctor123` | Xem danh sách bệnh nhân được chỉ định, tạo đơn thuốc. | Test luồng tạo đơn thuốc (`createPrescription`), xem dashboard bác sĩ. |
-| **PATIENT** | `patient@care.com` | `patient123` | Xem đơn thuốc cá nhân, gửi yêu cầu tái cấp thuốc, cập nhật chỉ số sức khỏe. | Test luồng gửi yêu cầu tái cấp thuốc (`requestRefill`), log chỉ số sức khỏe. |
-| **CLINIC_MANAGER** | `manager@care.com` | `manager123` | Quản lý thông tin và thống kê phòng khám được chỉ định. | Test luồng phân quyền phòng khám. |
+| **DOCTOR** | `mai.le@care.com` | `admin123` | Xem danh sách bệnh nhân được chỉ định, tạo đơn thuốc. | Test luồng tạo đơn thuốc (`createPrescription`), xem dashboard bác sĩ. |
+| **PATIENT** | `truongquocan@patient.com` | `admin123` | Xem đơn thuốc cá nhân, gửi yêu cầu tái cấp thuốc, cập nhật chỉ số sức khỏe. | Test luồng gửi yêu cầu tái cấp thuốc (`requestRefill`), log chỉ số sức khỏe. |
+| **CLINIC_MANAGER** | `manager@care.com` | `admin123` | Quản lý thông tin và thống kê phòng khám được chỉ định. | Test luồng phân quyền phòng khám. |
 
 ---
 

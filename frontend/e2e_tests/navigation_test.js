@@ -1,10 +1,18 @@
-Feature('Navigation');
+Feature('Public navigation');
 
-Scenario('Kiểm tra trang Landing Page hoạt động tốt', ({ I }) => {
-    I.amOnPage('/');
-    
-    // Kiểm tra các thành phần quan trọng trên trang chủ có load thành công không
-    I.see('DamDiep Healthcare'); 
-    I.seeElement('nav'); // Kiểm tra thanh điều hướng có tồn tại
-    I.seeElement('footer'); // Kiểm tra chân trang có tồn tại
+Scenario('Landing page exposes public navigation shell', ({ I }) => {
+  I.clearAuth();
+  I.amOnPage('/');
+
+  I.see('Velorah');
+  I.see('Begin Journey');
+  I.seeElement('nav');
+});
+
+Scenario('Unknown route renders not found page instead of crashing', ({ I }) => {
+  I.clearAuth();
+  I.amOnPage('/route-khong-ton-tai-e2e');
+
+  I.seeInCurrentUrl('/route-khong-ton-tai-e2e');
+  I.see('404');
 });

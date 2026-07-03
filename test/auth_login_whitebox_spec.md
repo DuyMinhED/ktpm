@@ -106,9 +106,9 @@ Kết luận: Độ phức tạp Cyclomatic của phương thức là **3**, tư
 
 | STT | Mã TC | Đường đi bao phủ | Mô tả kịch bản test | Dữ liệu đầu vào (Input) | Kết quả mong đợi (Expected Output) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1** | **TC-WB-01** | Path 1 | Đăng nhập thành công | Email: `patient@care.com`<br>Password: `admin123` (Thông tin đúng) | Trả về `ApiResponse` thành công (status 200, "Login successful") kèm theo JWT token. |
-| **2** | **TC-WB-02** | Path 2 | Sai thông tin đăng nhập | Email: `patient@care.com`<br>Password: `wrong_pass` (Sai mật khẩu) | Ném ra ngoại lệ `BadCredentialsException`, ghi log lỗi thất bại. |
-| **3** | **TC-WB-03** | Path 3 | Lỗi hệ thống khi tạo Token | Email: `patient@care.com`<br>Password: `admin123` (Xác thực qua nhưng cấu hình JWT lỗi) | Ném ra ngoại lệ `IllegalArgumentException` (hoặc lỗi hệ thống khác), ghi log lỗi thất bại. |
+| **1** | **TC-WB-01** | Path 1 | Đăng nhập thành công | Email: `truongquocan@patient.com`<br>Password: `admin123` (Thông tin đúng) | Trả về `ApiResponse` thành công (status 200, "Login successful") kèm theo JWT token. |
+| **2** | **TC-WB-02** | Path 2 | Sai thông tin đăng nhập | Email: `truongquocan@patient.com`<br>Password: `wrong_pass` (Sai mật khẩu) | Ném ra ngoại lệ `BadCredentialsException`, ghi log lỗi thất bại. |
+| **3** | **TC-WB-03** | Path 3 | Lỗi hệ thống khi tạo Token | Email: `truongquocan@patient.com`<br>Password: `admin123` (Xác thực qua nhưng cấu hình JWT lỗi) | Ném ra ngoại lệ `IllegalArgumentException` (hoặc lỗi hệ thống khác), ghi log lỗi thất bại. |
 
 ---
 

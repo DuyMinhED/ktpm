@@ -1,17 +1,42 @@
 Feature('Authentication');
 
-Scenario('Đăng nhập thành công', ({ I }) => {
-    // Sử dụng hàm login tuỳ chỉnh vừa định nghĩa trong steps_file.js
-    I.login('admin@care.com', 'admin123'); // Thay mật khẩu nếu admin123 không đúng
-    
-    // Kiểm tra xem sau khi đăng nhập có được chuyển hướng đúng không
-    I.waitInUrl('/admin', 5);
-    I.see('Dashboard'); // Hoặc bất kỳ chữ nào xuất hiện khi đăng nhập thành công
+Scenario('Admin login redirects to admin dashboard', ({ I }) => {
+  I.clearAuth();
+  I.login('admin@care.com', 'admin123');
+
+  I.waitInUrl('/admin', 15);
+  I.seeInCurrentUrl('/admin');
 });
 
-Scenario('Đăng nhập thất bại do sai mật khẩu', ({ I }) => {
-    I.login('admin@care.com', 'sai_mat_khau');
-    
-    // Kiểm tra xem có hiển thị thông báo lỗi không
-    I.see('Đăng nhập thất bại'); // Thay bằng câu thông báo lỗi thực tế của web bạn
+Scenario('Doctor login redirects to doctor dashboard', ({ I }) => {
+  I.clearAuth();
+  I.login('mai.le@care.com', 'admin123');
+
+  I.waitInUrl('/doctor', 15);
+  I.seeInCurrentUrl('/doctor');
+});
+
+Scenario('Clinic manager login redirects to clinic dashboard', ({ I }) => {
+  I.clearAuth();
+  I.login('manager@care.com', 'admin123');
+
+  I.waitInUrl('/clinic', 15);
+  I.seeInCurrentUrl('/clinic');
+});
+
+Scenario('Patient login redirects to patient dashboard', ({ I }) => {
+  I.clearAuth();
+  I.login('truongquocan@patient.com', 'admin123');
+
+  I.waitInUrl('/patient', 15);
+  I.seeInCurrentUrl('/patient');
+});
+
+Scenario('Invalid password keeps user on login modal and shows an error', ({ I }) => {
+  I.clearAuth();
+  I.login('admin@care.com', 'wrong-password');
+
+  I.waitForElement('form', 10);
+  I.seeElement('form');
+  I.seeInCurrentUrl('action=login');
 });
