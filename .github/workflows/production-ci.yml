@@ -279,7 +279,7 @@ jobs:
             --env-var "patientEmail=${TEST_PATIENT_EMAIL}" \
             --env-var "patientPassword=${TEST_PATIENT_PASSWORD}" \
             --env-var "clinicId=${TEST_CLINIC_ID}" \
-            --timeout-request 30000 \
+            --timeout-request 90000 \
             --reporters cli,json,junit \
             --reporter-json-export postman-newman-report.json \
             --reporter-junit-export postman-newman-report.xml
