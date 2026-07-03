@@ -68,3 +68,31 @@ Dựa trên tài liệu `docs/SRS.md` và mã nguồn backend/frontend:
 
 * Đã thiết kế chính xác **10 test cases** phân tích giá trị biên (BVA) bao phủ đầy đủ các trường hợp liên quan đến thời gian đặt lịch (`appointmentTime`), số lượng danh sách thuốc (`items`), và chỉ số đo sức khỏe (`BLOOD_SUGAR`).
 * Các test case tuân thủ chặt chẽ đặc tả nghiệp vụ trong tài liệu `docs/SRS.md`, giúp kiểm chứng tính đúng đắn của logic validation tại các vùng ranh giới nhạy cảm.
+
+---
+
+## 5. Bổ sung điều kiện biên và gap theo code hiện tại
+
+Các case BVA chính trong tài liệu đã đúng hướng, nhưng để triển khai tự động cần bổ sung các điều kiện sau:
+
+| Test Case | Type | Function | Input | Expected Outcome | New Tags Covered | Automation Target |
+|---|---|---|---|---|---|---|
+| TC-BVA-CORE-11 | EP | Đặt lịch hẹn | `appointmentTime = null` | 400 validation: appointment time required | `EP-APPT-I01` | Controller/API test |
+| TC-BVA-CORE-12 | EP | Đặt lịch hẹn | `doctorId = null` | 400 validation: doctor ID required | `EP-APPT-I02` | Controller/API test |
+| TC-BVA-CORE-13 | EP | Đặt lịch hẹn | `appointmentType = ""` | 400 validation: appointment type required | `EP-APPT-I04` | Controller/API test |
+| TC-BVA-CORE-14 | BVA | Đặt lịch hẹn | `appointmentTime = now + 3h - 11s` | Business error do service dùng ngưỡng `now.plusHours(3).minusSeconds(10)` | `BVA-APPT-B01` | Service test có fixed clock/mock |
+| TC-BVA-CORE-15 | BVA | Đặt lịch hẹn | `appointmentTime = now + 15d + 11s` | Business error do vượt upper tolerance | `BVA-APPT-B04` | Service test có fixed clock/mock |
+| TC-BVA-CORE-16 | EP | Kê đơn thuốc | `items = null` | 400 validation: items cannot be null | `EP-RX-I03` | DTO/API test |
+| TC-BVA-CORE-17 | EP | Kê đơn thuốc | item thiếu `medicationName` | 400 validation nếu nested validation được bật; nếu không thì gap | `EP-RX-I05` | Controller/API test |
+| TC-BVA-CORE-18 | EP | Kê đơn thuốc | item thiếu `dosage` | 400 validation nếu nested validation được bật; nếu không thì gap | `EP-RX-I06` | Controller/API test |
+| TC-BVA-CORE-19 | BVA | Chẩn đoán đơn thuốc | `diagnosis` 256 ký tự | 400 validation: max 255 | `BVA-RX-B04` | DTO/API test |
+| TC-BVA-CORE-20 | EP | Health metric | `metricType = "UNKNOWN"` | 400/business error khi parse enum hoặc xử lý metric không hỗ trợ | `EP-HM-I02` | Service/API test |
+
+### Lưu ý về thời gian hẹn
+
+`PatientAppointmentServiceImpl` hiện dùng tolerance khoảng 10 giây:
+
+- Lower bound: lỗi nếu `appointmentTime < now + 3h - 10s`.
+- Upper bound: lỗi nếu `appointmentTime > now + 15d + 10s`.
+
+Vì vậy test tự động nên mock/fix clock hoặc dùng khoảng lệch rõ ràng như `2h59m` và `15d+1m`, tránh flakiness do thời gian chạy test.

@@ -119,3 +119,27 @@ Dự án đã thực hiện thiết kế và tổng hợp thành công:
 
 *   Đã hoàn tất biên soạn báo cáo tổng hợp đầy đủ **50 ca kiểm thử giá trị biên (BVA)** và **36 ca kiểm thử phân hoạch tương đương (EP)** (đạt chỉ tiêu tối thiểu 50 BVA cases và 25 EP cases theo tài liệu mô tả yêu cầu kiểm thử của ticket **KCPM-824**).
 *   Độ bao phủ của các ca kiểm thử hộp đen đã phủ rộng từ tầng Giao diện Form Frontend (validation độ dài ký tự, giới hạn khoảng tuổi, định dạng điện thoại), tầng API Gateway (phân trang page/size, định danh ID) cho tới tầng Logic Nghiệp vụ cốt lõi ở Backend (biên đặt lịch hẹn, ngưỡng chỉ số sức khỏe).
+
+---
+
+## 5. Code-Based Correction Notes
+
+Các dòng tổng hợp trong tài liệu này cần được đọc cùng ma trận bổ sung tại `test/code_based_bva_ep_completion.md`.
+
+### 5.1. Pagination
+
+- Các case `TC-BVA-07` đến `TC-BVA-14` đang giả định `page` bắt đầu từ 1 và có `max page = 100`, `max size = 50`.
+- Code hiện tại dùng Spring `PageRequest.of(page, size)` và nhiều endpoint truyền `page=0&size=10`; vì vậy `page=0` là hợp lệ.
+- Chưa thấy validation rõ ràng cho `max page = 100` hoặc `max size = 50`; nếu muốn giữ các biên này trong báo cáo, cần ghi là **business requirement chưa được enforce trong code**.
+
+### 5.2. Password frontend/backend
+
+- Frontend `CreateUserModal` và `CreatePatientModal` đang kiểm tra password tối thiểu 6 ký tự.
+- Backend `CreateUserRequest` và `ChangePasswordRequest` yêu cầu password tối thiểu 8 ký tự.
+- Do đó các case password 6 và 7 ký tự chỉ hợp lệ ở tầng UI hiện tại, nhưng không hợp lệ khi gửi lên backend create-user/change-password. Cần thêm test `TC-FE-MISMATCH-001` để ghi nhận mismatch này.
+
+### 5.3. Support ticket subject
+
+- Các case `TC-BVA-49` và `TC-BVA-50` giả định subject tối thiểu 5 ký tự.
+- Entity `SupportTicket.subject` hiện chỉ có `nullable=false`, chưa có `@Size(min=5)`.
+- Nếu yêu cầu tối thiểu 5 ký tự là bắt buộc, cần bổ sung DTO/validation backend hoặc đánh dấu case này là gap.

@@ -35,3 +35,27 @@ Tài liệu này đặc tả **đúng 8 ca kiểm thử phân hoạch tương đ
 | **6** | **TC-EP-AUTH-06** | `password` | Không hợp lệ (Invalid) | Mật khẩu thiếu chữ in hoa hoặc chữ số khi chính sách yêu cầu | `"p@ssword"` (thiếu chữ hoa & chữ số) | **Thất bại:** Ném ngoại lệ `IllegalArgumentException` ("Mật khẩu phải chứa ít nhất một chữ hoa và một chữ số"). |
 | **7** | **TC-EP-AUTH-07** | `status` | Hợp lệ (Valid) | Trạng thái tài khoản hợp lệ | `"ACTIVE"` | **Thành công:** Chấp nhận và cập nhật trạng thái. |
 | **8** | **TC-EP-AUTH-08** | `status` | Không hợp lệ (Invalid) | Trạng thái tài khoản không được hỗ trợ | `"SUSPENDED"` | **Thất bại:** Báo lỗi validation hoặc ném ngoại lệ nghiệp vụ không hợp lệ. |
+---
+
+## 3. Traceability And Execution Completion
+
+| Test Case | Valid/Invalid Partition | Preconditions | Execution Steps | Automation Target | Evidence / Traceability |
+|---|---|---|---|---|---|
+| TC-EP-AUTH-01 | Valid email | Login or DTO validation context | Submit valid email with otherwise valid payload | DTO/API test | `CreateUserRequestValidationTest`, login/API specs |
+| TC-EP-AUTH-02 | Invalid email: missing `@` | DTO validation context | Submit `patientgmail.com` | DTO/API test | `CreateUserRequestValidationTest`, `UpdateUserRequestValidationTest` |
+| TC-EP-AUTH-03 | Invalid email: missing domain | DTO validation context | Submit `patient@` | DTO/API test | `CreateUserRequestValidationTest`, `UpdateUserRequestValidationTest` |
+| TC-EP-AUTH-04 | Valid password | Admin/service context | Submit password meeting length and policy | DTO/service test | `CreateUserRequestValidationTest`, `AdminUserServiceImplTest` |
+| TC-EP-AUTH-05 | Invalid password: too short | Admin/service context | Submit password length `<8` | DTO/service test | `CreateUserRequestValidationTest`, `AdminUserServiceImplTest` |
+| TC-EP-AUTH-06 | Invalid password: missing complexity | SystemConfig requires uppercase/number | Submit password missing uppercase or number | Service test | `AdminUserServiceImplTest` |
+| TC-EP-AUTH-07 | Valid status | Update user context | Submit `ACTIVE` or `INACTIVE` | DTO/API test | `UpdateUserRequestValidationTest`, `AdminUserServiceImplTest` |
+| TC-EP-AUTH-08 | Invalid status | Update user context | Submit `SUSPENDED`, lowercase, or unknown value | DTO/API test | `UpdateUserRequestValidationTest` |
+
+## 4. Completeness Notes
+
+| Required information | Status |
+|---|---|
+| Partition definition | Present in Section 1 |
+| Representative data | Present in Section 2 |
+| Expected result | Present in Section 2 |
+| Preconditions, steps, automation target | Added in Section 3 |
+| Evidence mapping | Added in Section 3 |

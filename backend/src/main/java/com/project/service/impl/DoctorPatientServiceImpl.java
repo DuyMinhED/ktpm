@@ -103,7 +103,7 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
             LocalDate d = LocalDate.now().minusDays(i);
             java.util.List<Double> dayVals = grouped.get(d);
             
-            if (dayVals != null && !dayVals.isEmpty()) {
+            if (dayVals != null) {
                 double avg = dayVals.stream().mapToDouble(v -> v).average().orElse(0);
                 avg = Math.round(avg * 10.0) / 10.0; // format to one decimal
                 result.add(avg);

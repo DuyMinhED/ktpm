@@ -2,32 +2,54 @@ package com.project.service.impl;
 
 import com.project.dto.request.CreateHealthMetricRequest;
 import com.project.dto.response.HealthMetricResponse;
+import com.project.dto.response.HealthMetricSummaryResponse;
+import com.project.entity.Clinic;
 import com.project.entity.HealthMetric;
 import com.project.entity.MetricType;
 import com.project.entity.Patient;
+import com.project.entity.PatientAlert;
+import com.project.entity.SystemConfig;
+import com.project.exception.ResourceNotFoundException;
 import com.project.repository.ClinicRepository;
 import com.project.repository.HealthMetricRepository;
 import com.project.repository.PatientAlertRepository;
 import com.project.repository.PatientRepository;
 import com.project.repository.SystemConfigRepository;
+import com.project.security.CustomUserDetails;
 import com.project.service.NotificationService;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class PatientHealthMetricServiceImplTest {
+class PatientHealthMetricServiceImplTest {
 
     @Mock
     private HealthMetricRepository healthMetricRepository;
@@ -50,426 +72,369 @@ public class PatientHealthMetricServiceImplTest {
     @InjectMocks
     private PatientHealthMetricServiceImpl service;
 
-    private Patient patient;
-
-    @BeforeEach
-    void setUp() {
-        patient = Patient.builder()
-                .id(1L)
-                .userId(100L)
-                .fullName("Nguyen Van A")
-                .clinicId(10L)
-                .doctorId(2L)
-                .gender("MALE")
-                .riskLevel("STABLE")
-                .build();
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
-    private void setupMockSaving() {
+    @Test
+    @DisplayName("create - saves normal metric for current patient without alert")
+    void create_normalMetricForCurrentPatient() {
+        authenticatePatient(101L);
+        Patient patient = patient(1L, 101L, 5L);
+        CreateHealthMetricRequest request = request("BLOOD_SUGAR", "5.5", null);
+        request.setMeasuredAt(LocalDateTime.of(2026, 7, 3, 8, 0));
+
+        when(patientRepository.findByUserId(101L)).thenReturn(Optional.of(patient));
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.empty());
+        when(healthMetricRepository.save(any(HealthMetric.class))).thenAnswer(invocation -> {
+            HealthMetric metric = invocation.getArgument(0);
+            metric.setId(10L);
+            return metric;
+        });
+
+        HealthMetricResponse response = service.create(request);
+
+        assertEquals(10L, response.getId());
+        assertEquals("BLOOD_SUGAR", response.getMetricType());
+        assertEquals("NORMAL", response.getStatus());
+        assertEquals("mmol/L", response.getUnit());
+        assertEquals(LocalDateTime.of(2026, 7, 3, 8, 0), response.getMeasuredAt());
+        verify(patientRepository, never()).save(patient);
+        verify(notificationService, never()).sendNotification(any(), any(), any(), any(), any());
+        verify(patientAlertRepository, never()).save(any(PatientAlert.class));
+    }
+
+    @Test
+    @DisplayName("recordMetricForPatient - high metric marks risk and notifies doctor, manager and patient")
+    void recordMetricForPatient_highMetricCreatesAlerts() {
+        Patient patient = patient(1L, 101L, 5L);
+        patient.setRiskLevel("STABLE");
+        CreateHealthMetricRequest request = request("BLOOD_SUGAR", "9.0", null);
+
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
         when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.empty());
         when(healthMetricRepository.save(any(HealthMetric.class))).thenAnswer(invocation -> {
             HealthMetric metric = invocation.getArgument(0);
-            metric.setId(99L);
-            metric.setMeasuredAt(LocalDateTime.now());
+            metric.setId(20L);
             return metric;
         });
+        when(clinicRepository.findById(2L)).thenReturn(Optional.of(Clinic.builder().id(2L).managerId(99L).build()));
+
+        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
+
+        assertEquals("HIGH", response.getStatus());
+        assertEquals("HIGH_RISK", patient.getRiskLevel());
+        verify(patientRepository).save(patient);
+        verify(notificationService).sendNotification(eq(5L), any(), any(), eq("warning"), eq("/doctor/patients/1"));
+        verify(notificationService).sendNotification(eq(99L), any(), any(), eq("warning"), eq("/clinic/risk-alerts"));
+        ArgumentCaptor<PatientAlert> alertCaptor = ArgumentCaptor.forClass(PatientAlert.class);
+        verify(patientAlertRepository).save(alertCaptor.capture());
+        assertEquals(patient, alertCaptor.getValue().getPatient());
+        assertEquals("HEALTH_WARNING", alertCaptor.getValue().getAlertType());
+        assertFalse(alertCaptor.getValue().isRead());
+        assertFalse(alertCaptor.getValue().isDismissed());
     }
 
-    // =========================================================================
-    // 1. BLOOD_SUGAR - EP & BVA Test Cases
-    // =========================================================================
-
     @Test
-    void recordMetric_bloodSugar_lowBoundary() {
-        setupMockSaving();
+    @DisplayName("recordMetricForPatient - low metric without doctor does not notify")
+    void recordMetricForPatient_lowMetricWithoutDoctorOnlyMarksRisk() {
+        Patient patient = patient(1L, 101L, null);
+        CreateHealthMetricRequest request = request("SPO2", "89", null);
 
-        // EP: LOW (<4.0) | BVA: 3.9
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("3.9"))
-                .unit("mmol/L")
-                .build();
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.empty());
+        when(healthMetricRepository.save(any(HealthMetric.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         HealthMetricResponse response = service.recordMetricForPatient(1L, request);
 
         assertEquals("LOW", response.getStatus());
-        verify(patientAlertRepository, times(1)).save(any());
-        verify(notificationService, times(1)).sendNotification(eq(2L), any(), any(), eq("warning"), any());
+        assertEquals("HIGH_RISK", patient.getRiskLevel());
+        verify(patientRepository).save(patient);
+        verify(notificationService, never()).sendNotification(any(), any(), any(), any(), any());
+        verify(patientAlertRepository, never()).save(any(PatientAlert.class));
     }
 
     @Test
-    void recordMetric_bloodSugar_normalBoundaryMin() {
-        setupMockSaving();
+    @DisplayName("recordMetricForPatient - high blood pressure without diastolic skips clinic manager without manager id")
+    void recordMetricForPatient_highBloodPressureNoDiastolicNoClinicManager() {
+        Patient patient = patient(1L, 101L, 5L);
+        CreateHealthMetricRequest request = request("BLOOD_PRESSURE", "150", null);
 
-        // EP: NORMAL (4.0 - 6.0) | BVA: 4.0 (min)
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("4.0"))
-                .unit("mmol/L")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("NORMAL", response.getStatus());
-    }
-
-    @Test
-    void recordMetric_bloodSugar_normalBoundaryMax() {
-        setupMockSaving();
-
-        // EP: NORMAL (4.0 - 6.0) | BVA: 6.0 (max)
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("6.0"))
-                .unit("mmol/L")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("NORMAL", response.getStatus());
-    }
-
-    @Test
-    void recordMetric_bloodSugar_borderlineHighBoundaryMin() {
-        setupMockSaving();
-
-        // EP: BORDERLINE_HIGH (6.0 < v <= 7.2) | BVA: 6.1
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("6.1"))
-                .unit("mmol/L")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("BORDERLINE_HIGH", response.getStatus());
-    }
-
-    @Test
-    void recordMetric_bloodSugar_borderlineHighBoundaryMax() {
-        setupMockSaving();
-
-        // EP: BORDERLINE_HIGH (6.0 < v <= 7.2) | BVA: 7.2
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("7.2"))
-                .unit("mmol/L")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("BORDERLINE_HIGH", response.getStatus());
-    }
-
-    @Test
-    void recordMetric_bloodSugar_highBoundary() {
-        setupMockSaving();
-
-        // EP: HIGH (>7.2) | BVA: 7.3
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_SUGAR.name())
-                .value(new BigDecimal("7.3"))
-                .unit("mmol/L")
-                .build();
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.empty());
+        when(healthMetricRepository.save(any(HealthMetric.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(clinicRepository.findById(2L)).thenReturn(Optional.of(Clinic.builder().id(2L).managerId(null).build()));
 
         HealthMetricResponse response = service.recordMetricForPatient(1L, request);
 
         assertEquals("HIGH", response.getStatus());
-        verify(patientAlertRepository, times(1)).save(any());
-        verify(notificationService, times(1)).sendNotification(eq(2L), any(), any(), eq("warning"), any());
+        verify(notificationService, times(1)).sendNotification(eq(5L), any(), any(), eq("warning"), eq("/doctor/patients/1"));
+        verify(patientAlertRepository).save(any(PatientAlert.class));
     }
 
-    // =========================================================================
-    // 2. HBA1C - EP & BVA Test Cases
-    // =========================================================================
-
     @Test
-    void recordMetric_hba1c_normalBoundary() {
-        setupMockSaving();
+    @DisplayName("recordMetricForPatient - normal metric stabilizes previously high-risk patient")
+    void recordMetricForPatient_normalMetricStabilizesHighRiskPatient() {
+        Patient patient = patient(1L, 101L, 5L);
+        patient.setRiskLevel("HIGH_RISK");
 
-        // EP: NORMAL (<5.7) | BVA: 5.6
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.HBA1C.name())
-                .value(new BigDecimal("5.6"))
-                .unit("%")
-                .build();
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.empty());
+        when(healthMetricRepository.save(any(HealthMetric.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
+        HealthMetricResponse response = service.recordMetricForPatient(1L, request("HEART_RATE", "80", null));
 
         assertEquals("NORMAL", response.getStatus());
+        assertEquals("STABLE", patient.getRiskLevel());
+        verify(patientRepository).save(patient);
     }
 
     @Test
-    void recordMetric_hba1c_borderlineHighMin() {
-        setupMockSaving();
-
-        // EP: BORDERLINE_HIGH (5.7 - 6.4) | BVA: 5.7 (min)
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.HBA1C.name())
-                .value(new BigDecimal("5.7"))
-                .unit("%")
+    @DisplayName("recordMetricForPatient - evaluates boundary statuses and custom config thresholds")
+    void recordMetricForPatient_statusBoundaries() {
+        Patient patient = patient(1L, 101L, null);
+        SystemConfig config = SystemConfig.builder()
+                .bpSysThreshold("130")
+                .bpDiaThreshold("85")
+                .hrThreshold("95")
+                .spo2Threshold("94")
                 .build();
 
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(systemConfigRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(config));
+        when(healthMetricRepository.save(any(HealthMetric.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertEquals("BORDERLINE_HIGH", response.getStatus());
+        assertEquals("LOW", service.recordMetricForPatient(1L, request("BLOOD_SUGAR", "3.9", null)).getStatus());
+        assertEquals("BORDERLINE_HIGH", service.recordMetricForPatient(1L, request("BLOOD_SUGAR", "7.2", null)).getStatus());
+        assertEquals("NORMAL", service.recordMetricForPatient(1L, request("BLOOD_PRESSURE", "119", null)).getStatus());
+        assertEquals("BORDERLINE_HIGH", service.recordMetricForPatient(1L, request("BLOOD_PRESSURE", "119", "80")).getStatus());
+        assertEquals("BORDERLINE_HIGH", service.recordMetricForPatient(1L, request("BLOOD_PRESSURE", "130", "85")).getStatus());
+        assertEquals("HIGH", service.recordMetricForPatient(1L, request("BLOOD_PRESSURE", "131", "86")).getStatus());
+        assertEquals("LOW", service.recordMetricForPatient(1L, request("HEART_RATE", "59", null)).getStatus());
+        assertEquals("HIGH", service.recordMetricForPatient(1L, request("HEART_RATE", "96", null)).getStatus());
+        assertEquals("NORMAL", service.recordMetricForPatient(1L, request("HBA1C", "5.6", null)).getStatus());
+        assertEquals("BORDERLINE_HIGH", service.recordMetricForPatient(1L, request("HBA1C", "6.4", null)).getStatus());
+        assertEquals("HIGH", service.recordMetricForPatient(1L, request("HBA1C", "6.5", null)).getStatus());
+        assertEquals("BORDERLINE_LOW", service.recordMetricForPatient(1L, request("SPO2", "92", null)).getStatus());
+        assertEquals("NORMAL", service.recordMetricForPatient(1L, request("SPO2", "94", null)).getStatus());
     }
 
     @Test
-    void recordMetric_hba1c_borderlineHighMax() {
-        setupMockSaving();
+    @DisplayName("recordMetricForPatient - missing patient throws ResourceNotFoundException")
+    void recordMetricForPatient_missingPatient() {
+        when(patientRepository.findById(404L)).thenReturn(Optional.empty());
 
-        // EP: BORDERLINE_HIGH (5.7 - 6.4) | BVA: 6.4 (max)
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.HBA1C.name())
-                .value(new BigDecimal("6.4"))
-                .unit("%")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("BORDERLINE_HIGH", response.getStatus());
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.recordMetricForPatient(404L, request("BLOOD_SUGAR", "5.5", null)));
     }
 
     @Test
-    void recordMetric_hba1c_high() {
-        setupMockSaving();
+    @DisplayName("getMetricsSummary - groups latest metrics, chart data, trend and change percentage")
+    void getMetricsSummary_groupsLatestTrendAndChange() {
+        authenticatePatient(101L);
+        Patient patient = patient(1L, 101L, 5L);
+        HealthMetric oldSugar = metric(1L, patient, MetricType.BLOOD_SUGAR, "5.0", null, "NORMAL", LocalDateTime.now().minusDays(2));
+        HealthMetric newSugar = metric(2L, patient, MetricType.BLOOD_SUGAR, "6.0", null, "NORMAL", LocalDateTime.now().minusDays(1));
+        HealthMetric bp = metric(3L, patient, MetricType.BLOOD_PRESSURE, "120", "80", "BORDERLINE_HIGH", LocalDateTime.now().minusHours(2));
 
-        // EP: HIGH (>6.4) | BVA: 6.5
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.HBA1C.name())
-                .value(new BigDecimal("6.5"))
-                .unit("%")
-                .build();
+        when(patientRepository.findByUserId(101L)).thenReturn(Optional.of(patient));
+        when(healthMetricRepository.findByPatientIdAndMeasuredAtBetweenAndIsDeletedFalse(eq(1L), any(), any()))
+                .thenReturn(List.of(oldSugar, newSugar, bp));
+        when(healthMetricRepository.findRecentByPatientId(eq(1L), any()))
+                .thenReturn(List.of(newSugar, bp, oldSugar));
 
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
+        List<HealthMetricSummaryResponse> summaries = service.getMetricsSummary("MONTH");
 
-        assertEquals("HIGH", response.getStatus());
-    }
+        assertEquals(2, summaries.size());
+        HealthMetricSummaryResponse sugar = summaries.stream()
+                .filter(summary -> "BLOOD_SUGAR".equals(summary.getMetricType()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(new BigDecimal("6.0"), sugar.getLatestValue());
+        assertEquals("UP", sugar.getTrend());
+        assertEquals("+20.0%", sugar.getChangePercentage());
+        assertEquals(2, sugar.getChartData().size());
 
-    // =========================================================================
-    // 3. HEART_RATE - EP & BVA Test Cases
-    // =========================================================================
-
-    @Test
-    void recordMetric_heartRate_low() {
-        setupMockSaving();
-
-        // EP: LOW (<60) | BVA: 59
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.HEART_RATE.name())
-                .value(new BigDecimal("59"))
-                .unit("bpm")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("LOW", response.getStatus());
-    }
-
-    @Test
-    void recordMetric_heartRate_normalMin() {
-        setupMockSaving();
-
-        // EP: NORMAL (60 - 100) | BVA: 60 (min)
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.HEART_RATE.name())
-                .value(new BigDecimal("60"))
-                .unit("bpm")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("NORMAL", response.getStatus());
+        HealthMetricSummaryResponse pressure = summaries.stream()
+                .filter(summary -> "BLOOD_PRESSURE".equals(summary.getMetricType()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("STABLE", pressure.getTrend());
+        assertEquals("0%", pressure.getChangePercentage());
     }
 
     @Test
-    void recordMetric_heartRate_normalMax() {
-        setupMockSaving();
+    @DisplayName("getMetricsSummary - zero previous value keeps change percentage at zero")
+    void getMetricsSummary_zeroPreviousChange() {
+        authenticatePatient(101L);
+        Patient patient = patient(1L, 101L, 5L);
+        HealthMetric zero = metric(1L, patient, MetricType.HEART_RATE, "0", null, "LOW", LocalDateTime.now().minusDays(2));
+        HealthMetric latest = metric(2L, patient, MetricType.HEART_RATE, "70", null, "NORMAL", LocalDateTime.now().minusDays(1));
 
-        // EP: NORMAL (60 - 100) | BVA: 100 (max)
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.HEART_RATE.name())
-                .value(new BigDecimal("100"))
-                .unit("bpm")
-                .build();
+        when(patientRepository.findByUserId(101L)).thenReturn(Optional.of(patient));
+        when(healthMetricRepository.findByPatientIdAndMeasuredAtBetweenAndIsDeletedFalse(eq(1L), any(), any()))
+                .thenReturn(List.of(zero, latest));
+        when(healthMetricRepository.findRecentByPatientId(eq(1L), any()))
+                .thenReturn(List.of(latest, zero));
 
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
+        List<HealthMetricSummaryResponse> summaries = service.getMetricsSummary("UNKNOWN");
 
-        assertEquals("NORMAL", response.getStatus());
+        assertEquals("0%", summaries.get(0).getChangePercentage());
+        assertEquals("UP", summaries.get(0).getTrend());
     }
 
     @Test
-    void recordMetric_heartRate_high() {
-        setupMockSaving();
+    @DisplayName("getMetricsSummary - supports downward and equal trends over year range")
+    void getMetricsSummary_downAndStableTrendsForYear() {
+        authenticatePatient(101L);
+        Patient patient = patient(1L, 101L, 5L);
+        HealthMetric oldHba1c = metric(1L, patient, MetricType.HBA1C, "6.0", null, "BORDERLINE_HIGH", LocalDateTime.now().minusMonths(2));
+        HealthMetric latestHba1c = metric(2L, patient, MetricType.HBA1C, "5.0", null, "NORMAL", LocalDateTime.now().minusMonths(1));
+        HealthMetric oldSpo2 = metric(3L, patient, MetricType.SPO2, "96", null, "NORMAL", LocalDateTime.now().minusDays(2));
+        HealthMetric latestSpo2 = metric(4L, patient, MetricType.SPO2, "96", null, "NORMAL", LocalDateTime.now().minusDays(1));
 
-        // EP: HIGH (>100) | BVA: 101
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.HEART_RATE.name())
-                .value(new BigDecimal("101"))
-                .unit("bpm")
-                .build();
+        when(patientRepository.findByUserId(101L)).thenReturn(Optional.of(patient));
+        when(healthMetricRepository.findByPatientIdAndMeasuredAtBetweenAndIsDeletedFalse(eq(1L), any(), any()))
+                .thenReturn(List.of(oldHba1c, latestHba1c, oldSpo2, latestSpo2));
+        when(healthMetricRepository.findRecentByPatientId(eq(1L), any()))
+                .thenReturn(List.of(latestHba1c, latestSpo2, oldHba1c, oldSpo2));
 
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
+        List<HealthMetricSummaryResponse> summaries = service.getMetricsSummary("YEAR");
 
-        assertEquals("HIGH", response.getStatus());
-    }
-
-    // =========================================================================
-    // 4. SPO2 - EP & BVA Test Cases
-    // =========================================================================
-
-    @Test
-    void recordMetric_spo2_low() {
-        setupMockSaving();
-
-        // EP: LOW (<90) | BVA: 89
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.SPO2.name())
-                .value(new BigDecimal("89"))
-                .unit("%")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("LOW", response.getStatus());
+        HealthMetricSummaryResponse hba1c = summaries.stream()
+                .filter(summary -> "HBA1C".equals(summary.getMetricType()))
+                .findFirst()
+                .orElseThrow();
+        HealthMetricSummaryResponse spo2 = summaries.stream()
+                .filter(summary -> "SPO2".equals(summary.getMetricType()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("DOWN", hba1c.getTrend());
+        assertEquals("-16.7%", hba1c.getChangePercentage());
+        assertEquals("STABLE", spo2.getTrend());
+        assertEquals("0.0%", spo2.getChangePercentage());
     }
 
     @Test
-    void recordMetric_spo2_borderlineLowMin() {
-        setupMockSaving();
+    @DisplayName("getChartData and getHistory - map current patient's metric data")
+    void getChartDataAndHistory_mapResponses() {
+        authenticatePatient(101L);
+        Patient patient = patient(1L, 101L, 5L);
+        HealthMetric metric = metric(1L, patient, MetricType.SPO2, "96", null, "NORMAL", LocalDateTime.now());
 
-        // EP: BORDERLINE_LOW (90 - 94) | BVA: 90 (min)
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.SPO2.name())
-                .value(new BigDecimal("90"))
-                .unit("%")
-                .build();
+        when(patientRepository.findByUserId(101L)).thenReturn(Optional.of(patient));
+        when(healthMetricRepository.findByPatientIdAndMetricTypeAndMeasuredAtBetweenAndIsDeletedFalse(eq(1L), eq(MetricType.SPO2), any(), any()))
+                .thenReturn(List.of(metric));
+        when(healthMetricRepository.findByPatientIdAndIsDeletedFalseOrderByMeasuredAtDesc(eq(1L), any()))
+                .thenReturn(new PageImpl<>(List.of(metric), PageRequest.of(0, 10), 1));
 
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
+        List<HealthMetricResponse> chart = service.getChartData("SPO2", "DAY");
+        List<HealthMetricResponse> weeklyChart = service.getChartData("SPO2", "WEEK");
+        Page<HealthMetricResponse> history = service.getHistory(PageRequest.of(0, 10));
 
-        assertEquals("BORDERLINE_LOW", response.getStatus());
+        assertEquals(1, chart.size());
+        assertEquals(1, weeklyChart.size());
+        assertEquals("SPO2", chart.get(0).getMetricType());
+        assertEquals(1, history.getTotalElements());
+        assertEquals("NORMAL", history.getContent().get(0).getStatus());
     }
 
     @Test
-    void recordMetric_spo2_borderlineLowMax() {
-        setupMockSaving();
+    @DisplayName("delete - soft deletes only current patient's metric")
+    void delete_softDeletesOwnedMetric() {
+        authenticatePatient(101L);
+        Patient patient = patient(1L, 101L, 5L);
+        HealthMetric metric = metric(10L, patient, MetricType.BLOOD_SUGAR, "5.5", null, "NORMAL", LocalDateTime.now());
 
-        // EP: BORDERLINE_LOW (90 - 94) | BVA: 93 (max-)
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.SPO2.name())
-                .value(new BigDecimal("93"))
-                .unit("%")
-                .build();
+        when(patientRepository.findByUserId(101L)).thenReturn(Optional.of(patient));
+        when(healthMetricRepository.findById(10L)).thenReturn(Optional.of(metric));
 
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
+        service.delete(10L);
 
-        assertEquals("BORDERLINE_LOW", response.getStatus());
+        assertTrue(metric.isDeleted());
+        verify(healthMetricRepository).save(metric);
     }
 
     @Test
-    void recordMetric_spo2_normal() {
-        setupMockSaving();
+    @DisplayName("delete - rejects missing metric and metric owned by another patient")
+    void delete_missingOrUnauthorized() {
+        authenticatePatient(101L);
+        Patient currentPatient = patient(1L, 101L, 5L);
+        Patient otherPatient = patient(2L, 202L, 5L);
 
-        // EP: NORMAL (>=94) | BVA: 94
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.SPO2.name())
-                .value(new BigDecimal("94"))
-                .unit("%")
-                .build();
+        when(patientRepository.findByUserId(101L)).thenReturn(Optional.of(currentPatient));
+        when(healthMetricRepository.findById(404L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.delete(404L));
 
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("NORMAL", response.getStatus());
-    }
-
-    // =========================================================================
-    // 5. BLOOD_PRESSURE - EP & BVA Test Cases
-    // =========================================================================
-
-    @Test
-    void recordMetric_bloodPressure_normal() {
-        setupMockSaving();
-
-        // EP: NORMAL (sys < 120 && dia < 80) | BVA: 119 / 79
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_PRESSURE.name())
-                .value(new BigDecimal("119"))
-                .valueSecondary(new BigDecimal("79"))
-                .unit("mmHg")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("NORMAL", response.getStatus());
+        when(healthMetricRepository.findById(11L))
+                .thenReturn(Optional.of(metric(11L, otherPatient, MetricType.BLOOD_SUGAR, "5.5", null, "NORMAL", LocalDateTime.now())));
+        assertThrows(AccessDeniedException.class, () -> service.delete(11L));
     }
 
     @Test
-    void recordMetric_bloodPressure_borderlineHighBoundary() {
-        setupMockSaving();
+    @DisplayName("current patient lookup - rejects unauthenticated user and missing patient profile")
+    void currentPatientLookup_errorPaths() {
+        assertThrows(ResourceNotFoundException.class, () -> service.create(request("BLOOD_SUGAR", "5.5", null)));
 
-        // EP: BORDERLINE_HIGH (sys <= 140 && dia <= 90) | BVA: 120 / 80
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_PRESSURE.name())
-                .value(new BigDecimal("120"))
-                .valueSecondary(new BigDecimal("80"))
-                .unit("mmHg")
-                .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("BORDERLINE_HIGH", response.getStatus());
+        authenticatePatient(101L);
+        when(patientRepository.findByUserId(101L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.getHistory(PageRequest.of(0, 10)));
     }
 
-    @Test
-    void recordMetric_bloodPressure_borderlineHighBoundaryMax() {
-        setupMockSaving();
-
-        // EP: BORDERLINE_HIGH (sys <= 140 && dia <= 90) | BVA: 140 / 90
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_PRESSURE.name())
-                .value(new BigDecimal("140"))
-                .valueSecondary(new BigDecimal("90"))
-                .unit("mmHg")
+    private static void authenticatePatient(Long userId) {
+        CustomUserDetails principal = CustomUserDetails.builder()
+                .id(userId)
+                .email("patient@example.com")
+                .role("PATIENT")
                 .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("BORDERLINE_HIGH", response.getStatus());
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities()));
     }
 
-    @Test
-    void recordMetric_bloodPressure_highSystolic() {
-        setupMockSaving();
-
-        // EP: HIGH (sys > 140 || dia > 90) | BVA: 141 / 90
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_PRESSURE.name())
-                .value(new BigDecimal("141"))
-                .valueSecondary(new BigDecimal("90"))
-                .unit("mmHg")
+    private static CreateHealthMetricRequest request(String metricType, String value, String valueSecondary) {
+        return CreateHealthMetricRequest.builder()
+                .metricType(metricType)
+                .value(new BigDecimal(value))
+                .valueSecondary(valueSecondary == null ? null : new BigDecimal(valueSecondary))
+                .notes("note")
                 .build();
-
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
-
-        assertEquals("HIGH", response.getStatus());
     }
 
-    @Test
-    void recordMetric_bloodPressure_highDiastolic() {
-        setupMockSaving();
-
-        // EP: HIGH (sys > 140 || dia > 90) | BVA: 140 / 91
-        CreateHealthMetricRequest request = CreateHealthMetricRequest.builder()
-                .metricType(MetricType.BLOOD_PRESSURE.name())
-                .value(new BigDecimal("140"))
-                .valueSecondary(new BigDecimal("91"))
-                .unit("mmHg")
+    private static Patient patient(Long id, Long userId, Long doctorId) {
+        return Patient.builder()
+                .id(id)
+                .userId(userId)
+                .doctorId(doctorId)
+                .clinicId(2L)
+                .fullName("Patient " + id)
+                .phone("090000000" + id)
+                .gender("M")
+                .riskLevel("STABLE")
                 .build();
+    }
 
-        HealthMetricResponse response = service.recordMetricForPatient(1L, request);
+    private static HealthMetric metric(Long id, Patient patient, MetricType type, String value, String valueSecondary,
+                                       String status, LocalDateTime measuredAt) {
+        return HealthMetric.builder()
+                .id(id)
+                .patient(patient)
+                .metricType(type)
+                .value(new BigDecimal(value))
+                .valueSecondary(valueSecondary == null ? null : new BigDecimal(valueSecondary))
+                .unit(unit(type))
+                .status(status)
+                .notes("note")
+                .measuredAt(measuredAt)
+                .build();
+    }
 
-        assertEquals("HIGH", response.getStatus());
+    private static String unit(MetricType type) {
+        return switch (type) {
+            case BLOOD_SUGAR -> "mmol/L";
+            case BLOOD_PRESSURE -> "mmHg";
+            case HEART_RATE -> "bpm";
+            case HBA1C, SPO2 -> "%";
+        };
     }
 }

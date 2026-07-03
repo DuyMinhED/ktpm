@@ -75,3 +75,24 @@ Dưới đây là danh sách chính xác **10 test cases biên** được thiế
 ## 4. Kết luận
 * Toàn bộ 10 test cases được thiết kế trực tiếp dựa trên logic kiểm tra điều kiện của mã nguồn frontend hiện tại, đảm bảo tính thực tế và khả năng áp dụng cao.
 * Các điểm kiểm thử bao phủ toàn bộ các trường hợp nhạy cảm tại biên ($min-1$, $min$, $min+1$, $max-1$, $max$, $max+1$) cho các form cốt lõi như `CreateUserModal` và `CreatePatientModal`.
+
+---
+
+## 5. Ghi chú đồng bộ frontend/backend
+
+Phần BVA ở trên phản ánh đúng validation hiện tại của frontend, nhưng khi đối chiếu backend cần ghi rõ các điểm sau:
+
+| Trường | Frontend hiện tại | Backend hiện tại | Kết luận kiểm thử |
+|---|---|---|---|
+| Create user password | Min = 6 ký tự trong `CreateUserModal` | Min = 8 ký tự trong `CreateUserRequest` | Case 6 và 7 ký tự là UI-valid nhưng API-invalid. Cần E2E/API test để phát hiện mismatch. |
+| Create patient password | Min = 6 ký tự trong `CreatePatientModal` | `CreatePatientRequest.password` chưa có annotation min length | Nên bổ sung backend validation hoặc ghi rõ đây chỉ là ràng buộc UI. |
+| Patient phone | Regex frontend: `0` hoặc `+84` + 9 chữ số | `CreatePatientRequest.phone` chỉ `@NotBlank` | Nên bổ sung backend pattern nếu muốn bảo đảm dữ liệu không bypass frontend. |
+| Patient age | Frontend 0..150 | Backend lưu `age` là `String`, chưa có range validation | Nên bổ sung DTO validation hoặc service validation nếu đây là requirement bắt buộc. |
+
+### Test case bổ sung bắt buộc
+
+| Test Case | Type | Preconditions | Input | Steps | Expected Outcome | New Tags Covered | Automation Target |
+|---|---|---|---|---|---|---|---|
+| TC-FE-MISMATCH-001 | Cross-layer | Đăng nhập admin/clinic manager | Create user password `"123456"` | Submit form thêm user | Frontend cho qua, backend trả validation lỗi min 8 hoặc API reject | `EP-AUTH-I08` | CodeceptJS + API assertion |
+| TC-FE-MISMATCH-002 | Cross-layer | Đăng nhập clinic manager | Create patient phone `"abc"` gửi trực tiếp API | Bypass UI bằng Postman/API | Backend hiện có thể không chặn vì chỉ `@NotBlank`; ghi nhận gap nếu request thành công | `EP-FE-I09` | Postman |
+| TC-FE-MISMATCH-003 | Cross-layer | Đăng nhập clinic manager | Create patient age `"151"` gửi trực tiếp API | Bypass UI bằng Postman/API | Backend hiện có thể không chặn vì `age` là `String`; ghi nhận gap nếu request thành công | `BVA-FE-B06` | Postman |

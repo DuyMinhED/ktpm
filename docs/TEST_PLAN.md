@@ -106,3 +106,41 @@ Hệ thống sẽ được đánh giá qua các cấp độ kiểm thử sau:
 - Tỷ lệ pass các ca kiểm thử tự động API đạt 100% trên môi trường H2 Database cục bộ sạch.
 - Không còn lỗi nghiêm trọng (Blocker/Critical) hoặc lỗi bảo mật phân quyền (401/403) chưa được xử lý.
 - Kết quả chạy thử nghiệm bằng Newman được lưu trữ đầy đủ làm tài liệu nghiệm thu kỹ thuật.
+---
+
+## 9. Cap nhat Unit Test va JaCoCo - 2026-07-03
+
+### 9.1. Trang thai moi nhat
+
+| Hang muc | Ket qua |
+|---|---|
+| GitHub sync | Da pull `origin/main` den commit `b8e485a` |
+| Conflict | Da xu ly 1 conflict tai `CoreBusinessBvaTest.java` |
+| Maven verify | `627 tests, 0 failures, 0 errors, 0 skipped` |
+| JaCoCo report | Da tao lai tai `backend/target/site/jacoco/index.html` |
+| Tien do chi tiet | Xem `test/coverage_progress_plan.md` |
+| Ban ghi pull/conflict | Xem `test/github_pull_conflict_resolution_report.md` |
+
+### 9.2. Package da dat muc bao phu hoan tat
+
+| Package | Trang thai |
+|---|---|
+| `com.project.controller` | 0 missed instructions, branches, lines, methods |
+| `com.project.dto.response` | 0 missed instructions, lines, methods |
+| `com.project.exception` | 0 missed instructions, lines, methods |
+| `com.project.specification` | 0 missed instructions, branches, lines, methods |
+
+### 9.3. Package/class can tiep tuc uu tien
+
+| Nhom | Muc tieu tiep theo |
+|---|---|
+| Service implementation | `ClinicDashboardServiceImpl`, `AdminDashboardServiceImpl`, `PatientAppointmentServiceImpl`, `DoctorAppointmentServiceImpl`, `ClinicDoctorServiceImpl` |
+| Cross-cutting | `AuditAspect`, `JwtTokenProvider`, `AuditService`, `RateLimitFilter` |
+| Edge branches | Mapper/entity/util branches con lai |
+
+### 9.4. Quy tac cap nhat tai lieu sau moi lan chay
+
+1. Chay `mvn -f backend/pom.xml -q verify`.
+2. Khong chinh tay file trong `backend/target/site/jacoco`.
+3. Cap nhat `test/coverage_progress_plan.md` voi so test, coverage snapshot, va class gap con lai.
+4. Neu co pull/merge conflict, cap nhat `test/github_pull_conflict_resolution_report.md`.

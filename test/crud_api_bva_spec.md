@@ -108,3 +108,40 @@
     *   **User Management:** Password Policy (min 8 ký tự).
     *   **Appointment:** Ràng buộc thời gian đặt lịch (min 3 giờ sau thời điểm hiện tại).
 *   Kết quả mong đợi được trình bày rõ ràng, bao gồm cả phân loại trạng thái sức khỏe và thông báo ngoại lệ cụ thể.
+---
+
+## 6. Code-Based Completion And Traceability
+
+This section completes the missing implementation details for execution and grading. When the original SRS-oriented rows conflict with current source code, use this table as the execution source of truth.
+
+### 6.1 Current Code Basis
+
+| Area | Source class / file | Main rule used for execution |
+|---|---|---|
+| Blood sugar | `PatientHealthMetricServiceImpl.evaluateStatus` | `<4.0 LOW`, `4.0..6.0 NORMAL`, `6.1..7.2 BORDERLINE_HIGH`, `>7.2 HIGH` |
+| SpO2 | `PatientHealthMetricServiceImpl.evaluateStatus` | `>=94 NORMAL`, `90..93 BORDERLINE_LOW`, `<90 LOW` |
+| Blood pressure | `PatientHealthMetricServiceImpl.evaluateStatus` | `<120 && <80 NORMAL`, `<=sysThreshold && <=diaThreshold BORDERLINE_HIGH`, otherwise HIGH; defaults are `140/90` |
+| Password | `AdminUserServiceImpl.validatePasswordPolicy`, request DTO tests | Minimum length `8`; optional special/uppercase/number rules depend on `SystemConfig` |
+| Appointment time | `PatientAppointmentServiceImpl.create` | `appointmentTime >= now + 3h` and `<= now + 15d` |
+
+### 6.2 Corrected BVA Rows For Automation
+
+| Test Case | Original Row | Corrected Input | Corrected Expected Result | Automation Target | Evidence / Trace |
+|---|---|---|---|---|---|
+| TC-BVA-05-CODE | SPO2 lower boundary | `89`, `90`, `93`, `94` | `89=LOW`, `90/93=BORDERLINE_LOW`, `94=NORMAL` | JUnit service test | `PatientHealthMetricServiceImplTest`, `CoreBusinessBvaTest` |
+| TC-BVA-06-CODE | SPO2 normal boundary | `94`, `95` | Both are `NORMAL` in current code | JUnit service test | `PatientHealthMetricServiceImplTest` |
+| TC-BVA-07-CODE | BP normal boundary | `119/79`, `120/80` | `119/79=NORMAL`, `120/80=BORDERLINE_HIGH` in current code | JUnit service test | `PatientHealthMetricServiceImplTest` |
+| TC-BVA-08-CODE | BP high threshold | `140/90`, `141/90`, `140/91` | `140/90=BORDERLINE_HIGH`, values above either threshold are `HIGH` | JUnit service test | `PatientHealthMetricServiceImplTest` |
+| TC-BVA-09-CODE | Password min | length `7`, `8`, `9` | `7` fails, `8/9` pass if other policy rules pass | DTO/service test | `CreateUserRequestValidationTest`, `AdminUserServiceImplTest` |
+| TC-BVA-10-CODE | Appointment lower boundary | `now+2h59m`, `now+3h`, `now+3h1m` | Lower minus one fails, lower and lower plus one pass | Service test with controlled time margin | `CoreBusinessBvaTest`, `PatientAppointmentServiceImplTest` |
+| TC-BVA-11-CODE | Appointment upper boundary | `now+14d23h59m`, `now+15d`, `now+15d1m` | Upper plus one fails, in-range values pass | Service test with controlled time margin | `CoreBusinessBvaTest`, `PatientAppointmentServiceImplTest` |
+
+### 6.3 Missing Columns Added For Execution
+
+| Required information | Status |
+|---|---|
+| Preconditions | Use authenticated patient/admin context depending on endpoint; seed required patient/doctor/clinic records before API execution. |
+| Steps | Send request through API/Postman or call service/DTO validation in JUnit; assert response/status and persisted state. |
+| Expected result | Listed per row above; prefer code-based expected result when old SRS rows differ. |
+| Automation target | JUnit for service/DTO boundary behavior; Postman for API contract verification. |
+| Traceability | Covered by `junit_bva_ep_traceability_spec.md` and `code_based_bva_ep_completion.md`. |

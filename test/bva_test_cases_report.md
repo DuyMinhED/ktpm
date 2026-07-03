@@ -69,3 +69,28 @@ Dựa trên DTO validation, frontend form validation và API contract, chúng t�
 
 - Toàn bộ 10 test cases được thiết kế trực tiếp dựa trên các quy tắc validation phổ biến cho các tham số API (`page`, `size`, `id`, `keyword`), đảm bảo tính thực tế và khả năng áp dụng cao.
 - Các điểm kiểm thử bao phủ toàn bộ các trường hợp nhạy cảm tại biên ($min-1$, $min$, $min+1$, $max-1$, $max$, $max+1$) cho các tham số cốt lõi.
+
+---
+
+## 5. Hiệu chỉnh theo code hiện tại
+
+Sau khi đối chiếu controller/service hiện tại, phần phân trang ở trên cần được hiệu chỉnh như sau:
+
+- Backend đang dùng `PageRequest.of(page, size)` với default `page=0`, nên `page=0` là **hợp lệ**, không phải lỗi.
+- Code hiện tại chưa có annotation hoặc guard rõ ràng cho `max page = 100`, `max size = 50`, `max keyword = 100`. Các giá trị này chỉ nên ghi là yêu cầu đề xuất/SRS nếu có, không nên đặt expected result là lỗi khi chưa có validation.
+- `size=0` và `page=-1` là các biên âm/dưới có khả năng lỗi do `PageRequest`, nên phù hợp để đưa vào API/controller negative test.
+
+### Bảng BVA API đã hiệu chỉnh
+
+| STT | Input Parameter | Boundary Value Type | Input Value | Expected Result theo code hiện tại | Field Name | Rule / Note |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | Page | min - 1 | `-1` | Lỗi request/exception do page âm | `page` | Min hợp lệ = 0 |
+| 2 | Page | min | `0` | Hợp lệ: trang đầu tiên | `page` | Zero-based paging |
+| 3 | Page | min + 1 | `1` | Hợp lệ: trang thứ hai | `page` | Zero-based paging |
+| 4 | Page | large value | `100` | Hợp lệ hoặc trả trang rỗng nếu vượt dữ liệu | `page` | Chưa có max validation |
+| 5 | Size | min - 1 | `0` | Lỗi request/exception do size không dương | `size` | Min hợp lệ = 1 |
+| 6 | Size | min | `1` | Hợp lệ: tối đa 1 item/trang | `size` | `PageRequest` hợp lệ |
+| 7 | Size | min + 1 | `2` | Hợp lệ: tối đa 2 item/trang | `size` | `PageRequest` hợp lệ |
+| 8 | Size | large value | `51` | Hợp lệ nếu không có max validation riêng | `size` | Không coi là lỗi nếu code chưa chặn |
+| 9 | ID | min - 1 | `0` | Nên kiểm tra 400/404 tùy endpoint; code chưa có `@Positive` đồng nhất | `id` | Gap validation |
+| 10 | Keyword Length | large value | 101 ký tự | Hợp lệ hoặc trả kết quả rỗng nếu code không chặn | `keyword` | Chưa có max validation |

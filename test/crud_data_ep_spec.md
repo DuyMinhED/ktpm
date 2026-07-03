@@ -95,3 +95,26 @@
     *   **Health Metrics:** 1 TC (wrong metric type).
     *   **Appointment:** 1 TC (invalid relationship — bác sĩ không tồn tại).
 *   Mỗi ca kiểm thử bao gồm dữ liệu đại diện cụ thể và kết quả mong đợi rõ ràng (HTTP status code + thông báo lỗi), đảm bảo tính khả thi khi triển khai kiểm thử thực tế trên Postman hoặc JUnit.
+---
+
+## 5. Completion Matrix For Execution
+
+The original EP table provides representative data and expected results. The following matrix adds the missing execution information: preconditions, steps, automation target, and traceability.
+
+| Test Case | Preconditions | Steps | Automation Target | Evidence / Traceability |
+|---|---|---|---|---|
+| TC-EP-01 | Admin token valid; clinic code unused | POST `/api/v1/admin/clinics` with valid payload; assert created clinic and manager link | Postman + controller/service JUnit | `AdminClinicServiceImplTest`, `AdminControllerTest` |
+| TC-EP-02 | Admin token valid | POST `/api/v1/admin/clinics` with blank required fields; assert 400 validation errors | DTO/controller test + Postman | `ClinicRequestValidationTest`, `AdminControllerTest` |
+| TC-EP-03 | Admin token valid; duplicate clinic code already exists | POST clinic with existing `clinicCode`; assert business error | Service/API test | `AdminClinicServiceImplTest` |
+| TC-EP-04 | Admin token valid | POST `/api/v1/admin/users` with invalid email; assert DTO validation error | DTO/controller test | `CreateUserRequestValidationTest` |
+| TC-EP-05 | Admin token valid | POST `/api/v1/admin/users` with invalid role; assert validation/business error | DTO/service test | `CreateUserRequestValidationTest`, `AdminUserServiceImplTest` |
+| TC-EP-06 | Patient token valid | POST health metric with unsupported `metricType`; assert parse/validation error | Service/API test | `PatientHealthMetricServiceImplTest`, `PatientHealthMetricControllerTest` |
+| TC-EP-07 | Patient token valid; doctor id does not exist | POST appointment with missing doctor id; assert current code behavior and record gap if service allows nullable doctor metadata | Service/API test | `PatientAppointmentServiceImplTest`, `patient_appointment_whitebox_spec.md` |
+
+## 6. Code-Based Gaps To Record
+
+| Gap | Impact | Required handling |
+|---|---|---|
+| `CreateAppointmentRequest.appointmentType` is non-blank but not strongly enum-validated in service | Invalid values may still create appointment with null location/link | Keep EP test as negative API/DTO case, and record service validation gap if request bypasses controller |
+| Patient appointment doctor lookup currently uses `orElse(null)` | Non-existing doctor can become a soft success path instead of 404 in direct service tests | Align expected result by layer: API requirement may expect 404, service code currently tolerates null doctor |
+| Some DTO rules are stricter than service rules | Direct service tests may pass values that controller rejects | Record automation target per layer before executing |
