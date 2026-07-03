@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.exception.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +32,9 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional(readOnly = true)
     public DoctorResponse getDoctorById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
         if (user.isDeleted() || !UserRole.DOCTOR.equals(user.getRole())) {
-            throw new RuntimeException("Doctor not found");
+            throw new ResourceNotFoundException("Doctor not found");
         }
         return mapToDoctorResponse(user);
     }
@@ -67,9 +68,9 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     public DoctorResponse updateDoctor(Long id, CreateDoctorRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
         if (user.isDeleted() || !UserRole.DOCTOR.equals(user.getRole())) {
-            throw new RuntimeException("Doctor not found");
+            throw new ResourceNotFoundException("Doctor not found");
         }
 
         user.setFullName(request.getName());
@@ -92,9 +93,9 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     public void deleteDoctor(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
         if (user.isDeleted() || !UserRole.DOCTOR.equals(user.getRole())) {
-            throw new RuntimeException("Doctor not found");
+            throw new ResourceNotFoundException("Doctor not found");
         }
         user.setDeleted(true);
         userRepository.save(user);
