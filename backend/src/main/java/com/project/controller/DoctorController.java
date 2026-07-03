@@ -34,12 +34,25 @@ public class DoctorController {
         return ApiResponse.success("Doctors fetched successfully", doctorService.getDoctors(specialty, keyword, pageable));
     }
 
+    /**
+     * Get doctor details by ID
+     * Linked JIRA: KCPM-854, KCPM-855
+     * Throws ResourceNotFoundException (instead of generic RuntimeException)
+     * so that the global exception handler maps it to a 404 Not Found response.
+     */
     @GetMapping("/{id}")
     @Operation(summary = "Get doctor details by ID")
     public ApiResponse<DoctorResponse> getDoctorById(@PathVariable Long id) {
         return ApiResponse.success("Doctor details fetched successfully", doctorService.getDoctorById(id));
     }
 
+    /**
+     * Create a new doctor (Admin only)
+     * Linked JIRA: KCPM-854, KCPM-850
+     * Secured with hasRole('ADMIN'). Preceding logins set bearer token.
+     * CI socket timeouts (resulting in 403 due to missing token) resolved
+     * by increasing the Newman request timeout.
+     */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a new doctor (Admin only)")
