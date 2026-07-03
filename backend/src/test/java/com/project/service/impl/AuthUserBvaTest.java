@@ -135,6 +135,12 @@ public class AuthUserBvaTest {
     // TC-BVA-AUTH-04: Email Length Max = 100 (Boundary: Max + 1 = 101)
     // Expected: Thất bại (Lỗi Validation)
     // =========================================================================
+    /**
+     * testEmailLength101_TC_BVA_AUTH_04
+     * JIRA Ticket: KCPM-835 (related to KCPM-831)
+     * Verifies that email with 101 characters (max length + 1) fails validation.
+     * The business rule follows SRS where email has max limit of 100 characters.
+     */
     @Test
     void testEmailLength101_TC_BVA_AUTH_04() {
         // Tạo email 101 ký tự với phần local-part hợp lệ (<= 64 ký tự) theo tiêu chuẩn RFC
