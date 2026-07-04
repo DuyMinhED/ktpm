@@ -10,8 +10,26 @@ Thu muc nay chua hai nhom noi dung:
 
 ## Tai Lieu Chinh
 
-- `TEST_DESIGN_INDEX.md`: chi muc gom nhom cac tai lieu thiet ke test khong Postman, bang dieu kien bien, so test case toi thieu va cac gap con lai.
-- Cac file Postman hien co chi giu vai tro tham chieu rieng; khong nam trong dot gom nhom thiet ke test nay.
+- `00_index/00_consolidated_test_design_index.md`: chi muc gom nhom cac tai lieu thiet ke test, bang dieu kien bien, so test case toi thieu va cac gap con lai.
+- `00_index/01_backend_whitebox_graph_index.md`: chi muc rieng cho cac tai lieu white-box graph.
+- `00_index/02_regression_suite_traceability_matrix.md`: ma tran truy vet regression suite.
+
+## Cau Truc Thu Muc
+
+| Folder | Noi dung |
+|---|---|
+| `00_index/` | Chi muc tong hop va traceability matrix. |
+| `01_bva_ep/` | Tai lieu Boundary Value Analysis va Equivalence Partitioning. |
+| `02_whitebox_backend/` | Tai lieu white-box, basis path, graph, checklist unit test backend. |
+| `03_frontend/` | Tai lieu frontend form BVA, E2E, static review, dieu kien test UI. |
+| `04_api_postman/` | Tai lieu API/Postman duoc gom rieng de de tim, khong tron voi JUnit/frontend. |
+| `05_reports_reviews/` | Bao cao, audit, static review, bug evidence, coverage progress. |
+| `06_testware_env/` | Testware, moi truong va du lieu test. |
+| `resource/` | Tai nguyen phu tro test. |
+
+## Static Review Ticket
+
+- `05_reports_reviews/kcpm_813_static_review_requirements_test_cases.md`: review checklist, ambiguous requirement points, test gaps, and follow-up actions for KCPM-813.
 
 ## Chuan Trinh Bay Bat Buoc
 

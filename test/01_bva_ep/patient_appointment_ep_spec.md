@@ -62,6 +62,33 @@
 
 ---
 
+## 3.1. Standardized Boundary Value Addendum
+
+The original appointment EP design has one lower-bound negative value. The table below completes the BVA set required for appointment scheduling and cancellation.
+
+| Field/Flow | Boundary rule | Minimum boundary values | Expected result | Minimum TC count |
+|---|---|---|---|---:|
+| `appointmentTime` lower bound | appointment must be at least `now + 3h` | `now + 2h59m`, `now + 3h`, `now + 3h1m` | lower-minus rejected; lower and lower-plus accepted | 3 |
+| `appointmentTime` upper bound | appointment must be at most `now + 15d` | `now + 14d23h59m`, `now + 15d`, `now + 15d1m` | upper-plus rejected; upper-minus and upper accepted | 3 |
+| `doctorId` | required positive id | `null`, `0`, `1 existing`, positive non-existing id | null/zero rejected; existing accepted; non-existing follows API/service rule | 4 |
+| `appointmentType` | non-blank and valid by API contract | `""`, `"IN_PERSON"`, `"ONLINE"`, `"VIDEO_CALL"` | blank rejected; valid values accepted; unsupported value rejected or logged as validation gap | 4 |
+| Cancel appointment status | patient can cancel only allowed states | `PENDING`, `SCHEDULED`, `COMPLETED`, `CANCELLED` | `PENDING` can be cancelled; confirmed/completed/cancelled states rejected or no-op per rule | 4 |
+
+Minimum BVA cases to add for this document: `18` rows. A reduced implementation set can use `10` rows: six appointment-time values, doctorId `null/non-existing`, appointmentType `""/VIDEO_CALL`, cancel status `SCHEDULED`.
+
+| New TC | Type | Input | Expected result | Automation target |
+|---|---|---|---|---|
+| TC-BVA-APPT-01 | BVA | `appointmentTime = now + 2h59m` | Business validation fails | `PatientAppointmentServiceImplTest` |
+| TC-BVA-APPT-02 | BVA | `appointmentTime = now + 3h` | Appointment created | `PatientAppointmentServiceImplTest` |
+| TC-BVA-APPT-03 | BVA | `appointmentTime = now + 3h1m` | Appointment created | `PatientAppointmentServiceImplTest` |
+| TC-BVA-APPT-04 | BVA | `appointmentTime = now + 14d23h59m` | Appointment created | `PatientAppointmentServiceImplTest` |
+| TC-BVA-APPT-05 | BVA | `appointmentTime = now + 15d` | Appointment created | `PatientAppointmentServiceImplTest` |
+| TC-BVA-APPT-06 | BVA | `appointmentTime = now + 15d1m` | Business validation fails | `PatientAppointmentServiceImplTest` |
+| TC-BVA-APPT-07 | EP/BVA | `doctorId = null` | DTO validation fails | `CreateAppointmentRequestValidationTest` |
+| TC-BVA-APPT-08 | EP/BVA | positive non-existing `doctorId` | Not found or documented service behavior | `PatientAppointmentServiceImplTest` |
+| TC-BVA-APPT-09 | EP/BVA | `appointmentType = ""` | DTO validation fails | `CreateAppointmentRequestValidationTest` |
+| TC-BVA-APPT-10 | EP/BVA | cancel appointment with status `SCHEDULED` | Business validation fails | `PatientAppointmentServiceImplTest` |
+
 ## 4. Kết luận
 
 * Tài liệu thiết kế đúng **7 test cases EP**, nằm trong giới hạn yêu cầu từ 5 đến 8 test cases.
