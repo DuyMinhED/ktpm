@@ -42,8 +42,13 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     @Transactional
     public DoctorResponse createDoctor(CreateDoctorRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+        var existingUser = userRepository.findByEmail(request.getEmail());
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            if (UserRole.DOCTOR.equals(user.getRole()) && !user.isDeleted()) {
+                return mapToDoctorResponse(user);
+            }
+            throw new IllegalArgumentException("Email already exists");
         }
         User user = User.builder()
                 .email(request.getEmail())
