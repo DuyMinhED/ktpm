@@ -138,10 +138,28 @@ public class DoctorServiceImplTest {
     }
 
     @Test
-    void createDoctor_duplicateEmail() {
+    void createDoctor_duplicateDoctorEmail_returnsExistingDoctor() {
         when(userRepository.findByEmail("doctor@example.com")).thenReturn(Optional.of(sampleDoctor));
 
-        assertThrows(RuntimeException.class, () -> doctorService.createDoctor(sampleRequest));
+        DoctorResponse result = doctorService.createDoctor(sampleRequest);
+
+        assertNotNull(result);
+        assertEquals("doctor@example.com", result.getEmail());
+        assertEquals("Dr. John Smith", result.getFullName());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void createDoctor_duplicateNonDoctorEmailThrowsBadRequest() {
+        User patient = User.builder()
+                .id(2L)
+                .email("doctor@example.com")
+                .role(UserRole.PATIENT)
+                .status("ACTIVE")
+                .build();
+        when(userRepository.findByEmail("doctor@example.com")).thenReturn(Optional.of(patient));
+
+        assertThrows(IllegalArgumentException.class, () -> doctorService.createDoctor(sampleRequest));
         verify(userRepository, never()).save(any(User.class));
     }
 
