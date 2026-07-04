@@ -18,6 +18,7 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
     const [notes, setNotes] = useState('');
+    const [validationError, setValidationError] = useState('');
 
     const metricOptions = [
         { label: 'Huyết áp', value: 'BLOOD_PRESSURE' },
@@ -29,13 +30,28 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSaving) return;
         if (!onSave) return;
 
+        const primaryValue = Number(value);
+        const secondaryValue = valueSecondary ? Number(valueSecondary) : null;
+
+        if (!Number.isFinite(primaryValue) || primaryValue <= 0) {
+            setValidationError('Gia tri do phai la so duong hop le.');
+            return;
+        }
+
+        if (metricType === 'BLOOD_PRESSURE' && (secondaryValue === null || !Number.isFinite(secondaryValue) || secondaryValue <= 0)) {
+            setValidationError('Huyet ap can du ca chi so tam thu va tam truong.');
+            return;
+        }
+
+        setValidationError('');
         const measuredAt = `${date}T${time}:00`;
         onSave({
             metricType,
-            value: parseFloat(value),
-            valueSecondary: valueSecondary ? parseFloat(valueSecondary) : null,
+            value: primaryValue,
+            valueSecondary: metricType === 'BLOOD_PRESSURE' ? secondaryValue : null,
             measuredAt,
             notes
         });
@@ -57,6 +73,7 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
             }
             
             setNotes('');
+            setValidationError('');
             
             // Set current date and time
             const now = new Date();
@@ -74,12 +91,20 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
         if (isOpen && lastValues && lastValues[metricType]) {
             setValue(String(lastValues[metricType].value || ''));
             setValueSecondary(String(lastValues[metricType].valueSecondary || ''));
+        } else if (isOpen) {
+            setValue('');
+            setValueSecondary('');
         }
     }, [metricType, isOpen, lastValues]);
 
     if (!isOpen) return null;
 
     const isBloodPressure = metricType === 'BLOOD_PRESSURE';
+
+    const handleMetricTypeChange = (nextType: string) => {
+        setValidationError('');
+        setMetricType(nextType);
+    };
 
     return createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -102,7 +127,7 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
                                 <Dropdown
                                     options={metricOptions}
                                     value={metricType}
-                                    onChange={setMetricType}
+                                    onChange={handleMetricTypeChange}
                                     className="z-[50]"
                                 />
                             </div>
@@ -118,6 +143,7 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
                                         required
                                         value={isBloodPressure ? (value && valueSecondary ? `${value}/${valueSecondary}` : value) : value}
                                         onChange={(e) => {
+                                            setValidationError('');
                                             if (isBloodPressure) {
                                                 const val = e.target.value;
                                                 if (val.includes('/')) {
@@ -126,6 +152,7 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
                                                     setValueSecondary(parts[1] || '');
                                                 } else {
                                                     setValue(val);
+                                                    setValueSecondary('');
                                                 }
                                             } else {
                                                 setValue(e.target.value);
@@ -135,6 +162,12 @@ const AddHealthMetricModal: React.FC<AddHealthMetricModalProps> = ({ isOpen, onC
                                 </div>
                             </div>
                         </div>
+
+                        {validationError && (
+                            <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-600">
+                                {validationError}
+                            </div>
+                        )}
 
                         <div className="space-y-1.5">
                             <label className="text-[13px] font-bold text-slate-700 dark:text-slate-300 ml-1">Ngày đo</label>

@@ -24,14 +24,26 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, initialRole = 
 
     if (!isOpen) return null;
 
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (error) setError('');
+        setEmail(e.target.value);
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (error) setError('');
+        setPassword(e.target.value);
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isLoading) return;
+
         setIsLoading(true);
         setError('');
 
         // Simulation
         setTimeout(() => {
-            if (email && password) {
+            if (email.trim() && password) {
                 onLoginSuccess(role);
             } else {
                 setError('Vui lòng nhập đầy đủ email và mật khẩu');
@@ -94,7 +106,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, initialRole = 
                                 <input
                                     type="text"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={handleEmailChange}
                                     placeholder="manager@ductin.com"
                                     className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-2xl focus:border-primary/20 focus:bg-white outline-none font-bold text-slate-900 dark:text-white transition-all placeholder:text-slate-400"
                                 />
@@ -111,7 +123,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, initialRole = 
                                 <input
                                     type="password"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={handlePasswordChange}
                                     placeholder="••••••••"
                                     className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-2xl focus:border-primary/20 focus:bg-white outline-none font-bold text-slate-900 dark:text-white transition-all placeholder:text-slate-400"
                                 />
