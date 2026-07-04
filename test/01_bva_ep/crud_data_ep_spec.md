@@ -118,3 +118,33 @@ The original EP table provides representative data and expected results. The fol
 | `CreateAppointmentRequest.appointmentType` is non-blank but not strongly enum-validated in service | Invalid values may still create appointment with null location/link | Keep EP test as negative API/DTO case, and record service validation gap if request bypasses controller |
 | Patient appointment doctor lookup currently uses `orElse(null)` | Non-existing doctor can become a soft success path instead of 404 in direct service tests | Align expected result by layer: API requirement may expect 404, service code currently tolerates null doctor |
 | Some DTO rules are stricter than service rules | Direct service tests may pass values that controller rejects | Record automation target per layer before executing |
+
+## 7. Standardized Boundary Value Addendum
+
+This EP file covers representative CRUD partitions. The following BVA table must be used to make the CRUD data design complete.
+
+| Module | Field | Boundary rule | Minimum boundary values | Expected result | Minimum TC count |
+|---|---|---|---|---|---:|
+| Clinic | `name` | `1..200` characters | length `0`, `1`, `199`, `200`, `201` | blank and `201` rejected; `1/199/200` accepted | 5 |
+| Clinic | `clinicCode` | `1..20` characters and unique | length `0`, `1`, `19`, `20`, `21`, duplicate valid code | blank, `21`, duplicate rejected; `1/19/20` accepted | 6 |
+| Clinic admin | `adminPassword` | minimum `8` | length `7`, `8`, `9` | `7` rejected; `8/9` accepted | 3 |
+| User | `fullName` | `1..100` characters | length `0`, `1`, `99`, `100`, `101` | blank and `101` rejected; `1/99/100` accepted | 5 |
+| User | `email` | valid format, max `100` | valid length `99`, valid length `100`, valid length `101`, invalid format | `101` and invalid format rejected | 4 |
+| User | `password` | minimum `8` | length `7`, `8`, `9` | `7` rejected; `8/9` accepted | 3 |
+| Health metric | `metricType` | supported enum values only | each supported value once, `TEMPERATURE`, `null` | supported values accepted; unsupported/null rejected | 7 |
+| Health metric | `BLOOD_PRESSURE.valueSecondary` | required for blood pressure | missing secondary, secondary present | missing rejected or recorded as service gap; present accepted | 2 |
+| Appointment | `appointmentTime` | `now + 3h` to `now + 15d` | `now+2h59m`, `now+3h`, `now+3h1m`, `now+14d23h59m`, `now+15d`, `now+15d1m` | outside rejected; inside accepted | 6 |
+| Appointment | `doctorId` | positive existing id | `null`, `0`, `1 existing`, positive non-existing id | null/0 rejected; existing accepted; non-existing follows service/API rule | 4 |
+
+Minimum BVA cases to add for CRUD data: `45` independent rows. For a practical smoke set, use `16` rows: clinic name `0/1/200/201`, clinicCode `20/21/duplicate`, user password `7/8`, health metric unsupported type, blood pressure missing secondary, appointment lower and upper four boundary values.
+
+| New TC | Module | Input | Expected result | Automation target |
+|---|---|---|---|---|
+| TC-BVA-CRUD-01 | Clinic | `name` length `201` | DTO validation fails | `ClinicRequestValidationTest` |
+| TC-BVA-CRUD-02 | Clinic | `clinicCode` length `21` | DTO validation fails | `ClinicRequestValidationTest` |
+| TC-BVA-CRUD-03 | Clinic | duplicate `clinicCode` length within valid range | Business validation fails | `AdminClinicServiceImplTest` |
+| TC-BVA-CRUD-04 | User | `fullName` length `101` | DTO validation fails | `CreateUserRequestValidationTest` |
+| TC-BVA-CRUD-05 | User | `email` length `101` | DTO validation fails | `CreateUserRequestValidationTest` |
+| TC-BVA-CRUD-06 | Health Metric | `metricType = TEMPERATURE` | Validation or enum parse fails | `CreateHealthMetricRequestValidationTest` |
+| TC-BVA-CRUD-07 | Health Metric | `BLOOD_PRESSURE` without `valueSecondary` | Rejected or recorded as gap | `PatientHealthMetricServiceImplTest` |
+| TC-BVA-CRUD-08 | Appointment | `appointmentTime = now + 15d1m` | Business validation fails | `PatientAppointmentServiceImplTest` |

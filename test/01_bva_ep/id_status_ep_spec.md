@@ -44,6 +44,35 @@
 
 ---
 
+## 3.1. Standardized Boundary Value Addendum
+
+The original document is EP-focused. The table below adds the required boundary values for id, status, and pagination-like identifiers.
+
+| Field | Boundary rule | Minimum boundary values | Expected result | Minimum TC count |
+|---|---|---|---|---:|
+| Path `id` | positive integer, normally `id >= 1` | `-1`, `0`, `1 existing`, positive non-existing id, non-numeric `abc` | negative/zero/non-numeric rejected; existing accepted; non-existing returns not found or current service gap | 5 |
+| Request body `id` | non-null positive id when DTO validates it | `null`, `0`, `1 existing`, positive non-existing id | null/zero rejected; existing accepted; non-existing handled by repository lookup | 4 |
+| User `status` | `ACTIVE` or `INACTIVE` | `ACTIVE`, `INACTIVE`, `active`, `SUSPENDED`, empty string, 31-character string | valid values accepted; invalid casing/unknown/empty/too long rejected | 6 |
+| Appointment `status` | supported lifecycle only | `PENDING`, `SCHEDULED`, `COMPLETED`, `CANCELLED`, `UNKNOWN`, lowercase `pending` | supported values accepted by valid transition; unsupported/lowercase rejected | 6 |
+| Pagination `page` | zero-based, `page >= 0` | `-1`, `0`, `1` | `-1` rejected; `0/1` accepted | 3 |
+| Pagination `size` | positive, `size >= 1` | `0`, `1`, `2` | `0` rejected; `1/2` accepted | 3 |
+
+Minimum BVA cases to add for this document: `27` rows. A reduced automation set can use `12` rows: path id `0/1/non-existing/abc`, user status `ACTIVE/SUSPENDED/active`, appointment status valid/unknown, page `-1/0`, size `0/1`.
+
+| New TC | Type | Input | Expected result | Automation target |
+|---|---|---|---|---|
+| TC-BVA-ID-01 | BVA | path id `-1` | `400 Bad Request` or validation error | Controller test |
+| TC-BVA-ID-02 | BVA | path id `0` | `400 Bad Request` or validation error | Controller test |
+| TC-BVA-ID-03 | BVA | path id `1` existing | `200 OK` | Controller/service test |
+| TC-BVA-ID-04 | EP/BVA | path id positive but non-existing | `404 Not Found` or documented service behavior | Controller/service test |
+| TC-BVA-ID-05 | BVA | path id `abc` | type mismatch `400 Bad Request` | Controller test |
+| TC-BVA-STATUS-01 | EP/BVA | user status `active` | validation fails | DTO/controller test |
+| TC-BVA-STATUS-02 | EP/BVA | user status 31 characters | validation fails | DTO/controller test |
+| TC-BVA-PAGE-01 | BVA | `page=-1` | validation fails | Controller test |
+| TC-BVA-PAGE-02 | BVA | `page=0` | first page accepted | Controller test |
+| TC-BVA-PAGE-03 | BVA | `size=0` | validation fails | Controller test |
+| TC-BVA-PAGE-04 | BVA | `size=1` | accepted | Controller test |
+
 ## 4. Kết luận
 
 * Tài liệu đã thiết kế chính xác **6 test cases phân hoạch tương đương** cho các trường hợp ID, Trạng thái và Dữ liệu không tồn tại, đáp ứng đầy đủ yêu cầu hoàn thành của ticket **KCPM-759** (tối thiểu 5 và tối đa 8 test cases).
