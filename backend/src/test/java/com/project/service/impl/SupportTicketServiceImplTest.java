@@ -3,6 +3,7 @@ package com.project.service.impl;
 import com.project.entity.Clinic;
 import com.project.entity.SupportTicket;
 import com.project.entity.User;
+import com.project.exception.ResourceNotFoundException;
 import com.project.repository.ClinicRepository;
 import com.project.repository.SupportTicketRepository;
 import com.project.repository.UserRepository;
@@ -81,6 +82,25 @@ class SupportTicketServiceImplTest {
     }
 
     @Test
+    void createTicket_withExplicitIdsAttachesCreatorAndClinic() {
+        SupportTicket ticket = ticket(20L);
+        ticket.setCreatorId(7L);
+        ticket.setClinicId(10L);
+        User user = User.builder().id(7L).fullName("Creator").build();
+        Clinic clinic = Clinic.builder().id(10L).name("Clinic").build();
+        when(userRepository.findById(7L)).thenReturn(Optional.of(user));
+        when(clinicRepository.findById(10L)).thenReturn(Optional.of(clinic));
+        when(ticketRepository.save(ticket)).thenReturn(ticket);
+
+        SupportTicket result = service.createTicket(ticket);
+
+        assertSame(user, result.getCreator());
+        assertSame(clinic, result.getClinic());
+        assertEquals(7L, result.getCreatorId());
+        assertEquals(10L, result.getClinicId());
+    }
+
+    @Test
     void updateTicketStatus_setsClosedAtForResolvedStatusAndAudits() {
         SupportTicket ticket = ticket(3L);
         ticket.setStatus("Mới");
@@ -100,7 +120,19 @@ class SupportTicketServiceImplTest {
     void updateTicketStatus_missingTicketThrows() {
         when(ticketRepository.findById(404L)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> service.updateTicketStatus(404L, "OPEN", null));
+        assertThrows(ResourceNotFoundException.class, () -> service.updateTicketStatus(404L, "OPEN", null));
+    }
+
+    @Test
+    void updateTicketStatus_setsClosedAtForApiResolvedStatus() {
+        SupportTicket ticket = ticket(30L);
+        when(ticketRepository.findById(30L)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.save(ticket)).thenReturn(ticket);
+
+        SupportTicket result = service.updateTicketStatus(30L, "RESOLVED", "done");
+
+        assertEquals("RESOLVED", result.getStatus());
+        assertNotNull(result.getClosedAt());
     }
 
     @Test
@@ -113,8 +145,8 @@ class SupportTicketServiceImplTest {
 
         assertSame(ticket, service.getTicketById(4L));
         assertSame(ticket, service.getTicketByCode("TKT-4"));
-        assertThrows(RuntimeException.class, () -> service.getTicketById(404L));
-        assertThrows(RuntimeException.class, () -> service.getTicketByCode("missing"));
+        assertThrows(ResourceNotFoundException.class, () -> service.getTicketById(404L));
+        assertThrows(ResourceNotFoundException.class, () -> service.getTicketByCode("missing"));
     }
 
     @Test

@@ -74,6 +74,16 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void handleBadRequest_returns400ErrorResponse() {
+        ResponseEntity<ApiResponse<Object>> response =
+                handler.handleBadRequest(new IllegalArgumentException("missing subject"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertFalse(response.getBody().isSuccess());
+        assertNotNull(response.getBody().getMessage());
+    }
+
+    @Test
     void handleRuntimeException_returns500WithoutLeakingOriginalMessage() {
         ResponseEntity<ApiResponse<Object>> response =
                 handler.handleRuntimeException(new RuntimeException("database password leaked"));

@@ -51,6 +51,12 @@ public class SupportTicket extends BaseEntity {
     @JoinColumn(name = "clinic_id")
     private Clinic clinic;
 
+    @Transient
+    private Long creatorId;
+
+    @Transient
+    private Long clinicId;
+
     @Column
     private LocalDateTime closedAt;
 
@@ -62,5 +68,21 @@ public class SupportTicket extends BaseEntity {
         if (this.ticketCode == null) {
             this.ticketCode = "TKT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         }
+    }
+
+    public Long getCreatorId() {
+        return creator != null ? creator.getId() : creatorId;
+    }
+
+    public void setCreatorId(Long creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public Long getClinicId() {
+        return clinic != null ? clinic.getId() : clinicId;
+    }
+
+    public void setClinicId(Long clinicId) {
+        this.clinicId = clinicId;
     }
 }

@@ -2,6 +2,7 @@ package com.project.exception;
 
 import com.project.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -46,6 +47,17 @@ public class GlobalExceptionHandler {
         log.warn("Validation failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error("Validation failed", errors));
+    }
+
+    @ExceptionHandler({
+            IllegalArgumentException.class,
+            DataIntegrityViolationException.class,
+            org.springframework.http.converter.HttpMessageNotReadableException.class
+    })
+    public ResponseEntity<ApiResponse<Object>> handleBadRequest(Exception ex) {
+        log.warn("Bad request: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("Yêu cầu không hợp lệ hoặc thiếu dữ liệu bắt buộc."));
     }
 
     @ExceptionHandler(RuntimeException.class)
