@@ -59,3 +59,29 @@ Tài liệu này đặc tả **đúng 8 ca kiểm thử phân hoạch tương đ
 | Expected result | Present in Section 2 |
 | Preconditions, steps, automation target | Added in Section 3 |
 | Evidence mapping | Added in Section 3 |
+
+## 5. Standardized Boundary Value Addendum
+
+This EP file must be read together with the following BVA set before implementation. The minimum BVA set below closes the gap where the original EP cases only used representative partitions.
+
+| Field | Boundary rule | Minimum boundary values | Expected result | Minimum TC count |
+|---|---|---|---|---:|
+| `email` length | `1..100` characters and valid email format | valid length `99`, valid length `100`, valid format length `101` | `99/100` accepted, `101` rejected by DTO validation | 3 |
+| `email` format | Must match email format | `patient@gmail.com`, `patientgmail.com`, `patient@` | valid email accepted, missing `@` and missing domain rejected | 3 |
+| `password` create user | Backend minimum length is `8` | length `7`, `8`, `9` | `7` rejected, `8/9` accepted if other policy rules pass | 3 |
+| `newPassword` change password | `8..100` characters | length `7`, `8`, `9`, `99`, `100`, `101` | lower/upper outside values rejected, inside values accepted | 6 |
+| `status` | Allowed values are `ACTIVE`, `INACTIVE` | `ACTIVE`, `INACTIVE`, `active`, `SUSPENDED`, 31-character string | two valid values accepted; lowercase, unknown, and too-long value rejected | 5 |
+
+Minimum BVA cases to add for this document: `20` rows if every value above is executed independently. A reduced smoke set can use `9` rows: email `100/101`, password `7/8/9`, newPassword `100/101`, status `ACTIVE/SUSPENDED`.
+
+| New TC | Type | Input | Expected result | Automation target |
+|---|---|---|---|---|
+| TC-BVA-AUTH-EP-01 | BVA | email length `99`, valid format | Validation passes | `CreateUserRequestValidationTest` |
+| TC-BVA-AUTH-EP-02 | BVA | email length `100`, valid format | Validation passes | `CreateUserRequestValidationTest` |
+| TC-BVA-AUTH-EP-03 | BVA | email length `101`, valid format | Validation fails | `CreateUserRequestValidationTest` |
+| TC-BVA-AUTH-EP-04 | BVA | password length `7` | Validation fails | `CreateUserRequestValidationTest` |
+| TC-BVA-AUTH-EP-05 | BVA | password length `8` | Validation passes | `CreateUserRequestValidationTest` |
+| TC-BVA-AUTH-EP-06 | BVA | password length `9` | Validation passes | `CreateUserRequestValidationTest` |
+| TC-BVA-AUTH-EP-07 | BVA | newPassword length `100` | Validation passes | `ChangePasswordRequestTest` |
+| TC-BVA-AUTH-EP-08 | BVA | newPassword length `101` | Validation fails | `ChangePasswordRequestTest` |
+| TC-BVA-AUTH-EP-09 | BVA/EP | status `SUSPENDED` | Validation fails | `UpdateUserRequestValidationTest` |
