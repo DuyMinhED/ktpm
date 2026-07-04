@@ -1,6 +1,7 @@
 package com.project.service.impl;
 
 import com.project.entity.SupportTicket;
+import com.project.exception.ResourceNotFoundException;
 import com.project.repository.SupportTicketRepository;
 import com.project.service.AuditService;
 import com.project.service.SupportTicketService;
@@ -30,6 +31,7 @@ public class SupportTicketServiceImpl implements SupportTicketService {
     @Override
     @Transactional
     public SupportTicket createTicket(SupportTicket ticket) {
+        Objects.requireNonNull(ticket);
         try {
             Object rawPrincipal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (rawPrincipal instanceof CustomUserDetails currentUser) {
@@ -42,7 +44,14 @@ public class SupportTicketServiceImpl implements SupportTicketService {
             // Fallback for test contexts
         }
 
-        SupportTicket savedTicket = ticketRepository.save(Objects.requireNonNull(ticket));
+        if (ticket.getCreator() == null && ticket.getCreatorId() != null) {
+            userRepository.findById(ticket.getCreatorId()).ifPresent(ticket::setCreator);
+        }
+        if (ticket.getClinic() == null && ticket.getClinicId() != null) {
+            clinicRepository.findById(ticket.getClinicId()).ifPresent(ticket::setClinic);
+        }
+
+        SupportTicket savedTicket = ticketRepository.save(ticket);
         
         auditService.recordActivity(
             "CREATE_TICKET",
@@ -58,13 +67,14 @@ public class SupportTicketServiceImpl implements SupportTicketService {
     @Transactional
     public SupportTicket updateTicketStatus(Long id, String status, String adminNote) {
         SupportTicket ticket = ticketRepository.findById(Objects.requireNonNull(id))
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu hỗ trợ"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy yêu cầu hỗ trợ"));
         
         String oldStatus = ticket.getStatus();
         ticket.setStatus(status);
         ticket.setAdminNote(adminNote);
         
-        if ("Đã giải quyết".equals(status) || "Đã đóng".equals(status)) {
+        if ("Đã giải quyết".equals(status) || "Đã đóng".equals(status)
+                || "RESOLVED".equalsIgnoreCase(status) || "CLOSED".equalsIgnoreCase(status)) {
             ticket.setClosedAt(LocalDateTime.now());
         }
         
@@ -83,13 +93,13 @@ public class SupportTicketServiceImpl implements SupportTicketService {
     @Override
     public SupportTicket getTicketById(Long id) {
         return ticketRepository.findById(Objects.requireNonNull(id))
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu hỗ trợ"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy yêu cầu hỗ trợ"));
     }
 
     @Override
     public SupportTicket getTicketByCode(String ticketCode) {
         return ticketRepository.findByTicketCode(ticketCode)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy mã yêu cầu " + ticketCode));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy mã yêu cầu " + ticketCode));
     }
 
     @Override
