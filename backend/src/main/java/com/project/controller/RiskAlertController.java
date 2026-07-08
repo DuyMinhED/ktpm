@@ -67,6 +67,6 @@ public class RiskAlertController {
     public ApiResponse<Void> dismissAlert(@PathVariable Long clinicId, @PathVariable Long alertId) {
         validateClinicAccess(clinicId);
         riskAlertService.dismissAlert(alertId);
-        return ApiResponse.success("Alert dismissed", null);
+        return ApiResponse.success("Alert dismissed successfully", null);
     }
 }

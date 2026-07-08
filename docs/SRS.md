@@ -84,6 +84,21 @@ Hệ thống được xây dựng dựa trên mô hình kiến trúc **Client-Se
     *   Hệ quản trị CSDL: PostgreSQL.
     *   ORM (Object-Relational Mapping): Hibernate.
 
+### 2.4 Quy chuẩn phản hồi API (API Response Convention)
+Để đảm bảo tính nhất quán của hệ thống và tính ổn định của các bộ kiểm thử tự động, toàn bộ các phản hồi API của hệ thống phải tuân thủ quy tắc định dạng chung như sau:
+*   **Cấu trúc dữ liệu phản hồi (JSON):**
+    ```json
+    {
+      "success": true/false,
+      "message": "Thông điệp mô tả kết quả xử lý bằng Tiếng Anh",
+      "data": object/array/null
+    }
+    ```
+*   **Quy tắc định nghĩa thông điệp phản hồi (Message Standardization):**
+    *   Đối với các API thay đổi trạng thái (POST, PUT, PATCH, DELETE) được thực thi thành công, thông báo `message` phải tuân theo cú pháp chuẩn: `"{Entity} {action} successfully"`.
+    *   Ví dụ:
+        *   Khi người dùng/quản trị viên thực hiện ẩn hoặc đóng cảnh báo (Dismiss Alert), cả API dành cho bệnh nhân (`PUT /api/v1/patient/dashboard/alerts/{id}/dismiss`) và API dành cho phòng khám/bác sĩ (`PATCH /api/v1/clinics/{clinicId}/risk-alerts/alerts/{alertId}/dismiss`) đều phải trả về thông báo thống nhất là: `"Alert dismissed successfully"`.
+
 ---
 
 ## 3. YÊU CẦU CHỨC NĂNG (FUNCTIONAL REQUIREMENTS)
@@ -130,6 +145,7 @@ Hệ thống được xây dựng dựa trên mô hình kiến trúc **Client-Se
 
 ## 4. YÊU CẦU PHI CHỨC NĂNG (NON-FUNCTIONAL REQUIREMENTS)
 *   **NFR-01 (Hiệu năng - Thời gian phản hồi):** Tốc độ tải dữ liệu và các thao tác CRUD cơ bản phải nhanh chóng. Tiêu chí đo lường: `< 2 giây` cho request thông thường. `< 5 giây` khi xuất file báo cáo dung lượng lớn (Excel/PDF).
+    *   *Ngoại lệ môi trường thử nghiệm (Non-Production Staging/Free Tier Cloud):* Trong môi trường thử nghiệm tự động (CI/CD) sử dụng các dịch vụ Cloud miễn phí (như Render Free Tier), giới hạn thời gian phản hồi được nới rộng tối đa lên tới `< 45 giây` để đảm bảo tính ổn định của bài kiểm thử khi gặp hiện tượng khởi động nguội (Cold Start) hoặc kết nối cơ sở dữ liệu chậm.
 *   **NFR-02 (Hiệu năng - Độ trễ thời gian thực):** Nhắn tin và nhận cảnh báo (WebSocket) không bị giật lag. Tiêu chí đo lường: Độ trễ mạng `< 500 ms`.
 *   **NFR-03 (Hiệu năng - Khả năng chịu tải):** Hệ thống có khả năng phục vụ nhiều người cùng lúc mà không bị sập. Tiêu chí đo lường: Tối thiểu `1.000 RPS` (Requests/giây) và `500` người dùng truy cập đồng thời.
 *   **NFR-04 (Bảo mật - Xác thực & Phiên làm việc):** 100% API nghiệp vụ phải yêu cầu đăng nhập. Sử dụng JWT Token, tự động vô hiệu hóa (timeout) sau `24 giờ`.
@@ -160,7 +176,7 @@ Hệ thống được xây dựng dựa trên mô hình kiến trúc **Client-Se
 
 ---
 
-## 6. PHẦN BỔ SUNG: ĐẶC TẢ CHI TIẾT CÁC NGƯỠNG NGHIỆP VỤ PHỤC VỤ KIỂM THỬ (BVA & WHITE-BOX TESTING)
+## 6. ĐẶC TẢ CHI TIẾT CÁC NGƯỠNG NGHIỆP VỤ PHỤC VỤ KIỂM THỬ (BVA & WHITE-BOX TESTING)
 
 Để phục vụ cho bài tập thực hành kiểm thử (tìm lỗi bằng kiểm thử BVA và White-box rồi tiến hành sửa đổi mã nguồn), dưới đây là tài liệu đặc tả các ngưỡng nghiệp vụ của hệ thống. 
 
