@@ -2936,7 +2936,7 @@
                   "    if (pm.response.code === 200) {",
                   "        var response = pm.response.json();",
                   "        pm.expect(response.success).to.be.true;",
-                  "        pm.expect(response.message).to.equal(\"Alert dismissed\");",
+                  "        pm.expect(response.message).to.equal(\"Alert dismissed successfully\");",
                   "        pm.expect(response.data).to.be.null;",
                   "    }",
                   "});"
