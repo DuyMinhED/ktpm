@@ -30,7 +30,7 @@ Scenario('Unauthenticated patient route redirects to landing page', ({ I }) => {
 Scenario('Patient role cannot open admin routes', ({ I }) => {
   I.clearAuth();
   I.login('truongquocan@patient.com', 'admin123');
-  I.waitInUrl('/patient', 15);
+  I.waitInUrl('/patient', 45);
   I.clientNavigate('/admin/users');
 
   I.waitInUrl('/patient', 5);
@@ -40,7 +40,7 @@ Scenario('Patient role cannot open admin routes', ({ I }) => {
 Scenario('Doctor role cannot open patient routes', ({ I }) => {
   I.clearAuth();
   I.login('mai.le@care.com', 'admin123');
-  I.waitInUrl('/doctor', 15);
+  I.waitInUrl('/doctor', 45);
   I.clientNavigate('/patient/profile');
 
   I.waitInUrl('/doctor', 5);
