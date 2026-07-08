@@ -113,7 +113,7 @@ Bộ kiểm thử hồi quy được phân theo 3 mức ưu tiên dựa trên m�
 | TC-REG-WB-07 | Support Ticket | P2 | Nguyễn Thị Ánh Ngọc | CFG + Basis Path | KCPM-764 |
 | TC-REG-WB-08 | Prescription API (Controller/Security/Coverage) | P0 | Trần Lê Quang | JaCoCo Coverage Report | KCPM-38 (KCPM-41/42/43) |
 | TC-REG-WB-09 | Test The Classes Clinic (7 classes) | P1 | Trần Lê Quang | 35 JUnit test cases | KCPM-668 |
-| TC-REG-WB-10 | Backend Service White-box Design (tổng hợp) | — (tổng hợp) | (Nhóm) | `mvn verify` — 627 tests pass | — (tài liệu tham chiếu) |
+| TC-REG-WB-10 | Backend Service White-box Design (tổng hợp) | — (tổng hợp) | (Nhóm) | Latest Surefire evidence: 635 tests pass | — (tài liệu tham chiếu) |
 
 **Tổng nhóm F:** 10 test suite, đây là nhóm có khối lượng lớn nhất, phủ toàn bộ service logic phức tạp có nhánh điều kiện.
 

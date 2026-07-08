@@ -20,21 +20,21 @@ Minimum required fields:
 
 | File | Status | Notes |
 |---|---|---|
-| `TEST_DESIGN_INDEX.md` | Complete | Navigation source of truth for non-Postman design. |
-| `core_business_bva_spec.md` | Complete | Has scope, BVA rules, concrete cases, expected result, supplemental code-based gaps, automation target. |
+| `../00_index/00_consolidated_test_design_index.md` | Complete | Navigation source of truth for non-Postman design and current implementation status. |
+| `core_business_bva_spec.md` | Complete and implemented | Has scope, BVA rules, concrete cases, expected result, supplemental code-based gaps, automation target. Implemented by `CoreBusinessBvaTest`. |
 | `code_based_bva_ep_completion.md` | Complete | Best source for current code-based BVA/EP rules and minimum automation set. |
-| `junit_bva_ep_traceability_spec.md` | Complete | Maps BVA/EP rows to JUnit evidence. |
+| `junit_bva_ep_traceability.md` | Complete and implemented | Maps BVA/EP rows to JUnit evidence. |
 | `crud_api_bva_spec.md` | Completed by addendum | Added code-basis corrections, corrected automation rows, and traceability. |
-| `crud_data_ep_spec.md` | Completed by addendum | Added preconditions, steps, automation target, traceability, and code gaps. |
-| `auth_user_test_spec.md` | Completed by addendum | Added preconditions, execution steps, automation target, and JUnit mapping. |
-| `auth_user_ep_test_spec.md` | Completed by addendum | Added traceability and execution matrix. |
-| `health_metric_ep_bva_spec.md` | Complete | Has EP/BVA partitions, thresholds, detailed cases, and JUnit target. Use code-based thresholds when older docs conflict. |
-| `id_status_ep_spec.md` | Acceptable | EP data for IDs/status should be read with `crud_data_ep_spec.md` and `code_based_bva_ep_completion.md`. |
-| `patient_appointment_ep_test_spec.md` | Acceptable | Appointment EP is covered more completely by `core_business_bva_spec.md` and `patient_appointment_whitebox_spec.md`. |
-| `frontend_form_bva_spec.md` | Complete with known mismatch | Includes frontend BVA and frontend/backend mismatch rows. |
-| `frontend_backend_test_design_traceability_spec.md` | Complete | Cross-layer traceability matrix and evidence checklist. |
-| `bva_ep_test_cases_summary_report.md` | Reference only | Summary has known encoding and old-assumption issues; use code-based correction notes and primary specs for execution. |
-| `bva_test_cases_report.md` | Reference only | Use for reporting context, not as source of truth if it conflicts with code-based docs. |
+| `crud_data_ep_spec.md` | Completed by addendum and mostly implemented | Added preconditions, steps, automation target, traceability, and code gaps. Most targets exist in DTO/service tests. |
+| `auth_user_general_spec.md` | Completed by addendum and implemented | Added preconditions, execution steps, automation target, and JUnit mapping. |
+| `auth_user_ep_spec.md` | Completed by addendum and implemented | Added traceability, execution matrix, and BVA addendum. |
+| `health_metric_ep_bva_spec.md` | Complete and implemented | Has EP/BVA partitions, thresholds, detailed cases, and JUnit target. Use code-based thresholds when older docs conflict. |
+| `id_status_ep_spec.md` | Complete with partial endpoint coverage | Has BVA addendum for IDs/status/pagination. Pagination and user status tests exist; endpoint-specific ID semantics remain per-controller follow-up. |
+| `patient_appointment_ep_spec.md` | Complete and mostly implemented | Appointment EP/BVA is covered by `CoreBusinessBvaTest`, `CreateAppointmentRequestValidationTest`, and `PatientAppointmentServiceImplTest`. |
+| `../03_frontend/frontend_form_bva.md` | Complete with known mismatch | Includes frontend BVA and frontend/backend mismatch rows. E2E covers smoke/validation/toast but not every bypass row. |
+| `../03_frontend/frontend_backend_traceability.md` | Complete | Cross-layer traceability matrix and evidence checklist. |
+| `bva_ep_summary_report.md` | Reference only | Summary has old-assumption issues; use code-based correction notes and primary specs for execution. |
+| `bva_cases_report.md` | Reference only | Use for reporting context, not as source of truth if it conflicts with code-based docs. |
 
 ## 3. Remaining Design Risks
 
@@ -54,5 +54,6 @@ Minimum required fields:
 | Traceability to JUnit/API | Ready |
 | Frontend/backend mapping | Ready |
 | Known code mismatches | Documented |
+| Implementation audit | Ready in `../05_reports_reviews/test_design_vs_implementation_audit.md` |
 
-Conclusion: the BVA/EP design set is now complete enough for submission when `TEST_DESIGN_INDEX.md` is used as the entry point and code-based documents are treated as source of truth for execution.
+Conclusion: the BVA/EP design set is now complete enough for submission when `../00_index/00_consolidated_test_design_index.md` is used as the entry point and code-based documents are treated as source of truth for execution.

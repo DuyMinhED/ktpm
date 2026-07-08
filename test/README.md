@@ -13,6 +13,7 @@ Thu muc nay chua hai nhom noi dung:
 - `00_index/00_consolidated_test_design_index.md`: chi muc gom nhom cac tai lieu thiet ke test, bang dieu kien bien, so test case toi thieu va cac gap con lai.
 - `00_index/01_backend_whitebox_graph_index.md`: chi muc rieng cho cac tai lieu white-box graph.
 - `00_index/02_regression_suite_traceability_matrix.md`: ma tran truy vet regression suite.
+- `05_reports_reviews/test_design_vs_implementation_audit.md`: doi chieu tai lieu thiet ke voi test that dang co trong source.
 
 ## Cau Truc Thu Muc
 
@@ -30,6 +31,7 @@ Thu muc nay chua hai nhom noi dung:
 ## Static Review Ticket
 
 - `05_reports_reviews/kcpm_813_static_review_requirements_test_cases.md`: review checklist, ambiguous requirement points, test gaps, and follow-up actions for KCPM-813.
+- `05_reports_reviews/test_design_vs_implementation_audit.md`: current audit of design documents versus backend JUnit, frontend E2E, and Postman artifacts.
 
 ## Chuan Trinh Bay Bat Buoc
 

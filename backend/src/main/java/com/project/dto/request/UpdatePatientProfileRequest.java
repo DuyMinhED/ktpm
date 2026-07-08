@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -34,7 +35,8 @@ public class UpdatePatientProfileRequest {
     private String occupation;
     private String ethnicity;
     private String healthInsuranceNumber;
-    private java.time.LocalDate dateOfBirth;
+    @PastOrPresent(message = "Date of birth cannot be in the future")
+    private LocalDate dateOfBirth;
     private String avatarUrl;
     private String medicalHistory;
     private String allergies;

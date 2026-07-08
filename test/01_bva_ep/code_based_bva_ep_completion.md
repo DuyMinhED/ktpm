@@ -100,6 +100,6 @@ Tai lieu nay bo sung cac dieu kien bien va phan hoach tuong duong con thieu tron
 | `bva_test_cases_report.md` | Treats `page=0` as invalid and assumes max page/size without code validation. |
 | `bva_ep_test_cases_summary_report.md` | Repeats the same pagination assumption and lists password min 6 without noting backend min 8. |
 | `frontend_form_bva_spec.md` | Correct for current frontend, but must mark backend mismatch for create-user password. |
-| `auth_user_test_spec.md` | Needs `password min+1`, email `max-1`, empty/invalid email, phone invalid-pattern/empty, status enum invalid/lowercase. |
+| `auth_user_general_spec.md` | Completed by current DTO/service tests for password, email, phone, and status boundaries; keep frontend/backend password mismatch as follow-up. |
 | Most `*_postman_test_spec.md` files | Need explicit BVA rows in addition to success/401/403/404 scenarios. |
 

@@ -6,6 +6,8 @@ This file is the main entry point for non-Postman test design documents. It grou
 
 Postman collection specs are intentionally out of scope for this consolidation pass.
 
+Implementation audit reference: `../05_reports_reviews/test_design_vs_implementation_audit.md`.
+
 ## 2. Document Groups
 
 ### 2.1 Primary JUnit, BVA, and EP Design
@@ -62,14 +64,14 @@ Postman collection specs are intentionally out of scope for this consolidation p
 
 | Area | Minimum Count | Current Source | Status |
 |---|---:|---|---|
-| Core business BVA implemented in JUnit | 10 | `CoreBusinessBvaTest`, `../01_bva_ep/core_business_bva_spec.md` | Implemented. |
-| JUnit BVA rows | 14 | `../01_bva_ep/junit_bva_ep_traceability.md` | Documented and mostly implemented. |
-| JUnit EP rows | 16 | `../01_bva_ep/junit_bva_ep_traceability.md` | Documented and mostly implemented. |
-| Backend service white-box rows | 17 | `../02_whitebox_backend/backend_service_whitebox_design.md` | Documented and mostly implemented for high-priority services. |
-| Frontend-to-backend workflow rows | 8 | `../03_frontend/frontend_backend_traceability.md` | Documented as traceability; E2E execution depends on frontend test runner. |
-| Remaining service white-box minimum | 15 | `../02_whitebox_backend/backend_service_whitebox_design.md` | Recommended next implementation set. |
+| Core business BVA implemented in JUnit | 10 original rows, 11 current JUnit tests | `CoreBusinessBvaTest`, `../01_bva_ep/core_business_bva_spec.md` | Implemented. |
+| JUnit BVA rows | 14 | `../01_bva_ep/junit_bva_ep_traceability.md` | Implemented by current backend source evidence. |
+| JUnit EP rows | 16 | `../01_bva_ep/junit_bva_ep_traceability.md` | Implemented by current backend source evidence. |
+| Backend service white-box rows | 17 primary rows plus extended service suites | `../02_whitebox_backend/backend_service_whitebox_design.md` | Broadly implemented; see audit report for current source mapping. |
+| Frontend-to-backend workflow rows | 8 | `../03_frontend/frontend_backend_traceability.md` | Partially implemented by current E2E files; cross-layer mismatch rows remain follow-up. |
+| Remaining service white-box minimum | 0 as original target set; new gaps are endpoint-specific polish | `../02_whitebox_backend/backend_service_whitebox_design.md` | Original minimum set is covered by current service tests; rerun JaCoCo for exact branch deltas. |
 
-The latest verified backend baseline was `627` Maven tests passing with `0` failures, `0` errors, and `0` skipped.
+Latest available backend Surefire evidence: `635` tests, `0` failures, `0` errors, `0` skipped. Current source contains `89` backend Java test classes and `7` frontend E2E files.
 
 ## 5. Consolidated Boundary Condition Table
 
@@ -92,15 +94,17 @@ The latest verified backend baseline was `627` Maven tests passing with `0` fail
 
 ## 6. Remaining Non-Postman Test Design Gaps
 
-| Gap | Minimum Cases | Suggested Target |
-|---|---:|---|
-| `ClinicDashboardServiceImpl` dashboard aggregation branches | 4 | Empty data, single clinic, multiple clinics, repository error/default handling. |
-| `AdminDashboardServiceImpl` summary branches | 3 | Empty data, populated data, repository failure or null metric branch. |
-| `PatientAppointmentServiceImpl` scheduling branches | 3 | Valid schedule, boundary rejection, conflict/not-found path. |
-| `DoctorAppointmentServiceImpl` appointment state branches | 3 | Valid transition, invalid transition, unauthorized/not-found path. |
-| `ClinicDoctorServiceImpl` doctor assignment/search branches | 2 | Empty result and populated result, plus duplicate/not-found if implemented. |
+| Gap | Current state | Suggested Target |
+|---|---|---|
+| `ClinicDashboardServiceImpl` dashboard aggregation branches | Implemented by `ClinicDashboardServiceImplTest`; exact branch deltas require latest JaCoCo rerun. | Keep only uncovered defensive branches if JaCoCo still reports misses. |
+| `AdminDashboardServiceImpl` summary branches | Implemented by `AdminDashboardServiceImplTest`. | Refresh coverage report from current run. |
+| `PatientAppointmentServiceImpl` scheduling/cancel/reminder branches | Implemented by `PatientAppointmentServiceImplTest` and DTO validation tests. | Keep layer-specific notes where DTO rejects but service tolerates. |
+| `DoctorAppointmentServiceImpl` appointment state branches | Implemented by `DoctorAppointmentServiceImplTest`. | Add endpoint-specific controller tests only if API contract requires stricter status behavior. |
+| `ClinicDoctorServiceImpl` doctor assignment/search branches | Implemented by `ClinicDoctorServiceImplTest`. | Recheck duplicate/not-found branch misses after JaCoCo rerun. |
+| Postman strict business assertions | Partial. Collection has executable tests but some status assertions are intentionally broad smoke checks. | Split smoke checks from strict negative business assertions. |
+| Frontend/backend validation mismatch cases | Partial. Route/login/toast/form smoke E2E exists. | Add E2E/API bypass tests for known mismatches if required for submission. |
 
-Total minimum remaining non-Postman design set: `15` focused JUnit/white-box cases.
+Total original minimum service white-box set is implemented in current source. Remaining items are refinement/follow-up, not missing core design implementation.
 
 ## 7. Cleanup Rules For Future Updates
 

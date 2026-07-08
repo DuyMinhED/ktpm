@@ -7,6 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,5 +71,19 @@ public class UpdatePatientProfileRequestTest {
         Set<ConstraintViolation<UpdatePatientProfileRequest>> violations = validator.validate(request);
         assertFalse(violations.isEmpty());
         assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("Invalid phone number")));
+    }
+
+    @Test
+    void validate_futureDateOfBirth() {
+        UpdatePatientProfileRequest request = UpdatePatientProfileRequest.builder()
+                .fullName("John Doe")
+                .phone("0123456789")
+                .email("john@example.com")
+                .dateOfBirth(LocalDate.now().plusDays(1))
+                .build();
+
+        Set<ConstraintViolation<UpdatePatientProfileRequest>> violations = validator.validate(request);
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("Date of birth cannot be in the future")));
     }
 }

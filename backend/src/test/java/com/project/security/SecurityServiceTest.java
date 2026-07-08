@@ -73,16 +73,18 @@ class SecurityServiceTest {
     }
 
     @Test
-    void canAccessPatient_doctorRequiresSameClinicAndNonNullClinic() {
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient(1L, 20L, 2L)));
+    void canAccessPatient_doctorRequiresAssignedPatient() {
+        Patient assignedPatient = patient(1L, 20L, 2L);
+        assignedPatient.setDoctorId(12L);
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(assignedPatient));
 
         authenticate(12L, RoleUtils.DOCTOR, 2L);
         assertTrue(securityService.canAccessPatient(1L));
 
-        authenticate(12L, RoleUtils.DOCTOR, 3L);
+        authenticate(13L, RoleUtils.DOCTOR, 2L);
         assertFalse(securityService.canAccessPatient(1L));
 
-        authenticate(12L, RoleUtils.DOCTOR, null);
+        authenticate(null, RoleUtils.DOCTOR, 2L);
         assertFalse(securityService.canAccessPatient(1L));
     }
 

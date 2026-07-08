@@ -4,7 +4,7 @@
 
 This document records the service-level white-box test design implemented in JUnit/Mockito. It does not cover Postman scripts or Postman collections.
 
-Verification baseline: `mvn -f backend/pom.xml -q verify` passed with `627 tests, 0 failures, 0 errors`.
+Latest available Surefire baseline: `635 tests, 0 failures, 0 errors, 0 skipped`.
 
 ## 2. Branch And Path Design
 
@@ -41,11 +41,13 @@ Verification baseline: `mvn -f backend/pom.xml -q verify` passed with `627 tests
 
 ## 4. Remaining White-Box Design Targets
 
-| Priority | Class | Main remaining decision areas |
-|---:|---|---|
-| 1 | `ClinicDashboardServiceImpl` | Dashboard chart branches, empty data, appointment mapping, report fallbacks |
-| 2 | `AdminDashboardServiceImpl` | Aggregate count defaults, report branches, audit-log mapping |
-| 3 | `PatientAppointmentServiceImpl` | Appointment-time tolerance, cancel/toggle reminder branches |
-| 4 | `DoctorAppointmentServiceImpl` | Create/update/reschedule and patient/doctor relation checks |
-| 5 | `ClinicDoctorServiceImpl` | Create/update/delete, duplicate email/license, clinic ownership boundaries |
+| Priority | Class | Current implementation evidence | Remaining note |
+|---:|---|---|---|
+| 1 | `ClinicDashboardServiceImpl` | `ClinicDashboardServiceImplTest` | Implemented in source; rerun JaCoCo to identify only residual defensive branches. |
+| 2 | `AdminDashboardServiceImpl` | `AdminDashboardServiceImplTest` | Implemented in source; refresh coverage report from current run. |
+| 3 | `PatientAppointmentServiceImpl` | `PatientAppointmentServiceImplTest`, `CreateAppointmentRequestValidationTest` | Implemented in source; keep layer-specific note where DTO rejects values that service tolerates. |
+| 4 | `DoctorAppointmentServiceImpl` | `DoctorAppointmentServiceImplTest` | Implemented in source; endpoint-specific state tests may still be added if API contract tightens. |
+| 5 | `ClinicDoctorServiceImpl` | `ClinicDoctorServiceImplTest` | Implemented in source; duplicate/not-found branches should be checked against latest JaCoCo. |
+
+The original high-priority white-box implementation target set is covered by current backend source tests. Remaining work is coverage polish and contract clarification, not missing primary design implementation.
 

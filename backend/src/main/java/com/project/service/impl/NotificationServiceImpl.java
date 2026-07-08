@@ -2,12 +2,14 @@ package com.project.service.impl;
 
 import com.project.dto.response.NotificationResponse;
 import com.project.entity.Notification;
+import com.project.exception.ResourceNotFoundException;
 import com.project.repository.NotificationRepository;
 import com.project.service.NotificationService;
 import com.project.util.SecurityUtils;
 import com.project.util.DateTimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,10 +44,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void markAsRead(Long id) {
-        notificationRepository.findById(id).ifPresent(n -> {
-            n.setRead(true);
-            notificationRepository.save(n);
-        });
+        Notification notification = getOwnedNotification(id);
+        notification.setRead(true);
+        notificationRepository.save(notification);
     }
 
     @Override
@@ -60,7 +61,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void delete(Long id) {
-        notificationRepository.deleteById(id);
+        Notification notification = getOwnedNotification(id);
+        notification.setDeleted(true);
+        notificationRepository.save(notification);
     }
 
     @Override
@@ -87,5 +90,15 @@ public class NotificationServiceImpl implements NotificationService {
                 .read(n.isRead())
                 .targetUrl(n.getTargetUrl())
                 .build();
+    }
+
+    private Notification getOwnedNotification(Long id) {
+        Long userId = SecurityUtils.getCurrentUserId().orElseThrow();
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found: " + id));
+        if (notification.isDeleted() || !notification.getUserId().equals(userId)) {
+            throw new AccessDeniedException("You do not have permission to access this notification");
+        }
+        return notification;
     }
 }

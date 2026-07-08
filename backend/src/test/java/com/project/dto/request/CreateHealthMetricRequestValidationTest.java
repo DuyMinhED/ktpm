@@ -46,14 +46,27 @@ class CreateHealthMetricRequestValidationTest {
     }
 
     @Test
-    void unknownMetricType_documentsCurrentDtoValidationGap() {
+    void unknownMetricType_failValidation() {
         CreateHealthMetricRequest request = validRequest();
         request.setMetricType("UNKNOWN");
 
         Set<ConstraintViolation<CreateHealthMetricRequest>> violations = validator.validate(request);
 
-        assertTrue(violations.isEmpty(),
-                "DTO only requires metricType to be non-null; supported enum validation happens later in service logic");
+        assertFalse(violations.isEmpty());
+        assertTrue(hasViolationOn(violations, "metricType"));
+    }
+
+    @Test
+    void nonPositiveValues_failValidation() {
+        CreateHealthMetricRequest request = validRequest();
+        request.setValue(new BigDecimal("-1"));
+        assertTrue(hasViolationOn(validator.validate(request), "value"));
+
+        request = validRequest();
+        request.setMetricType("BLOOD_PRESSURE");
+        request.setValue(new BigDecimal("120"));
+        request.setValueSecondary(BigDecimal.ZERO);
+        assertTrue(hasViolationOn(validator.validate(request), "valueSecondary"));
     }
 
     private boolean hasViolationOn(Set<? extends ConstraintViolation<?>> violations, String propertyName) {

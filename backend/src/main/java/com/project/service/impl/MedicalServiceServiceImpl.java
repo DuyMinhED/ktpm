@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.List;
@@ -44,6 +45,7 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     @Override
     @Transactional
     public MedicalService createService(MedicalService service) {
+        validateServicePayload(service);
         CustomUserDetails user = getCurrentUser();
         if ("ROLE_CLINIC_MANAGER".equals(user.getRole())) {
             // Automatically assign service to the current Clinic Manager's clinic
@@ -62,6 +64,7 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     @Override
     @Transactional
     public MedicalService updateService(Long id, MedicalService service) {
+        validateServicePayload(service);
         MedicalService existing = getServiceById(id);
         validateWriteAccess(existing);
 
@@ -164,6 +167,13 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
         }
         
         throw new org.springframework.security.access.AccessDeniedException("Chỉ Quản lý phòng khám mới có quyền truy cập tính năng này!");
+    }
+
+    private void validateServicePayload(MedicalService service) {
+        Objects.requireNonNull(service, "Medical service is required");
+        if (service.getPrice() == null || service.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Service price must be greater than 0");
+        }
     }
 
     private void recordActivity(String action, String module, String details, String status) {

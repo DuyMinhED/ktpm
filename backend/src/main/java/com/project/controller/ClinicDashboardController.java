@@ -246,7 +246,8 @@ public class ClinicDashboardController {
 
     @PostMapping("/patients/{patientId}/health-metrics")
     @PreAuthorize("hasAnyRole('" + RoleUtils.CLINIC_MANAGER + "', '" + RoleUtils.ADMIN + "', '" + RoleUtils.DOCTOR
-            + "') and (@securityService.isClinicManagerOf(#clinicId) or @securityService.isDoctorOfClinic(#clinicId))")
+            + "') and (@securityService.isClinicManagerOf(#clinicId) or @securityService.isDoctorOfClinic(#clinicId))"
+            + " and @securityService.canAccessPatient(#patientId)")
     @Operation(summary = "Record patient health metric", description = "Allows doctor or clinic manager to record measurements during visits")
     public ApiResponse<com.project.dto.response.HealthMetricResponse> recordPatientMetric(
             @PathVariable Long clinicId,

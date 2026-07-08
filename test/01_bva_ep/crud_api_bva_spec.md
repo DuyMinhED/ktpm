@@ -144,4 +144,4 @@ This section completes the missing implementation details for execution and grad
 | Steps | Send request through API/Postman or call service/DTO validation in JUnit; assert response/status and persisted state. |
 | Expected result | Listed per row above; prefer code-based expected result when old SRS rows differ. |
 | Automation target | JUnit for service/DTO boundary behavior; Postman for API contract verification. |
-| Traceability | Covered by `junit_bva_ep_traceability_spec.md` and `code_based_bva_ep_completion.md`. |
+| Traceability | Covered by `junit_bva_ep_traceability.md` and `code_based_bva_ep_completion.md`. |

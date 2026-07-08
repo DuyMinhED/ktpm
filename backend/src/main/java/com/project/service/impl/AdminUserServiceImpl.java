@@ -13,6 +13,7 @@ import com.project.repository.UserRepository;
 import com.project.repository.SystemConfigRepository;
 import com.project.service.AdminUserService;
 import com.project.service.AuditService;
+import com.project.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -133,6 +134,14 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow();
+        SecurityUtils.getCurrentUserId().ifPresent(currentUserId -> {
+            if (currentUserId.equals(id)) {
+                throw new IllegalStateException("Cannot delete the currently logged-in admin account");
+            }
+        });
+        if (UserRole.ADMIN.equals(user.getRole()) && userRepository.countByRoleAndIsDeletedFalse(UserRole.ADMIN) <= 1) {
+            throw new IllegalStateException("Cannot delete the last active admin account");
+        }
         user.setDeleted(true);
         userRepository.save(user);
         

@@ -14,6 +14,7 @@ import com.project.repository.PatientRepository;
 import com.project.repository.SystemConfigRepository;
 import com.project.repository.UserRepository;
 import com.project.service.AuditService;
+import com.project.util.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -334,5 +335,38 @@ public class AdminUserServiceImplTest {
         verify(userRepository, times(1)).save(sampleUser);
         verify(patientRepository, times(1)).save(any(Patient.class));
         verify(auditService, times(1)).recordActivity(eq("Xóa"), eq("Quản lý người dùng"), anyString(), eq("danger"));
+    }
+
+    @Test
+    void deleteUser_currentAdminAccount_shouldThrowException() {
+        sampleUser.setRole(UserRole.ADMIN);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
+
+        try (var security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+
+            assertThrows(IllegalStateException.class, () -> adminUserService.deleteUser(1L));
+        }
+
+        assertFalse(sampleUser.isDeleted());
+        verify(userRepository, never()).save(any(User.class));
+        verify(auditService, never()).recordActivity(anyString(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void deleteUser_lastAdminAccount_shouldThrowException() {
+        sampleUser.setRole(UserRole.ADMIN);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
+        when(userRepository.countByRoleAndIsDeletedFalse(UserRole.ADMIN)).thenReturn(1L);
+
+        try (var security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(99L));
+
+            assertThrows(IllegalStateException.class, () -> adminUserService.deleteUser(1L));
+        }
+
+        assertFalse(sampleUser.isDeleted());
+        verify(userRepository, never()).save(any(User.class));
+        verify(auditService, never()).recordActivity(anyString(), anyString(), anyString(), anyString());
     }
 }

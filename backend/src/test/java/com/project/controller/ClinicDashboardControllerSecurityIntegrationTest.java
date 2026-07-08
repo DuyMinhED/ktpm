@@ -159,6 +159,7 @@ public class ClinicDashboardControllerSecurityIntegrationTest {
     void whenDoctorRecordsHealthMetric_thenSuccess() throws Exception {
         when(securityService.isClinicManagerOf(eq(1L))).thenReturn(false);
         when(securityService.isDoctorOfClinic(eq(1L))).thenReturn(true);
+        when(securityService.canAccessPatient(eq(2L))).thenReturn(true);
 
         com.project.dto.request.CreateHealthMetricRequest request = new com.project.dto.request.CreateHealthMetricRequest();
         request.setMetricType("BLOOD_SUGAR");
@@ -179,5 +180,23 @@ public class ClinicDashboardControllerSecurityIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "doctor@example.com", roles = {"DOCTOR"})
+    void whenDoctorRecordsMetricForUnassignedPatient_thenForbidden() throws Exception {
+        when(securityService.isClinicManagerOf(eq(1L))).thenReturn(false);
+        when(securityService.isDoctorOfClinic(eq(1L))).thenReturn(true);
+        when(securityService.canAccessPatient(eq(2L))).thenReturn(false);
+
+        com.project.dto.request.CreateHealthMetricRequest request = new com.project.dto.request.CreateHealthMetricRequest();
+        request.setMetricType("BLOOD_SUGAR");
+        request.setValue(new java.math.BigDecimal("120.00"));
+        request.setUnit("mg/dL");
+
+        mockMvc.perform(post("/api/v1/clinics/1/patients/2/health-metrics")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
     }
 }

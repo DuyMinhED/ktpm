@@ -72,7 +72,7 @@ Bảng 10 case ban đầu mới bao phủ một phần biên độ dài. Để �
 | TC-BVA-AUTH-08 | Phone optional or present | Build request with phone length 20 | DTO JUnit | `CreateUserRequestValidationTest`, `UpdateUserRequestValidationTest` |
 | TC-BVA-AUTH-09 | Phone optional or present | Build request with phone length 21 | DTO JUnit | `CreateUserRequestValidationTest`, `UpdateUserRequestValidationTest` |
 | TC-BVA-AUTH-10 | Update user path | Build request with status length 31 | DTO/API test | `UpdateUserRequestValidationTest` |
-| TC-BVA-AUTH-11..20 | See Section 3 | Execute the code-based supplemental cases | DTO/service/API test | `junit_bva_ep_traceability_spec.md`, `code_based_bva_ep_completion.md` |
+| TC-BVA-AUTH-11..20 | See Section 3 | Execute the code-based supplemental cases | DTO/service/API test | `junit_bva_ep_traceability.md`, `code_based_bva_ep_completion.md` |
 
 ## 5. Completeness Status
 

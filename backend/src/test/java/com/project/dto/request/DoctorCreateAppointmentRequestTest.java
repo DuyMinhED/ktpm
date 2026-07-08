@@ -53,7 +53,7 @@ class DoctorCreateAppointmentRequestTest {
     }
 
     @Test
-    void malformedDateTimeAndUnknownType_currentlyPassDtoValidationDocumentingGap() {
+    void malformedDateTimeAndUnknownType_failValidation() {
         DoctorCreateAppointmentRequest request = DoctorCreateAppointmentRequest.builder()
                 .patientId(1L)
                 .appointmentDate("03/07/2026")
@@ -63,9 +63,9 @@ class DoctorCreateAppointmentRequestTest {
 
         Set<ConstraintViolation<DoctorCreateAppointmentRequest>> violations = validator.validate(request);
 
-        assertFalse(hasViolationOn(violations, "appointmentDate"));
-        assertFalse(hasViolationOn(violations, "appointmentTime"));
-        assertFalse(hasViolationOn(violations, "type"));
+        assertTrue(hasViolationOn(violations, "appointmentDate"));
+        assertTrue(hasViolationOn(violations, "appointmentTime"));
+        assertTrue(hasViolationOn(violations, "type"));
     }
 
     private boolean hasViolationOn(Set<? extends ConstraintViolation<?>> violations, String propertyName) {

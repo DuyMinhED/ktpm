@@ -6,7 +6,7 @@ This document maps the implemented backend JUnit tests to Boundary Value Analysi
 
 This file intentionally excludes Postman/API collection design. It focuses only on code-level automated tests in `backend/src/test/java`.
 
-Verification baseline: `mvn -f backend/pom.xml -q verify` passed with `627 tests, 0 failures, 0 errors`.
+Latest available Surefire baseline: `635 tests, 0 failures, 0 errors, 0 skipped`. Current source contains `89` backend Java test classes.
 
 ## 2. Boundary Value Analysis Coverage
 
@@ -54,4 +54,14 @@ Verification baseline: `mvn -f backend/pom.xml -q verify` passed with `627 tests
 - `page=0` should be treated as valid for current backend pagination because Spring `PageRequest.of(page, size)` is zero-based.
 - Appointment-time tests should use fixed/mocked time or values far enough from the tolerance window to avoid flaky results.
 - Frontend password validation and backend password validation are not identical; this mismatch should be tracked as a product/design gap.
+
+## 5. Implementation Status
+
+| Area | Status | Evidence |
+|---|---|---|
+| Core BVA rows `BVA-JUNIT-001..010` | Implemented | `CoreBusinessBvaTest` currently has 11 test methods, including nested prescription item validation. |
+| Additional BVA rows `BVA-JUNIT-011..014` | Implemented | `DoctorPatientServiceImplTest` and `PatientPrescriptionServiceImplTest`. |
+| EP rows `EP-JUNIT-001..016` | Implemented | `PatientPrescriptionServiceImplTest`, `DoctorPatientServiceImplTest`, `GeminiAiChatServiceImplTest`. |
+| Pagination BVA referenced elsewhere | Implemented separately | `PaginationBvaTest`. |
+| Frontend/backend mismatch rows | Follow-up | These are tracked in frontend/API docs, not this JUnit traceability file. |
 

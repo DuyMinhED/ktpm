@@ -28,7 +28,7 @@ Input reviewed:
 | BVA/EP docs include boundary tables | Done | Added boundary addenda to `auth_user_ep_spec.md`, `crud_data_ep_spec.md`, `id_status_ep_spec.md`, and `patient_appointment_ep_spec.md`. |
 | Test cases include expected result and automation target | Mostly done | Core BVA/EP and white-box specs include expected result plus JUnit/API/E2E targets. Some legacy report files remain summary-only. |
 | Ambiguous requirements are identified | Done | See Section 3. |
-| Test gaps are mapped to modules/tasks/test cases | Done | See Section 4. |
+| Test gaps are mapped to modules/tasks/test cases | Done and refreshed | See Section 4. Items now distinguish implemented evidence from follow-up work. |
 | Follow-up actions are prioritized | Done | See Section 5. |
 
 ## 3. Ambiguous Points By Module
@@ -48,20 +48,20 @@ Input reviewed:
 
 ## 4. Test Gaps And Required Updates
 
-| Gap ID | Module | Gap | Existing evidence | Required update / target test |
+| Gap ID | Module | Current status | Existing evidence | Remaining update / target |
 |---|---|---|---|---|
-| GAP-AUTH-001 | Auth/User | Need explicit boundary tests for `newPassword` length `7/8/9/99/100/101`. | `test/01_bva_ep/auth_user_ep_spec.md` Section 5. | `ChangePasswordRequestTest`, auth API negative cases. |
-| GAP-AUTH-002 | Auth/User | Status casing and unknown values need DTO/controller checks. | `auth_user_ep_spec.md`, `id_status_ep_spec.md`. | `UpdateUserRequestValidationTest`: `active`, `SUSPENDED`, empty status. |
-| GAP-CRUD-001 | Clinic | Need clinic name/code length boundaries and duplicate-code path. | `crud_data_ep_spec.md` Section 7. | `ClinicRequestValidationTest`, `AdminClinicServiceImplTest`. |
-| GAP-CRUD-002 | User | Need fullName/email/password CRUD boundary cases tied to DTO annotations. | `crud_data_ep_spec.md`, `auth_user_general_spec.md`. | `CreateUserRequestValidationTest`, `UpdateUserRequestValidationTest`. |
-| GAP-HM-001 | Health Metrics | Need one authoritative threshold suite for BLOOD_SUGAR, HBA1C, HEART_RATE, SPO2, BLOOD_PRESSURE. | `code_based_bva_ep_completion.md`, `health_metric_ep_bva_spec.md`. | `PatientHealthMetricServiceImplTest`, `CoreBusinessBvaTest`. |
-| GAP-HM-002 | Health Metrics | Missing/invalid `valueSecondary` for BLOOD_PRESSURE must be tested by layer. | `crud_data_ep_spec.md` Section 7. | DTO/API test if validation exists; service test records gap if not enforced. |
-| GAP-APPT-001 | Patient Appointment | Need full lower/upper appointment time BVA around `now+3h` and `now+15d`. | `patient_appointment_ep_spec.md` Section 3.1. | `PatientAppointmentServiceImplTest`, `CreateAppointmentRequestValidationTest`. |
-| GAP-APPT-002 | Patient Appointment | Need `doctorId=null`, `doctorId=0`, non-existing doctor, and unsupported appointment type cases. | `patient_appointment_ep_spec.md`, `crud_data_ep_spec.md`. | DTO/service/controller tests with layer-specific expected result. |
-| GAP-ID-001 | ID/Status/Pagination | Need path id and pagination BVA: `id=-1/0/1/abc`, `page=-1/0`, `size=0/1`. | `id_status_ep_spec.md` Section 3.1. | Controller tests, `PaginationBvaTest`. |
-| GAP-FE-001 | Frontend Forms | Need E2E cases for toast errors and frontend/backend mismatch paths. | `frontend_test_conditions_analysis.md`, `frontend_form_bva.md`. | `frontend/e2e_tests/frontend_error_toast_test.js`, form BVA E2E specs. |
-| GAP-POSTMAN-001 | API/Postman | Broad status-code assertions reduce defect detection. | Postman collection tests. | Add strict assertions for business-negative cases and keep broad checks only for smoke endpoints. |
-| GAP-DOC-001 | Documentation | Legacy documents had inconsistent names and locations. | `test/README.md`, grouped folder structure. | Keep `test/README.md` as navigation source and avoid adding new root-level spec files. |
+| GAP-AUTH-001 | Auth/User | Implemented | `ChangePasswordRequestTest.newPasswordBoundaryValues_matchSizeMinMax` | Add API-level negative case only if required beyond DTO validation. |
+| GAP-AUTH-002 | Auth/User | Implemented for DTO | `UpdateUserRequestValidationTest.statusAllowsOnlyActiveOrInactive`, `statusLength31_failsValidation` | Add controller/API assertion if status update endpoint contract needs exact body/error shape. |
+| GAP-CRUD-001 | Clinic | Implemented for DTO/service | `ClinicRequestValidationTest`, `AdminClinicServiceImplTest` | Refresh JaCoCo and API contract docs if exact duplicate-code status is standardized. |
+| GAP-CRUD-002 | User | Implemented for DTO/service | `CreateUserRequestValidationTest`, `UpdateUserRequestValidationTest`, `AdminUserServiceImplTest` | Keep frontend/backend password mismatch as product decision. |
+| GAP-HM-001 | Health Metrics | Implemented for current code thresholds | `PatientHealthMetricServiceImplTest.recordMetricForPatient_statusBoundaries`, `CoreBusinessBvaTest` | Update SRS/docs if product wants different SPO2/BP thresholds. |
+| GAP-HM-002 | Health Metrics | Partially implemented | `PatientHealthMetricServiceImplTest.recordMetricForPatient_highBloodPressureNoDiastolicNoClinicManager` | Decide whether missing diastolic should be rejected by DTO/API or tolerated by service. |
+| GAP-APPT-001 | Patient Appointment | Implemented | `CoreBusinessBvaTest`, `PatientAppointmentServiceImplTest`, `CreateAppointmentRequestValidationTest` | Keep fixed-clock/tolerance notes to avoid flaky tests. |
+| GAP-APPT-002 | Patient Appointment | Partially implemented by layer | `CreateAppointmentRequestValidationTest.unsupportedAppointmentType_failValidation`, `PatientAppointmentServiceImplTest` doctor-null paths | Decide whether service should hard-fail non-existing doctor or keep tolerant behavior. |
+| GAP-ID-001 | ID/Status/Pagination | Partially implemented | `PaginationBvaTest`, controller/service not-found tests | Add endpoint-specific `id=-1/0/abc/non-existing` tests only for high-risk routes. |
+| GAP-FE-001 | Frontend Forms | Partially implemented | `frontend_error_toast_test.js`, `frontend_validation_test.js`, route/login/navigation E2E files | Add cross-layer bypass tests for password, phone, and age mismatches if required. |
+| GAP-POSTMAN-001 | API/Postman | Follow-up | Postman collection JSON is valid and executable | Split broad smoke assertions from strict business-negative assertions. |
+| GAP-DOC-001 | Documentation | Implemented | `test/README.md`, grouped folder structure, `test_design_vs_implementation_audit.md` | Keep root `test/` clean and update references after renames. |
 
 ## 5. Follow-Up Actions
 

@@ -276,6 +276,23 @@ public class CoreBusinessBvaTest {
         assertTrue(violations.isEmpty(), "One medication item should pass validation");
     }
 
+    @Test
+    void testPrescriptionItems_BlankMedicationName_failsCascadeValidation() {
+        PrescriptionItemRequest item = new PrescriptionItemRequest();
+        item.setMedicationName(" ");
+        item.setDosage("500mg");
+
+        PrescriptionRequest request = new PrescriptionRequest();
+        request.setPatientId(1L);
+        request.setDiagnosis("Headache");
+        request.setItems(Collections.singletonList(item));
+
+        Set<ConstraintViolation<PrescriptionRequest>> violations = validator.validate(request);
+
+        assertTrue(violations.stream()
+                .anyMatch(v -> "items[0].medicationName".equals(v.getPropertyPath().toString())));
+    }
+
     // =========================================================================
     // 3. Health Metric Values - BVA Test Cases (TC-BVA-CORE-07 -> TC-BVA-CORE-10)
     // =========================================================================

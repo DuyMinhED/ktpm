@@ -10,6 +10,7 @@ import com.project.service.PatientPrescriptionService;
 import com.project.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,6 +128,13 @@ public class PatientPrescriptionServiceImpl implements PatientPrescriptionServic
     public void requestRefill(Long prescriptionId) {
         Prescription prescription = prescriptionRepository.findById(prescriptionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Prescription not found: " + prescriptionId));
+        Patient patient = getCurrentPatient();
+        if (prescription.getPatient() == null || !prescription.getPatient().getId().equals(patient.getId())) {
+            throw new AccessDeniedException("Unauthorized to request refill for this prescription");
+        }
+        if (prescription.getStatus() != PrescriptionStatus.ACTIVE) {
+            throw new IllegalStateException("Only active prescriptions can be refilled");
+        }
         prescription.setStatus(PrescriptionStatus.PENDING_RENEWAL);
         prescriptionRepository.save(prescription);
 

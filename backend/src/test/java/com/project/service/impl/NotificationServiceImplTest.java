@@ -2,8 +2,10 @@ package com.project.service.impl;
 
 import com.project.dto.response.NotificationResponse;
 import com.project.entity.Notification;
+import com.project.exception.ResourceNotFoundException;
 import com.project.repository.NotificationRepository;
 import com.project.util.SecurityUtils;
+import org.springframework.security.access.AccessDeniedException;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
@@ -13,12 +15,15 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 class NotificationServiceImplTest {
@@ -65,11 +70,32 @@ class NotificationServiceImplTest {
         when(repository.findById(2L)).thenReturn(Optional.of(notification));
         when(repository.findById(404L)).thenReturn(Optional.empty());
 
-        service.markAsRead(2L);
-        service.markAsRead(404L);
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(7L));
+
+            service.markAsRead(2L);
+
+            assertThrows(ResourceNotFoundException.class, () -> service.markAsRead(404L));
+        }
 
         assertTrue(notification.isRead());
         verify(repository).save(notification);
+    }
+
+    @Test
+    void markAsRead_otherUsersNotification_isDenied() {
+        Notification notification = notification(2L);
+        notification.setUserId(8L);
+        when(repository.findById(2L)).thenReturn(Optional.of(notification));
+
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(7L));
+
+            assertThrows(AccessDeniedException.class, () -> service.markAsRead(2L));
+        }
+
+        assertFalse(notification.isRead());
+        verify(repository, never()).save(notification);
     }
 
     @Test
@@ -90,14 +116,22 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void deleteAndSendNotification_delegateToRepository() {
+    void delete_marksOwnedNotificationAsDeletedAndSendNotificationSavesNewRecord() {
+        Notification notification = notification(9L);
+        when(repository.findById(9L)).thenReturn(Optional.of(notification));
         when(repository.save(any(Notification.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        service.delete(9L);
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(7L));
+
+            service.delete(9L);
+        }
         service.sendNotification(7L, "Title", "Message", "warning", "/x");
 
-        verify(repository).deleteById(9L);
-        verify(repository).save(any(Notification.class));
+        assertTrue(notification.isDeleted());
+        verify(repository, never()).deleteById(9L);
+        verify(repository).save(notification);
+        verify(repository).save(argThat(n -> "warning".equals(n.getType()) && "/x".equals(n.getTargetUrl())));
     }
 
     private static Notification notification(Long id) {

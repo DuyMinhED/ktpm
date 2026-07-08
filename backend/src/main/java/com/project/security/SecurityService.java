@@ -30,7 +30,7 @@ public class SecurityService {
         }
 
         if (RoleUtils.DOCTOR.equals(role)) {
-            return user.getClinicId() != null && user.getClinicId().equals(patient.getClinicId());
+            return user.getId() != null && user.getId().equals(patient.getDoctorId());
         }
 
         if ("PATIENT".equals(user.getRole())) {

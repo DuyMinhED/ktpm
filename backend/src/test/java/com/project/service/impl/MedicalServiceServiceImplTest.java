@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -110,6 +111,18 @@ class MedicalServiceServiceImplTest {
     }
 
     @Test
+    void createService_nonPositivePriceIsRejectedBeforeSave() {
+        authenticate("ROLE_ADMIN", null);
+        MedicalService zeroPrice = serviceEntity(null, null, ACTIVE);
+        zeroPrice.setPrice(BigDecimal.ZERO);
+
+        assertThrows(IllegalArgumentException.class, () -> service.createService(zeroPrice));
+
+        verify(medicalServiceRepository, never()).save(any());
+        verifyNoInteractions(auditService);
+    }
+
+    @Test
     void updateService_adminCopiesMutableFieldsButKeepsClinicId() {
         authenticate("ROLE_ADMIN", null);
         MedicalService existing = serviceEntity(1L, 10L, ACTIVE);
@@ -137,6 +150,18 @@ class MedicalServiceServiceImplTest {
 
         assertThrows(AccessDeniedException.class, () -> service.updateService(1L, serviceEntity(null, 10L, INACTIVE)));
         assertThrows(AccessDeniedException.class, () -> service.updateService(2L, serviceEntity(null, 10L, INACTIVE)));
+    }
+
+    @Test
+    void updateService_nonPositivePriceIsRejectedBeforeLookup() {
+        authenticate("ROLE_ADMIN", null);
+        MedicalService invalid = serviceEntity(null, null, ACTIVE);
+        invalid.setPrice(new BigDecimal("-1.00"));
+
+        assertThrows(IllegalArgumentException.class, () -> service.updateService(1L, invalid));
+
+        verify(medicalServiceRepository, never()).findById(1L);
+        verify(medicalServiceRepository, never()).save(any());
     }
 
     @Test

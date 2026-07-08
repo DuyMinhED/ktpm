@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -317,7 +318,9 @@ class PatientPrescriptionServiceImplTest {
 
     @Test
     void requestRefill_success() {
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
         when(prescriptionRepository.findById(10L)).thenReturn(Optional.of(prescription));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.of(currentPatient));
 
         patientPrescriptionService.requestRefill(10L);
 
@@ -332,5 +335,31 @@ class PatientPrescriptionServiceImplTest {
         assertTrue(savedNotification.getMessage().contains("Nguyen Van A"));
         assertTrue(savedNotification.getMessage().contains("#RX-5678"));
         assertEquals("/doctor/patients/100", savedNotification.getTargetUrl());
+    }
+
+    @Test
+    void requestRefill_otherPatientsPrescription_isDenied() {
+        prescription.setPatient(otherPatient);
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+        when(prescriptionRepository.findById(10L)).thenReturn(Optional.of(prescription));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.of(currentPatient));
+
+        assertThrows(AccessDeniedException.class, () -> patientPrescriptionService.requestRefill(10L));
+
+        verify(prescriptionRepository, never()).save(any());
+        verify(notificationRepository, never()).save(any());
+    }
+
+    @Test
+    void requestRefill_inactivePrescription_isRejected() {
+        prescription.setStatus(PrescriptionStatus.CANCELLED);
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+        when(prescriptionRepository.findById(10L)).thenReturn(Optional.of(prescription));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.of(currentPatient));
+
+        assertThrows(IllegalStateException.class, () -> patientPrescriptionService.requestRefill(10L));
+
+        verify(prescriptionRepository, never()).save(any());
+        verify(notificationRepository, never()).save(any());
     }
 }

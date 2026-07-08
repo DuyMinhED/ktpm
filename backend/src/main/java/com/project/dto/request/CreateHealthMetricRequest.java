@@ -13,11 +13,14 @@ import java.time.LocalDateTime;
 public class CreateHealthMetricRequest {
 
     @NotNull(message = "Metric type is required")
+    @Pattern(regexp = "BLOOD_SUGAR|BLOOD_PRESSURE|HEART_RATE|HBA1C|SPO2", message = "Metric type is not supported")
     private String metricType; // BLOOD_SUGAR, BLOOD_PRESSURE, HEART_RATE, HBA1C, SPO2
 
     @NotNull(message = "Value is required")
+    @Positive(message = "Value must be greater than 0")
     private BigDecimal value;
 
+    @Positive(message = "Secondary value must be greater than 0")
     private BigDecimal valueSecondary; // For blood pressure diastolic
 
     @NotBlank(message = "Unit is required")

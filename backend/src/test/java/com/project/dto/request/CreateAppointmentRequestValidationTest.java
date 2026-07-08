@@ -50,6 +50,22 @@ class CreateAppointmentRequestValidationTest {
         assertTrue(validator.validate(validRequest()).isEmpty());
     }
 
+    @Test
+    void pastAppointmentTime_failValidation() {
+        CreateAppointmentRequest request = validRequest();
+        request.setAppointmentTime(LocalDateTime.now().minusMinutes(1));
+
+        assertTrue(hasViolationOn(validator.validate(request), "appointmentTime"));
+    }
+
+    @Test
+    void unsupportedAppointmentType_failValidation() {
+        CreateAppointmentRequest request = validRequest();
+        request.setAppointmentType("VIDEO_CALL");
+
+        assertTrue(hasViolationOn(validator.validate(request), "appointmentType"));
+    }
+
     private boolean hasViolationOn(Set<? extends ConstraintViolation<?>> violations, String propertyName) {
         return violations.stream().anyMatch(v -> propertyName.equals(v.getPropertyPath().toString()));
     }
