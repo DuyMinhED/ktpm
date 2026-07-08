@@ -33,7 +33,38 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Health Check: Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Health Check: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Health Check: Response body indicates healthy\", function () {",
+                  "    var text = pm.response.text();",
+                  "    if (text) {",
+                  "        try {",
+                  "            var json = pm.response.json();",
+                  "            pm.expect(json).to.satisfy(function (body) {",
+                  "                return body.status || body.message || body.success !== undefined;",
+                  "            });",
+                  "        } catch (e) {",
+                  "            pm.expect(text.length).to.be.above(0);",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Login - Admin",
@@ -317,7 +348,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Dashboard Data: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Dashboard Data: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Dashboard Data: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Dashboard Data: Response has valid dashboard structure\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.be.an(\"object\");",
+                  "    pm.expect(Object.keys(response.data).length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Reports",
@@ -352,7 +419,44 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Reports: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Reports: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Reports: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Reports: Response has valid reports structure\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.satisfy(function (d) {",
+                  "        return d !== null && (typeof d === \"object\" || Array.isArray(d));",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Audit Logs",
@@ -387,7 +491,53 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Audit Logs: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Audit Logs: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Audit Logs: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Audit Logs: Response has valid paginated structure\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var page = response.data;",
+                  "    pm.expect(page).to.be.an(\"object\");",
+                  "    pm.expect(page).to.have.property(\"content\");",
+                  "    pm.expect(page.content).to.be.an(\"array\");",
+                  "    pm.expect(page).to.include.keys(\"totalElements\", \"totalPages\");",
+                  "    if (page.content.length > 0) {",
+                  "        var log = page.content[0];",
+                  "        pm.expect(log).to.be.an(\"object\");",
+                  "        pm.expect(log).to.satisfy(function (item) {",
+                  "            return item.id !== undefined || item.action || item.timestamp || item.createdAt;",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -849,7 +999,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Toggle Clinic Status: Status code is 200 or auth/not found guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Clinic Status: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Clinic Status: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Clinic Status: Response has valid body\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -880,7 +1066,44 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get User Stats: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get User Stats: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get User Stats: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get User Stats: Response has valid stats object\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var stats = response.data;",
+                  "    pm.expect(stats).to.be.an(\"object\");",
+                  "    pm.expect(Object.keys(stats).length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Users List",
@@ -997,7 +1220,44 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Users By Role: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Users By Role: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Users By Role: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Users By Role: Response has valid paginated users\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    var data = response.data;",
+                  "    pm.expect(data).to.be.an(\"object\");",
+                  "    pm.expect(data.content).to.be.an(\"array\");",
+                  "    pm.expect(data).to.include.keys(\"totalElements\", \"totalPages\");",
+                  "    data.content.forEach(function (user) {",
+                  "        pm.expect(user.role).to.equal(\"DOCTOR\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get User By ID",
@@ -1209,7 +1469,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get System Config: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get System Config: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get System Config: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get System Config: Response has valid config object\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.be.an(\"object\");",
+                  "    pm.expect(Object.keys(response.data).length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update System Config",
@@ -1243,7 +1539,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Update System Config: Status code is 200 or auth/validation guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Update System Config: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Update System Config: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update System Config: Response has valid body\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.be.an(\"object\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Regenerate API Key",
@@ -1269,7 +1600,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Regenerate API Key: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Regenerate API Key: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Regenerate API Key: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Regenerate API Key: Response has new API key\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.apiKey;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1306,7 +1673,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Clinic Dashboard: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Clinic Dashboard: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Clinic Dashboard: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Clinic Dashboard: Response has valid dashboard data\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.be.an(\"object\");",
+                  "    pm.expect(Object.keys(response.data).length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Clinic Profile",
@@ -1332,7 +1735,46 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Clinic Profile: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Clinic Profile: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Clinic Profile: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Clinic Profile: Response has valid clinic profile\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var clinic = response.data;",
+                  "    pm.expect(clinic).to.be.an(\"object\");",
+                  "    pm.expect(clinic).to.satisfy(function (c) {",
+                  "        return c.id !== undefined || c.name || c.clinicCode;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Clinic Profile",
@@ -1367,7 +1809,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Update Clinic Profile: Status code is 200 or auth/validation guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Clinic Profile: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Clinic Profile: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Clinic Profile: Response has valid updated profile\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.satisfy(function (body) {",
+                  "        return body.data !== undefined || body.message || body.success === true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Conditions List",
@@ -1393,7 +1871,45 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Conditions List: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Conditions List: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Conditions List: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Conditions List: Response has valid conditions array\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.be.an(\"array\");",
+                  "    if (response.data.length > 0) {",
+                  "        pm.expect(response.data[0]).to.be.a(\"string\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2154,7 +2670,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Create Doctor: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Create Doctor: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Create Doctor: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create Doctor: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Doctor",
@@ -2190,7 +2742,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Update Doctor: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Doctor: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Doctor: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Doctor: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete Doctor",
@@ -2217,7 +2805,39 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete Doctor: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Doctor: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Doctor: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Doctor: Response has valid body\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2258,7 +2878,50 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Appointments: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Appointments: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Appointments: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Appointments: Response has valid paged structure\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var page = response.data;",
+                  "    var list = Array.isArray(page) ? page : page.content;",
+                  "    pm.expect(list).to.be.an(\"array\");",
+                  "    if (!Array.isArray(page)) {",
+                  "        pm.expect(page).to.include.keys(\"content\", \"totalElements\", \"totalPages\");",
+                  "    }",
+                  "    if (list.length > 0) {",
+                  "        var appt = list[0];",
+                  "        pm.expect(appt).to.be.an(\"object\");",
+                  "        pm.expect(appt).to.satisfy(function (i) { return i.id !== undefined; });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Appointment",
@@ -2293,7 +2956,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Create Appointment: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Create Appointment: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Create Appointment: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create Appointment: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Appointment",
@@ -2329,7 +3028,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Update Appointment: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Appointment: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Appointment: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Appointment: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Appointment Status",
@@ -3064,7 +3799,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Create Appointment: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Create Appointment: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Create Appointment: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create Appointment: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Appointment Status",
@@ -3101,7 +3872,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Update Appointment Status: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Appointment Status: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Appointment Status: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Appointment Status: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Reschedule Appointment",
@@ -3137,7 +3944,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Reschedule Appointment: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Reschedule Appointment: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Reschedule Appointment: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Reschedule Appointment: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Batch Reschedule",
@@ -3173,7 +4016,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Batch Reschedule: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Batch Reschedule: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Batch Reschedule: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Batch Reschedule: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 404, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -3213,7 +4092,49 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get My Patients: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get My Patients: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get My Patients: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get My Patients: Response has valid paged patients\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var page = response.data;",
+                  "    var list = Array.isArray(page) ? page : page.content;",
+                  "    pm.expect(list).to.be.an(\"array\");",
+                  "    if (!Array.isArray(page)) {",
+                  "        pm.expect(page).to.include.keys(\"content\", \"totalElements\", \"totalPages\");",
+                  "    }",
+                  "    if (list.length > 0) {",
+                  "        pm.expect(list[0]).to.be.an(\"object\");",
+                  "        pm.expect(list[0]).to.satisfy(function (i) { return i.id !== undefined || i.patientId !== undefined; });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Patients With Filters",
@@ -3260,7 +4181,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Patients With Filters: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patients With Filters: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patients With Filters: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patients With Filters: Response has valid filtered data\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var page = response.data;",
+                  "    var list = Array.isArray(page) ? page : page.content;",
+                  "    pm.expect(list).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Patient Stats",
@@ -3292,7 +4248,41 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Patient Stats: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Stats: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Stats: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Stats: Response has valid stats\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.be.an(\"object\");",
+                  "    pm.expect(Object.keys(response.data).length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Patient Detail",
@@ -4201,7 +5191,44 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Available Doctors: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Available Doctors: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Available Doctors: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Available Doctors: Response has valid doctors list\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var list = Array.isArray(response.data) ? response.data : response.data.content;",
+                  "    pm.expect(list).to.be.an(\"array\");",
+                  "    if (list.length > 0) {",
+                  "        pm.expect(list[0]).to.satisfy(function (d) { return d.id !== undefined && (d.name || d.fullName); });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Book Appointment",
@@ -4235,7 +5262,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Book Appointment: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Book Appointment: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Book Appointment: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Book Appointment: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Cancel Appointment",
@@ -4262,7 +5325,39 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Cancel Appointment: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Cancel Appointment: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Cancel Appointment: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Cancel Appointment: Response has valid body\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Toggle Reminder",
@@ -4295,7 +5390,39 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Toggle Reminder: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Reminder: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Reminder: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Reminder: Response has valid body\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -4334,7 +5461,46 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Record Health Metric: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Record Health Metric: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Record Health Metric: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Record Health Metric: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    if (response.data) {",
+                  "        pm.expect(response.data).to.be.an(\"object\");",
+                  "        pm.expect(response.data).to.satisfy(function (m) { return m.id !== undefined; });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Metrics Summary",
@@ -4366,7 +5532,40 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Metrics Summary: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Metrics Summary: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Metrics Summary: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Metrics Summary: Response has valid summary\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.satisfy(function (d) { return d !== null && typeof d === \"object\"; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Chart Data",
@@ -4402,7 +5601,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Chart Data: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Chart Data: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Chart Data: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Chart Data: Response has valid chart data\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.satisfy(function (d) {",
+                  "        return Array.isArray(d) || (d !== null && typeof d === \"object\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Metrics History",
@@ -4438,7 +5672,45 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Metrics History: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Metrics History: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Metrics History: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Metrics History: Response has valid history list\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var list = Array.isArray(response.data) ? response.data : (response.data.content || []);",
+                  "    pm.expect(list).to.be.an(\"array\");",
+                  "    if (list.length > 0) {",
+                  "        pm.expect(list[0]).to.be.an(\"object\");",
+                  "        pm.expect(list[0]).to.satisfy(function (m) { return m.id !== undefined; });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete Health Metric",
@@ -4464,7 +5736,40 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete Health Metric: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Health Metric: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Health Metric: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Health Metric: Response has valid body\", function () {",
+                  "    if (pm.response.code === 204) return;",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -5312,7 +6617,43 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Add Emergency Contact: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Add Emergency Contact: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Add Emergency Contact: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Add Emergency Contact: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Emergency Contact",
@@ -5348,7 +6689,39 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Update Emergency Contact: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Emergency Contact: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Emergency Contact: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Emergency Contact: Response has valid body\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Download Health Report",
@@ -5374,7 +6747,30 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Download Health Report: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Download Health Report: Response time is less than 10000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "",
+                  "pm.test(\"Download Health Report: Response has content\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        pm.expect(pm.response.text().length).to.be.above(0);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -5403,7 +6799,45 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get My Notifications: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get My Notifications: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get My Notifications: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get My Notifications: Response has valid list\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var list = Array.isArray(response.data) ? response.data : (response.data.content || []);",
+                  "    pm.expect(list).to.be.an(\"array\");",
+                  "    if (list.length > 0) {",
+                  "        pm.expect(list[0]).to.be.an(\"object\");",
+                  "        pm.expect(list[0]).to.satisfy(function (n) { return n.id !== undefined; });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Unread Count",
@@ -5428,7 +6862,41 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Unread Count: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Unread Count: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Unread Count: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Unread Count: Response has valid count\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.be.a(\"number\");",
+                  "    pm.expect(response.data).to.be.at.least(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Mark As Read",
@@ -5454,7 +6922,40 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Mark As Read: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Mark As Read: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Mark As Read: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Mark As Read: Response has valid body\", function () {",
+                  "    if (pm.response.code === 204 || !pm.response.text()) return;",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Mark All As Read",
@@ -6309,7 +7810,46 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get All Services: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get All Services: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get All Services: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get All Services: Response has valid services list\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var list = Array.isArray(response.data) ? response.data : response.data.content;",
+                  "    pm.expect(list).to.be.an(\"array\");",
+                  "    if (list.length > 0) {",
+                  "        var svc = list[0];",
+                  "        pm.expect(svc).to.be.an(\"object\");",
+                  "        pm.expect(svc).to.satisfy(function (s) { return s.id !== undefined && (s.name || s.serviceName); });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Services By Clinic",
@@ -6339,7 +7879,41 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Services By Clinic: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Services By Clinic: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Services By Clinic: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Services By Clinic: Response has valid services\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var list = Array.isArray(response.data) ? response.data : response.data.content;",
+                  "    pm.expect(list).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Service By ID",
@@ -6364,7 +7938,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Service By ID: Status code is 200 or error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Service By ID: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Service By ID: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Service By ID: Response has valid service detail\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    var svc = response.data;",
+                  "    pm.expect(svc).to.be.an(\"object\");",
+                  "    pm.expect(svc).to.satisfy(function (s) { return s.id !== undefined && (s.name || s.serviceName); });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Service Stats (Admin)",
@@ -6389,7 +7998,40 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get Service Stats: Status code is 200 or auth guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Service Stats: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Get Service Stats: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Service Stats: Response has valid stats\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.have.property(\"data\");",
+                  "    pm.expect(response.data).to.satisfy(function (d) { return d !== null && typeof d === \"object\"; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Service",
@@ -6422,7 +8064,47 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Create Service: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"Create Service: Response time is less than 5000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test(\"Create Service: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create Service: Response has valid body\", function () {",
+                  "    if (!pm.response.text()) { pm.expect(pm.response.code).to.be.oneOf([401, 403]); return; }",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if ([400, 401, 403, 409].includes(pm.response.code)) {",
+                  "        pm.expect(response).to.satisfy(function (b) { return b.message || b.error || b.errors || b.status; });",
+                  "        return;",
+                  "    }",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "    if (response.data) {",
+                  "        pm.expect(response.data).to.be.an(\"object\");",
+                  "        pm.expect(response.data).to.satisfy(function (s) { return s.id !== undefined; });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Service",
@@ -6456,7 +8138,39 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Update Service: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Service: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Update Service: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Service: Response has valid body\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Toggle Service Status",
@@ -6482,7 +8196,39 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Toggle Service Status: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Service Status: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Service Status: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Service Status: Response has valid body\", function () {",
+                  "    if (pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete Service",
@@ -6507,7 +8253,39 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete Service: Status code is success or handled error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Service: Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Service: Content-Type is application/json\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Service: Response has valid body\", function () {",
+                  "    if (pm.response.code === 204 || pm.response.code !== 200) return;",
+                  "    var response = pm.response.json();",
+                  "    pm.expect(response).to.be.an(\"object\");",
+                  "    if (response.hasOwnProperty(\"success\")) { pm.expect(response.success).to.be.true; }",
+                  "    pm.expect(response).to.satisfy(function (b) { return b.data !== undefined || b.message || b.success === true; });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
