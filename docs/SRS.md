@@ -130,6 +130,9 @@ Hệ thống được xây dựng dựa trên mô hình kiến trúc **Client-Se
 
 ## 4. YÊU CẦU PHI CHỨC NĂNG (NON-FUNCTIONAL REQUIREMENTS)
 *   **NFR-01 (Hiệu năng - Thời gian phản hồi):** Tốc độ tải dữ liệu và các thao tác CRUD cơ bản phải nhanh chóng. Tiêu chí đo lường: `< 2 giây` cho request thông thường. `< 5 giây` khi xuất file báo cáo dung lượng lớn (Excel/PDF).
+    *   *Ngoại lệ môi trường thử nghiệm (Non-Production Staging/Free Tier Cloud):* Trong môi trường thử nghiệm tự động (CI/CD) sử dụng các dịch vụ Cloud miễn phí (như Render Free Tier), giới hạn thời gian phản hồi được nới rộng cho một số tác vụ nặng để tránh lỗi timeout do hiện tượng khởi động nguội (Cold Start) của máy chủ:
+        *   Tải chi tiết bệnh nhân (`Get Patient Detail`): `< 45 giây` (45000ms) *(Cập nhật lúc 17:51 ngày 08/07/2026)*.
+        *   Tải lịch sử đơn thuốc (`Get Prescription History`): `< 45 giây` (45000ms).
 *   **NFR-02 (Hiệu năng - Độ trễ thời gian thực):** Nhắn tin và nhận cảnh báo (WebSocket) không bị giật lag. Tiêu chí đo lường: Độ trễ mạng `< 500 ms`.
 *   **NFR-03 (Hiệu năng - Khả năng chịu tải):** Hệ thống có khả năng phục vụ nhiều người cùng lúc mà không bị sập. Tiêu chí đo lường: Tối thiểu `1.000 RPS` (Requests/giây) và `500` người dùng truy cập đồng thời.
 *   **NFR-04 (Bảo mật - Xác thực & Phiên làm việc):** 100% API nghiệp vụ phải yêu cầu đăng nhập. Sử dụng JWT Token, tự động vô hiệu hóa (timeout) sau `24 giờ`.

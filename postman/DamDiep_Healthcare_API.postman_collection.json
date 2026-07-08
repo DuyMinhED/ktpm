@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "859fb18d-1c81-4433-9e9b-958f2397acc9",
+    "_postman_id": "c4a69a49-68c2-4cf8-8874-7aeef4efc3e7",
     "name": "DamDiep Healthcare API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "55225055",
-    "_collection_link": "https://go.postman.co/collection/42986888-859fb18d-1c81-4433-9e9b-958f2397acc9?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/55225055-c4a69a49-68c2-4cf8-8874-7aeef4efc3e7?source=collection_link"
   },
   "item": [
     {
@@ -2668,30 +2668,6 @@
       "item": [
         {
           "name": "Get Risk Alert Dashboard",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/dashboard",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "clinics",
-                "{{clinicId}}",
-                "risk-alerts",
-                "dashboard"
-              ]
-            }
-          },
-          "response": [],
           "event": [
             {
               "listen": "test",
@@ -2736,10 +2712,7 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Get High Risk Patients",
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2749,7 +2722,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/high-risk-patients?page=0&size=10",
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/dashboard",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2759,21 +2732,14 @@
                 "clinics",
                 "{{clinicId}}",
                 "risk-alerts",
-                "high-risk-patients"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
+                "dashboard"
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Get High Risk Patients",
           "event": [
             {
               "listen": "test",
@@ -2820,12 +2786,9 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Mark Alert As Read",
+          ],
           "request": {
-            "method": "PATCH",
+            "method": "GET",
             "header": [
               {
                 "key": "Content-Type",
@@ -2833,7 +2796,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/alerts/1/read",
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/high-risk-patients?page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2843,13 +2806,24 @@
                 "clinics",
                 "{{clinicId}}",
                 "risk-alerts",
-                "alerts",
-                "1",
-                "read"
+                "high-risk-patients"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Mark Alert As Read",
           "event": [
             {
               "listen": "test",
@@ -2882,10 +2856,7 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Dismiss Alert",
+          ],
           "request": {
             "method": "PATCH",
             "header": [
@@ -2895,7 +2866,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/alerts/1/dismiss",
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/alerts/1/read",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2907,11 +2878,14 @@
                 "risk-alerts",
                 "alerts",
                 "1",
-                "dismiss"
+                "read"
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Dismiss Alert",
           "event": [
             {
               "listen": "test",
@@ -2944,7 +2918,33 @@
                 "type": "text/javascript"
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/clinics/{{clinicId}}/risk-alerts/alerts/1/dismiss",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clinics",
+                "{{clinicId}}",
+                "risk-alerts",
+                "alerts",
+                "1",
+                "dismiss"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -4048,31 +4048,6 @@
         },
         {
           "name": "Dismiss Alert",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/patient/dashboard/alerts/1/dismiss",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "patient",
-                "dashboard",
-                "alerts",
-                "1",
-                "dismiss"
-              ]
-            }
-          },
-          "response": [],
           "event": [
             {
               "listen": "test",
@@ -4105,7 +4080,32 @@
                 "type": "text/javascript"
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/dashboard/alerts/1/dismiss",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "dashboard",
+                "alerts",
+                "1",
+                "dismiss"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -4803,39 +4803,6 @@
       "item": [
         {
           "name": "Get Active Prescriptions",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/active",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "patient",
-                "prescriptions",
-                "active"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{patientToken}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "response": [],
           "event": [
             {
               "listen": "test",
@@ -4879,31 +4846,8 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Get Prescription History",
+          ],
           "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/history",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "patient",
-                "prescriptions",
-                "history"
-              ]
-            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -4913,9 +4857,32 @@
                   "type": "string"
                 }
               ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "active"
+              ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Get Prescription History",
           "event": [
             {
               "listen": "test",
@@ -4956,31 +4923,8 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Get Today Schedule",
+          ],
           "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/today-schedule",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "patient",
-                "prescriptions",
-                "today-schedule"
-              ]
-            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -4990,9 +4934,32 @@
                   "type": "string"
                 }
               ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "history"
+              ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Get Today Schedule",
           "event": [
             {
               "listen": "test",
@@ -5036,40 +5003,8 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Log Medication",
+          ],
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"scheduleId\": \"{{medicationScheduleId}}\",\n  \"status\": \"TAKEN\",\n  \"notes\": \"Đã uống đúng giờ\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/log-medication",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "patient",
-                "prescriptions",
-                "log-medication"
-              ]
-            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -5079,9 +5014,32 @@
                   "type": "string"
                 }
               ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/today-schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "today-schedule"
+              ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Log Medication",
           "event": [
             {
               "listen": "test",
@@ -5114,32 +5072,8 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Request Refill",
+          ],
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/{{refillPrescriptionId}}/request-refill",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "patient",
-                "prescriptions",
-                "{{refillPrescriptionId}}",
-                "request-refill"
-              ]
-            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -5149,9 +5083,41 @@
                   "type": "string"
                 }
               ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": \"{{medicationScheduleId}}\",\n  \"status\": \"TAKEN\",\n  \"notes\": \"Đã uống đúng giờ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/log-medication",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "log-medication"
+              ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Request Refill",
           "event": [
             {
               "listen": "test",
@@ -5184,7 +5150,41 @@
                 "type": "text/javascript"
               }
             }
-          ]
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{patientToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patient/prescriptions/{{refillPrescriptionId}}/request-refill",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patient",
+                "prescriptions",
+                "{{refillPrescriptionId}}",
+                "request-refill"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -5760,37 +5760,6 @@
       "item": [
         {
           "name": "Chat With AI",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"message\": \"Tôi bị đau đầu và mệt mỏi\",\n  \"history\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Xin chào\"\n    },\n    {\n      \"role\": \"assistant\",\n      \"content\": \"Xin chào! Tôi có thể giúp gì cho bạn?\"\n    }\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/ai/chat",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "chat"
-              ]
-            }
-          },
-          "response": [],
           "event": [
             {
               "listen": "test",
@@ -5830,7 +5799,38 @@
                 "type": "text/javascript"
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Tôi bị đau đầu và mệt mỏi\",\n  \"history\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Xin chào\"\n    },\n    {\n      \"role\": \"assistant\",\n      \"content\": \"Xin chào! Tôi có thể giúp gì cho bạn?\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/chat",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "chat"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -5839,36 +5839,6 @@
       "item": [
         {
           "name": "Get Doctors List",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/doctors?page=0&size=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "doctors"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
-            }
-          },
-          "response": [],
           "event": [
             {
               "listen": "test",
@@ -5910,10 +5880,7 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Get Doctors By Specialty",
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -5923,7 +5890,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/doctors?specialty=Tim mạch&page=0&size=10",
+              "raw": "{{baseUrl}}/api/doctors?page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5932,10 +5899,6 @@
                 "doctors"
               ],
               "query": [
-                {
-                  "key": "specialty",
-                  "value": "Tim mạch"
-                },
                 {
                   "key": "page",
                   "value": "0"
@@ -5947,7 +5910,10 @@
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Get Doctors By Specialty",
           "event": [
             {
               "listen": "test",
@@ -5990,10 +5956,7 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Get Doctor By ID",
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -6003,18 +5966,34 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/doctors/{{publicDoctorId}}",
+              "raw": "{{baseUrl}}/api/doctors?specialty=Tim mạch&page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "doctors",
-                "{{publicDoctorId}}"
+                "doctors"
+              ],
+              "query": [
+                {
+                  "key": "specialty",
+                  "value": "Tim mạch"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Get Doctor By ID",
           "event": [
             {
               "listen": "test",
@@ -6051,49 +6030,31 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Create Doctor (Admin)",
+          ],
           "request": {
-            "method": "POST",
+            "method": "GET",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"BS. Lê Văn F {{$randomInt}}\",\n  \"email\": \"bsf{{$randomInt}}@hospital.com\",\n  \"phone\": \"0907{{$randomInt}}\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS{{$randomInt}}\",\n  \"degree\": \"Phó giáo sư\",\n  \"experience\": \"15 năm\",\n  \"bio\": \"Chuyên gia thần kinh\",\n  \"password\": \"123456\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
             "url": {
-              "raw": "{{baseUrl}}/api/doctors",
+              "raw": "{{baseUrl}}/api/doctors/{{publicDoctorId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "doctors"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
+                "doctors",
+                "{{publicDoctorId}}"
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Create Doctor (Admin)",
           "event": [
             {
               "listen": "test",
@@ -6130,38 +6091,8 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Update Doctor",
+          ],
           "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"BS. Lê Văn F Updated {{$randomInt}}\",\n  \"email\": \"bsf_up{{$randomInt}}@hospital.com\",\n  \"phone\": \"0907{{$randomInt}}\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS{{$randomInt}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/doctors/{{publicDoctorId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "doctors",
-                "{{publicDoctorId}}"
-              ]
-            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -6171,9 +6102,38 @@
                   "type": "string"
                 }
               ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Lê Văn F {{$randomInt}}\",\n  \"email\": \"bsf{{$randomInt}}@hospital.com\",\n  \"phone\": \"0907{{$randomInt}}\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS{{$randomInt}}\",\n  \"degree\": \"Phó giáo sư\",\n  \"experience\": \"15 năm\",\n  \"bio\": \"Chuyên gia thần kinh\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "doctors"
+              ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Update Doctor",
           "event": [
             {
               "listen": "test",
@@ -6210,18 +6170,34 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Delete Doctor (Admin)",
+          ],
           "request": {
-            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BS. Lê Văn F Updated {{$randomInt}}\",\n  \"email\": \"bsf_up{{$randomInt}}@hospital.com\",\n  \"phone\": \"0907{{$randomInt}}\",\n  \"specialty\": \"Thần kinh\",\n  \"licenseNumber\": \"BS{{$randomInt}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/doctors/{{publicDoctorId}}",
               "host": [
@@ -6232,19 +6208,12 @@
                 "doctors",
                 "{{publicDoctorId}}"
               ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Delete Doctor (Admin)",
           "event": [
             {
               "listen": "test",
@@ -6277,7 +6246,38 @@
                 "type": "text/javascript"
               }
             }
-          ]
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors/{{publicDoctorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "doctors",
+                "{{publicDoctorId}}"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -6513,6 +6513,25 @@
       "item": [
         {
           "name": "Create Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 201 Created\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    var response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"supportTicketId\", response.id);",
+                  "    pm.collectionVariables.set(\"supportTicketCode\", response.ticketCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -6542,26 +6561,7 @@
               ]
             }
           },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200 OK or 201 Created\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-                  "});",
-                  "",
-                  "if (pm.response.code === 200 || pm.response.code === 201) {",
-                  "    var response = pm.response.json();",
-                  "    pm.collectionVariables.set(\"supportTicketId\", response.id);",
-                  "    pm.collectionVariables.set(\"supportTicketCode\", response.ticketCode);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "response": []
         },
         {
           "name": "Get All Tickets",
@@ -6713,28 +6713,6 @@
         },
         {
           "name": "Get Ticket By ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/support-tickets/{{supportTicketId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "support-tickets",
-                "{{supportTicketId}}"
-              ]
-            }
-          },
-          "response": [],
           "event": [
             {
               "listen": "test",
@@ -6768,10 +6746,7 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Get Ticket By Code",
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -6781,7 +6756,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/support-tickets/code/{{supportTicketCode}}",
+              "raw": "{{baseUrl}}/api/v1/support-tickets/{{supportTicketId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6789,12 +6764,14 @@
                 "api",
                 "v1",
                 "support-tickets",
-                "code",
-                "{{supportTicketCode}}"
+                "{{supportTicketId}}"
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Get Ticket By Code",
           "event": [
             {
               "listen": "test",
@@ -6827,12 +6804,9 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Update Ticket Status",
+          ],
           "request": {
-            "method": "PUT",
+            "method": "GET",
             "header": [
               {
                 "key": "Content-Type",
@@ -6840,7 +6814,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/support-tickets/{{supportTicketId}}/status?status=RESOLVED&adminNote=Đã xử lý",
+              "raw": "{{baseUrl}}/api/v1/support-tickets/code/{{supportTicketCode}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6848,22 +6822,15 @@
                 "api",
                 "v1",
                 "support-tickets",
-                "{{supportTicketId}}",
-                "status"
-              ],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "RESOLVED"
-                },
-                {
-                  "key": "adminNote",
-                  "value": "Đã xử lý"
-                }
+                "code",
+                "{{supportTicketCode}}"
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Update Ticket Status",
           "event": [
             {
               "listen": "test",
@@ -6896,12 +6863,9 @@
                 "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "Get Ticket Stats",
+          ],
           "request": {
-            "method": "GET",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -6909,7 +6873,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/support-tickets/stats",
+              "raw": "{{baseUrl}}/api/v1/support-tickets/{{supportTicketId}}/status?status=RESOLVED&adminNote=Đã xử lý",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6917,11 +6881,25 @@
                 "api",
                 "v1",
                 "support-tickets",
-                "stats"
+                "{{supportTicketId}}",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "RESOLVED"
+                },
+                {
+                  "key": "adminNote",
+                  "value": "Đã xử lý"
+                }
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "Get Ticket Stats",
           "event": [
             {
               "listen": "test",
@@ -6955,10 +6933,49 @@
                 "type": "text/javascript"
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/support-tickets/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support-tickets",
+                "stats"
+              ]
+            }
+          },
+          "response": []
         },
         {
           "name": "Delete Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204 No Content or error guard\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -6980,24 +6997,7 @@
               ]
             }
           },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 204 No Content or error guard\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
-                  "});",
-                  "",
-                  "pm.test(\"Response time is less than 8000ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "response": []
         }
       ]
     }
@@ -7118,28 +7118,23 @@
     },
     {
       "key": "publicDoctorId",
-      "value": "1",
-      "type": "string"
+      "value": "1"
     },
     {
       "key": "refillPrescriptionId",
-      "value": "1",
-      "type": "string"
+      "value": "1"
     },
     {
       "key": "medicationScheduleId",
-      "value": "1",
-      "type": "string"
+      "value": "1"
     },
     {
       "key": "supportTicketId",
-      "value": "1",
-      "type": "string"
+      "value": "1"
     },
     {
       "key": "supportTicketCode",
-      "value": "TK-001",
-      "type": "string"
+      "value": "TK-001"
     }
   ]
 }
