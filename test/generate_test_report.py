@@ -122,19 +122,19 @@ for i,(cls,typ,tc,v1,v2,v3,v4,v5,v6,note) in enumerate(junit):
 
 sr=4+len(junit)+1
 ws2.merge_cells(start_row=sr,start_column=1,end_row=sr,end_column=3)
-sc(ws2,sr,1,"TONG CONG",bold_f,sum_fl); sc(ws2,sr,4,sum(d[2] for d in junit),bold_f,sum_fl)
-for ci,val in enumerate(["124/124","124/124","139/139","136/139","157/157","157/157"]):
+sc(ws2,sr,1,"TONG CONG",bold_f,sum_fl); sc(ws2,sr,4,"-",bold_f,sum_fl)
+for ci,val in enumerate(["121/131","100/110","213/213","72/74","35/37","87/87"]):
     ff,ffl = (pass_f,pass_fl) if "FAIL" not in val and val.split("/")[0]==val.split("/")[1] else (fail_f,fail_fl)
     sc(ws2,sr,5+ci,val,ff,ffl)
-sc(ws2,sr,11,"",norm_f,sum_fl)
+sc(ws2,sr,11,"Thuc te code build",norm_f,sum_fl)
 
 sr2=sr+1
 ws2.merge_cells(start_row=sr2,start_column=1,end_row=sr2,end_column=3)
 sc(ws2,sr2,1,"PASS RATE",bold_f,sum_fl); sc(ws2,sr2,4,"",norm_f,sum_fl)
-for ci,val in enumerate(["100%","100%","100%","97.8%","100%","100%"]):
+for ci,val in enumerate(["92.3%","90.9%","100%","97.2%","94.5%","100%"]):
     ff,ffl = (pass_f,pass_fl) if val=="100%" else (fail_f,fail_fl)
     sc(ws2,sr2,5+ci,val,ff,ffl)
-sc(ws2,sr2,11,"v4 phat hien bug -> fix o v5",bold_f,sum_fl,la)
+sc(ws2,sr2,11,"Ty le pass thuc te",bold_f,sum_fl,la)
 
 # ==================== SHEET 3: TEST DESIGN ====================
 ws3 = wb.create_sheet("Test Design & Postman"); ws3.sheet_properties.tabColor = MED_BLUE
@@ -185,17 +185,17 @@ for i,h in enumerate(ch): sc(ws4,3,i+1,h,hdr_f,hdr_fl)
 ws4.row_dimensions[3].height=28
 
 comp = [
-    ("JUnit Test Classes","19","19","21","21","23","23","Tang","Them BVA + Integration"),
-    ("JUnit Test Cases","124","124","139","139","157","157","Tang","+20 BVA, +18 Integration"),
-    ("JUnit Pass Rate","100%","100%","100%","97.8%","100%","100%","Phuc hoi","Fix regression o v5"),
-    ("JUnit Failures","0","0","0","3","0","0","Da fix","BVA phat hien bug -> fix"),
+    ("JUnit Test Classes","?","?","?","?","?","?","Bien dong","So file test duoc chay"),
+    ("JUnit Test Cases","131","110","213","74","37","87","Bien dong","So TC thuc te chay duoc"),
+    ("JUnit Pass Rate","92.3%","90.9%","100%","97.2%","94.5%","100%","Tang/Giam","Tuy thuoc moi truong"),
+    ("JUnit Failures","0","0","0","2","2","0","Bien dong","Loi logic"),
+    ("JUnit Errors","10","10","0","0","0","0","Giam","Loi moi truong da fix tu v3"),
     ("BVA Test Cases","0","0","0","10","10","10","On dinh","Frontend + Core Business"),
     ("EP Test Cases","0","0","0","8","8","8","On dinh","JWT + Permission"),
     ("Whitebox Analyses","0","0","0","0","2","2","On dinh","JWT + Prescription CFG"),
     ("Postman API Modules","0","0","0","0","7","7","Moi","66 assertions"),
     ("E2E Scenarios","0","0","0","0","15","15","Moi","Login, CRUD, Navigation"),
     ("Test Design Artifacts","0","0","0","2","13","16","Tang manh","+3 o week 6"),
-    ("Bug phat hien","0","0","0","3","3 fixed","3 fixed","Hoan tat","Boundary validation"),
     ("CI/CD Pipeline","Chua","Chua","Chua","Chua","Chua","Fixed","On dinh","KCPM-831/839"),
 ]
 
@@ -208,11 +208,11 @@ for i,(m,v1,v2,v3,v4,v5,v6,tr,nt) in enumerate(comp):
 cr=4+len(comp)+2
 banner(ws4,cr,"KET LUAN",9,sub_f,hdr_fl,30)
 conclusions = [
-    "1. v1-v3: Xay dung nen tang unit test + integration test cho Admin/Clinic/Patient/Doctor.",
-    "2. v4: BVA/EP phat hien 3 bugs validation (boundary mismatch) - chung minh hieu qua kiem thu.",
-    "3. v5: Fix bugs, them Postman (7 modules), Whitebox (2 CFG), E2E (15 scenarios).",
-    "4. v6: Hoan thien CI/CD, Bug tracking standard. Pass Rate phuc hoi 100%.",
-    "5. Tong: 157 JUnit + 66 Postman assertions + 15 E2E = DAT YEU CAU.",
+    "1. v1-v2: Giai doan dau gap nhieu loi moi truong (10 Errors) va chua hoan thien toan bo test suite.",
+    "2. v3: Pass rate dat 100% voi so luong test cao (213 TC) do moi truong da duoc fix.",
+    "3. v4-v5: So luong test thuc thi giam manh do crash moi truong hoac refactor loi, xay ra Failures (2).",
+    "4. v6: Hoan thien CI/CD, Pass Rate phuc hoi 100% voi 87 Test Cases on dinh.",
+    "5. Ket luan: So lieu phan anh dung thuc te qua trinh phat trien (co loi, co fix, co crash).",
 ]
 for i,c in enumerate(conclusions):
     r=cr+1+i
@@ -243,6 +243,6 @@ for i,(d,cmd) in enumerate(guide):
     sc(ws5,r,3,cmd,Font(name="Consolas",size=11,color=DARK_BLUE),w_fl,la)
 
 # Save
-out = r"d:\Download\ktpm\test\Test_Result_Report_duyho0705.xlsx"
+out = "Test_Result_Report_duyho0705.xlsx"
 wb.save(out)
 print(f"[OK] Report saved: {out}")
