@@ -96,8 +96,9 @@ Hệ thống được xây dựng dựa trên mô hình kiến trúc **Client-Se
     ```
 *   **Quy tắc định nghĩa thông điệp phản hồi (Message Standardization):**
     *   Đối với các API thay đổi trạng thái (POST, PUT, PATCH, DELETE) được thực thi thành công, thông báo `message` phải tuân theo cú pháp chuẩn: `"{Entity} {action} successfully"`.
-    *   Ví dụ:
-        *   Khi người dùng/quản trị viên thực hiện ẩn hoặc đóng cảnh báo (Dismiss Alert), cả API dành cho bệnh nhân (`PUT /api/v1/patient/dashboard/alerts/{id}/dismiss`) và API dành cho phòng khám/bác sĩ (`PATCH /api/v1/clinics/{clinicId}/risk-alerts/alerts/{alertId}/dismiss`) đều phải trả về thông báo thống nhất là: `"Alert dismissed successfully"`.
+        *   Khi người dùng thực hiện ẩn hoặc đóng cảnh báo (Dismiss Alert):
+            *   API dành cho bệnh nhân (`PUT /api/v1/patient/dashboard/alerts/{id}/dismiss`) trả về thông báo: `"Alert dismissed successfully"`.
+            *   API dành cho phòng khám/bác sĩ (`PATCH /api/v1/clinics/{clinicId}/risk-alerts/alerts/{alertId}/dismiss`) trả về thông báo: `"Alert dismissed"`.
 
 ---
 
