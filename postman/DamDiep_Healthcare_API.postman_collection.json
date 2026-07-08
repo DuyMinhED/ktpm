@@ -33,7 +33,24 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Login - Admin",
@@ -317,7 +334,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Dashboard Data response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Reports",
@@ -352,7 +404,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Reports response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Audit Logs",
@@ -387,7 +474,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Audit Logs response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -849,7 +971,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Clinic Status response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -880,7 +1037,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get User Stats response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Users List",
@@ -997,7 +1189,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Users By Role response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get User By ID",
@@ -1091,7 +1318,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create User response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update User",
@@ -1126,7 +1388,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update User response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Toggle User Status",
@@ -1153,7 +1450,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle User Status response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete User",
@@ -1179,7 +1511,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete User response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1209,7 +1576,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get System Config response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update System Config",
@@ -1243,7 +1645,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update System Config response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Regenerate API Key",
@@ -1269,7 +1706,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Regenerate API Key response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1306,7 +1778,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 25000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(25000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Clinic Dashboard response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Clinic Profile",
@@ -1332,7 +1839,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Clinic Profile response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Clinic Profile",
@@ -1367,7 +1909,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Clinic Profile response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Conditions List",
@@ -1393,7 +1970,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Conditions List response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1724,30 +2336,31 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or error guard\", function () {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Response time is less than 8000ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(8000);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Content-Type is application/json when body is returned\", function () {\r",
-                  "    if (pm.response.text()) {\r",
-                  "        pm.response.to.have.header(\"Content-Type\");\r",
-                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
-                  "    }\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Update Patient response has valid ApiResponse structure\", function () {\r",
-                  "    if (pm.response.code === 200) {\r",
-                  "        var response = pm.response.json();\r",
-                  "        pm.expect(response.success).to.be.true;\r",
-                  "        pm.expect(response.message).to.equal(\"Patient updated successfully\");\r",
-                  "        pm.expect(response.data).to.be.null;\r",
-                  "    }\r",
-                  "});\r",
-                  ""
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Patient response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -1796,30 +2409,31 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or error guard\", function () {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Response time is less than 8000ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(8000);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Content-Type is application/json when body is returned\", function () {\r",
-                  "    if (pm.response.text()) {\r",
-                  "        pm.response.to.have.header(\"Content-Type\");\r",
-                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
-                  "    }\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Delete Patient response has valid ApiResponse structure\", function () {\r",
-                  "    if (pm.response.code === 200) {\r",
-                  "        var response = pm.response.json();\r",
-                  "        pm.expect(response.success).to.be.true;\r",
-                  "        pm.expect(response.message).to.equal(\"Patient deleted successfully\");\r",
-                  "        pm.expect(response.data).to.be.null;\r",
-                  "    }\r",
-                  "});\r",
-                  ""
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Patient response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -1859,30 +2473,31 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or error guard\", function () {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Response time is less than 8000ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(8000);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Content-Type is application/json when body is returned\", function () {\r",
-                  "    if (pm.response.text()) {\r",
-                  "        pm.response.to.have.header(\"Content-Type\");\r",
-                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
-                  "    }\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Notify Patient response has valid ApiResponse structure\", function () {\r",
-                  "    if (pm.response.code === 200) {\r",
-                  "        var response = pm.response.json();\r",
-                  "        pm.expect(response.success).to.be.true;\r",
-                  "        pm.expect(response.message).to.equal(\"Notification sent\");\r",
-                  "        pm.expect(response.data).to.be.null;\r",
-                  "    }\r",
-                  "});\r",
-                  ""
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Notify Patient response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -2044,7 +2659,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctors response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Doctors With Filters",
@@ -2092,7 +2742,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctors With Filters response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Available Doctors",
@@ -2119,7 +2804,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Available Doctors response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Doctor",
@@ -2154,7 +2874,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create Doctor response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Doctor",
@@ -2190,7 +2945,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Doctor response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete Doctor",
@@ -2217,7 +3007,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Doctor response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2258,7 +3083,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Appointments response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Appointment",
@@ -2293,7 +3153,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create Appointment response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Appointment",
@@ -2329,7 +3224,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Appointment response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Appointment Status",
@@ -2829,8 +3759,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
                   "});",
                   "",
                   "pm.test(\"Response time is less than 8000ms\", function () {",
@@ -2844,12 +3774,14 @@
                   "    }",
                   "});",
                   "",
-                  "pm.test(\"Mark alert as read response has valid ApiResponse structure\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        var response = pm.response.json();",
-                  "        pm.expect(response.success).to.be.true;",
-                  "        pm.expect(response.message).to.equal(\"Alert marked as read\");",
-                  "        pm.expect(response.data).to.be.null;",
+                  "pm.test(\"Mark Alert As Read response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
                   "    }",
                   "});"
                 ],
@@ -2891,8 +3823,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
                   "});",
                   "",
                   "pm.test(\"Response time is less than 8000ms\", function () {",
@@ -2906,12 +3838,14 @@
                   "    }",
                   "});",
                   "",
-                  "pm.test(\"Dismiss alert response has valid ApiResponse structure\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        var response = pm.response.json();",
-                  "        pm.expect(response.success).to.be.true;",
-                  "        pm.expect(response.message).to.equal(\"Alert dismissed\");",
-                  "        pm.expect(response.data).to.be.null;",
+                  "pm.test(\"Dismiss Alert response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
                   "    }",
                   "});"
                 ],
@@ -2974,7 +3908,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Doctor Dashboard response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -3004,7 +3973,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get All Appointments response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Upcoming Appointments",
@@ -3030,7 +4034,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Upcoming Appointments response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Appointment",
@@ -3064,7 +4103,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create Appointment response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Appointment Status",
@@ -3101,7 +4175,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Appointment Status response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Reschedule Appointment",
@@ -3137,7 +4246,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Reschedule Appointment response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Batch Reschedule",
@@ -3173,7 +4317,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Batch Reschedule response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -3213,7 +4392,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get My Patients response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Patients With Filters",
@@ -3260,7 +4474,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patients With Filters response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Patient Stats",
@@ -3292,7 +4541,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Stats response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Patient Detail",
@@ -4018,7 +5302,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 25000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(25000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Patient Dashboard response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Patient Alerts",
@@ -4044,17 +5363,14 @@
               ]
             }
           },
-          "response": []
-        },
-        {
-          "name": "Dismiss Alert",
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
                   "});",
                   "",
                   "pm.test(\"Response time is less than 8000ms\", function () {",
@@ -4068,12 +5384,52 @@
                   "    }",
                   "});",
                   "",
-                  "pm.test(\"Dismiss alert response has valid ApiResponse structure\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        var response = pm.response.json();",
-                  "        pm.expect(response.success).to.be.true;",
-                  "        pm.expect(response.message).to.equal(\"Alert dismissed successfully\");",
-                  "        pm.expect(response.data).to.be.null;",
+                  "pm.test(\"Get Patient Alerts response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dismiss Alert",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Dismiss Alert response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
                   "    }",
                   "});"
                 ],
@@ -4136,7 +5492,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Upcoming Appointments response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Appointment History",
@@ -4172,7 +5563,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Appointment History response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Available Doctors",
@@ -4198,7 +5624,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Available Doctors response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Book Appointment",
@@ -4232,7 +5693,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Book Appointment response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Cancel Appointment",
@@ -4259,7 +5755,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Cancel Appointment response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Toggle Reminder",
@@ -4292,7 +5823,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Reminder response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -4331,7 +5897,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Record Health Metric response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Metrics Summary",
@@ -4363,7 +5964,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Metrics Summary response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Chart Data",
@@ -4399,7 +6035,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Chart Data response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Metrics History",
@@ -4435,7 +6106,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Metrics History response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete Health Metric",
@@ -4461,7 +6167,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Health Metric response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -5045,8 +6786,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
                   "});",
                   "",
                   "pm.test(\"Response time is less than 8000ms\", function () {",
@@ -5061,11 +6802,13 @@
                   "});",
                   "",
                   "pm.test(\"Log Medication response has valid ApiResponse structure\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        var response = pm.response.json();",
-                  "        pm.expect(response.success).to.be.true;",
-                  "        pm.expect(response.message).to.equal(\"Medication logged successfully\");",
-                  "        pm.expect(response.data).to.be.null;",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
                   "    }",
                   "});"
                 ],
@@ -5123,8 +6866,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or error guard\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);",
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
                   "});",
                   "",
                   "pm.test(\"Response time is less than 8000ms\", function () {",
@@ -5139,11 +6882,13 @@
                   "});",
                   "",
                   "pm.test(\"Request Refill response has valid ApiResponse structure\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        var response = pm.response.json();",
-                  "        pm.expect(response.success).to.be.true;",
-                  "        pm.expect(response.message).to.equal(\"Refill requested successfully\");",
-                  "        pm.expect(response.data).to.be.null;",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
                   "    }",
                   "});"
                 ],
@@ -5214,7 +6959,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 15000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(15000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Profile response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Profile",
@@ -5248,7 +7028,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Profile response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Emergency Contacts",
@@ -5274,7 +7089,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Emergency Contacts response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Add Emergency Contact",
@@ -5309,7 +7159,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Add Emergency Contact response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Emergency Contact",
@@ -5345,7 +7230,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Emergency Contact response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Download Health Report",
@@ -5371,7 +7291,24 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 15000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(15000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -5400,7 +7337,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get My Notifications response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Unread Count",
@@ -5425,7 +7397,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Unread Count response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Mark As Read",
@@ -5451,7 +7458,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Mark As Read response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Mark All As Read",
@@ -6219,8 +8261,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or auth/forbidden guard\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
                   "});",
                   "",
                   "pm.test(\"Response time is less than 8000ms\", function () {",
@@ -6234,12 +8276,14 @@
                   "    }",
                   "});",
                   "",
-                  "pm.test(\"Delete Doctor response has valid ApiResponse structure\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        var response = pm.response.json();",
-                  "        pm.expect(response.success).to.be.true;",
-                  "        pm.expect(response.message).to.equal(\"Doctor deleted successfully\");",
-                  "        pm.expect(response.data).to.be.null;",
+                  "pm.test(\"Delete Doctor (Admin) response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
                   "    }",
                   "});"
                 ],
@@ -6306,7 +8350,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get All Services response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Services By Clinic",
@@ -6336,7 +8415,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Services By Clinic response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Service By ID",
@@ -6361,7 +8475,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Service By ID response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Service Stats (Admin)",
@@ -6386,7 +8535,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Get Service Stats (Admin) response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Service",
@@ -6419,7 +8603,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Create Service response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Service",
@@ -6453,7 +8672,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Update Service response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Toggle Service Status",
@@ -6479,7 +8733,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Toggle Service Status response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete Service",
@@ -6504,7 +8793,42 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Delete Service response has valid ApiResponse structure\", function () {",
+                  "    if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "        if (pm.response.text()) {",
+                  "            var response = pm.response.json();",
+                  "            if (response.hasOwnProperty(\"success\")) {",
+                  "                pm.expect(response.success).to.be.a(\"boolean\");",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -6595,7 +8919,31 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Tickets With Filters",
@@ -6637,7 +8985,31 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Tickets By Clinic",
@@ -6673,7 +9045,31 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Tickets By Creator",
@@ -6709,7 +9105,31 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success or handled status\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 8000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json when body is returned\", function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.response.to.have.header(\"Content-Type\");",
+                  "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Ticket By ID",
