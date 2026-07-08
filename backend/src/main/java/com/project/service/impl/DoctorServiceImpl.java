@@ -45,7 +45,27 @@ public class DoctorServiceImpl implements DoctorService {
         var existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
             User user = existingUser.get();
-            if (UserRole.DOCTOR.equals(user.getRole()) && !user.isDeleted()) {
+            if (UserRole.DOCTOR.equals(user.getRole())) {
+                if (user.isDeleted()) {
+                    user.setDeleted(false);
+                    user.setStatus("ACTIVE");
+                    user.setFullName(request.getName());
+                    user.setPhone(request.getPhone());
+                    user.setSpecialization(request.getSpecialty());
+                    user.setDegree(request.getDegree());
+                    user.setExperience(request.getExperience());
+                    user.setLicenseNumber(request.getLicenseNumber());
+                    user.setAvatarUrl(request.getAvatarUrl());
+                    user.setLicenseImageUrl(request.getLicenseImageUrl());
+                    user.setBio(request.getBio());
+                    if (request.getPassword() != null) {
+                        user.setPassword(passwordEncoder.encode(request.getPassword()));
+                    } else {
+                        user.setPassword(passwordEncoder.encode("DefaultPassword123"));
+                    }
+                    User savedUser = userRepository.save(user);
+                    return mapToDoctorResponse(savedUser);
+                }
                 return mapToDoctorResponse(user);
             }
             throw new IllegalArgumentException("Email already exists");

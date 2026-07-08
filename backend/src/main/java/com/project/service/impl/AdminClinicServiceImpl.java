@@ -61,7 +61,12 @@ public class AdminClinicServiceImpl implements AdminClinicService {
     @Override
     @Transactional
     public AdminClinicResponse createClinic(CreateClinicRequest request) {
-        if (clinicRepository.findByClinicCode(request.getClinicCode()).isPresent()) throw new RuntimeException("Mã phòng khám đã tồn tại");
+        if (clinicRepository.findByClinicCode(request.getClinicCode()).isPresent()) {
+            throw new IllegalArgumentException("Mã phòng khám đã tồn tại");
+        }
+        if (userRepository.findByEmail(request.getAdminEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email người quản lý đã tồn tại");
+        }
         
         Clinic clinic = Clinic.builder()
                 .clinicCode(request.getClinicCode()).name(request.getName()).address(request.getAddress())
