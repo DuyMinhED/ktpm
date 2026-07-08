@@ -59,8 +59,30 @@ public class ClinicDoctorServiceImpl implements ClinicDoctorService {
     @CacheEvict(value = "clinic_dashboard", allEntries = true)
     @Audit(action = "CREATE_DOCTOR", module = "DOCTOR_MANAGEMENT")
     public void createDoctor(Long clinicId, CreateDoctorRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+        var existingUser = userRepository.findByEmail(request.getEmail());
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            if (UserRole.DOCTOR.equals(user.getRole())) {
+                if (user.isDeleted()) {
+                    user.setDeleted(false);
+                    user.setStatus("ACTIVE");
+                    user.setFullName(request.getName());
+                    user.setPhone(request.getPhone());
+                    user.setClinicId(clinicId);
+                    user.setSpecialization(request.getSpecialty());
+                    user.setDegree(request.getDegree());
+                    user.setExperience(request.getExperience());
+                    user.setLicenseNumber(request.getLicenseNumber());
+                    user.setAvatarUrl(request.getAvatarUrl());
+                    user.setLicenseImageUrl(request.getLicenseImageUrl());
+                    user.setBio(request.getBio());
+                    user.setPassword(passwordEncoder.encode(request.getPassword() != null ? request.getPassword() : "DefaultPassword123"));
+                    userRepository.save(user);
+                    return;
+                }
+                throw new IllegalArgumentException("Email already exists");
+            }
+            throw new IllegalArgumentException("Email already exists");
         }
         User user = User.builder()
                 .email(request.getEmail())
