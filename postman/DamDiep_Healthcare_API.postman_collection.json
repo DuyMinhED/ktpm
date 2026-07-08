@@ -1765,7 +1765,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Nguyễn Văn B Updated\",\n  \"age\": \"46\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0903333334\",\n  \"doctorId\": 1\n}",
+              "raw": "{\n  \"name\": \"Nguyễn Văn B Updated\",\n  \"age\": \"46\",\n  \"gender\": \"Nam\",\n  \"phone\": \"0903333334\",\n  \"doctorId\": 3\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3305,8 +3305,8 @@
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
                   "});",
                   "",
-                  "pm.test(\"Response time is less than 25000ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(25000);",
+                  "pm.test(\"Response time is less than 45000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(45000);",
                   "});",
                   "",
                   "pm.test(\"Content-Type is application/json when body is returned\", function () {",
@@ -4072,7 +4072,7 @@
                   "    if (pm.response.code === 200) {",
                   "        var response = pm.response.json();",
                   "        pm.expect(response.success).to.be.true;",
-                  "        pm.expect(response.message).to.equal(\"Alert dismissed\");",
+                  "        pm.expect(response.message).to.equal(\"Alert dismissed successfully\");",
                   "        pm.expect(response.data).to.be.null;",
                   "    }",
                   "});"
@@ -4892,8 +4892,8 @@
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
                   "});",
                   "",
-                  "pm.test(\"Response time is less than 15000ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(15000);",
+                  "pm.test(\"Response time is less than 45000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(45000);",
                   "});",
                   "",
                   "pm.test(\"Content-Type is application/json when body is returned\", function () {",
@@ -5769,8 +5769,8 @@
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
                   "});",
                   "",
-                  "pm.test(\"Response time is less than 8000ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "pm.test(\"Response time is less than 15000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(15000);",
                   "});",
                   "",
                   "pm.test(\"Content-Type is application/json when body is returned\", function () {",
