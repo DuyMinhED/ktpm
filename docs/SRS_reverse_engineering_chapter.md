@@ -560,3 +560,1344 @@ The AI Chat module sends chat requests to `GeminiAiChatServiceImpl`, which uses 
 | Cache runtime behavior | `@Cacheable` exists, but cache provider/configuration was not confirmed. |
 | Cloud upload workflow | Frontend Cloudinary utility exists; backend upload service was not confirmed. |
 
+---
+
+# IV. NON-FUNCTIONAL REQUIREMENTS
+
+> Source basis: `backend/pom.xml`, `application.yml`, `SecurityConfig.java`, `RateLimitFilter.java`, `BaseEntity.java`, `JpaAuditConfig.java`, `.github/workflows/production-ci.yml`, `sonar-project.properties`, entity index annotations.
+
+## 4.1 Performance
+
+| NFR ID | Requirement | Evidence |
+|---|---|---|
+| NFR-PERF-01 | HikariCP connection pool is configured with maximum 10 connections, minimum idle 2, idle timeout 30 s, max lifetime 600 s and connection timeout 30 s. | `application.yml` `spring.datasource.hikari` block. |
+| NFR-PERF-02 | Leak detection threshold is set to 15 s to identify unreleased connections. | `application.yml` `hikari.leak-detection-threshold: 15000`. |
+| NFR-PERF-03 | Keepalive time is 30 s to support Neon-style serverless DB connections. | `application.yml` `hikari.keepalive-time: 30000`. |
+| NFR-PERF-04 | Database indexes are declared on high-cardinality foreign keys and frequently filtered columns to accelerate queries. | Entity `@Index` annotations on `users` (clinic_id, role, status, created_at, is_deleted), `patients` (clinic_id, doctor_id, risk_level, chronic_condition, composite), `appointments` (doctor_id, status, created_at, is_deleted, composite), `prescriptions` (doctor_id, patient_id, created_at, is_deleted, composite), `health_metrics` (composite patient_id+type+date, patient_id+date), `medical_services` (status, category, created_at), `audit_logs` (created_at, module, user_id), `support_tickets` (status, priority, user_id). |
+| NFR-PERF-05 | Frontend uses React lazy loading and code splitting for page components. | `AppRoutes.tsx` uses `lazy(() => import(...))` for all major page components. |
+| NFR-PERF-06 | Admin dashboard method uses `@Cacheable` annotation for caching. | `AdminDashboardServiceImpl.getDashboardData` annotation. Cache provider runtime is **Need Confirmation**. |
+| NFR-PERF-07 | Postman API tests enforce a per-request timeout of 90 s. | `production-ci.yml` `--timeout-request 90000`. |
+| NFR-PERF-08 | CI jobs have timeout limits: backend 25 min, frontend 20 min, Postman 20 min, E2E 30 min, Docker 20 min. | `production-ci.yml` per-job `timeout-minutes`. |
+
+## 4.2 Security
+
+| NFR ID | Requirement | Evidence |
+|---|---|---|
+| NFR-SEC-01 | Authentication uses stateless JWT with HMAC-SHA secret (minimum 256 bits). Token expiration is 86,400,000 ms (24 hours); refresh expiration is 604,800,000 ms (7 days). | `application.yml` `jwt.secret`, `jwt.expiration`, `jwt.refresh-expiration`. |
+| NFR-SEC-02 | Passwords are encoded using BCrypt. | `SecurityConfig.passwordEncoder()` returns `BCryptPasswordEncoder`. |
+| NFR-SEC-03 | CSRF is disabled for stateless REST API. | `SecurityConfig.filterChain` `.csrf(csrf -> csrf.disable())`. |
+| NFR-SEC-04 | Session creation policy is STATELESS. | `SecurityConfig.filterChain` `.sessionCreationPolicy(SessionCreationPolicy.STATELESS)`. |
+| NFR-SEC-05 | Rate limiting is applied to login endpoint: maximum 10 attempts per IP per 60 seconds. Exceeding returns HTTP 429. | `RateLimitFilter.java` with `MAX_ATTEMPTS = 10`, `WINDOW_MS = 60_000`. |
+| NFR-SEC-06 | Unauthenticated access to protected endpoints returns 401 via `JwtAuthenticationEntryPoint`. | `SecurityConfig` `exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))`. |
+| NFR-SEC-07 | Method-level security is enabled through `@EnableMethodSecurity`. Role-based access is enforced via `@PreAuthorize` at class or method level. | `SecurityConfig` annotation and controller annotations. |
+| NFR-SEC-08 | Password policy is configurable through `SystemConfig`: optional special character requirement and optional uppercase+number requirement. | `AdminUserServiceImpl.validatePasswordPolicy` reads `SystemConfig.specialCharRequired` and `upperNumberRequired`. |
+| NFR-SEC-09 | Soft delete is implemented in `BaseEntity.isDeleted` and enforced via `@SQLDelete`/`@SQLRestriction` on sensitive entities (e.g., `Prescription`). | `BaseEntity.java` and `Prescription.java`. |
+| NFR-SEC-10 | CORS is configured to allow all origin patterns with credentials and standard HTTP methods. | `SecurityConfig.corsConfigurationSource()`. Production CORS restriction is **Need Confirmation**. |
+| NFR-SEC-11 | JWT filter extracts and validates token on every request, setting `SecurityContext` authentication. | `JwtAuthenticationFilter.java`. |
+
+## 4.3 Availability
+
+| NFR ID | Requirement | Evidence |
+|---|---|---|
+| NFR-AVL-01 | Health check endpoint `/api/v1/auth/health` is publicly accessible for monitoring. | `AuthRestController.healthCheck()`. |
+| NFR-AVL-02 | Backend is containerized with Docker for deployment portability. | `production-ci.yml` `docker-build` job builds `./backend`. |
+| NFR-AVL-03 | Frontend is deployed on Vercel. Backend is deployed on Render. | `production-ci.yml` env vars reference `vercel.app` and `onrender.com`. |
+| NFR-AVL-04 | CI pipeline runs on every push to `main`, `develop`, `feature/**` and `KCPM-*` branches. | `production-ci.yml` `on.push.branches`. |
+
+## 4.4 Reliability
+
+| NFR ID | Requirement | Evidence |
+|---|---|---|
+| NFR-REL-01 | Global exception handler catches all unhandled exceptions and returns structured `ApiResponse` objects. | `GlobalExceptionHandler.java` handles `ResourceNotFoundException`, `AccessDeniedException`, `AuthenticationException`, `MethodArgumentNotValidException`, `IllegalArgumentException`, `DataIntegrityViolationException`, `RuntimeException` and generic `Exception`. |
+| NFR-REL-02 | Transactional annotations ensure atomicity on write operations. | `@Transactional` on service create/update/delete methods. |
+| NFR-REL-03 | Hibernate `ddl-auto: update` automatically evolves schema to match entity changes. | `application.yml` `spring.jpa.hibernate.ddl-auto: update`. |
+| NFR-REL-04 | CI failure summaries are generated and uploaded as artifacts for post-mortem analysis. | `production-ci.yml` failure summary steps for every job. |
+| NFR-REL-05 | CI failures on `main`/`develop` automatically create or comment on Jira issues for tracking. | `production-ci.yml` `create-jira-bug-on-failure` job. |
+
+## 4.5 Scalability
+
+| NFR ID | Requirement | Evidence |
+|---|---|---|
+| NFR-SCL-01 | Connection pool size is configurable through environment variables. | `application.yml` `${DB_URL}`, `${DB_USERNAME}`, `${DB_PASSWORD}` and Hikari settings. |
+| NFR-SCL-02 | Server port is configurable via `${PORT:8080}`. | `application.yml` `server.port`. |
+| NFR-SCL-03 | Pagination is used for all list endpoints to control response size. | All list endpoints accept `Pageable` or `page`/`size` parameters. |
+| NFR-SCL-04 | In-memory rate limiter can be replaced with Redis-based solution for horizontal scaling. | `RateLimitFilter.java` comment: "In production, replace with Redis-based solution." |
+
+## 4.6 Maintainability
+
+| NFR ID | Requirement | Evidence |
+|---|---|---|
+| NFR-MNT-01 | Layered architecture separates concerns: controller → service → repository → entity. | Package structure under `com.project`. |
+| NFR-MNT-02 | Lombok reduces boilerplate with `@Getter`, `@Setter`, `@Builder`, `@RequiredArgsConstructor`. | All entities and service classes. |
+| NFR-MNT-03 | MapStruct/manual mapper pattern separates entity-to-DTO transformation. | `mapper` package with `UserMapper`. |
+| NFR-MNT-04 | Springdoc OpenAPI generates API documentation from annotations. | `springdoc-openapi-starter-webmvc-ui` dependency and `@Operation`/`@Tag` annotations. |
+| NFR-MNT-05 | SonarCloud is configured for static analysis. | `sonar-project.properties` defines source and test paths. |
+| NFR-MNT-06 | JaCoCo is configured for code coverage reporting during `verify` phase. | `pom.xml` `jacoco-maven-plugin 0.8.12` with `prepare-agent` and `report` executions. |
+| NFR-MNT-07 | JPA Auditing automatically populates `createdAt`, `updatedAt`, `createdBy`, `updatedBy` via `BaseEntity`. | `BaseEntity.java` with `@EntityListeners(AuditingEntityListener.class)`, `JpaAuditConfig.java`. |
+
+## 4.7 Portability
+
+| NFR ID | Requirement | Evidence |
+|---|---|---|
+| NFR-PRT-01 | Backend runs on Java 17 with Spring Boot 3.2.4. | `pom.xml` `<java.version>17</java.version>`, parent Spring Boot 3.2.4. |
+| NFR-PRT-02 | H2 in-memory database is used for test profile, enabling tests without external MySQL. | `application-h2.yml`, `pom.xml` H2 dependency with test scope. |
+| NFR-PRT-03 | Frontend is built with Node.js 22, React 19, TypeScript and Vite. | `production-ci.yml` and `frontend/package.json`. |
+| NFR-PRT-04 | Docker build support exists for backend containerization. | CI `docker-build` job. |
+
+## 4.8 Logging
+
+| NFR ID | Requirement | Evidence |
+|---|---|---|
+| NFR-LOG-01 | SLF4J with `@Slf4j` is used throughout service and security classes. | Lombok `@Slf4j` annotation on service implementations. |
+| NFR-LOG-02 | `GlobalExceptionHandler` logs warnings for client errors and errors for server exceptions. | `log.warn` for 4xx, `log.error` for 5xx. |
+| NFR-LOG-03 | SQL queries are logged in development via `show-sql: true` with formatting. | `application.yml` `spring.jpa.show-sql: true`, `format_sql: true`. |
+| NFR-LOG-04 | Audit trail is stored in `audit_logs` table capturing user, action, module, details, IP and status. | `AuditLog.java`, `AuditAspect.java`, `AuditService.recordActivity`. |
+
+## 4.9 Backup and Recovery
+
+| NFR ID | Requirement | Evidence |
+|---|---|---|
+| NFR-BKP-01 | Soft delete pattern preserves data integrity. Records are flagged `is_deleted = true` rather than physically removed. | `BaseEntity.isDeleted` and service `deleteUser` sets `isDeleted(true)`. |
+| NFR-BKP-02 | CI artifacts (test reports, JaCoCo, Newman, E2E) are uploaded for historical access. | `production-ci.yml` `actions/upload-artifact@v4` steps. |
+| NFR-BKP-03 | Database backup strategy and disaster recovery procedures are **Need Confirmation**. | No backup configuration was found in source. |
+
+---
+
+# V. DATABASE DESIGN
+
+> Source basis: All entity classes under `backend/src/main/java/com/project/entity/`, `BaseEntity.java` auditing fields, JPA annotations and relationship mappings.
+
+## 5.1 Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    users ||--o{ patients : "userId"
+    users ||--o{ notifications : "userId"
+    users ||--o{ audit_logs : "userId"
+    users ||--o{ support_tickets : "creator"
+    clinics ||--o{ patients : "clinicId"
+    clinics ||--o{ support_tickets : "clinic"
+    clinics ||--o{ medical_services : "clinicId"
+    patients ||--o{ emergency_contacts : "patient"
+    patients ||--o{ health_metrics : "patient"
+    patients ||--o{ appointments : "patient"
+    patients ||--o{ prescriptions : "patient"
+    patients ||--o{ conversations : "patient"
+    patients ||--o{ medication_schedules : "patient"
+    patients ||--o{ medication_logs : "patient"
+    patients ||--o{ patient_alerts : "patient"
+    prescriptions ||--o{ prescription_items : "prescription"
+    conversations ||--o{ messages : "conversation"
+    medication_schedules ||--o{ medication_logs : "schedule"
+    prescription_items ||--o{ medication_schedules : "prescriptionItem"
+    medical_services ||--o{ medical_service_features : "service_id"
+```
+
+## 5.2 Entity Descriptions
+
+### 5.2.1 users
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | User identifier. |
+| email | VARCHAR(100) | UNIQUE, NOT NULL | Login email. |
+| password | VARCHAR(255) | NOT NULL | BCrypt-hashed password. |
+| role | VARCHAR(50) | NOT NULL, ENUM | ADMIN, DOCTOR, CLINIC_MANAGER, PATIENT. |
+| full_name | VARCHAR(100) | | Display name. |
+| phone | VARCHAR(20) | | Phone number. |
+| avatar_url | VARCHAR(500) | | Profile image URL. |
+| clinic_id | BIGINT | FK (logical) | Associated clinic. |
+| specialization | VARCHAR(100) | | Doctor specialty. |
+| department | VARCHAR(100) | | Doctor department. |
+| license_number | VARCHAR(50) | | Doctor license (CCHN). |
+| license_image_url | VARCHAR(500) | | Doctor license image. |
+| degree | VARCHAR(50) | | Doctor academic degree. |
+| bio | TEXT | | Doctor biography. |
+| experience | VARCHAR(100) | | Years of experience. |
+| max_patients | INT | | Maximum patient capacity. |
+| status | VARCHAR(30) | NOT NULL, DEFAULT 'ACTIVE' | ACTIVE or INACTIVE. |
+| created_at | DATETIME | Audit, NOT UPDATABLE | Creation timestamp. |
+| updated_at | DATETIME | Audit | Last modification timestamp. |
+| created_by | BIGINT | Audit, NOT UPDATABLE | Creator user ID. |
+| updated_by | BIGINT | Audit | Last modifier user ID. |
+| is_deleted | BOOLEAN | NOT NULL, DEFAULT false | Soft delete flag. |
+
+Indexes: `idx_user_clinic_id`, `idx_user_role`, `idx_user_status`, `idx_user_created_at`, `idx_user_is_deleted`.
+
+### 5.2.2 clinics
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Clinic identifier. |
+| clinic_code | VARCHAR(20) | UNIQUE | Unique clinic code. |
+| name | VARCHAR(200) | NOT NULL | Clinic name. |
+| email | VARCHAR(100) | | Clinic email. |
+| description | TEXT | | Clinic description. |
+| address | TEXT | | Physical address. |
+| phone | VARCHAR(20) | | Phone number. |
+| image_url | TEXT | | Clinic image. |
+| manager_id | BIGINT | | Clinic manager user ID. |
+| status | VARCHAR(30) | NOT NULL, DEFAULT 'ACTIVE' | ACTIVE or INACTIVE. |
+| doctor_count | INT | DEFAULT 0 | Denormalized doctor count. |
+| patient_count | INT | DEFAULT 0 | Denormalized patient count. |
+| high_risk_patient_count | INT | DEFAULT 0 | Denormalized high-risk count. |
+| created_at, updated_at, created_by, updated_by, is_deleted | | Inherited from BaseEntity | Audit fields. |
+
+### 5.2.3 patients
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Patient identifier. |
+| user_id | BIGINT | NOT NULL | Login account reference. |
+| clinic_id | BIGINT | | Assigned clinic. |
+| full_name | VARCHAR(100) | NOT NULL | Patient name. |
+| phone | VARCHAR(20) | NOT NULL | Phone number. |
+| email | VARCHAR(100) | | Contact email. |
+| gender | VARCHAR(10) | NOT NULL | Gender. |
+| date_of_birth | DATE | | Birth date. |
+| address | TEXT | | Home address. |
+| avatar_url | TEXT | | Profile image. |
+| patient_code | VARCHAR(50) | UNIQUE | Generated patient code (PT-XXXX). |
+| doctor_id | BIGINT | | Assigned doctor user ID. |
+| joined_date | DATE | | Registration date. |
+| identity_card | VARCHAR(20) | | National ID card. |
+| occupation | VARCHAR(100) | | Occupation. |
+| ethnicity | VARCHAR(50) | | Ethnicity. |
+| health_insurance_number | VARCHAR(50) | | Insurance number. |
+| chronic_condition | VARCHAR(100) | | Primary chronic condition. |
+| medical_history | TEXT | | Medical history notes. |
+| allergies | TEXT | | Known allergies. |
+| risk_level | VARCHAR(50) | | Risk classification. |
+| treatment_status | VARCHAR(50) | | Current treatment status. |
+| profile_status | VARCHAR(50) | | Profile completeness status. |
+| room_location | VARCHAR(100) | | Hospital room. |
+| clinicalNotes | TEXT | | Clinical notes. |
+| blood_type | VARCHAR(10) | | Blood type. |
+| height_cm | DECIMAL(5,2) | | Height in centimeters. |
+| weight_kg | DECIMAL(5,2) | | Weight in kilograms. |
+| Audit fields | | Inherited from BaseEntity | |
+
+Indexes: `idx_patient_clinic_id`, `idx_patient_doctor_id`, `idx_patient_risk_level`, `idx_patient_created_at`, `idx_patient_is_deleted`, `idx_patient_chronic_condition`, `idx_patient_clinic_created_deleted` (composite).
+
+### 5.2.4 appointments
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Appointment identifier. |
+| doctor_id | BIGINT | NOT NULL | Assigned doctor. |
+| patient_id | BIGINT | FK NOT NULL | Patient reference. |
+| appointment_time | DATETIME | NOT NULL | Scheduled time. |
+| end_time | DATETIME | | Expected end time. |
+| status | VARCHAR(50) | NOT NULL, ENUM | PENDING, SCHEDULED, COMPLETED, CANCELLED. |
+| type | VARCHAR(255) | | IN_PERSON or ONLINE. |
+| location | VARCHAR(255) | | Physical location. |
+| meeting_link | VARCHAR(500) | | Video call link. |
+| reason | TEXT | | Visit reason. |
+| diagnosis_summary | TEXT | | Doctor diagnosis notes. |
+| doctor_name | VARCHAR(100) | | Cached doctor name. |
+| doctor_specialty | VARCHAR(100) | | Cached doctor specialty. |
+| doctor_avatar_url | VARCHAR(500) | | Cached doctor avatar. |
+| reminder_enabled | BOOLEAN | NOT NULL, DEFAULT false | Reminder toggle. |
+| Audit fields | | Inherited from BaseEntity | |
+
+Indexes: `idx_appointment_doctor_id`, `idx_appointment_status`, `idx_appointment_created_at`, `idx_appointment_is_deleted`, `idx_appointment_doctor_created_deleted` (composite).
+
+### 5.2.5 prescriptions
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Prescription identifier. |
+| prescription_code | VARCHAR(20) | UNIQUE, NOT NULL | Generated prescription code. |
+| doctor_id | BIGINT | NOT NULL | Prescribing doctor. |
+| patient_id | BIGINT | FK NOT NULL | Patient reference. |
+| diagnosis | VARCHAR(255) | NOT NULL | Diagnosis text. |
+| status | VARCHAR(50) | NOT NULL, ENUM | ACTIVE, EXPIRED, CANCELLED, PENDING_RENEWAL, COMPLETED. |
+| notes | TEXT | | Additional notes. |
+| Audit fields | | Inherited from BaseEntity | |
+
+Soft delete: `@SQLDelete(sql = "UPDATE prescriptions SET is_deleted = true WHERE id=?")`, `@SQLRestriction("is_deleted = false")`.
+
+### 5.2.6 prescription_items
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Item identifier. |
+| prescription_id | BIGINT | FK NOT NULL | Parent prescription. |
+| medication_name | VARCHAR(255) | NOT NULL | Drug name. |
+| dosage | VARCHAR(100) | NOT NULL | Dosage information. |
+| usage_instructions | VARCHAR(255) | | Usage instructions. |
+| created_at | DATETIME | AUTO | Creation timestamp. |
+| updated_at | DATETIME | AUTO | Update timestamp. |
+
+### 5.2.7 health_metrics
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Metric identifier. |
+| patient_id | BIGINT | FK NOT NULL | Patient reference. |
+| metric_type | VARCHAR(50) | NOT NULL, ENUM | BLOOD_SUGAR, BLOOD_PRESSURE, HEART_RATE, HBA1C, SPO2. |
+| value | DECIMAL(10,2) | NOT NULL | Primary measurement value. |
+| value_secondary | DECIMAL(10,2) | | Secondary value (e.g., diastolic for blood pressure). |
+| unit | VARCHAR(20) | NOT NULL | Measurement unit. |
+| status | VARCHAR(50) | | NORMAL, BORDERLINE_HIGH, HIGH, LOW. |
+| notes | TEXT | | Additional notes. |
+| measured_at | DATETIME | NOT NULL | Measurement timestamp. |
+| Audit fields | | Inherited from BaseEntity | |
+
+### 5.2.8 conversations
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Conversation identifier. |
+| patient_id | BIGINT | FK NOT NULL | Patient participant. |
+| doctor_id | BIGINT | NOT NULL | Doctor participant. |
+| last_message_at | DATETIME | | Last message timestamp. |
+| is_active | BOOLEAN | DEFAULT true | Conversation active state. |
+| Audit fields | | Inherited from BaseEntity | |
+
+### 5.2.9 messages
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Message identifier. |
+| conversation_id | BIGINT | FK NOT NULL | Parent conversation. |
+| sender_id | BIGINT | NOT NULL | Sender user ID. |
+| sender_type | VARCHAR(20) | NOT NULL | PATIENT or DOCTOR. |
+| content | TEXT | NOT NULL | Message content. |
+| message_type | VARCHAR(20) | DEFAULT 'TEXT' | TEXT, IMAGE, FILE. |
+| attachment_url | VARCHAR(500) | | Attachment URL. |
+| is_read | BOOLEAN | | Read status. |
+| sent_at | DATETIME | | Send timestamp. |
+| created_at | DATETIME | AUTO | Creation timestamp. |
+
+### 5.2.10 notifications
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Notification identifier. |
+| user_id | BIGINT | NOT NULL | Target user. |
+| title | VARCHAR | NOT NULL | Notification title. |
+| message | TEXT | NOT NULL | Notification body. |
+| type | VARCHAR | NOT NULL | info, warning, success, error. |
+| is_read | BOOLEAN | NOT NULL, DEFAULT false | Read status. |
+| target_url | VARCHAR | | Navigation target URL. |
+| Audit fields | | Inherited from BaseEntity | |
+
+### 5.2.11 emergency_contacts
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Contact identifier. |
+| patient_id | BIGINT | FK NOT NULL | Owner patient. |
+| contact_name | VARCHAR(100) | NOT NULL | Contact person name. |
+| relationship | VARCHAR(50) | NOT NULL | Relationship to patient. |
+| phone | VARCHAR(20) | NOT NULL | Phone number. |
+| is_primary | BOOLEAN | | Primary contact flag. |
+| Audit fields | | Inherited from BaseEntity | |
+
+### 5.2.12 medication_schedules
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Schedule identifier. |
+| patient_id | BIGINT | FK NOT NULL | Patient reference. |
+| prescription_item_id | BIGINT | FK | Linked prescription item. |
+| medication_name | VARCHAR(255) | NOT NULL | Drug name. |
+| dosage | VARCHAR(100) | NOT NULL | Dosage. |
+| scheduled_time | TIME | NOT NULL | Daily scheduled time. |
+| frequency | VARCHAR(50) | NOT NULL | DAILY, TWICE_DAILY, THREE_TIMES_DAILY. |
+| instructions | TEXT | | Usage instructions. |
+| start_date | DATE | NOT NULL | Schedule start date. |
+| end_date | DATE | | Schedule end date. |
+| is_active | BOOLEAN | DEFAULT true | Active state. |
+| Audit fields | | Inherited from BaseEntity | |
+
+### 5.2.13 medication_logs
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Log identifier. |
+| schedule_id | BIGINT | FK NOT NULL | Parent schedule. |
+| patient_id | BIGINT | FK NOT NULL | Patient reference. |
+| taken_at | DATETIME | NOT NULL | Actual time of action. |
+| status | VARCHAR(50) | NOT NULL | TAKEN, MISSED, SKIPPED. |
+| notes | TEXT | | Additional notes. |
+| created_at | DATETIME | AUTO | Creation timestamp. |
+
+### 5.2.14 patient_alerts
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Alert identifier. |
+| patient_id | BIGINT | FK NOT NULL | Patient reference. |
+| alert_type | VARCHAR(50) | NOT NULL | HEALTH_WARNING, MEDICATION_REMINDER, APPOINTMENT_REMINDER. |
+| severity | VARCHAR(20) | NOT NULL | INFO, WARNING, CRITICAL. |
+| title | VARCHAR(255) | NOT NULL | Alert title. |
+| message | TEXT | NOT NULL | Alert message. |
+| is_read | BOOLEAN | | Read flag. |
+| is_dismissed | BOOLEAN | | Dismissed flag. |
+| created_at | DATETIME | AUTO | Creation timestamp. |
+
+### 5.2.15 medical_services
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Service identifier. |
+| name | VARCHAR(200) | NOT NULL | Service name. |
+| category | VARCHAR(100) | NOT NULL | Service category. |
+| price | DECIMAL(15,2) | NOT NULL | Service price. |
+| duration | VARCHAR(100) | NOT NULL | Expected duration. |
+| description | TEXT | | Service description. |
+| status | VARCHAR(50) | NOT NULL | Business status (e.g., "Đang kinh doanh"). |
+| clinic_id | BIGINT | | NULL for global services, otherwise clinic-specific. |
+| Audit fields | | Inherited from BaseEntity | |
+
+### 5.2.16 medical_service_features
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| service_id | BIGINT | FK NOT NULL | Parent medical service (element collection). |
+| feature | VARCHAR | | Feature text entry. |
+
+### 5.2.17 support_tickets
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Ticket identifier. |
+| ticketCode | VARCHAR | UNIQUE, NOT NULL | Auto-generated "TKT-XXXXXXXX". |
+| subject | VARCHAR | NOT NULL | Subject. |
+| category | VARCHAR | NOT NULL | Category (Kỹ thuật, Hỗ trợ nghiệp vụ, etc.). |
+| priority | VARCHAR | NOT NULL | Priority (Khẩn cấp, Cao, Trung bình, Thấp). |
+| status | VARCHAR | NOT NULL, DEFAULT 'Mới' | Mới, Đang xử lý, Chờ phản hồi, Đã giải quyết, Đã đóng. |
+| message | TEXT | NOT NULL | Ticket description. |
+| adminNote | TEXT | | Admin response note. |
+| user_id | BIGINT | FK | Creator user reference. |
+| clinic_id | BIGINT | FK | Related clinic. |
+| closedAt | DATETIME | | Close timestamp. |
+| Audit fields | | Inherited from BaseEntity | |
+
+### 5.2.18 audit_logs
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Log identifier. |
+| userId | BIGINT | NOT NULL | Actor user ID. |
+| userName | VARCHAR | | Actor display name. |
+| userAvatar | VARCHAR | | Actor avatar URL. |
+| action | VARCHAR | NOT NULL | Action performed. |
+| module | VARCHAR | NOT NULL | Module name. |
+| details | TEXT | | Action details. |
+| ipAddress | VARCHAR | | Client IP address. |
+| status | VARCHAR | | success, warning, danger. |
+| Audit fields | | Inherited from BaseEntity | |
+
+### 5.2.19 system_configs
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PK, AUTO_INCREMENT | Config identifier. |
+| language | VARCHAR | | UI language. |
+| timezone | VARCHAR | | System timezone. |
+| maintenanceMode | BOOLEAN | | Maintenance mode flag. |
+| specialCharRequired | BOOLEAN | | Password requires special character. |
+| upperNumberRequired | BOOLEAN | | Password requires uppercase + number. |
+| bpSysThreshold | VARCHAR | | Blood pressure systolic threshold. |
+| bpDiaThreshold | VARCHAR | | Blood pressure diastolic threshold. |
+| hrThreshold | VARCHAR | | Heart rate threshold. |
+| spo2Threshold | VARCHAR | | SpO2 threshold. |
+| notifyVitalSigns | BOOLEAN | | Vital signs notification toggle. |
+| notifySupportRequests | BOOLEAN | | Support request notification toggle. |
+| notifyRevenueReports | BOOLEAN | | Revenue report notification toggle. |
+| apiKey | VARCHAR | | System API key for display/regeneration. |
+| Audit fields | | Inherited from BaseEntity | |
+
+---
+
+# VI. BUSINESS RULES
+
+> Source basis: Service implementations, entity constraints, security annotations and validation DTOs.
+
+| Rule ID | Category | Rule | Evidence |
+|---|---|---|---|
+| BR-01 | Unique Constraint | User email must be unique across the system. | `User.email` has `unique = true`; `AdminUserServiceImpl.createUser` checks `findByEmail`. |
+| BR-02 | Unique Constraint | Clinic code must be unique. | `Clinic.clinicCode` has `unique = true`; `AdminClinicServiceImpl` validates duplicate. |
+| BR-03 | Unique Constraint | Patient code must be unique. | `Patient.patientCode` has `unique = true`. |
+| BR-04 | Unique Constraint | Prescription code must be unique. | `Prescription.prescriptionCode` has `unique = true`. |
+| BR-05 | Unique Constraint | Support ticket code must be unique, auto-generated as "TKT-" + UUID prefix. | `SupportTicket.ticketCode` has `unique = true`; `@PrePersist onCreate()`. |
+| BR-06 | Soft Delete | User deletion is soft — sets `isDeleted = true` instead of physical delete. If user is PATIENT, linked patient record is also soft-deleted. | `AdminUserServiceImpl.deleteUser`. |
+| BR-07 | Soft Delete | Prescription deletion is soft via `@SQLDelete` annotation; queries automatically filter by `@SQLRestriction("is_deleted = false")`. | `Prescription.java`. |
+| BR-08 | Permission Rule | Cannot delete the currently logged-in admin account. | `AdminUserServiceImpl.deleteUser` checks `currentUserId.equals(id)`. |
+| BR-09 | Permission Rule | Cannot delete the last active admin account. | `AdminUserServiceImpl.deleteUser` checks `countByRoleAndIsDeletedFalse(ADMIN) <= 1`. |
+| BR-10 | Status Transition | Clinic status toggles between ACTIVE and INACTIVE. | `AdminClinicServiceImpl.toggleClinicStatus`. |
+| BR-11 | Status Transition | User status toggles between ACTIVE and INACTIVE. | `AdminUserServiceImpl.toggleUserStatus`. |
+| BR-12 | Status Transition | Appointment status values: PENDING → SCHEDULED → COMPLETED; any → CANCELLED. Completed or cancelled appointments cannot be updated further. | `AppointmentStatus` enum; `ClinicDashboardServiceImpl.updateAppointment` blocks update for completed/cancelled. |
+| BR-13 | Status Transition | Prescription status values: ACTIVE, EXPIRED, CANCELLED, PENDING_RENEWAL, COMPLETED. | `PrescriptionStatus` enum. |
+| BR-14 | Scheduling Rule | Appointment time must be at least 3 hours in the future. | `PatientAppointmentServiceImpl.create` checks `appointmentTime.isBefore(now.plusHours(3))`. |
+| BR-15 | Scheduling Rule | Appointment time must be at most 15 days in the future. | `PatientAppointmentServiceImpl.create` checks `appointmentTime.isAfter(now.plusDays(15))`. |
+| BR-16 | Permission Rule | Patient can only cancel PENDING appointments. SCHEDULED appointments cannot be self-cancelled (must contact clinic). COMPLETED appointments cannot be cancelled. | `PatientAppointmentServiceImpl.cancel` status checks. |
+| BR-17 | Permission Rule | Patient can only cancel, toggle reminder for, and view their own appointments. | `PatientAppointmentServiceImpl` checks `appointment.getPatient().getId().equals(currentPatient.getId())`. |
+| BR-18 | Validation Rule | Health metric type is restricted to BLOOD_SUGAR, BLOOD_PRESSURE, HEART_RATE, HBA1C, SPO2. | `MetricType` enum. |
+| BR-19 | Validation Rule | Health metric value must be positive. Secondary value (diastolic) must also be positive when present. | DTO validation in metric creation. |
+| BR-20 | Validation Rule | Medical service price must be greater than 0. | `MedicalServiceServiceImpl` validation. |
+| BR-21 | Validation Rule | Prescription requires a diagnosis (max 255 chars) and at least one prescription item. | DTO validation and `PrescriptionServiceImpl.create`. |
+| BR-22 | Validation Rule | Password must be at least 8 characters. Optional special character and uppercase+number requirements are configurable via `SystemConfig`. | `AdminUserServiceImpl.validatePasswordPolicy`. |
+| BR-23 | Validation Rule | Login request requires valid `@Email` format and non-blank password. | `LoginRequest` DTO annotations. |
+| BR-24 | Security Rule | Login endpoint is rate-limited to 10 requests per IP per 60-second window. | `RateLimitFilter.java`. |
+| BR-25 | Security Rule | JWT token has 24-hour expiration; refresh token has 7-day expiration. | `application.yml`. |
+| BR-26 | Domain Rule | When admin creates a PATIENT user, a corresponding `Patient` record is automatically created with a generated patient code. | `AdminUserServiceImpl.createUser` creates Patient for PATIENT role. |
+| BR-27 | Domain Rule | Notification ownership is enforced — users can only read, mark, or delete their own notifications. | `NotificationServiceImpl` checks `userId` equality. |
+| BR-28 | Domain Rule | Patient is scoped to a clinic; available doctors are limited to the same clinic. | `PatientAppointmentServiceImpl.getAvailableDoctors` filters by `clinicId`. |
+| BR-29 | Domain Rule | Prescription creation by doctor requires `SecurityService.canAccessPatient` authorization. | `PrescriptionController @PreAuthorize`. |
+| BR-30 | Domain Rule | Patient profile update can synchronize the email into the login user account. | `PatientProfileServiceImpl` updates user email alongside patient email. |
+| BR-31 | Domain Rule | Medication refill can only be requested for ACTIVE prescriptions. | `PatientPrescriptionServiceImpl.requestRefill`. |
+| BR-32 | Audit Rule | Admin actions (create, update, toggle status, delete) are recorded in audit log with actor, action, module, details and status. | `AuditService.recordActivity` called from admin service methods. |
+| BR-33 | Notification Rule | Appointment creation by patient sends notification to the assigned doctor. | `PatientAppointmentServiceImpl.create` calls `notificationService.sendNotification`. |
+| BR-34 | Domain Rule | IN_PERSON appointments use clinic name as location; ONLINE appointments receive a default meeting link. | `PatientAppointmentServiceImpl.create` conditional assignment. |
+
+---
+
+# VII. SCREEN FLOW
+
+> Source basis: `frontend/src/routes/AppRoutes.tsx`, frontend layout components, and ProtectedRoute configurations.
+
+## 7.1 Overall Application Screen Flow
+
+```mermaid
+graph TD
+    Landing[/ Landing Page /] -->|Login| AuthCheck{Role?}
+    AuthCheck -->|ADMIN| AdminPortal[Admin Portal]
+    AuthCheck -->|CLINIC_MANAGER| ClinicPortal[Clinic Portal]
+    AuthCheck -->|DOCTOR| DoctorPortal[Doctor Portal]
+    AuthCheck -->|PATIENT| PatientPortal[Patient Portal]
+    
+    AdminPortal --> AD[/admin Dashboard]
+    AD --> AC[/admin/clinics]
+    AD --> AU[/admin/users]
+    AD --> AS[/admin/services]
+    AD --> AR[/admin/reports]
+    AD --> AAL[/admin/audit-logs]
+    AD --> ASup[/admin/support]
+    AD --> ASet[/admin/settings]
+    
+    ClinicPortal --> CD[/clinic Dashboard]
+    CD --> CR[/clinic/reports]
+    CD --> CRA[/clinic/alerts]
+    CD --> CP[/clinic/patients]
+    CD --> CDo[/clinic/doctors]
+    CD --> CAs[/clinic/assignment]
+    CD --> CA[/clinic/appointments]
+    CD --> CS[/clinic/services]
+    CD --> CSet[/clinic/settings]
+    CD --> CSup[/clinic/support]
+    
+    DoctorPortal --> DD[/doctor Dashboard]
+    DD --> DAn[/doctor/analytics]
+    DD --> DA[/doctor/appointments]
+    DD --> DM[/doctor/messages]
+    DD --> DP[/doctor/patients]
+    DD --> DPr[/doctor/prescriptions]
+    DD --> DSup[/doctor/support]
+    
+    PatientPortal --> PD[/patient Dashboard]
+    PD --> PM[/patient/metrics]
+    PD --> PA[/patient/appointments]
+    PD --> PPr[/patient/prescriptions]
+    PD --> PMg[/patient/messages]
+    PD --> PPf[/patient/profile]
+    PD --> PS[/patient/services]
+    PD --> PSup[/patient/support]
+```
+
+## 7.2 Authentication Flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant FE as Landing Page
+    participant Auth as AuthRestController
+    participant JWT as JwtTokenProvider
+    participant Rate as RateLimitFilter
+    
+    User->>FE: Navigate to /
+    User->>FE: Enter email/password
+    FE->>Rate: POST /api/v1/auth/login
+    Rate->>Rate: Check IP rate limit
+    alt Rate exceeded
+        Rate-->>FE: 429 Too Many Requests
+    else Within limit
+        Rate->>Auth: Forward request
+        Auth->>JWT: generateToken
+        JWT-->>Auth: JWT token
+        Auth-->>FE: ApiResponse with token
+        FE->>FE: Store token, redirect by role
+    end
+```
+
+---
+
+# VIII. SCREEN DESCRIPTION
+
+> Source basis: `AppRoutes.tsx` route definitions, layout components, and corresponding API endpoints.
+
+## 8.1 Landing Page (/)
+
+| Field | Description |
+|---|---|
+| Purpose | Public entry point with login form and system branding. |
+| Displayed Data | System name (DamDiep Healthcare), login form. |
+| Actions | Enter email/password, submit login. |
+| Validation | Email format, non-empty password. |
+| Navigation | Redirects to role-specific dashboard after login. |
+| Permissions | Public access. |
+
+## 8.2 Admin Dashboard (/admin)
+
+| Field | Description |
+|---|---|
+| Purpose | Display global system statistics and operational charts. |
+| Displayed Data | Total users, clinics, patients, appointments, activity timeline, performance metrics. |
+| Actions | Filter by time range and metric; navigate to sub-modules. |
+| Validation | None client-enforced. |
+| Navigation | Sidebar links to clinics, users, services, reports, audit logs, support, settings. |
+| Permissions | ADMIN only. |
+
+## 8.3 Admin Clinics (/admin/clinics)
+
+| Field | Description |
+|---|---|
+| Purpose | Manage all clinics in the system. |
+| Displayed Data | Clinic list with code, name, status, manager, patient/doctor counts. Stats cards. |
+| Actions | Create clinic (with manager), edit clinic, toggle status, search/filter. |
+| Validation | Name required (max 200), clinic code required (max 20), manager email/name/password required. |
+| Navigation | Detail view per clinic, back to dashboard. |
+| Permissions | ADMIN only. |
+
+## 8.4 Admin Users (/admin/users)
+
+| Field | Description |
+|---|---|
+| Purpose | Manage all user accounts. |
+| Displayed Data | User list with name, email, role, status, clinic. Stats by role. |
+| Actions | Create user, edit, toggle status, delete, filter by role/status/clinic/keyword. |
+| Validation | Full name required, email valid (max 100), password min 8, role required. |
+| Navigation | User detail, back to dashboard. |
+| Permissions | ADMIN only. |
+
+## 8.5 Admin Settings (/admin/settings)
+
+| Field | Description |
+|---|---|
+| Purpose | Configure system-wide settings. |
+| Displayed Data | Language, timezone, maintenance mode, password policy flags, medical thresholds, notification toggles, API key. |
+| Actions | Update config, regenerate API key. |
+| Validation | Boolean fields required for update. |
+| Navigation | Back to dashboard. |
+| Permissions | ADMIN only. |
+
+## 8.6 Admin Audit Logs (/admin/audit-logs)
+
+| Field | Description |
+|---|---|
+| Purpose | Search and review system audit trail. |
+| Displayed Data | Paginated list with user, action, module, details, timestamp, status. |
+| Actions | Filter by user name, module, keyword. Paginate. |
+| Validation | None enforced. |
+| Navigation | Back to dashboard. |
+| Permissions | ADMIN only. |
+
+## 8.7 Clinic Dashboard (/clinic)
+
+| Field | Description |
+|---|---|
+| Purpose | Clinic operations overview and metrics. |
+| Displayed Data | Patient counts, appointment summary, disease distribution, risk alerts preview. |
+| Actions | Navigate to sub-modules, filter by period. |
+| Validation | Clinic ID from session. |
+| Navigation | Reports, alerts, patients, doctors, assignment, appointments, services, settings, support. |
+| Permissions | CLINIC_MANAGER, ADMIN. |
+
+## 8.8 Doctor Dashboard (/doctor)
+
+| Field | Description |
+|---|---|
+| Purpose | Doctor's personal operational summary. |
+| Displayed Data | Assigned patient count, today's appointments, high-risk patients, schedule. |
+| Actions | Navigate to appointments, patients, prescriptions, messages. |
+| Validation | Doctor identity from JWT. |
+| Navigation | Analytics, appointments, messages, patients, prescriptions, support. |
+| Permissions | DOCTOR only. |
+
+## 8.9 Patient Dashboard (/patient)
+
+| Field | Description |
+|---|---|
+| Purpose | Patient's personal health summary and alert center. |
+| Displayed Data | Upcoming appointments, recent metrics, alerts, medication schedule. |
+| Actions | Dismiss alerts, navigate to detailed views. |
+| Validation | Patient identity from JWT. |
+| Navigation | Metrics, appointments, prescriptions, messages, profile, services, support. |
+| Permissions | PATIENT only. |
+
+## 8.10 Patient Health Metrics (/patient/metrics)
+
+| Field | Description |
+|---|---|
+| Purpose | Record, view and track health measurements. |
+| Displayed Data | Metric charts, summary stats, trend analysis, measurement history. |
+| Actions | Add new metric, view history, delete own metric. |
+| Validation | Metric type must be valid enum, value positive, unit required. |
+| Navigation | Back to dashboard. |
+| Permissions | PATIENT only. |
+
+## 8.11 Patient Appointments (/patient/appointments)
+
+| Field | Description |
+|---|---|
+| Purpose | Book, view and manage appointments. |
+| Displayed Data | Upcoming appointments, appointment history, available doctors. |
+| Actions | Book new appointment, cancel pending appointment, toggle reminder. |
+| Validation | Doctor required, time 3h–15d in future, type IN_PERSON/ONLINE. |
+| Navigation | Back to dashboard. |
+| Permissions | PATIENT only. |
+
+## 8.12 Patient Profile (/patient/profile)
+
+| Field | Description |
+|---|---|
+| Purpose | View and edit personal profile and emergency contacts. |
+| Displayed Data | Full profile fields, emergency contact list, downloadable report. |
+| Actions | Update profile, add/edit/delete emergency contacts, download report. |
+| Validation | Full name max 100, phone/email patterns, date of birth past/present. |
+| Navigation | Back to dashboard. |
+| Permissions | PATIENT only. |
+
+---
+
+# IX. AUTHORIZATION MATRIX
+
+> Source basis: `SecurityConfig.filterChain`, controller `@PreAuthorize` annotations, `SecurityService` methods.
+
+## 9.1 Module-Level CRUD Matrix
+
+| Module / Resource | Guest | Patient | Doctor | Clinic Manager | Admin |
+|---|---|---|---|---|---|
+| Auth (Login, Health) | R | — | — | — | — |
+| Admin Dashboard | — | — | — | — | R |
+| Admin Clinics | — | — | — | — | CRUD |
+| Admin Users | — | — | — | — | CRUD |
+| Admin System Config | — | — | — | — | RU |
+| Admin Audit Logs | — | — | — | — | R |
+| Admin Reports | — | — | — | — | R |
+| Clinic Dashboard | — | — | R* | R | R |
+| Clinic Patients | — | — | R* | CRUD | CRUD |
+| Clinic Doctors | — | — | — | CRUD | CRUD |
+| Clinic Appointments | — | — | — | CRUD | CRUD |
+| Clinic Risk Alerts | — | — | — | RUD | RUD |
+| Clinic Reports | — | — | — | R | R |
+| Doctor Dashboard | — | — | R | — | — |
+| Doctor Appointments | — | — | CRUD | — | — |
+| Doctor Patients | — | — | R | — | — |
+| Doctor Prescriptions | — | — | CRD | — | — |
+| Doctor Messages | — | — | CRU | — | — |
+| Patient Dashboard | — | R | — | — | — |
+| Patient Profile | — | RU | — | — | — |
+| Patient Health Metrics | — | CRD | — | — | — |
+| Patient Appointments | — | CRD | — | — | — |
+| Patient Prescriptions | — | R | — | — | — |
+| Patient Messages | — | CRU | — | — | — |
+| Notifications | — | RUD | RUD | RUD | RUD |
+| Medical Services | — | R | R | CRU | CRUD |
+| Support Tickets | — | CR** | CR** | CRU** | CRUD** |
+| AI Chat | — | C | C | C | C |
+| User Profile (password) | — | U | U | U | U |
+| Doctor Directory | R | R | R | R | CRUD |
+
+Legend: C = Create, R = Read, U = Update, D = Delete, — = No access, * = With clinic relation check, ** = Role-specific permissions **Need Confirmation**.
+
+---
+
+# X. API SPECIFICATION
+
+> Source basis: All controller classes in `backend/src/main/java/com/project/controller/`.
+
+## 10.1 Authentication Module
+
+| Method | URL | Description | Auth | Request DTO | Response DTO | Validation |
+|---|---|---|---|---|---|---|
+| GET | `/api/v1/auth/health` | API health check. | Public | — | ApiResponse | — |
+| POST | `/api/v1/auth/login` | Login and receive JWT. | Public | `LoginRequest` | `ApiResponse<JwtAuthenticationResponse>` | email: @NotBlank @Email; password: @NotBlank |
+
+## 10.2 Admin Module
+
+| Method | URL | Description | Auth | Request DTO | Response DTO | Validation |
+|---|---|---|---|---|---|---|
+| GET | `/api/v1/admin/dashboard` | Admin dashboard data. | ADMIN | timeRange, metric (query) | `ApiResponse<AdminDashboardResponse>` | Optional strings |
+| GET | `/api/v1/admin/clinics/stats` | Clinic statistics. | ADMIN | — | `ApiResponse<AdminClinicStatsResponse>` | — |
+| GET | `/api/v1/admin/clinics` | List clinics (paginated). | ADMIN | status, keyword, page, size (query) | `ApiResponse<Page<AdminClinicResponse>>` | — |
+| GET | `/api/v1/admin/clinics/{id}` | Clinic detail. | ADMIN | id (path) | `ApiResponse<AdminClinicResponse>` | — |
+| POST | `/api/v1/admin/clinics` | Create clinic with manager. | ADMIN | `CreateClinicRequest` | `ApiResponse<AdminClinicResponse>` | @Valid |
+| PUT | `/api/v1/admin/clinics/{id}` | Update clinic. | ADMIN | `UpdateClinicRequest` | `ApiResponse<AdminClinicResponse>` | @Valid |
+| PATCH | `/api/v1/admin/clinics/{id}/toggle-status` | Toggle clinic status. | ADMIN | id (path) | `ApiResponse<Void>` | — |
+| GET | `/api/v1/admin/users/stats` | User statistics. | ADMIN | — | `ApiResponse<AdminUserStatsResponse>` | — |
+| GET | `/api/v1/admin/users` | List users (paginated). | ADMIN | role, status, clinicId, keyword, page, size (query) | `ApiResponse<Page<AdminUserResponse>>` | — |
+| GET | `/api/v1/admin/users/{id}` | User detail. | ADMIN | id (path) | `ApiResponse<AdminUserResponse>` | — |
+| POST | `/api/v1/admin/users` | Create user. | ADMIN | `CreateUserRequest` | `ApiResponse<AdminUserResponse>` | @Valid |
+| PUT | `/api/v1/admin/users/{id}` | Update user. | ADMIN | `UpdateUserRequest` | `ApiResponse<AdminUserResponse>` | @Valid |
+| PATCH | `/api/v1/admin/users/{id}/toggle-status` | Toggle user status. | ADMIN | id (path) | `ApiResponse<Void>` | — |
+| DELETE | `/api/v1/admin/users/{id}` | Delete user (soft). | ADMIN | id (path) | `ApiResponse<Void>` | — |
+| GET | `/api/v1/admin/reports` | Admin reports data. | ADMIN | reportType, performanceFilter (query) | `ApiResponse<AdminReportsResponse>` | — |
+| GET | `/api/v1/admin/audit-logs` | Audit logs (paginated). | ADMIN | userName, module, keyword, page, size (query) | `ApiResponse<Page<AuditLogResponse>>` | — |
+| GET | `/api/v1/admin/config` | Get system config. | ADMIN | — | `ApiResponse<SystemConfigResponse>` | — |
+| PUT | `/api/v1/admin/config` | Update system config. | ADMIN | `UpdateSystemConfigRequest` | `ApiResponse<SystemConfigResponse>` | @Valid |
+| POST | `/api/v1/admin/config/regenerate-key` | Regenerate API key. | ADMIN | — | `ApiResponse<String>` | — |
+
+## 10.3 Clinic Module
+
+| Method | URL | Description | Auth |
+|---|---|---|---|
+| GET | `/api/v1/clinics/{clinicId}/dashboard` | Clinic dashboard. | CLINIC_MANAGER, ADMIN, DOCTOR |
+| GET/POST/PUT/DELETE | `/api/v1/clinics/{clinicId}/patients/**` | Clinic patient CRUD. | CLINIC_MANAGER, ADMIN, DOCTOR (varies) |
+| GET/POST/PUT/DELETE | `/api/v1/clinics/{clinicId}/doctors/**` | Clinic doctor CRUD. | CLINIC_MANAGER, ADMIN |
+| GET/POST/PUT | `/api/v1/clinics/{clinicId}/appointments/**` | Clinic appointments. | CLINIC_MANAGER, ADMIN |
+| GET/PUT | `/api/v1/clinics/{clinicId}/profile` | Clinic profile. | CLINIC_MANAGER, ADMIN |
+| GET/PUT | `/api/v1/clinics/{clinicId}/risk-alerts/**` | Risk alerts. | CLINIC_MANAGER, ADMIN |
+| GET | `/v1/clinics/{clinicId}/reports/**` | Clinic reports. | Auth **Need Confirmation** |
+| POST/GET | `/api/v1/clinics/{clinicId}/patients/{patientId}/health-metrics` | Patient health metrics (clinic context). | CLINIC_MANAGER, ADMIN, DOCTOR |
+
+## 10.4 Doctor Module
+
+| Method | URL | Description | Auth |
+|---|---|---|---|
+| GET | `/api/v1/doctor/dashboard` | Doctor dashboard. | DOCTOR |
+| GET/POST/PUT/PATCH | `/api/v1/doctor/appointments/**` | Doctor appointments. | DOCTOR |
+| GET | `/api/v1/doctor/patients/**` | Doctor patients and stats. | DOCTOR |
+| GET/POST/DELETE | `/api/v1/doctor/prescriptions/**` | Prescriptions. | DOCTOR |
+| GET/POST/PUT | `/api/v1/doctor/messages/**` | Doctor messages. | DOCTOR |
+| GET/POST/PUT/DELETE | `/api/doctors/**` | Doctor directory CRUD. | Public reads, ADMIN writes, DOCTOR self-update |
+
+## 10.5 Patient Module
+
+| Method | URL | Description | Auth |
+|---|---|---|---|
+| GET | `/api/v1/patient/dashboard/**` | Patient dashboard and alerts. | PATIENT |
+| GET/PUT | `/api/v1/patient/profile/**` | Profile and contacts. | PATIENT |
+| GET/POST/DELETE | `/api/v1/patient/health-metrics/**` | Health metrics. | PATIENT |
+| GET/POST/PUT | `/api/v1/patient/appointments/**` | Appointments. | PATIENT |
+| GET/POST | `/api/v1/patient/prescriptions/**` | Prescriptions and medication. | PATIENT |
+| GET/POST/PUT | `/api/v1/patient/messages/**` | Messages. | PATIENT |
+
+## 10.6 Common Modules
+
+| Method | URL | Description | Auth |
+|---|---|---|---|
+| GET | `/api/v1/notifications` | List notifications. | Authenticated |
+| GET | `/api/v1/notifications/unread-count` | Unread count. | Authenticated |
+| PUT | `/api/v1/notifications/{id}/read` | Mark read. | Authenticated |
+| PUT | `/api/v1/notifications/read-all` | Mark all read. | Authenticated |
+| DELETE | `/api/v1/notifications/{id}` | Delete notification. | Authenticated |
+| GET/POST/PUT/DELETE | `/api/v1/medical-services/**` | Medical services. | Reads: Authenticated; Writes: ADMIN, CLINIC_MANAGER |
+| GET/POST/PUT/DELETE | `/api/v1/support-tickets/**` | Support tickets. | Authenticated (role matrix **Need Confirmation**) |
+| POST | `/api/v1/ai/chat` | AI chat. | Authenticated |
+| GET/PUT | `/api/v1/users/me` | Current user profile. | Authenticated |
+| PUT | `/api/v1/users/change-password` | Change password. | Authenticated |
+
+---
+
+# XI. SOFTWARE VERIFICATION
+
+> Source basis: `backend/src/test/java/com/project/`, `pom.xml` test dependencies, `production-ci.yml`, `postman/` directory, `test/` directory structure.
+
+## 11.1 Testing Framework Summary
+
+| Framework / Tool | Purpose | Configuration |
+|---|---|---|
+| JUnit 5 | Unit and integration test runner. | `spring-boot-starter-test` (includes JUnit 5). |
+| Mockito | Mocking dependencies in unit tests. | Included in `spring-boot-starter-test`. |
+| MockMvc | Controller integration testing with Spring MVC test support. | `spring-boot-starter-test`. |
+| Spring Security Test | Testing security constraints with `@WithMockUser`. | `spring-security-test` dependency. |
+| H2 Database | In-memory database for test profile. | `application-h2.yml`, H2 dependency (test scope). |
+| JaCoCo | Code coverage measurement and reporting. | `jacoco-maven-plugin 0.8.12` in `pom.xml`. |
+| Newman (Postman) | API contract testing against live deployment. | `production-ci.yml` postman-test job. |
+| CodeceptJS + Playwright | End-to-end UI testing. | `production-ci.yml` e2e-test job with `npm run test:e2e`. |
+| SonarCloud | Static analysis and quality gate. | `sonar-project.properties`. |
+
+## 11.2 Test File Inventory
+
+### 11.2.1 Controller Tests (26 files)
+
+| Test File | Target | Type |
+|---|---|---|
+| AdminControllerTest | AdminController | Unit (MockMvc) |
+| AdminControllerSecurityIntegrationTest | AdminController | Security integration |
+| AiChatControllerTest | AiChatController | Unit |
+| ClinicDashboardControllerTest | ClinicDashboardController | Unit (MockMvc) |
+| ClinicDashboardControllerSecurityIntegrationTest | ClinicDashboardController | Security integration |
+| ClinicDashboardSecurityIntegrationTest | ClinicDashboardController | Security integration |
+| ClinicReportControllerTest | ClinicReportController | Unit |
+| DashboardControllerTest | DashboardController | Unit |
+| DoctorAppointmentControllerTest | DoctorAppointmentController | Unit |
+| DoctorControllerTest | DoctorController | Unit |
+| DoctorControllerSecurityIntegrationTest | DoctorController | Security integration |
+| DoctorMessageControllerTest | DoctorMessageController | Unit |
+| DoctorPatientControllerTest | DoctorPatientController | Unit |
+| MedicalServiceControllerTest | MedicalServiceController | Unit |
+| NotificationControllerTest | NotificationController | Unit |
+| PaginationBvaTest | Pagination logic | BVA |
+| PatientAppointmentControllerTest | PatientAppointmentController | Unit |
+| PatientDashboardControllerTest | PatientDashboardController | Unit |
+| PatientHealthMetricControllerTest | PatientHealthMetricController | Unit |
+| PatientMessageControllerTest | PatientMessageController | Unit |
+| PatientProfileControllerSecurityIntegrationTest | PatientProfileController | Security integration |
+| PrescriptionControllerTest | PrescriptionController | Unit |
+| PrescriptionControllerSecurityIntegrationTest | PrescriptionController | Security integration |
+| RiskAlertControllerTest | RiskAlertController | Unit |
+| SupportTicketControllerTest | SupportTicketController | Unit |
+| UserProfileControllerTest | UserProfileController | Unit |
+
+### 11.2.2 Service Tests (30 files)
+
+| Test File | Target |
+|---|---|
+| AdminClinicServiceImplTest | AdminClinicServiceImpl |
+| AdminConfigServiceImplTest | AdminConfigServiceImpl |
+| AdminDashboardServiceImplTest | AdminDashboardServiceImpl |
+| AdminUserServiceImplTest | AdminUserServiceImpl |
+| AuthUserBvaTest | Authentication BVA |
+| ClinicDashboardServiceImplTest | ClinicDashboardServiceImpl |
+| ClinicDoctorServiceImplTest | ClinicDoctorServiceImpl |
+| ClinicPatientServiceImplTest | ClinicPatientServiceImpl |
+| ClinicReportServiceImplTest | ClinicReportServiceImpl |
+| ClinicalAnalyticsServiceImplTest | ClinicalAnalyticsServiceImpl |
+| CoreBusinessBvaTest | Core business BVA |
+| DoctorAppointmentServiceImplTest | DoctorAppointmentServiceImpl |
+| DoctorDashboardServiceImplTest | DoctorDashboardServiceImpl |
+| DoctorMessageServiceImplTest | DoctorMessageServiceImpl |
+| DoctorPatientServiceImplTest | DoctorPatientServiceImpl |
+| DoctorServiceImplTest | DoctorServiceImpl |
+| GeminiAiChatServiceImplTest | GeminiAiChatServiceImpl |
+| MedicalServiceServiceImplTest | MedicalServiceServiceImpl |
+| NotificationServiceImplTest | NotificationServiceImpl |
+| PatientAppointmentServiceImplTest | PatientAppointmentServiceImpl |
+| PatientDashboardServiceImplTest | PatientDashboardServiceImpl |
+| PatientHealthMetricServiceImplTest | PatientHealthMetricServiceImpl |
+| PatientMessageServiceImplTest | PatientMessageServiceImpl |
+| PatientPrescriptionServiceImplTest | PatientPrescriptionServiceImpl |
+| PatientProfileServiceImplTest | PatientProfileServiceImpl |
+| PrescriptionServiceImplTest | PrescriptionServiceImpl |
+| PrescriptionServiceTest | PrescriptionService |
+| RiskAlertServiceImplTest | RiskAlertServiceImpl |
+| SupportTicketServiceImplTest | SupportTicketServiceImpl |
+| JiraBugSyncExtension | JUnit extension for Jira sync |
+
+### 11.2.3 Security Tests (2 files)
+
+| Test File | Target |
+|---|---|
+| CustomUserDetailsServiceImplTest | CustomUserDetailsServiceImpl |
+| SecurityServiceTest | SecurityService |
+
+### 11.2.4 Additional Test Categories
+
+| Category | Files | Location |
+|---|---|---|
+| DTO tests | Present | `backend/src/test/java/com/project/dto/` |
+| Entity tests | Present | `backend/src/test/java/com/project/entity/` |
+| Exception tests | Present | `backend/src/test/java/com/project/exception/` |
+| Mapper tests | Present | `backend/src/test/java/com/project/mapper/` |
+| Repository tests | Present | `backend/src/test/java/com/project/repository/` |
+| Specification tests | Present | `backend/src/test/java/com/project/specification/` |
+| Utility tests | Present | `backend/src/test/java/com/project/util/` |
+
+## 11.3 API Contract Testing
+
+The Postman collection at `postman/DamDiep_Healthcare_API.postman_collection.json` (256 KB) provides comprehensive API tests run via Newman in CI. The environment file provides base URL configuration. Tests authenticate as admin, manager, doctor and patient roles, and verify response structures and business rules.
+
+## 11.4 End-to-End Testing
+
+CodeceptJS with Playwright runs browser-based E2E tests against the deployed frontend (`vercel.app`). Tests cover login flows for all four roles and key user workflows. E2E runs in headless mode in CI with screenshot capture on failure.
+
+## 11.5 Organized Test Resources
+
+The `test/` directory contains an organized testing structure:
+
+| Directory | Purpose |
+|---|---|
+| `test/00_index` | Test index and organization. |
+| `test/01_bva_ep` | Boundary Value Analysis and Equivalence Partitioning test cases. |
+| `test/02_whitebox_backend` | White-box testing documentation and analysis. |
+| `test/03_frontend` | Frontend testing artifacts. |
+| `test/04_api_postman` | Postman API test resources. |
+| `test/05_reports_reviews` | Test reports and code reviews. |
+| `test/06_testware_env` | Test environment configuration. |
+
+---
+
+# XII. WHITE BOX TESTING
+
+> Source basis: `PatientAppointmentServiceImpl.create()` and `AdminUserServiceImpl.deleteUser()` selected for complexity analysis.
+
+## 12.1 Method: PatientAppointmentServiceImpl.create
+
+### 12.1.1 Pseudo Code
+
+```
+FUNCTION create(request):
+    patient = getCurrentPatient()
+    now = currentTime()
+    appointmentTime = request.appointmentTime
+    
+    IF appointmentTime != null THEN                          // D1
+        IF appointmentTime < now + 3 hours THEN              // D2
+            THROW "Must be at least 3 hours ahead"
+        END IF
+        IF appointmentTime > now + 15 days THEN              // D3
+            THROW "Maximum 15 days ahead"
+        END IF
+    END IF
+    
+    doctor = findById(request.doctorId)                      // D4: doctor may be null
+    
+    finalLocation = "Phòng khám Đa khoa"
+    IF patient.clinicId != null THEN                         // D5
+        TRY
+            clinic = findById(patient.clinicId)
+            IF clinic != null AND clinic.name != null THEN   // D6
+                finalLocation = clinic.name
+            END IF
+        CATCH exception
+            log warning
+        END TRY
+    END IF
+    
+    appointment = build(patient, doctor, appointmentTime, type, location, meetingLink)
+    
+    IF type == "IN_PERSON" THEN                              // D7
+        set location = finalLocation
+    ELSE
+        set meetingLink = default link
+    END IF
+    
+    saved = save(appointment)
+    
+    IF doctor != null THEN                                   // D8
+        sendNotification(doctor, patient, saved)
+    END IF
+    
+    RETURN mapToResponse(saved)
+END FUNCTION
+```
+
+### 12.1.2 Decision Nodes
+
+| Node | Condition | True Branch | False Branch |
+|---|---|---|---|
+| D1 | appointmentTime != null | Validate time bounds | Skip validation |
+| D2 | appointmentTime < now+3h | Throw exception | Continue |
+| D3 | appointmentTime > now+15d | Throw exception | Continue |
+| D4 | doctor found | Set doctor info | doctor = null |
+| D5 | patient.clinicId != null | Resolve clinic name | Use fallback |
+| D6 | clinic != null && name != null | Use clinic name | Keep fallback |
+| D7 | type == "IN_PERSON" | Set location | Set meeting link |
+| D8 | doctor != null | Send notification | Skip notification |
+
+### 12.1.3 Control Flow Graph
+
+```mermaid
+graph TD
+    S[Start] --> D1{appointmentTime != null?}
+    D1 -->|Yes| D2{time < now+3h?}
+    D1 -->|No| D4
+    D2 -->|Yes| E1[Throw: 3h rule]
+    D2 -->|No| D3{time > now+15d?}
+    D3 -->|Yes| E2[Throw: 15d rule]
+    D3 -->|No| D4[Find doctor]
+    D4 --> D5{clinicId != null?}
+    D5 -->|Yes| D6{clinic found & name != null?}
+    D5 -->|No| D7
+    D6 -->|Yes| USE[Use clinic name]
+    D6 -->|No| D7
+    USE --> D7{type == IN_PERSON?}
+    D7 -->|Yes| LOC[Set location]
+    D7 -->|No| LINK[Set meeting link]
+    LOC --> SAVE[Save appointment]
+    LINK --> SAVE
+    SAVE --> D8{doctor != null?}
+    D8 -->|Yes| NOTIFY[Send notification]
+    D8 -->|No| RET[Return response]
+    NOTIFY --> RET
+    RET --> END[End]
+```
+
+### 12.1.4 Cyclomatic Complexity
+
+V(G) = E - N + 2P = 8 decision nodes + 1 = **9**
+
+### 12.1.5 Independent Paths
+
+| Path | Description |
+|---|---|
+| P1 | appointmentTime is null → clinicId is null → ONLINE → doctor is null → return |
+| P2 | appointmentTime is null → clinicId is null → IN_PERSON → doctor found → notify → return |
+| P3 | appointmentTime valid (within bounds) → clinicId not null → clinic found → IN_PERSON → doctor found → notify → return |
+| P4 | appointmentTime too early (< 3h) → throw exception |
+| P5 | appointmentTime too late (> 15d) → throw exception |
+| P6 | appointmentTime valid → clinicId not null → clinic not found → ONLINE → doctor null → return |
+| P7 | appointmentTime valid → clinicId null → IN_PERSON → doctor found → notify → return |
+| P8 | appointmentTime valid → clinicId not null → clinic found → ONLINE → doctor found → notify → return |
+| P9 | appointmentTime valid → clinicId not null → clinic lookup throws exception → IN_PERSON → doctor null → return |
+
+### 12.1.6 White-box Test Cases
+
+| TC | Input Scenario | Expected Result | Path |
+|---|---|---|---|
+| WB-APT-01 | appointmentTime=null, type=ONLINE, clinicId=null | Appointment created with meeting link, no notification | P1 |
+| WB-APT-02 | appointmentTime=now+1h | IllegalArgumentException: 3 hour rule | P4 |
+| WB-APT-03 | appointmentTime=now+20d | IllegalArgumentException: 15 day rule | P5 |
+| WB-APT-04 | appointmentTime=now+5h, type=IN_PERSON, clinicId=valid, doctorId=valid | Appointment with clinic name location, notification sent | P3 |
+| WB-APT-05 | appointmentTime=now+5h, type=ONLINE, clinicId=null, doctorId=valid | Appointment with meeting link, notification sent | P7 (ONLINE) |
+| WB-APT-06 | appointmentTime=now+5h, clinicId=valid but clinic not found, type=ONLINE, doctorId=null | Appointment with default location, no notification | P6 |
+| WB-APT-07 | appointmentTime=now+5h, clinicId=valid, clinic lookup exception, type=IN_PERSON | Appointment with fallback location | P9 |
+
+Coverage Goal: 100% branch coverage for all 8 decision nodes.
+
+## 12.2 Method: AdminUserServiceImpl.deleteUser
+
+### 12.2.1 Pseudo Code
+
+```
+FUNCTION deleteUser(id):
+    user = findById(id)                                      // D1: throws if not found
+    
+    currentUserId = getCurrentUserId()
+    IF currentUserId == id THEN                              // D2
+        THROW "Cannot delete currently logged-in admin"
+    END IF
+    
+    IF user.role == ADMIN THEN                               // D3
+        IF countAdmins <= 1 THEN                             // D4
+            THROW "Cannot delete last admin"
+        END IF
+    END IF
+    
+    user.setDeleted(true)
+    save(user)
+    
+    IF user.role == PATIENT THEN                             // D5
+        patient = findByUserId(user.id)
+        IF patient exists THEN                               // D6
+            patient.setDeleted(true)
+            save(patient)
+        END IF
+    END IF
+    
+    recordAuditActivity("Xóa", user.email)
+END FUNCTION
+```
+
+### 12.2.2 Cyclomatic Complexity
+
+V(G) = 6 decision nodes + 1 = **7**
+
+### 12.2.3 Control Flow Graph
+
+```mermaid
+graph TD
+    S[Start] --> D1[Find user by ID]
+    D1 -->|Not found| E1[Throw Not Found]
+    D1 -->|Found| D2{currentUser == id?}
+    D2 -->|Yes| E2[Throw: Cannot delete self]
+    D2 -->|No| D3{role == ADMIN?}
+    D3 -->|Yes| D4{adminCount <= 1?}
+    D3 -->|No| SOFT[Soft delete user]
+    D4 -->|Yes| E3[Throw: Last admin]
+    D4 -->|No| SOFT
+    SOFT --> D5{role == PATIENT?}
+    D5 -->|Yes| D6{patient found?}
+    D5 -->|No| AUDIT[Record audit]
+    D6 -->|Yes| DELP[Soft delete patient]
+    D6 -->|No| AUDIT
+    DELP --> AUDIT
+    AUDIT --> END[End]
+```
+
+### 12.2.4 White-box Test Cases
+
+| TC | Input Scenario | Expected Result | Path |
+|---|---|---|---|
+| WB-USR-01 | id=999 (not found) | NoSuchElementException | D1 fail |
+| WB-USR-02 | id=currentUserId | IllegalStateException: cannot delete self | D2 true |
+| WB-USR-03 | user.role=ADMIN, only 1 admin | IllegalStateException: last admin | D3→D4 true |
+| WB-USR-04 | user.role=ADMIN, 2+ admins | Soft delete admin, audit recorded | D3→D4 false |
+| WB-USR-05 | user.role=DOCTOR | Soft delete user, no patient cascade, audit | D3 false, D5 false |
+| WB-USR-06 | user.role=PATIENT, patient exists | Soft delete user + patient, audit | D5→D6 true |
+| WB-USR-07 | user.role=PATIENT, no patient record | Soft delete user only, audit | D5→D6 false |
+
+---
+
+# XIII. TEST COVERAGE
+
+> Source basis: `pom.xml` JaCoCo configuration, CI pipeline artifact uploads.
+
+## 13.1 JaCoCo Configuration
+
+JaCoCo Maven Plugin 0.8.12 is configured with:
+- **prepare-agent**: Instruments bytecode for coverage tracking.
+- **report**: Generates HTML/XML/CSV coverage reports during `verify` phase.
+- Surefire plugin is configured with `-Dnet.bytebuddy.experimental=true @{argLine}` to support Byte Buddy with modern JDK.
+
+## 13.2 Coverage Metrics
+
+JaCoCo reports are generated at `backend/target/site/jacoco/` and uploaded as CI artifacts (`backend-test-reports`). The report tracks:
+
+| Metric | Description |
+|---|---|
+| Instruction Coverage | Percentage of bytecode instructions executed. |
+| Branch Coverage | Percentage of conditional branches taken. |
+| Method Coverage | Percentage of methods invoked. |
+| Class Coverage | Percentage of classes loaded. |
+| Line Coverage | Percentage of source lines executed. |
+
+Exact coverage percentages require running `mvn verify` and examining the generated report. Current coverage values are **Need Confirmation** from latest CI run.
+
+## 13.3 Expected Coverage Gaps
+
+| Area | Reason |
+|---|---|
+| `GlobalExceptionHandler` catch-all handlers | May not be triggered by unit tests focused on happy paths. |
+| `GeminiAiChatServiceImpl` external API calls | Requires mocking external Gemini API. |
+| `RateLimitFilter` edge cases | In-memory rate limiter timing-sensitive tests may be fragile. |
+| JIT fallback paths in `mapToResponse` | Legacy data fallback paths require specific database state. |
+| `AuditAspect` AOP advice | Requires integration test context to trigger aspects. |
+
+---
+
+# XIV. STATIC ANALYSIS
+
+> Source basis: `sonar-project.properties`, `pom.xml`.
+
+## 14.1 Configured Tools
+
+| Tool | Status | Configuration |
+|---|---|---|
+| SonarCloud | Configured | `sonar-project.properties` defines sources (`backend/src/main`, `frontend/src`), tests (`backend/src/test`), exclusions (`test/resources`, `reporters`, `target`, `node_modules`). |
+| PMD | Not configured | No PMD plugin or ruleset found in `pom.xml`. |
+| SpotBugs | Not configured | No SpotBugs plugin found in `pom.xml`. |
+| Checkstyle | Not configured | No Checkstyle plugin found in `pom.xml`. |
+| ESLint | Configured | Frontend runs `npm run lint` in CI. |
+| TypeScript Compiler | Configured | Frontend runs `npm run typecheck` in CI. |
+
+## 14.2 SonarCloud Scope
+
+- **Sources**: `backend/src/main`, `frontend/src`
+- **Tests**: `backend/src/test`
+- **Exclusions**: `test/resources/**/*`, `reporters/**/*`, `backend/target/**/*`, `**/node_modules/**/*`
+- **CPD Exclusions**: Same as analysis exclusions.
+
+SonarCloud integration typically requires a `SONAR_TOKEN` secret and additional CI job. A dedicated SonarCloud CI step was not detected in `production-ci.yml`; execution may be handled via external integration or manual trigger. This is **Need Confirmation**.
+
+---
+
+# XV. CI/CD
+
+> Source basis: `.github/workflows/production-ci.yml`.
+
+## 15.1 Pipeline Overview
+
+```mermaid
+graph TD
+    TRIGGER[Push/PR to main/develop/feature/KCPM branches] --> BACKEND[backend-test]
+    TRIGGER --> FRONTEND[frontend-test]
+    BACKEND --> POSTMAN[postman-test]
+    FRONTEND --> E2E[e2e-test]
+    BACKEND --> DOCKER[docker-build]
+    BACKEND --> JIRA[create-jira-bug-on-failure]
+    FRONTEND --> JIRA
+    POSTMAN --> JIRA
+    E2E --> JIRA
+    DOCKER --> JIRA
+```
+
+## 15.2 Job Details
+
+| Job | Name | Runner | Timeout | Dependencies | Description |
+|---|---|---|---|---|---|
+| backend-test | Backend - Maven Test | ubuntu-latest | 25 min | None | Java 17 setup, `mvn clean verify` with test profile. Uploads Surefire/Failsafe reports and JaCoCo coverage. |
+| frontend-test | Frontend - Build and Static Checks | ubuntu-latest | 20 min | None | Node.js 22 setup, `npm ci`, lint, typecheck, build. Uploads lint/typecheck/build logs. |
+| postman-test | Postman - Newman API Test | ubuntu-latest | 20 min | backend-test | Installs Newman, runs Postman collection against live API with role-specific credentials. Exports JSON and JUnit reports. |
+| e2e-test | E2E - CodeceptJS Playwright | ubuntu-latest | 30 min | frontend-test | Installs Playwright browsers, runs E2E tests against deployed frontend. Captures screenshots on failure. |
+| docker-build | Docker - Backend Build | ubuntu-latest | 20 min | backend-test | Builds Docker image for backend. Verifies Dockerfile validity. |
+| create-jira-bug-on-failure | Jira - Create or Comment CI Failure | ubuntu-latest | 10 min | All jobs | On failure of any job on main/develop, downloads failure summaries and creates/updates Jira bug issue. |
+
+## 15.3 Pipeline Features
+
+| Feature | Details |
+|---|---|
+| Concurrency | `cancel-in-progress: true` per branch ref group. |
+| Path Filtering | Only triggers on changes in `backend/`, `frontend/`, `postman/`, `test/resource/`, `.github/`. |
+| Artifact Upload | Every job uploads reports/logs as GitHub Actions artifacts. |
+| Failure Summarization | Each job generates a structured failure summary text file for debugging. |
+| Jira Integration | Automated bug creation with `KCPM` project key via `.github/scripts/create-or-comment-jira-ci-issue.js`. |
+| Test Credentials | Pre-configured test accounts for admin, manager, doctor and patient roles. |
+
+---
+
+# XVI. BUG LIST
+
+> Source basis: Static code review of service implementations, configuration and entity classes.
+
+| Bug ID | Description | Severity | Priority |
+|---|---|---|---|
+| BUG-01 | `PatientAppointmentServiceImpl.cancel()` wraps all exceptions including business-rule `RuntimeException` in a new generic `RuntimeException`, losing the specific error message for the client. | Medium | Medium |
+| BUG-02 | `PatientAppointmentServiceImpl.create()` sets a hardcoded meeting link `"https://meet.google.com/abc-xyz"` for all ONLINE appointments instead of generating unique links. | Low | Low |
+| BUG-03 | `AdminUserServiceImpl.createUser()` generates patient code with `"PT-" + (1000 + (int)(Math.random() * 9000))`, which has collision risk as patient count grows. | Medium | High |
+| BUG-04 | `SecurityConfig.corsConfigurationSource()` allows all origin patterns (`*`) with credentials, which is insecure for production deployment. | High | High |
+| BUG-05 | `RateLimitFilter` uses in-memory `ConcurrentHashMap` without cleanup, causing potential memory leak over time as entries accumulate for distinct IPs. | Medium | Medium |
+| BUG-06 | `ClinicReportController` lacks explicit `@PreAuthorize` annotation; effective authorization relies solely on URL-based security config which may not enforce clinic-specific access. | High | High |
+| BUG-07 | `SupportTicketController` lacks method-level `@PreAuthorize` annotations, meaning any authenticated user can potentially access all ticket operations. | High | Medium |
+| BUG-08 | `application.yml` configures `ddl-auto: update` which is not safe for production as it may apply unintended schema changes. | High | High |
+| BUG-09 | `application.yml` embeds default JWT secret in source code. The fallback secret should not be present in version control. | Critical | Critical |
+| BUG-10 | `Clinic` entity uses denormalized counts (`doctorCount`, `patientCount`, `highRiskPatientCount`) that can drift from actual data if updates are made outside the normal service flow. | Medium | Low |
+| BUG-11 | `Appointment` entity caches doctor name/specialty/avatar but does not update these when the doctor's profile changes, leading to stale display data. | Low | Low |
+| BUG-12 | `@Cacheable` on `AdminDashboardServiceImpl.getDashboardData` requires a cache provider (Redis, Ehcache, etc.) but none is configured in `pom.xml`, so caching may be a no-op. | Medium | Medium |
+
+---
+
+# XVII. CONCLUSION
+
+## 17.1 Architecture Summary
+
+The DamDiep Healthcare system follows a clean three-tier architecture: a React 19 + TypeScript + Vite frontend communicates via REST APIs with a Spring Boot 3.2.4 backend, which persists data in MySQL through Spring Data JPA. Security is implemented with stateless JWT authentication, BCrypt password encoding, role-based access control with four roles (ADMIN, DOCTOR, CLINIC_MANAGER, PATIENT), and method-level authorization via Spring Security. The system supports 11 distinct business modules covering the full lifecycle of chronic disease patient management.
+
+## 17.2 Requirements Summary
+
+The system satisfies 28 identified use cases and 6 functional requirement categories derived from source code analysis. The authentication and authorization mechanism is comprehensive, with class-level and method-level `@PreAuthorize` annotations, ownership checks via `SecurityService`, and a centralized exception handling strategy. Business rules governing appointment scheduling, prescription management, password policy, soft deletion and audit logging are well-implemented in service layer code.
+
+## 17.3 Verification Summary
+
+The project demonstrates strong testing coverage with 58+ backend test files organized across controller, service, security, DTO, entity, mapper, repository and specification test packages. Testing includes unit tests (JUnit 5 + Mockito), integration tests (MockMvc + H2), security tests (@WithMockUser), BVA tests, API contract tests (Newman/Postman with 256 KB collection) and E2E tests (CodeceptJS + Playwright). JaCoCo is configured for coverage reporting and SonarCloud is set up for quality gate analysis.
+
+## 17.4 Quality Assessment
+
+| Aspect | Rating | Notes |
+|---|---|---|
+| Architecture | Good | Clean layered design with proper separation of concerns. |
+| Security | Good with risks | JWT + BCrypt + RBAC + rate limiting, but production CORS and embedded secrets need attention. |
+| Testing | Good | Comprehensive test suite across multiple levels. |
+| Code quality | Good | Lombok, mappers, structured exception handling. |
+| CI/CD | Excellent | Multi-stage pipeline with Jira integration and failure analysis. |
+| Documentation | Moderate | Swagger/OpenAPI configured but disabled by default. |
+
+## 17.5 Future Improvements
+
+| Area | Recommendation |
+|---|---|
+| Security | Restrict CORS origins for production; externalize JWT secret; add HTTPS enforcement. |
+| Database | Replace `ddl-auto: update` with Flyway/Liquibase for controlled migrations. |
+| Caching | Configure a cache provider (Redis/Ehcache) to activate `@Cacheable` annotations. |
+| Real-time | Implement WebSocket/STOMP for real-time messaging and notification push. |
+| Patient Code | Replace `Math.random()` patient code generation with a sequence-based approach. |
+| Rate Limiting | Replace in-memory rate limiter with Redis-backed solution for horizontal scaling. |
+| Static Analysis | Add PMD, SpotBugs and Checkstyle plugins to the Maven build. |
+| Monitoring | Add health check endpoints for database connectivity and external API availability. |
+| Authorization | Add explicit `@PreAuthorize` to `ClinicReportController` and `SupportTicketController`. |
+| Testing | Increase branch coverage for exception handling paths and external API integration. |
