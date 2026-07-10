@@ -48,11 +48,13 @@ const VelorahLandingPage = () => {
       if (avatarUrl) localStorage.setItem('userAvatar', avatarUrl);
       if (clinicId) localStorage.setItem('clinicId', clinicId.toString());
 
-      if (role === 'ROLE_ADMIN') {
+      const normalizedRole = role.replace('ROLE_', '');
+
+      if (normalizedRole === 'ADMIN') {
         navigate('/admin');
-      } else if (role === 'ROLE_DOCTOR') {
+      } else if (normalizedRole === 'DOCTOR') {
         navigate('/doctor');
-      } else if (role === 'ROLE_CLINIC_MANAGER') {
+      } else if (normalizedRole === 'CLINIC_MANAGER') {
         navigate('/clinic');
       } else {
         navigate('/patient');
