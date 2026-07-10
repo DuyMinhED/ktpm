@@ -167,9 +167,6 @@ Hệ thống được xây dựng dựa trên mô hình kiến trúc **Client-Se
 
 Để phục vụ cho bài tập thực hành kiểm thử (tìm lỗi bằng kiểm thử BVA và White-box rồi tiến hành sửa đổi mã nguồn), dưới đây là tài liệu đặc tả các ngưỡng nghiệp vụ của hệ thống. 
 
-> [!NOTE]
-> **Lưu ý quan trọng cho Sinh viên:** 
-> Một số ngưỡng nghiệp vụ dưới đây đã được cố ý thiết kế khác biệt so với logic hiện tại trong mã nguồn. Nhiệm vụ của bạn là viết kịch bản kiểm thử dựa trên tài liệu đặc tả này, chạy kiểm thử để phát hiện các lỗi sai biệt (failures), sau đó tiến hành sửa code (hoặc sửa tài liệu tùy đề bài) cho khớp và đúng chuẩn.
 
 ### 6.1 Logic phân loại Chỉ số Sức khỏe (Health Metrics Classification)
 Được cài đặt tại: `PatientHealthMetricServiceImpl.evaluateStatus(MetricType type, BigDecimal value, BigDecimal secondary)`
