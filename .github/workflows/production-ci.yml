@@ -13,7 +13,6 @@ on:
       - "backend/**"
       - "frontend/**"
       - "postman/**"
-      - "test/resource/**"
       - ".github/workflows/**"
       - ".github/scripts/**"
 
@@ -25,7 +24,6 @@ on:
       - "backend/**"
       - "frontend/**"
       - "postman/**"
-      - "test/resource/**"
       - ".github/workflows/**"
       - ".github/scripts/**"
 
@@ -263,7 +261,7 @@ jobs:
 
       - name: Run Postman collection
         run: |
-          COLLECTION_PATH="test/resource/DamDiep_Healthcare_API.postman_collection.json"
+          COLLECTION_PATH="postman/DamDiep_Healthcare_API.postman_collection.json"
           test -f "${COLLECTION_PATH}" || (echo "Postman collection not found: ${COLLECTION_PATH}" && exit 1)
 
           API_BASE_URL="${API_BASE_URL:-${DEFAULT_API_BASE_URL}}"
