@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -24,6 +25,7 @@ public class SupportTicketController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<SupportTicket>> getAllTickets(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
@@ -32,6 +34,7 @@ public class SupportTicketController {
     }
 
     @GetMapping("/clinic/{clinicId}")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isClinicManagerOf(#clinicId)")
     public ResponseEntity<Page<SupportTicket>> getTicketsByClinic(
             @PathVariable Long clinicId,
             @RequestParam(required = false) String status,
@@ -40,6 +43,7 @@ public class SupportTicketController {
     }
 
     @GetMapping("/creator/{creatorId}")
+    @PreAuthorize("hasRole('ADMIN') or #creatorId == authentication.principal.id")
     public ResponseEntity<Page<SupportTicket>> getTicketsByCreator(
             @PathVariable Long creatorId,
             @RequestParam(required = false) String status,
@@ -48,6 +52,7 @@ public class SupportTicketController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@securityService.isTicketOwner(#id)")
     public ResponseEntity<SupportTicket> getTicketById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.getTicketById(id));
     }
@@ -58,6 +63,7 @@ public class SupportTicketController {
     }
 
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isClinicManagerOfTicket(#id)")
     public ResponseEntity<SupportTicket> updateStatus(
             @PathVariable Long id,
             @RequestParam String status,
@@ -66,11 +72,13 @@ public class SupportTicketController {
     }
 
     @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Long>> getStats() {
         return ResponseEntity.ok(ticketService.getTicketStats());
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
         ticketService.deleteTicket(id);
         return ResponseEntity.noContent().build();

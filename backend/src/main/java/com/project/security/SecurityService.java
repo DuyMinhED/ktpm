@@ -1,11 +1,15 @@
 package com.project.security;
 
-import com.project.entity.Patient;
-import com.project.repository.PatientRepository;
-import com.project.util.SecurityUtils;
-import com.project.util.RoleUtils;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.project.entity.Patient;
+import com.project.entity.SupportTicket;
+import com.project.repository.PatientRepository;
+import com.project.repository.SupportTicketRepository;
+import com.project.util.RoleUtils;
+import com.project.util.SecurityUtils;
+
+import lombok.RequiredArgsConstructor;
 
 @Service("securityService")
 @SuppressWarnings("null")
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class SecurityService {
 
     private final PatientRepository patientRepository;
+    private final SupportTicketRepository supportTicketRepository;
 
     public boolean canAccessPatient(Long patientId) {
         CustomUserDetails user = SecurityUtils.getCurrentUserDetails().orElse(null);
@@ -69,5 +74,30 @@ public class SecurityService {
         return RoleUtils.DOCTOR.equals(user.getRole()) && 
                user.getId() != null && 
                user.getId().equals(doctorId);
+    }
+
+    public boolean isTicketOwner(Long ticketId) {
+        CustomUserDetails user = SecurityUtils.getCurrentUserDetails().orElse(null);
+        if (user == null || user.getRole() == null) return false;
+
+        if (RoleUtils.ADMIN.equals(user.getRole())) return true;
+
+        SupportTicket ticket = supportTicketRepository.findById(ticketId).orElse(null);
+        if (ticket == null) return false;
+
+        return user.getId() != null && user.getId().equals(ticket.getCreatorId());
+    }
+
+    public boolean isClinicManagerOfTicket(Long ticketId) {
+        CustomUserDetails user = SecurityUtils.getCurrentUserDetails().orElse(null);
+        if (user == null || user.getRole() == null) return false;
+
+        if (RoleUtils.ADMIN.equals(user.getRole())) return true;
+        if (!RoleUtils.CLINIC_MANAGER.equals(user.getRole())) return false;
+
+        SupportTicket ticket = supportTicketRepository.findById(ticketId).orElse(null);
+        if (ticket == null) return false;
+
+        return user.getClinicId() != null && user.getClinicId().equals(ticket.getClinicId());
     }
 }
