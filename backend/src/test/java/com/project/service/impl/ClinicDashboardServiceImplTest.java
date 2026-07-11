@@ -454,7 +454,7 @@ public class ClinicDashboardServiceImplTest {
         when(appointmentRepository.findById(32L)).thenReturn(Optional.of(completed));
 
         assertThrows(AccessDeniedException.class, () -> service.updateAppointment(1L, 31L, appointmentRequest(1L, "ONLINE", "https://meet")));
-        assertThrows(IllegalStateException.class, () -> service.updateAppointment(1L, 32L, appointmentRequest(2L, "ONLINE", "https://meet")));
+        assertThrows(IllegalArgumentException.class, () -> service.updateAppointment(1L, 32L, appointmentRequest(2L, "ONLINE", "https://meet")));
     }
 
     // =========================================================================

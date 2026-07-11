@@ -70,13 +70,13 @@ class MedicalServiceServiceImplTest {
         when(medicalServiceRepository.findById(404L)).thenReturn(Optional.empty());
 
         assertSame(existing, service.getServiceById(1L));
-        assertThrows(RuntimeException.class, () -> service.getServiceById(404L));
+        assertThrows(com.project.exception.ResourceNotFoundException.class, () -> service.getServiceById(404L));
         assertThrows(NullPointerException.class, () -> service.getServiceById(null));
     }
 
     @Test
     void createService_clinicManagerAssignsOwnClinicAndAudits() {
-        authenticate("ROLE_CLINIC_MANAGER", 10L);
+        authenticate("CLINIC_MANAGER", 10L);
         MedicalService request = serviceEntity(null, 99L, ACTIVE);
         MedicalService saved = serviceEntity(1L, 10L, ACTIVE);
         when(medicalServiceRepository.save(request)).thenReturn(saved);
@@ -90,7 +90,7 @@ class MedicalServiceServiceImplTest {
 
     @Test
     void createService_adminKeepsProvidedClinicIdOrGlobalScope() {
-        authenticate("ROLE_ADMIN", null);
+        authenticate("ADMIN", null);
         MedicalService request = serviceEntity(null, null, ACTIVE);
         MedicalService saved = serviceEntity(2L, null, ACTIVE);
         when(medicalServiceRepository.save(request)).thenReturn(saved);
@@ -112,7 +112,7 @@ class MedicalServiceServiceImplTest {
 
     @Test
     void createService_nonPositivePriceIsRejectedBeforeSave() {
-        authenticate("ROLE_ADMIN", null);
+        authenticate("ADMIN", null);
         MedicalService zeroPrice = serviceEntity(null, null, ACTIVE);
         zeroPrice.setPrice(BigDecimal.ZERO);
 
@@ -124,7 +124,7 @@ class MedicalServiceServiceImplTest {
 
     @Test
     void updateService_adminCopiesMutableFieldsButKeepsClinicId() {
-        authenticate("ROLE_ADMIN", null);
+        authenticate("ADMIN", null);
         MedicalService existing = serviceEntity(1L, 10L, ACTIVE);
         MedicalService update = serviceEntity(null, 99L, INACTIVE);
         update.setName("Updated service");
@@ -144,7 +144,7 @@ class MedicalServiceServiceImplTest {
 
     @Test
     void updateService_clinicManagerCannotEditGlobalOrOtherClinicServices() {
-        authenticate("ROLE_CLINIC_MANAGER", 10L);
+        authenticate("CLINIC_MANAGER", 10L);
         when(medicalServiceRepository.findById(1L)).thenReturn(Optional.of(serviceEntity(1L, null, ACTIVE)));
         when(medicalServiceRepository.findById(2L)).thenReturn(Optional.of(serviceEntity(2L, 11L, ACTIVE)));
 
@@ -154,7 +154,7 @@ class MedicalServiceServiceImplTest {
 
     @Test
     void updateService_nonPositivePriceIsRejectedBeforeLookup() {
-        authenticate("ROLE_ADMIN", null);
+        authenticate("ADMIN", null);
         MedicalService invalid = serviceEntity(null, null, ACTIVE);
         invalid.setPrice(new BigDecimal("-1.00"));
 
@@ -166,7 +166,7 @@ class MedicalServiceServiceImplTest {
 
     @Test
     void deleteService_deletesWhenManagerOwnsClinicService() {
-        authenticate("ROLE_CLINIC_MANAGER", 10L);
+        authenticate("CLINIC_MANAGER", 10L);
         MedicalService existing = serviceEntity(1L, 10L, ACTIVE);
         when(medicalServiceRepository.findById(1L)).thenReturn(Optional.of(existing));
 
@@ -178,7 +178,7 @@ class MedicalServiceServiceImplTest {
 
     @Test
     void toggleStatus_switchesActiveAndInactiveStatuses() {
-        authenticate("ROLE_ADMIN", null);
+        authenticate("ADMIN", null);
         MedicalService active = serviceEntity(1L, null, ACTIVE);
         MedicalService inactive = serviceEntity(2L, null, INACTIVE);
         when(medicalServiceRepository.findById(1L)).thenReturn(Optional.of(active));
