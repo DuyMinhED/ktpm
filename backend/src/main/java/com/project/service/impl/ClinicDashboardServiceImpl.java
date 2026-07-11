@@ -466,7 +466,7 @@ public class ClinicDashboardServiceImpl implements ClinicDashboardService {
         }
 
         if (appointment.getStatus() == com.project.entity.AppointmentStatus.COMPLETED || appointment.getStatus() == com.project.entity.AppointmentStatus.CANCELLED) {
-            throw new IllegalStateException("Không thể cập nhật thông tin lịch hẹn đã hoàn thành hoặc đã hủy!");
+            throw new IllegalArgumentException("Không thể cập nhật thông tin lịch hẹn đã hoàn thành hoặc đã hủy!");
         }
 
         java.time.LocalDateTime appointmentTime = java.time.LocalDateTime.parse(request.getAppointmentDate() + "T" + request.getAppointmentTime());

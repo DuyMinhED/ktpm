@@ -39,7 +39,7 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     @Override
     public MedicalService getServiceById(Long id) {
         return medicalServiceRepository.findById(Objects.requireNonNull(id))
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ với id: " + id));
+                .orElseThrow(() -> new com.project.exception.ResourceNotFoundException("Không tìm thấy dịch vụ với id: " + id));
     }
 
     @Override
@@ -47,10 +47,10 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     public MedicalService createService(MedicalService service) {
         validateServicePayload(service);
         CustomUserDetails user = getCurrentUser();
-        if ("ROLE_CLINIC_MANAGER".equals(user.getRole())) {
+        if ("CLINIC_MANAGER".equals(user.getRole())) {
             // Automatically assign service to the current Clinic Manager's clinic
             service.setClinicId(user.getClinicId());
-        } else if ("ROLE_ADMIN".equals(user.getRole())) {
+        } else if ("ADMIN".equals(user.getRole())) {
             // Admins keep clinicId as provided or null for global
         } else {
             throw new org.springframework.security.access.AccessDeniedException("Chỉ Admin hoặc Quản lý phòng khám mới có quyền tạo dịch vụ");
@@ -155,11 +155,11 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
 
     private void validateWriteAccess(MedicalService service) {
         CustomUserDetails user = getCurrentUser();
-        if ("ROLE_ADMIN".equals(user.getRole())) {
+        if ("ADMIN".equals(user.getRole())) {
             return; // System Admins bypass
         }
         
-        if ("ROLE_CLINIC_MANAGER".equals(user.getRole())) {
+        if ("CLINIC_MANAGER".equals(user.getRole())) {
             if (service.getClinicId() == null || !service.getClinicId().equals(user.getClinicId())) {
                 throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền quản lý dịch vụ của hệ thống hoặc phòng khám khác!");
             }
