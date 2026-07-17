@@ -2,6 +2,8 @@ package com.project.security;
 
 import com.project.entity.Patient;
 import com.project.repository.PatientRepository;
+import com.project.repository.SupportTicketRepository;
+import com.project.entity.SupportTicket;
 import com.project.util.RoleUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,9 @@ class SecurityServiceTest {
 
     @Mock
     private PatientRepository patientRepository;
+
+    @Mock
+    private SupportTicketRepository supportTicketRepository;
 
     @InjectMocks
     private SecurityService securityService;
@@ -185,5 +190,77 @@ class SecurityServiceTest {
                 .phone("090000000" + id)
                 .gender("M")
                 .build();
+    }
+
+    @Test
+    void isUserSelf_returnsTrueForMatchingUserId() {
+        assertFalse(securityService.isUserSelf(10L));
+
+        authenticate(10L, RoleUtils.PATIENT, null);
+        assertTrue(securityService.isUserSelf(10L));
+        assertFalse(securityService.isUserSelf(11L));
+    }
+
+    @Test
+    void canAccessTicket_allowsAdminOrManagerOrCreator() {
+        SupportTicket ticket = SupportTicket.builder()
+                .id(1L)
+                .ticketCode("TKT-1")
+                .clinicId(2L)
+                .creatorId(10L)
+                .build();
+        
+        // Unauthenticated
+        assertFalse(securityService.canAccessTicket(1L));
+
+        // Admin
+        authenticate(99L, RoleUtils.ADMIN, null);
+        assertTrue(securityService.canAccessTicket(1L));
+
+        // Clinic Manager - same clinic
+        authenticate(20L, RoleUtils.CLINIC_MANAGER, 2L);
+        when(supportTicketRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        assertTrue(securityService.canAccessTicket(1L));
+
+        // Clinic Manager - different clinic
+        authenticate(20L, RoleUtils.CLINIC_MANAGER, 3L);
+        assertFalse(securityService.canAccessTicket(1L));
+
+        // Creator - patient
+        authenticate(10L, RoleUtils.PATIENT, null);
+        assertTrue(securityService.canAccessTicket(1L));
+
+        // Non-creator - patient
+        authenticate(11L, RoleUtils.PATIENT, null);
+        assertFalse(securityService.canAccessTicket(1L));
+        
+        // Ticket not found
+        authenticate(10L, RoleUtils.PATIENT, null);
+        when(supportTicketRepository.findById(99L)).thenReturn(Optional.empty());
+        assertFalse(securityService.canAccessTicket(99L));
+    }
+
+    @Test
+    void canAccessTicketByCode_allowsAdminOrManagerOrCreator() {
+        SupportTicket ticket = SupportTicket.builder()
+                .id(1L)
+                .ticketCode("TKT-1")
+                .clinicId(2L)
+                .creatorId(10L)
+                .build();
+
+        // Admin
+        authenticate(99L, RoleUtils.ADMIN, null);
+        assertTrue(securityService.canAccessTicketByCode("TKT-1"));
+
+        // Creator
+        authenticate(10L, RoleUtils.PATIENT, null);
+        when(supportTicketRepository.findByTicketCode("TKT-1")).thenReturn(Optional.of(ticket));
+        assertTrue(securityService.canAccessTicketByCode("TKT-1"));
+
+        // Ticket not found
+        authenticate(10L, RoleUtils.PATIENT, null);
+        when(supportTicketRepository.findByTicketCode("INVALID")).thenReturn(Optional.empty());
+        assertFalse(securityService.canAccessTicketByCode("INVALID"));
     }
 }
