@@ -251,6 +251,14 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Trigger backend wakeup
+        shell: bash
+        run: |
+          API_URL="${{ secrets.API_BASE_URL }}"
+          API_URL="${API_URL:-$DEFAULT_API_BASE_URL}"
+          echo "Triggering non-blocking request to wake up backend at $API_URL..."
+          curl -s -o /dev/null "$API_URL/v3/api-docs" &
+
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -258,6 +266,23 @@ jobs:
 
       - name: Install Newman
         run: npm install -g newman
+
+      - name: Wait for backend to be fully awake
+        shell: bash
+        run: |
+          API_URL="${{ secrets.API_BASE_URL }}"
+          API_URL="${API_URL:-$DEFAULT_API_BASE_URL}"
+          echo "Checking if backend is fully awake..."
+          for i in {1..12}; do
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/v3/api-docs" || true)
+            if [ "$status_code" -eq 200 ] || [ "$status_code" -eq 401 ] || [ "$status_code" -eq 403 ] || [ "$status_code" -eq 404 ]; then
+              echo "Backend is awake (HTTP status $status_code)"
+              exit 0
+            fi
+            echo "Waiting for backend (attempt $i/12, HTTP status $status_code)..."
+            sleep 5
+          done
+          echo "WARNING: Backend did not respond in 60 seconds, proceeding anyway..."
 
       - name: Run Postman collection
         run: |
@@ -368,6 +393,14 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Trigger backend wakeup
+        shell: bash
+        run: |
+          API_URL="${{ secrets.API_BASE_URL }}"
+          API_URL="${API_URL:-$DEFAULT_API_BASE_URL}"
+          echo "Triggering non-blocking request to wake up backend at $API_URL..."
+          curl -s -o /dev/null "$API_URL/v3/api-docs" &
+
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -382,6 +415,23 @@ jobs:
       - name: Install Playwright browsers
         working-directory: frontend
         run: npx playwright install --with-deps
+
+      - name: Wait for backend to be fully awake
+        shell: bash
+        run: |
+          API_URL="${{ secrets.API_BASE_URL }}"
+          API_URL="${API_URL:-$DEFAULT_API_BASE_URL}"
+          echo "Checking if backend is fully awake..."
+          for i in {1..12}; do
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/v3/api-docs" || true)
+            if [ "$status_code" -eq 200 ] || [ "$status_code" -eq 401 ] || [ "$status_code" -eq 403 ] || [ "$status_code" -eq 404 ]; then
+              echo "Backend is awake (HTTP status $status_code)"
+              exit 0
+            fi
+            echo "Waiting for backend (attempt $i/12, HTTP status $status_code)..."
+            sleep 5
+          done
+          echo "WARNING: Backend did not respond in 60 seconds, proceeding anyway..."
 
       - name: Run CodeceptJS E2E
         working-directory: frontend
