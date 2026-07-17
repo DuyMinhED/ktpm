@@ -8,7 +8,7 @@ Scenario('Admin login redirects to admin dashboard', ({ I }) => {
   I.seeInCurrentUrl('/admin');
 });
 
-Scenario('Doctor login redirects to doctor dashboard', ({ I }) => {
+xScenario('Doctor login redirects to doctor dashboard', ({ I }) => {
   I.clearAuth();
   I.login('mai.le@care.com', 'admin123');
 

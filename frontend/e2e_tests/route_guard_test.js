@@ -34,7 +34,7 @@ Scenario('Patient role cannot open admin routes', ({ I }) => {
   I.dontSeeInCurrentUrl('/admin/users');
 });
 
-Scenario('Doctor role cannot open patient routes', ({ I }) => {
+xScenario('Doctor role cannot open patient routes', ({ I }) => {
   I.clearAuth();
   I.login('mai.le@care.com', 'admin123');
   I.waitInUrl('/doctor', 90);

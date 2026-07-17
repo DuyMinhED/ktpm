@@ -18,6 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.project.entity.Clinic;
+import com.project.entity.User;
+import com.project.entity.UserRole;
+import com.project.entity.Patient;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -40,11 +43,39 @@ public class ClinicRepositoryTest {
                 .address("123 HCM")
                 .phone("028123456")
                 .status("ACTIVE")
-                .doctorCount(5)
-                .patientCount(50)
-                .highRiskPatientCount(3)
                 .build();
         entityManager.persistAndFlush(sampleClinic);
+
+        // Persist related doctor
+        User doctor = User.builder()
+                .email("doctor@abc.com")
+                .password("password")
+                .role(UserRole.DOCTOR)
+                .fullName("Doctor ABC")
+                .clinicId(sampleClinic.getId())
+                .build();
+        entityManager.persistAndFlush(doctor);
+
+        // Persist related patients
+        Patient patient1 = Patient.builder()
+                .userId(101L)
+                .clinicId(sampleClinic.getId())
+                .fullName("Patient High Risk")
+                .phone("0901234567")
+                .gender("MALE")
+                .riskLevel("HIGH")
+                .build();
+        entityManager.persistAndFlush(patient1);
+
+        Patient patient2 = Patient.builder()
+                .userId(102L)
+                .clinicId(sampleClinic.getId())
+                .fullName("Patient Low Risk")
+                .phone("0907654321")
+                .gender("MALE")
+                .riskLevel("LOW")
+                .build();
+        entityManager.persistAndFlush(patient2);
     }
 
     @Test
@@ -105,21 +136,21 @@ public class ClinicRepositoryTest {
     @DisplayName("sumDoctorCountByActiveStatus → returns sum")
     void sumDoctorCount() {
         long sum = clinicRepository.sumDoctorCountByActiveStatus();
-        assertTrue(sum >= 5);
+        assertEquals(1, sum);
     }
 
     @Test
     @DisplayName("sumPatientCount → returns sum")
     void sumPatientCount() {
         long sum = clinicRepository.sumPatientCount();
-        assertTrue(sum >= 50);
+        assertEquals(2, sum);
     }
 
     @Test
     @DisplayName("sumHighRiskPatientCount → returns sum")
     void sumHighRiskPatientCount() {
         long sum = clinicRepository.sumHighRiskPatientCount();
-        assertTrue(sum >= 3);
+        assertEquals(1, sum);
     }
 
     @Test

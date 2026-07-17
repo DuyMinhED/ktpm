@@ -180,7 +180,7 @@ public class DoctorPatientServiceImplTest {
                 .bloodType("O+")
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
-        when(patientRepository.findByDoctorIdAndFilters(10L, null, null, null, pageable))
+        when(patientRepository.findByDoctorIdAndFilters(10L, "", "", "", pageable))
                 .thenReturn(new PageImpl<>(List.of(patient)));
         when(healthMetricRepository.findTopByPatientIdAndMetricTypeAndIsDeletedFalseOrderByMeasuredAtDesc(1L,
                 MetricType.BLOOD_SUGAR)).thenReturn(Optional.of(metric(MetricType.BLOOD_SUGAR, "8.0", null, LocalDateTime.now())));
@@ -213,7 +213,7 @@ public class DoctorPatientServiceImplTest {
     @Test
     void getMyPatients_mapsDecreasingTrendAndMissingBloodPressureSecondary() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(patientRepository.findByDoctorIdAndFilters(10L, null, null, null, pageable))
+        when(patientRepository.findByDoctorIdAndFilters(10L, "", "", "", pageable))
                 .thenReturn(new PageImpl<>(List.of(samplePatient)));
         when(healthMetricRepository.findTopByPatientIdAndMetricTypeAndIsDeletedFalseOrderByMeasuredAtDesc(1L,
                 MetricType.BLOOD_PRESSURE)).thenReturn(Optional.of(metric(MetricType.BLOOD_PRESSURE, "118", null, LocalDateTime.now())));
@@ -233,7 +233,7 @@ public class DoctorPatientServiceImplTest {
     @Test
     void getMyPatients_mapsStableHighAndNormalTrendBoundaries() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(patientRepository.findByDoctorIdAndFilters(10L, null, null, null, pageable))
+        when(patientRepository.findByDoctorIdAndFilters(10L, "", "", "", pageable))
                 .thenReturn(new PageImpl<>(List.of(samplePatient, patient(2L).build())));
         when(healthMetricRepository.findTop2ByPatientIdAndMetricTypeAndIsDeletedFalseOrderByMeasuredAtDesc(1L,
                 MetricType.BLOOD_SUGAR)).thenReturn(List.of(
@@ -257,7 +257,7 @@ public class DoctorPatientServiceImplTest {
                 .dateOfBirth(null)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
-        when(patientRepository.findByDoctorIdAndFilters(10L, null, null, null, pageable))
+        when(patientRepository.findByDoctorIdAndFilters(10L, "", "", "", pageable))
                 .thenReturn(new PageImpl<>(List.of(patient)));
         when(healthMetricRepository.findTopByPatientIdAndMetricTypeAndIsDeletedFalseOrderByMeasuredAtDesc(anyLong(), any()))
                 .thenThrow(new RuntimeException("metric store down"));

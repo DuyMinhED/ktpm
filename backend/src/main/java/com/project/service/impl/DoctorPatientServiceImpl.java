@@ -61,8 +61,12 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
     @Transactional(readOnly = true)
     public Page<DoctorPatientResponse> getMyPatients(Long doctorUserId, String search, String condition,
             String riskLevel, Pageable pageable) {
+        String searchParam = search != null ? search : "";
+        String conditionParam = condition != null ? condition : "";
+        String riskParam = riskLevel != null ? riskLevel : "";
+
         Page<Patient> patients = patientRepository.findByDoctorIdAndFilters(
-                doctorUserId, search, condition, riskLevel, pageable);
+                doctorUserId, searchParam, conditionParam, riskParam, pageable);
 
         return patients.map(this::mapToResponse);
     }

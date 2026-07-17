@@ -2,6 +2,7 @@ package com.project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 @Entity
 @Table(name = "clinics")
@@ -44,15 +45,15 @@ public class Clinic extends BaseEntity {
     @Builder.Default
     private String status = "ACTIVE"; // ACTIVE, INACTIVE
 
-    @Column(name = "doctor_count")
+    @Formula("(SELECT COUNT(*) FROM users u WHERE u.clinic_id = id AND u.role = 'DOCTOR' AND u.is_deleted = false)")
     @Builder.Default
     private Integer doctorCount = 0;
 
-    @Column(name = "patient_count")
+    @Formula("(SELECT COUNT(*) FROM patients p WHERE p.clinic_id = id AND p.is_deleted = false)")
     @Builder.Default
     private Integer patientCount = 0;
 
-    @Column(name = "high_risk_patient_count")
+    @Formula("(SELECT COUNT(*) FROM patients p WHERE p.clinic_id = id AND p.risk_level = 'HIGH' AND p.is_deleted = false)")
     @Builder.Default
     private Integer highRiskPatientCount = 0;
 }
