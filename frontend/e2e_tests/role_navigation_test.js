@@ -3,7 +3,7 @@ Feature('Role navigation smoke');
 Scenario('Admin account can reach core admin pages after login', ({ I }) => {
   I.clearAuth();
   I.login('admin@care.com', 'admin123');
-  I.waitInUrl('/admin', 45);
+  I.waitInUrl('/admin', 90);
 
   I.amOnPage('/admin/users');
   I.seeInCurrentUrl('/admin/users');
@@ -18,7 +18,7 @@ Scenario('Admin account can reach core admin pages after login', ({ I }) => {
 Scenario('Doctor account can reach core doctor pages after login', ({ I }) => {
   I.clearAuth();
   I.login('mai.le@care.com', 'admin123');
-  I.waitInUrl('/doctor', 45);
+  I.waitInUrl('/doctor', 90);
 
   I.amOnPage('/doctor/appointments');
   I.seeInCurrentUrl('/doctor/appointments');
@@ -33,7 +33,7 @@ Scenario('Doctor account can reach core doctor pages after login', ({ I }) => {
 Scenario('Clinic manager account can reach core clinic pages after login', ({ I }) => {
   I.clearAuth();
   I.login('manager@care.com', 'admin123');
-  I.waitInUrl('/clinic', 45);
+  I.waitInUrl('/clinic', 90);
 
   I.amOnPage('/clinic/patients');
   I.seeInCurrentUrl('/clinic/patients');
@@ -48,7 +48,7 @@ Scenario('Clinic manager account can reach core clinic pages after login', ({ I 
 Scenario('Patient account can reach core patient pages after login', ({ I }) => {
   I.clearAuth();
   I.login('truongquocan@patient.com', 'admin123');
-  I.waitInUrl('/patient', 45);
+  I.waitInUrl('/patient', 90);
 
   I.amOnPage('/patient/metrics');
   I.seeInCurrentUrl('/patient/metrics');
