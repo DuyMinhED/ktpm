@@ -48,8 +48,14 @@ public class ClinicPatientServiceImpl implements ClinicPatientService {
     @Transactional(readOnly = true)
     public Page<ClinicPatientResponse> getPatientRecords(Long clinicId, String keyword, String condition, String riskLevel,
                                                         String status, String doctor, Pageable pageable) {
-        Page<Patient> patientPage = patientRepository.findByClinicIdAndFilters(clinicId, keyword, condition, riskLevel,
-                status, doctor, pageable);
+        String keywordParam = keyword != null ? keyword : "";
+        String conditionParam = condition != null ? condition : "";
+        String riskParam = riskLevel != null ? riskLevel : "";
+        String statusParam = status != null ? status : "";
+        String doctorParam = doctor != null ? doctor : "";
+
+        Page<Patient> patientPage = patientRepository.findByClinicIdAndFilters(clinicId, keywordParam, conditionParam, riskParam,
+                statusParam, doctorParam, pageable);
 
         List<User> doctors = userRepository.findByFilters(UserRole.DOCTOR, "ACTIVE", clinicId, null, null, null, null, PageRequest.of(0, 100))
                 .getContent();
