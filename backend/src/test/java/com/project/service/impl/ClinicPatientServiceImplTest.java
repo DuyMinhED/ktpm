@@ -107,7 +107,7 @@ class ClinicPatientServiceImplTest {
         User duplicate = doctor(20L, 1L, "Dr. Duplicate");
         PageRequest pageable = PageRequest.of(0, 10);
 
-        when(patientRepository.findByClinicIdAndFilters(1L, null, null, null, null, null, pageable))
+        when(patientRepository.findByClinicIdAndFilters(1L, "", "", "", "", "", pageable))
                 .thenReturn(new PageImpl<>(List.of(patient), pageable, 1));
         when(userRepository.findByFilters(UserRole.DOCTOR, "ACTIVE", 1L, null, null, null, null, PageRequest.of(0, 100)))
                 .thenReturn(new PageImpl<>(List.of(first, duplicate)));
