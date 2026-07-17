@@ -5,6 +5,7 @@ import com.project.dto.response.DoctorResponse;
 import com.project.entity.User;
 import com.project.entity.UserRole;
 import com.project.repository.UserRepository;
+import com.project.repository.AppointmentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +34,9 @@ public class DoctorServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private AppointmentRepository appointmentRepository;
 
     @InjectMocks
     private DoctorServiceImpl doctorService;
@@ -121,6 +125,7 @@ public class DoctorServiceImplTest {
         assertNotNull(result);
         assertEquals("Dr. John Smith", result.getFullName());
         verify(userRepository, times(1)).save(any(User.class));
+        verify(appointmentRepository, never()).updateDoctorCacheInfo(any(), any(), any(), any());
     }
 
     @Test
@@ -135,6 +140,7 @@ public class DoctorServiceImplTest {
         assertNotNull(result);
         verify(passwordEncoder, times(1)).encode("DefaultPassword123");
         verify(userRepository, times(1)).save(any(User.class));
+        verify(appointmentRepository, never()).updateDoctorCacheInfo(any(), any(), any(), any());
     }
 
     @Test
@@ -173,6 +179,7 @@ public class DoctorServiceImplTest {
         assertNotNull(result);
         assertEquals("Dr. John Smith", result.getFullName());
         verify(userRepository, times(1)).save(any(User.class));
+        verify(appointmentRepository, times(1)).updateDoctorCacheInfo(eq(1L), eq("Dr. John Smith"), eq("Cardiology"), any());
     }
 
     @Test
@@ -218,6 +225,7 @@ public class DoctorServiceImplTest {
         assertNotNull(result);
         verify(passwordEncoder, times(1)).encode("newSecurePassword");
         verify(userRepository, times(1)).save(any(User.class));
+        verify(appointmentRepository, times(1)).updateDoctorCacheInfo(eq(1L), eq("Dr. John Smith"), eq("Cardiology"), eq("http://avatar.url"));
     }
 
     @Test
@@ -236,6 +244,7 @@ public class DoctorServiceImplTest {
         assertNotNull(result);
         verify(passwordEncoder, never()).encode(anyString());
         verify(userRepository, times(1)).save(any(User.class));
+        verify(appointmentRepository, times(1)).updateDoctorCacheInfo(eq(1L), eq("Dr. John Smith"), eq("Cardiology"), any());
     }
 
     @Test
@@ -289,6 +298,22 @@ public class DoctorServiceImplTest {
 
         assertThrows(RuntimeException.class, () -> doctorService.deleteDoctor(1L));
         verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void createDoctor_duplicateDoctorEmail_isDeleted_restoresAndSyncsCache() {
+        sampleDoctor.setDeleted(true);
+        when(userRepository.findByEmail("doctor@example.com")).thenReturn(Optional.of(sampleDoctor));
+        when(passwordEncoder.encode(anyString())).thenReturn("hashedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(sampleDoctor);
+
+        DoctorResponse result = doctorService.createDoctor(sampleRequest);
+
+        assertNotNull(result);
+        assertEquals("Dr. John Smith", result.getFullName());
+        assertFalse(sampleDoctor.isDeleted());
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(appointmentRepository, times(1)).updateDoctorCacheInfo(eq(1L), eq("Dr. John Smith"), eq("Cardiology"), any());
     }
 }
 

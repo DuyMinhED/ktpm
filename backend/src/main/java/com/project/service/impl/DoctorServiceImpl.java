@@ -5,6 +5,7 @@ import com.project.dto.response.DoctorResponse;
 import com.project.entity.User;
 import com.project.entity.UserRole;
 import com.project.repository.UserRepository;
+import com.project.repository.AppointmentRepository;
 import com.project.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import com.project.exception.ResourceNotFoundException;
 public class DoctorServiceImpl implements DoctorService {
 
     private final UserRepository userRepository;
+    private final AppointmentRepository appointmentRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -64,6 +66,7 @@ public class DoctorServiceImpl implements DoctorService {
                         user.setPassword(passwordEncoder.encode("DefaultPassword123"));
                     }
                     User savedUser = userRepository.save(user);
+                    appointmentRepository.updateDoctorCacheInfo(savedUser.getId(), savedUser.getFullName(), savedUser.getSpecialization(), savedUser.getAvatarUrl());
                     return mapToDoctorResponse(savedUser);
                 }
                 return mapToDoctorResponse(user);
@@ -111,6 +114,7 @@ public class DoctorServiceImpl implements DoctorService {
         if (request.getStatus() != null) user.setStatus(request.getStatus());
 
         User savedUser = userRepository.save(user);
+        appointmentRepository.updateDoctorCacheInfo(savedUser.getId(), savedUser.getFullName(), savedUser.getSpecialization(), savedUser.getAvatarUrl());
         return mapToDoctorResponse(savedUser);
     }
 

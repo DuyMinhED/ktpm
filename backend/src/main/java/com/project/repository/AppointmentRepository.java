@@ -148,4 +148,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                        "FROM appointments a JOIN users u ON a.doctor_id = u.id " +
                        "WHERE u.clinic_id = :clinicId AND a.is_deleted = false", nativeQuery = true)
         double calculateAdherenceRateByClinic(@org.springframework.data.repository.query.Param("clinicId") Long clinicId);
+
+        @org.springframework.data.jpa.repository.Modifying
+        @org.springframework.data.jpa.repository.Query("UPDATE Appointment a SET a.doctorName = :name, a.doctorSpecialty = :specialty, a.doctorAvatarUrl = :avatarUrl WHERE a.doctorId = :doctorId")
+        int updateDoctorCacheInfo(
+            @org.springframework.data.repository.query.Param("doctorId") Long doctorId,
+            @org.springframework.data.repository.query.Param("name") String name,
+            @org.springframework.data.repository.query.Param("specialty") String specialty,
+            @org.springframework.data.repository.query.Param("avatarUrl") String avatarUrl
+        );
 }
