@@ -134,6 +134,33 @@ class NotificationServiceImplTest {
         verify(repository).save(argThat(n -> "warning".equals(n.getType()) && "/x".equals(n.getTargetUrl())));
     }
 
+    @Test
+    void delete_otherUsersNotification_isDenied() {
+        Notification notification = notification(9L);
+        notification.setUserId(8L);
+        when(repository.findById(9L)).thenReturn(Optional.of(notification));
+
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(7L));
+
+            assertThrows(AccessDeniedException.class, () -> service.delete(9L));
+        }
+
+        assertFalse(notification.isDeleted());
+        verify(repository, never()).save(notification);
+    }
+
+    @Test
+    void delete_nonExistentNotification_throwsResourceNotFoundException() {
+        when(repository.findById(999L)).thenReturn(Optional.empty());
+
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(7L));
+
+            assertThrows(ResourceNotFoundException.class, () -> service.delete(999L));
+        }
+    }
+
     private static Notification notification(Long id) {
         return Notification.builder()
                 .id(id)
