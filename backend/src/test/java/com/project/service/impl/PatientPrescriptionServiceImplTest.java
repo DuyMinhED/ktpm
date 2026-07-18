@@ -351,6 +351,19 @@ class PatientPrescriptionServiceImplTest {
     }
 
     @Test
+    void requestRefill_nullPatientPrescription_isDenied() {
+        prescription.setPatient(null);
+        mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
+        when(prescriptionRepository.findById(10L)).thenReturn(Optional.of(prescription));
+        when(patientRepository.findByUserId(1L)).thenReturn(Optional.of(currentPatient));
+
+        assertThrows(AccessDeniedException.class, () -> patientPrescriptionService.requestRefill(10L));
+
+        verify(prescriptionRepository, never()).save(any());
+        verify(notificationRepository, never()).save(any());
+    }
+
+    @Test
     void requestRefill_inactivePrescription_isRejected() {
         prescription.setStatus(PrescriptionStatus.CANCELLED);
         mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(1L));
