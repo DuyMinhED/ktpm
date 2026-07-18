@@ -99,6 +99,21 @@ class NotificationServiceImplTest {
     }
 
     @Test
+    void markAsRead_deletedNotification_throwsAccessDeniedException() {
+        Notification notification = notification(2L);
+        notification.setDeleted(true);
+        when(repository.findById(2L)).thenReturn(Optional.of(notification));
+
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getCurrentUserId).thenReturn(Optional.of(7L));
+
+            assertThrows(AccessDeniedException.class, () -> service.markAsRead(2L));
+        }
+
+        verify(repository, never()).save(notification);
+    }
+
+    @Test
     void markAllAsRead_marksUnreadNotificationsForCurrentUser() {
         Notification first = notification(1L);
         Notification second = notification(2L);
